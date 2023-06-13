@@ -34,16 +34,17 @@ class Plot:
         
         
 class ReportInterface:
-    def __init__(self, identifier, name, columns=None, type=None, report=None):
+    def __init__(self, identifier, name, columns=None, interface_type=None, report=None):
         self._identifier = identifier
         self._name = name
-        self._type = type
+        self._type = interface_type
+        self._columns = columns
         self._report = report
         
         
 class StreamlitReport(ReportInterface):
     def __init__(self, identifier, name, columns, report=None):
-        ReportInterface.__init__(self, identifier, name=name, columns=columns, type='streamlit', report=report)
+        ReportInterface.__init__(self, identifier, name=name, columns=columns, interface_type='streamlit', report=report)
 
     def generate_report(self, output_dir='../tmp'):
         if not os.path.exists(output_dir):
