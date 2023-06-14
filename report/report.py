@@ -1,4 +1,6 @@
 import os
+import sys
+from streamlit.web import cli as stcli
 import json
 
 class Report:
@@ -46,7 +48,7 @@ class StreamlitReport(ReportInterface):
     def __init__(self, identifier, name, columns, report=None):
         ReportInterface.__init__(self, identifier, name=name, columns=columns, interface_type='streamlit', report=report)
 
-    def generate_report(self, output_dir='../tmp'):
+    def generate_report(self, output_dir='tmp'):
         if not os.path.exists(output_dir):
             os.mkdir(output_dir)
         if not os.path.exists(os.path.join(output_dir, 'pages')):
@@ -81,24 +83,8 @@ st.markdown("<h3 style='text-align: center; color: #020058;'>{}</h1>", unsafe_al
 import holoviews as hv
 from holoviews import opts, dim
 {}'''.format(msg, section_desc_msg, "\n".join(code_chunk)))
-
-        
-        
     
-if __name__ == "__main__":
-    with open(os.path.join('../example_data', 'barplot.json'), 'r') as bf:
-        plotly_code1 = bf.read()
-    with open(os.path.join('../example_data', 'lineplot.json'), 'r') as lf:
-        plotly_code2 = lf.read()
     
-    report = Report(1213412, "test_report", 'DOES it WoRK', "Just a test", sections=[])
-    section1 = Section(21324, "Proteomics", "This is a Proteomics example", "Not much", plots=[])
-    section2 = Section(24324, "Transcriptomics", "This is a Transcriptomics example", "Not much", plots=[])
-    plot1 = Plot(3323, "plot1", "plotly", "Test 1", "", plotly_code1)
-    plot2 = Plot(3423, "plot2", "plotly", "Test 2", "", plotly_code2)
-    section1._plots.extend([plot1, plot2])
-    section2._plots.extend([plot1, plot2])
-    report._sections.extend([section1, section2])
-    
-    report_gui = StreamlitReport(12312, "MyPage", columns=None, report=report)
-    report_gui.generate_report()
+    def run_report(self, output_dir='tmp'):
+        sys.argv = ["streamlit", "run", os.path.join(output_dir, self._name+".py")]
+        sys.exit(stcli.main())
