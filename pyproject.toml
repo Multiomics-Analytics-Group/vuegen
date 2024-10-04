@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "report-generator"
+version = "0.1.0"
+description = "Module to generate automatic web interface reports with visualizations"
+authors = ["MoNA group"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.9,<3.9.7 || >3.9.7,<4.0"
+streamlit = "1.23.1"
+holoviews = "1.16.2"
+plotly = "5.15.0"
+watchdog = "3.0.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
