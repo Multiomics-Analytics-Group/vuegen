@@ -16,7 +16,7 @@ if __name__ == '__main__':
     section2.plots.extend([plot1, plot2])
     report.sections.extend([section1, section2])
     
-    report_gui = r.StreamlitReport(12312, "MyPage", columns=None, report=report)
+    report_gui = r.StreamlitReportView(12312, "MyPage", columns=None, report=report)
     report_gui.generate_report(output_dir="tmp")
     report_gui.run_report(output_dir='tmp')
     
