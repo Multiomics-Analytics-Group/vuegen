@@ -12,9 +12,9 @@ if __name__ == '__main__':
     section2 = r.Section(24324, "Transcriptomics", "This is a Transcriptomics example", "Not much", plots=[])
     plot1 = r.Plot(3323, "plot1", "plotly", "Test 1", "", plotly_code1)
     plot2 = r.Plot(3423, "plot2", "plotly", "Test 2", "", plotly_code2)
-    section1._plots.extend([plot1, plot2])
-    section2._plots.extend([plot1, plot2])
-    report._sections.extend([section1, section2])
+    section1.plots.extend([plot1, plot2])
+    section2.plots.extend([plot1, plot2])
+    report.sections.extend([section1, section2])
     
     report_gui = r.StreamlitReport(12312, "MyPage", columns=None, report=report)
     report_gui.generate_report(output_dir="tmp")
