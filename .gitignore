@@ -161,3 +161,9 @@ cython_debug/
 
 # Temporary files
 tmp/
+
+# VS Code
+.DS_Store
+
+# Extra info
+UML_diagrams/
