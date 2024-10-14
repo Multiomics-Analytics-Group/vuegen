@@ -298,3 +298,5 @@ st.markdown("<h4 style='text-align: center; color: #024558;'>{subsection.descrip
                             section_file.write(f"st.bokeh_chart({plot.read_plot_code()}, use_container_width=True)\n")
                         elif plot.plot_type == 'plotly':
                             section_file.write(f"st.plotly_chart({plot.read_plot_code()}, use_container_width=True)\n")
+
+
