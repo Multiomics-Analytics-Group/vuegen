@@ -27,6 +27,6 @@ if __name__ == '__main__':
     report.sections.extend([section1, section2])
     
     # Create report view
-    report_gui = r.StreamlitReportView(12312, "MyPage", columns=None, report=report)
+    report_gui = r.StreamlitReportView(12312, "MyPage", report=report, columns=None)
     report_gui.generate_report(output_dir="tmp")
     report_gui.run_report(output_dir='tmp')

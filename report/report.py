@@ -9,7 +9,7 @@ from streamlit.web import cli as stcli
 @dataclass
 class Report:
     """
-    A report consisting of multiple sections.
+    A report consisting of multiple sections and subsections.
 
     Attributes
     ----------
@@ -136,18 +136,18 @@ class ReportView(ABC):
         A unique identifier for the report view ABC.
     name : str
         The name of the view.
+    report : Report
+        The report that this ABC is associated with.
     columns : List[str], optional
         Column names used in the report view ABC (default is None).
     interface_type : str, optional
         The type of the ABC (e.g., 'WebAppReportView', 'DocumentReportView', PresentReportView, 'WikiReportView', 'NotebookReportView') (default is None).
-    report : Report, optional
-        The report that this ABC is associated with (default is None).
     """
     identifier: int
     name: str
+    report: Report
     columns: Optional[List[str]] = None
     interface_type: Optional[str] = None
-    report: Optional[Report] = None
 
     @abstractmethod
     def generate_report(self, output_dir: str = 'tmp') -> None:
@@ -160,6 +160,29 @@ class ReportView(ABC):
             The directory where the generated report files will be saved (default is 'tmp').
         """
         pass
+
+class WebAppReportView(ReportView):
+    """
+    An abstract class for web application report views.
+
+    Attributes
+    ----------
+    framework : str
+        The web app framework used (e.g., 'Streamlit').
+
+    Methods
+    -------
+    run_report(output_dir='tmp')
+        Runs the generated web app report.
+    _build_plots(output_dir='tmp')
+        Generates plots for each section in the report.
+    """
+
+    framework: str
+
+    def __init__(self, identifier: int, name: str, columns: Optional[List[str]], framework: str, report: Report):
+        super().__init__(identifier, name=name, columns=columns, interface_type='WebAppReportView', report=report)
+        self.framework = framework
 
     @abstractmethod
     def run_report(self, output_dir: str = 'tmp') -> None:
@@ -176,7 +199,7 @@ class ReportView(ABC):
     @abstractmethod
     def _build_plots(self, output_dir: str) -> None:
         """
-        Generates and organize plots for each subsection and section in the report.
+        Generates and organizes plots for each subsection and section in the report.
         
         Parameters
         ----------
@@ -190,7 +213,7 @@ class ReportView(ABC):
         pass
 
 
-class StreamlitReportView(ReportView):
+class StreamlitReportView(WebAppReportView):
     """
     A Streamlit-based implementation of a report view interface.
 
@@ -200,12 +223,12 @@ class StreamlitReportView(ReportView):
         Generates the Streamlit report and saves the report files to the specified directory.
     run_report(output_dir='tmp')
         Runs the generated Streamlit report.
-    _build_plots(msg, output_dir)
+    _build_plots(output_dir='tmp')
         Generates Python files for each section in the report, containing the plots.
     """
 
-    def __init__(self, identifier: int, name: str, columns: Optional[List[str]], report: Optional[Report] = None):
-        super().__init__(identifier, name=name, columns=columns, interface_type='streamlit', report=report)
+    def __init__(self, identifier: int, name: str, columns: Optional[List[str]], report: Report):
+        super().__init__(identifier, name=name, columns=columns, framework='Streamlit', report=report)
 
     def generate_report(self, output_dir: str = 'tmp') -> None:
         """
