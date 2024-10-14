@@ -1,6 +1,7 @@
 import os
 import sys
 import json
+from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import List, Optional
 from streamlit.web import cli as stcli
@@ -125,28 +126,68 @@ class Plot:
 
 
 @dataclass
-class ReportView:
+class ReportView(ABC):
     """
-    A base class for report view interfaces.
+    An abstract base class for report view implementations.
 
     Attributes
     ----------
     identifier : int
-        A unique identifier for the report view interface.
+        A unique identifier for the report view ABC.
     name : str
         The name of the view.
     columns : List[str], optional
-        Column names used in the report view interface (default is None).
+        Column names used in the report view ABC (default is None).
     interface_type : str, optional
-        The type of the interface (e.g., 'WebAppReportView', 'DocumentReportView', PresentReportView, 'WikiReportView', 'NotebookReportView') (default is None).
+        The type of the ABC (e.g., 'WebAppReportView', 'DocumentReportView', PresentReportView, 'WikiReportView', 'NotebookReportView') (default is None).
     report : Report, optional
-        The report that this interface is associated with (default is None).
+        The report that this ABC is associated with (default is None).
     """
     identifier: int
     name: str
     columns: Optional[List[str]] = None
     interface_type: Optional[str] = None
     report: Optional[Report] = None
+
+    @abstractmethod
+    def generate_report(self, output_dir: str = 'tmp') -> None:
+        """
+        Generates the report and creates output files.
+        
+        Parameters
+        ----------
+        output_dir : str, optional
+            The directory where the generated report files will be saved (default is 'tmp').
+        """
+        pass
+
+    @abstractmethod
+    def run_report(self, output_dir: str = 'tmp') -> None:
+        """
+        Runs the generated report.
+
+        Parameters
+        ----------
+        output_dir : str, optional
+            The directory where the report was generated (default is 'tmp').
+        """
+        pass
+
+    @abstractmethod
+    def _build_plots(self, output_dir: str) -> None:
+        """
+        Generates and organize plots for each subsection and section in the report.
+        
+        Parameters
+        ----------
+        output_dir : str
+            The directory where section files will be saved.
+
+        Notes
+        -----
+        This method is intended to be used internally by the `generate_report` method.
+        """
+        pass
 
 
 class StreamlitReportView(ReportView):
@@ -157,10 +198,10 @@ class StreamlitReportView(ReportView):
     -------
     generate_report(output_dir='tmp')
         Generates the Streamlit report and saves the report files to the specified directory.
-    plot_sections(msg, output_dir)
-        Generates Python files for each section in the report, containing the plots.
     run_report(output_dir='tmp')
         Runs the generated Streamlit report.
+    _build_plots(msg, output_dir)
+        Generates Python files for each section in the report, containing the plots.
     """
 
     def __init__(self, identifier: int, name: str, columns: Optional[List[str]], report: Optional[Report] = None):
@@ -189,9 +230,21 @@ st.markdown("<h1 style='text-align: center; color: #023858;'>{}</h1>", unsafe_al
         with open(os.path.join(output_dir, self.name.replace(" ", "_") + ".py"), 'w') as homepage:
             homepage.write(home_msg + "\n" + desc_msg)
 
-        self.plot_sections(output_dir=pages_dir)
+        self._build_plots(output_dir=pages_dir)
 
-    def plot_sections(self, output_dir: str) -> None:
+    def run_report(self, output_dir: str = 'tmp') -> None:
+        """
+        Runs the generated Streamlit report.
+
+        Parameters
+        ----------
+        output_dir : str, optional
+            The directory where the report was generated (default is 'tmp').
+        """
+        sys.argv = ["streamlit", "run", os.path.join(output_dir, self.name.replace(" ", "_") + ".py")]
+        sys.exit(stcli.main())
+
+    def _build_plots(self, output_dir: str) -> None:
         """
         Generates Python files for each section in the report, including subsections and plots.
         
@@ -222,15 +275,3 @@ st.markdown("<h4 style='text-align: center; color: #024558;'>{subsection.descrip
                             section_file.write(f"st.bokeh_chart({plot.read_plot_code()}, use_container_width=True)\n")
                         elif plot.plot_type == 'plotly':
                             section_file.write(f"st.plotly_chart({plot.read_plot_code()}, use_container_width=True)\n")
-
-    def run_report(self, output_dir: str = 'tmp') -> None:
-        """
-        Runs the generated Streamlit report.
-
-        Parameters
-        ----------
-        output_dir : str, optional
-            The directory where the report was generated (default is 'tmp').
-        """
-        sys.argv = ["streamlit", "run", os.path.join(output_dir, self.name.replace(" ", "_") + ".py")]
-        sys.exit(stcli.main())
