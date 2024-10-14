@@ -33,7 +33,7 @@ class Report:
 @dataclass
 class Section:
     """
-    A section within a report, containing multiple plots.
+    A section within a report, containing multiple subsections.
 
     Attributes
     ----------
@@ -45,8 +45,32 @@ class Section:
         The title of the section (default is None).
     description : str, optional
         A description of the section (default is None).
+    subsections : List[Subsection]
+        A list of subsections within this section.
+    """
+    identifier: int
+    name: str
+    title: Optional[str] = None
+    description: Optional[str] = None
+    subsections: List['Subsection'] = field(default_factory=list)
+
+@dataclass
+class Subsection:
+    """
+    A subsection within a section, containing multiple plots.
+
+    Attributes
+    ----------
+    identifier : int
+        A unique identifier for the subsection.
+    name : str
+        The name of the subsection.
+    title : str, optional
+        The title of the subsection (default is None).
+    description : str, optional
+        A description of the subsection (default is None).
     plots : List[Plot]
-        A list of plots within this section.
+        A list of plots within this subsection.
     """
     identifier: int
     name: str
@@ -58,7 +82,7 @@ class Section:
 @dataclass
 class Plot:
     """
-    A plot within a section of a report.
+    A plot within a subsection of a report.
 
     Attributes
     ----------
@@ -144,7 +168,7 @@ class StreamlitReportView(ReportView):
 
     def generate_report(self, output_dir: str = 'tmp') -> None:
         """
-        Generates the Streamlit report and creates Python files for each section and plot.
+        Generates the Streamlit report and creates Python files for each section and its subsections and plots.
 
         Parameters
         ----------
@@ -160,39 +184,44 @@ class StreamlitReportView(ReportView):
         home_msg = '''import streamlit as st
 st.set_page_config(layout="wide", page_title="{}", menu_items={{}})
 st.markdown("<h1 style='text-align: center; color: #023858;'>{}</h1>", unsafe_allow_html=True)'''.format(self.name, self.name)
-        desc_msg = '''st.markdown("<h3 style='text-align: center; color: #020058;'>{}</h1>", unsafe_allow_html=True)'''.format(self.report.description)
+        desc_msg = '''st.markdown("<h3 style='text-align: center; color: #020058;'>{}</h3>", unsafe_allow_html=True)'''.format(self.report.description)
 
         with open(os.path.join(output_dir, self.name.replace(" ", "_") + ".py"), 'w') as homepage:
             homepage.write(home_msg + "\n" + desc_msg)
 
-        self.plot_sections(msg=home_msg, output_dir=pages_dir)
+        self.plot_sections(output_dir=pages_dir)
 
-    def plot_sections(self, msg: str, output_dir: str) -> None:
+    def plot_sections(self, output_dir: str) -> None:
         """
-        Generates Python files for each section in the report, containing the plots.
-
+        Generates Python files for each section in the report, including subsections and plots.
+        
         Parameters
         ----------
-        msg : str
-            The message to be included in each section file (usually the home message).
         output_dir : str
             The directory where section files will be saved.
         """
         for section in self.report.sections:
-            section_desc_msg = '''st.markdown("<h2 style='text-align: center; color: #020058;'>{}</h1>", unsafe_allow_html=True)
-st.markdown("<h3 style='text-align: center; color: #020058;'>{}</h1>", unsafe_allow_html=True)'''.format(section.name, section.description)
+            section_desc_msg = f"""st.markdown("<h2 style='text-align: center; color: #020058;'>{section.name}</h2>", unsafe_allow_html=True)
+st.markdown("<h3 style='text-align: center; color: #020058;'>{section.description}</h3>", unsafe_allow_html=True)"""
 
-            with open(os.path.join(output_dir, section.name + ".py"), 'w') as pfile:
-                bokeh_code = '''st.bokeh_chart({}, use_container_width=True)'''
-                plotly_code = '''st.plotly_chart({}, use_container_width=True)'''
-                code_chunk = []
-                for plot in section.plots:
-                    if plot.plot_type == 'bokeh':
-                        code_chunk.append(bokeh_code.format(plot.read_plot_code()))
-                    elif plot.plot_type == 'plotly':
-                        code_chunk.append(plotly_code.format(plot.read_plot_code()))
-                pfile.write('{}\n{}\nimport holoviews as hv\nfrom holoviews import opts, dim\n{}'.format(
-                    msg, section_desc_msg, "\n".join(code_chunk)))
+            with open(os.path.join(output_dir, section.name.replace(" ", "_") + ".py"), 'w') as section_file:
+                # Start the section file with the home message
+                section_file.write(f'import streamlit as st\n{section_desc_msg}\n')
+
+                # Iterate through subsections and integrate them into the section file
+                for subsection in section.subsections:
+                    subsection_desc_msg = f"""st.markdown("<h3 style='text-align: center; color: #023558;'>{subsection.name}</h3>", unsafe_allow_html=True)
+st.markdown("<h4 style='text-align: center; color: #024558;'>{subsection.description}</h4>", unsafe_allow_html=True)"""
+                    
+                    # Write the subsection description first
+                    section_file.write(subsection_desc_msg + "\n")
+                    
+                    # Iterate through plots in the subsection
+                    for plot in subsection.plots:
+                        if plot.plot_type == 'bokeh':
+                            section_file.write(f"st.bokeh_chart({plot.read_plot_code()}, use_container_width=True)\n")
+                        elif plot.plot_type == 'plotly':
+                            section_file.write(f"st.plotly_chart({plot.read_plot_code()}, use_container_width=True)\n")
 
     def run_report(self, output_dir: str = 'tmp') -> None:
         """
@@ -203,5 +232,5 @@ st.markdown("<h3 style='text-align: center; color: #020058;'>{}</h1>", unsafe_al
         output_dir : str, optional
             The directory where the report was generated (default is 'tmp').
         """
-        sys.argv = ["streamlit", "run", os.path.join(output_dir, self.name + ".py")]
+        sys.argv = ["streamlit", "run", os.path.join(output_dir, self.name.replace(" ", "_") + ".py")]
         sys.exit(stcli.main())
