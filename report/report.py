@@ -4,6 +4,7 @@ import json
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import List, Optional
+from altair import Chart
 from streamlit.web import cli as stcli
 
 @dataclass
@@ -92,13 +93,16 @@ class Plot:
     name : str
         The name of the plot.
     plot_type : str
-        The type of the plot (e.g., 'plotly', 'bokeh').
+        The type of the plot (e.g., 'interactive', 'static').
+    file_path : str
+        The file path for the plot data (for interactive) or the image (for static).
+    visualization_tool : str, optional
+        The visualization_tool for rendering interactive plots (e.g., 'plotly', 'bokeh', 'altair'). 
+        It is optional for static plots.
     title : str, optional
         The title of the plot (default is None).
     caption : str, optional
         A caption for the plot (default is None).
-    code : str, optional
-        The code representing the plot, stored as a JSON string (default is None).
 
     Methods
     -------
@@ -108,9 +112,11 @@ class Plot:
     identifier: int
     name: str
     plot_type: str
+    file_path: str
+    visualization_tool: Optional[str] = None
     title: Optional[str] = None
     caption: Optional[str] = None
-    code: Optional[str] = None
+    #code: Optional[str] = None
 
     def read_plot_code(self) -> str:
         """
@@ -121,8 +127,12 @@ class Plot:
         str
             A string representation of the parsed plot code.
         """
-        plot_dict = json.loads(self.code) if self.code else {}
-        return str(plot_dict)
+        if self.plot_type == 'interactive':
+            plot_dict = json.loads(self.file_path) if self.file_path else {}
+            if self.visualization_tool == 'altair':
+                return json.dumps(plot_dict)
+            return str(plot_dict)
+        return ""
 
 
 @dataclass
@@ -167,8 +177,8 @@ class WebAppReportView(ReportView):
 
     Attributes
     ----------
-    framework : str
-        The web app framework used (e.g., 'Streamlit').
+    report_framework : str
+        The web app framework used to generate the report (e.g., 'Streamlit').
 
     Methods
     -------
@@ -178,11 +188,11 @@ class WebAppReportView(ReportView):
         Generates plots for each section in the report.
     """
 
-    framework: str
+    report_framework: str
 
-    def __init__(self, identifier: int, name: str, columns: Optional[List[str]], framework: str, report: Report):
+    def __init__(self, identifier: int, name: str, columns: Optional[List[str]], report_framework: str, report: Report):
         super().__init__(identifier, name=name, columns=columns, interface_type='WebAppReportView', report=report)
-        self.framework = framework
+        self.report_framework = report_framework
 
     @abstractmethod
     def run_report(self, output_dir: str = 'tmp') -> None:
@@ -228,7 +238,7 @@ class StreamlitReportView(WebAppReportView):
     """
 
     def __init__(self, identifier: int, name: str, columns: Optional[List[str]], report: Report):
-        super().__init__(identifier, name=name, columns=columns, framework='Streamlit', report=report)
+        super().__init__(identifier, name=name, columns=columns, report_framework='Streamlit', report=report)
 
     def generate_report(self, output_dir: str = 'tmp') -> None:
         """
@@ -289,14 +299,21 @@ st.markdown("<h3 style='text-align: center; color: #020058;'>{section.descriptio
                     subsection_desc_msg = f"""st.markdown("<h3 style='text-align: center; color: #023558;'>{subsection.name}</h3>", unsafe_allow_html=True)
 st.markdown("<h4 style='text-align: center; color: #024558;'>{subsection.description}</h4>", unsafe_allow_html=True)"""
                     
-                    # Write the subsection description first
+                    # Write the subsection description
                     section_file.write(subsection_desc_msg + "\n")
                     
                     # Iterate through plots in the subsection
                     for plot in subsection.plots:
-                        if plot.plot_type == 'bokeh':
-                            section_file.write(f"st.bokeh_chart({plot.read_plot_code()}, use_container_width=True)\n")
-                        elif plot.plot_type == 'plotly':
-                            section_file.write(f"st.plotly_chart({plot.read_plot_code()}, use_container_width=True)\n")
+                        if plot.plot_type == 'interactive':
+                            if plot.visualization_tool == 'plotly':
+                                section_file.write(f"st.plotly_chart({plot.read_plot_code()}, use_container_width=True)\n")
+                            elif plot.visualization_tool == 'bokeh':
+                                section_file.write(f"st.bokeh_chart({plot.read_plot_code()}, use_container_width=True)\n")
+                            elif plot.visualization_tool == 'altair':
+                                section_file.write(f"import altair as alt\n")
+                                section_file.write(f"chart = alt.Chart.from_json('{plot.read_plot_code()}')\n")
+                                section_file.write(f"st.altair_chart(chart, use_container_width=True)\n")
+                        elif plot.plot_type == 'static':
+                            section_file.write(f"st.image('{plot.file_path}', caption='{plot.caption}', use_column_width=True)\n")
 
 

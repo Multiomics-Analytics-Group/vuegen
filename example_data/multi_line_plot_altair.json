@@ -1,0 +1,13 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "data": {
+    "values": [
+      {"year": 2016, "sales": 30000, "profit": 5000}
+    ]
+  },
+  "mark": "point",
+  "encoding": {
+    "x": {"field": "year", "type": "ordinal"},
+    "y": {"field": "sales", "type": "quantitative"}
+  }
+}

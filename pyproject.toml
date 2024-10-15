@@ -12,6 +12,7 @@ streamlit = "1.23.1"
 holoviews = "1.16.2"
 plotly = "5.15.0"
 watchdog = "3.0.0"
+bokeh = "2.4.3"
 
 
 [build-system]

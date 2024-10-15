@@ -17,10 +17,17 @@ sections:
         plots:
           - identifier: 3323
             name: "plot1"
-            plot_type: "plotly"
+            plot_type: "interactive"
+            file_path: "example_data/barplot_plotly.json"
+            visualization_tool: "plotly"
             title: "Test 1"
             caption: ""
-            file_path: "example_data/barplot.json"
+          - identifier: 3324
+            name: "plot1"
+            plot_type: "static"
+            file_path: "example_data/test.png"
+            title: "Test 2"
+            caption: ""
       - identifier: 5002
         name: "Subsection 2 Proteomics"
         title: "Subsection Example 2"
@@ -28,10 +35,11 @@ sections:
         plots:
           - identifier: 3423
             name: "plot2"
-            plot_type: "plotly"
-            title: "Test 2"
+            plot_type: "interactive"
+            file_path: "example_data/lineplot_plotly.json"
+            visualization_tool: "plotly"
+            title: "Test 3"
             caption: ""
-            file_path: "example_data/lineplot.json"
   - identifier: 24324
     name: "Transcriptomics"
     title: "This is a Transcriptomics example"
@@ -43,14 +51,16 @@ sections:
         description: "This is the first transcript subsection"
         plots:
           - identifier: 3323
-            name: "plot1"
-            plot_type: "plotly"
-            title: "Test 1"
+            name: "altair_plot1"
+            plot_type: "interactive"
+            file_path: "example_data/multi_line_plot_altair.json"
+            visualization_tool: "altair"
+            title: "Test 4"
             caption: ""
-            file_path: "example_data/barplot.json"
           - identifier: 3423
             name: "plot2"
-            plot_type: "plotly"
-            title: "Test 2"
+            plot_type: "interactive"
+            file_path: "example_data/lineplot_plotly.json"
+            visualization_tool: "plotly"
+            title: "Test 5"
             caption: ""
-            file_path: "example_data/lineplot.json"
