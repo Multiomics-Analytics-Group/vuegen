@@ -70,17 +70,18 @@ class YAMLMetadataManager(MetadataManager):
                 for plot_data in subsection_data['plots']:
                     plot_file_path = plot_data['file_path']
                     if plot_data['plot_type'] == 'interactive':
-                        with open(plot_file_path, 'r') as plot_file:
-                            plot_code = plot_file.read()
+                        #with open(plot_file_path, 'r') as plot_file:
+                         #   plot_code = plot_file.read()
                     
                         plot = Plot(
                             identifier=plot_data['identifier'],
                             name=plot_data['name'],
                             plot_type=plot_data['plot_type'],
                             visualization_tool = plot_data.get('visualization_tool'),
-                            file_path=plot_code,
+                            file_path=plot_file_path,
                             title=plot_data.get('title'),
-                            caption=plot_data.get('caption')
+                            caption=plot_data.get('caption'),
+                            csv_network_format=plot_data.get('csv_network_format')
                         )
                     else:
                         plot = Plot(

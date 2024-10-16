@@ -6,6 +6,8 @@ from dataclasses import dataclass, field
 from typing import List, Optional
 import altair as alt
 from streamlit.web import cli as stcli
+import networkx as nx
+from pyvis.network import Network
 
 @dataclass
 class Report:
@@ -103,6 +105,8 @@ class Plot:
         The title of the plot (default is None).
     caption : str, optional
         A caption for the plot (default is None).
+    csv_network_format : str, optional
+        The format of the CSV file for network plots (edgelist or adjlist) (default is None).
     """
     identifier: int
     name: str
@@ -111,6 +115,7 @@ class Plot:
     visualization_tool: Optional[str] = None
     title: Optional[str] = None
     caption: Optional[str] = None
+    csv_network_format: Optional[str] = None
 
     def read_plot_fromjson(self) -> str:
         """
@@ -122,12 +127,110 @@ class Plot:
             A string representation of the parsed plot code.
         """
         if self.plot_type == 'interactive':
-            plot_dict = json.loads(self.file_path) if self.file_path else {}
+            with open(self.file_path, 'r') as plot_file:
+                plot_json = plot_file.read()
+            plot_dict = json.loads(plot_json) if plot_json else {}
             if self.visualization_tool == 'altair':
                 altair_plot = alt.Chart.from_dict(plot_dict)
                 return altair_plot.to_dict()
             return str(plot_dict)
         return ""
+
+    def read_network(self) -> nx.Graph:
+        """
+        Reads the network file and returns a NetworkX graph object.
+        
+        Returns
+        -------
+        G : networkx.Graph
+            A NetworkX graph object created from the specified network file.
+        """
+        # Mapping of file extensions to NetworkX loading functions
+        file_extension_map = {
+            '.gml': nx.read_gml,
+            '.graphml': nx.read_graphml,
+            '.gexf': nx.read_gexf,
+            '.csv': nx.read_edgelist,
+            '.txt': nx.read_edgelist,
+            # Add more mappings as needed
+        }
+
+        # Determine the file extension
+        file_extension = os.path.splitext(self.file_path)[-1].lower()
+
+        if file_extension in file_extension_map:
+            # Call the corresponding loading function
+            if file_extension in ['.csv', '.txt'] and self.csv_network_format:
+                if self.csv_network_format == 'edgelist':
+                    G = nx.read_edgelist(self.file_path, delimiter=',')
+                elif self.csv_network_format == 'adjlist':
+                    G = nx.read_adjlist(self.file_path)
+                else:
+                    raise ValueError(f"Unsupported format for CSV/TXT file: {self.csv_network_format}")
+            else:
+                G = file_extension_map[file_extension](self.file_path)
+
+                    # Clean up edge attributes to avoid conflicts
+            for u, v, data in G.edges(data=True):
+                data.pop('source', None)
+                data.pop('target', None)
+
+            # Assign node labels as their IDs
+            for node in G.nodes(data=True):
+                G.nodes[node[0]]['label'] = G.nodes[node[0]].get('name', node[0])  # Set node label to its name or ID
+
+            # Obtain and set degree values for nodes
+            degrees = {node: G.degree(node) for node in G.nodes()}
+
+            # Assign sizes based on degrees
+            min_size = 5  # Define minimum node size
+            max_size = 30  # Define maximum node size
+            min_degree = min(degrees.values())
+            max_degree = max(degrees.values())
+
+            for node in G.nodes():
+                degree = degrees[node]
+                if degree == min_degree:
+                    size = min_size
+                elif degree == max_degree:
+                    size = max_size
+                else:
+                    size = min_size + (max_size - min_size) * ((degree - min_degree) / (max_degree - min_degree))
+                
+                G.nodes[node]['size'] = size  # Assign size based on degree
+
+            return G
+        else:
+            raise ValueError(f"Unsupported file extension: {file_extension}")
+
+    def create_and_save_pyvis_network(self, G: nx.Graph, output_file: str) -> Network:
+        """
+        Creates a PyVis network from a NetworkX graph object and saves it as an HTML file.
+        
+        Parameters
+        ----------
+        G : networkx.Graph
+            A NetworkX graph object.
+        output_file : str
+            The file path where the HTML should be saved.
+        """
+        # Create a PyVis network object
+        net = Network(height='600px', width='100%', bgcolor='white', font_color='black')
+        net.from_nx(G)
+
+        # Optionally customize nodes
+        for node in net.nodes:
+            node_id = node['id']
+            node_data = G.nodes[node_id]
+            node['font'] = {'size': 12}
+            node_data.get('name', node_id)
+            node['borderWidth'] = 2
+            node['borderWidthSelected'] = 2.5
+
+        # Save the network as an HTML file
+        net.save_graph(output_file)
+
+        return net
     
     def generate_imports(self) -> str:
         """
@@ -298,7 +401,6 @@ st.markdown("<h1 style='text-align: center; color: #023858;'>{}</h1>", unsafe_al
         for section in self.report.sections:
             # Create the section file
             section_file_path = os.path.join(output_dir, section.name.replace(" ", "_") + ".py")
-            #with open(section_file_path, 'w') as section_file:
             # Track imports to avoid duplication
             imports_written = set() 
             
@@ -332,8 +434,18 @@ st.markdown("<h4 style='text-align: center; color: #024558;'>{subsection.descrip
                         #elif plot.visualization_tool == 'bokeh':
                         #section_file.write(f"st.bokeh_chart({plot.read_plot_code()}, use_container_width=True)\n")
                         elif plot.visualization_tool == 'altair':
-                            #section_file.write('import altair as alt\nimport json\n')
                             section_content.append(f"st.vega_lite_chart(json.loads(alt.Chart.from_dict({plot.read_plot_fromjson()}).to_json()), use_container_width=True)\n")
+                        elif plot.visualization_tool == 'pyvis':
+                            G = plot.read_network()
+                            output_file = f"example_data/{plot.name.replace(' ', '_')}.html"  # Define the output file name
+                            net = plot.create_and_save_pyvis_network(G, output_file)  # Get the Network object
+
+                            # Write code to display the network in the Streamlit app
+                            section_content.append(f"""with open('{output_file}', 'r') as f:\n""")
+                            section_content.append(f"""    html_data = f.read()\n""")
+                            section_content.append(f"""st.markdown(f"<p style='text-align: center; color: black;'> <b>Number of nodes:</b> {len(net.nodes)} </p>", unsafe_allow_html=True)
+st.markdown(f"<p style='text-align: center; color: black;'> <b>Number of relationships:</b> {len(net.edges)} </p>", unsafe_allow_html=True)""")                         
+                            section_content.append(f"""st.components.v1.html(html_data, height=600)\n""")
                     elif plot.plot_type == 'static':
                         section_content.append(f"st.image('{plot.file_path}', caption='{plot.caption}', use_column_width=True)\n")
 

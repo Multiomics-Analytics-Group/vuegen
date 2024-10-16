@@ -40,6 +40,18 @@ sections:
             visualization_tool: "plotly"
             title: "Test 3"
             caption: ""
+      - identifier: 5003
+        name: "Subsection 3 Proteomics"
+        title: "Network Example 1"
+        description: "This is the third prot subsection"
+        plots:
+          - identifier: 2247
+            name: "Network Plot"
+            plot_type: "interactive"
+            visualization_tool: "pyvis"
+            file_path: "example_data/test.graphml"
+            title: "Network Visualization"
+            caption: "This shows the network structure."
   - identifier: 24324
     name: "Transcriptomics"
     title: "This is a Transcriptomics example"

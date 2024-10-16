@@ -13,6 +13,7 @@ holoviews = "1.16.2"
 plotly = "5.15.0"
 watchdog = "3.0.0"
 bokeh = "2.4.3"
+pyvis = "^0.3.2"
 
 
 [build-system]
