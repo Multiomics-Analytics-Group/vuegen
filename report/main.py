@@ -7,6 +7,6 @@ if __name__ == '__main__':
     report = yaml_manager.load_report_metadata('./report_metadata.yaml')
 
     # Create report view
-    report_view = r.StreamlitReportView(12312, "MyPage", report=report, columns=None)
+    report_view = r.StreamlitReportView(12312, "Multi-omics project report", report=report, columns=None)
     report_view.generate_report(output_dir="tmp")
     report_view.run_report(output_dir='tmp')
