@@ -18,7 +18,7 @@ sections:
           - identifier: 3323
             name: "plot1"
             plot_type: "interactive"
-            file_path: "example_data/barplot_plotly.json"
+            file_path: "example_data/plotly_barplot.json"
             visualization_tool: "plotly"
             title: "Test 1"
             caption: ""
@@ -36,7 +36,7 @@ sections:
           - identifier: 3423
             name: "plot2"
             plot_type: "interactive"
-            file_path: "example_data/lineplot_plotly.json"
+            file_path: "example_data/plotly_lineplot.json"
             visualization_tool: "plotly"
             title: "Test 3"
             caption: ""
@@ -53,14 +53,21 @@ sections:
           - identifier: 3323
             name: "altair_plot1"
             plot_type: "interactive"
-            file_path: "example_data/multi_line_plot_altair.json"
+            file_path: "example_data/altair_multilineplot.json"
             visualization_tool: "altair"
             title: "Test 4"
             caption: ""
           - identifier: 3423
             name: "plot2"
             plot_type: "interactive"
-            file_path: "example_data/lineplot_plotly.json"
+            file_path: "example_data/plotly_lineplot.json"
             visualization_tool: "plotly"
             title: "Test 5"
+            caption: ""
+          - identifier: 3358
+            name: "altair_plot2"
+            plot_type: "interactive"
+            file_path: "example_data/altair_multilineplot.json"
+            visualization_tool: "altair"
+            title: "Test 4"
             caption: ""

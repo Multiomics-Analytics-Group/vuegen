@@ -4,7 +4,7 @@ import json
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import List, Optional
-from altair import Chart
+import altair as alt
 from streamlit.web import cli as stcli
 
 @dataclass
@@ -93,21 +93,16 @@ class Plot:
     name : str
         The name of the plot.
     plot_type : str
-        The type of the plot (e.g., 'interactive', 'static').
+        The type of the plot ('interactive' or 'static').
     file_path : str
-        The file path for the plot data (for interactive) or the image (for static).
+        The file path for the JSON representation of the plot (for interactive plots) or the image file path (for static plots).
     visualization_tool : str, optional
-        The visualization_tool for rendering interactive plots (e.g., 'plotly', 'bokeh', 'altair'). 
-        It is optional for static plots.
+        The visualization_tool for rendering interactive plots ('plotly', 'bokeh', or 'altair'). 
+        It is not required for static plots (default is None).
     title : str, optional
         The title of the plot (default is None).
     caption : str, optional
         A caption for the plot (default is None).
-
-    Methods
-    -------
-    read_plot_code()
-        Reads and parses the plot code from the stored JSON string.
     """
     identifier: int
     name: str
@@ -116,11 +111,10 @@ class Plot:
     visualization_tool: Optional[str] = None
     title: Optional[str] = None
     caption: Optional[str] = None
-    #code: Optional[str] = None
 
-    def read_plot_code(self) -> str:
+    def read_plot_fromjson(self) -> str:
         """
-        Reads and parses the plot code from the stored JSON string.
+        Reads and parses the JSON representation of the plot. 
 
         Returns
         -------
@@ -130,10 +124,25 @@ class Plot:
         if self.plot_type == 'interactive':
             plot_dict = json.loads(self.file_path) if self.file_path else {}
             if self.visualization_tool == 'altair':
-                return json.dumps(plot_dict)
+                altair_plot = alt.Chart.from_dict(plot_dict)
+                return altair_plot.to_dict()
             return str(plot_dict)
         return ""
+    
+    def generate_imports(self) -> str:
+        """
+        Generate the import statements required for the visualization tool.
 
+        Returns
+        -------
+        str
+            A string representing the import statements needed for the plot.
+        """
+        imports = []
+        if self.visualization_tool == 'altair':
+            imports.append('import altair as alt')
+            imports.append('import json')
+        return "\n".join(imports)
 
 @dataclass
 class ReportView(ABC):
@@ -287,33 +296,55 @@ st.markdown("<h1 style='text-align: center; color: #023858;'>{}</h1>", unsafe_al
             The directory where section files will be saved.
         """
         for section in self.report.sections:
+            # Create the section file
+            section_file_path = os.path.join(output_dir, section.name.replace(" ", "_") + ".py")
+            #with open(section_file_path, 'w') as section_file:
+            # Track imports to avoid duplication
+            imports_written = set() 
+            
+            # Collect section and subsection descriptions
             section_desc_msg = f"""st.markdown("<h2 style='text-align: center; color: #020058;'>{section.name}</h2>", unsafe_allow_html=True)
 st.markdown("<h3 style='text-align: center; color: #020058;'>{section.description}</h3>", unsafe_allow_html=True)"""
+        
+            # Collect imports and section content
+            imports = ['import streamlit as st']
+            section_content = [section_desc_msg]
 
-            with open(os.path.join(output_dir, section.name.replace(" ", "_") + ".py"), 'w') as section_file:
-                # Start the section file with the home message
-                section_file.write(f'import streamlit as st\n{section_desc_msg}\n')
-
-                # Iterate through subsections and integrate them into the section file
-                for subsection in section.subsections:
-                    subsection_desc_msg = f"""st.markdown("<h3 style='text-align: center; color: #023558;'>{subsection.name}</h3>", unsafe_allow_html=True)
+            # Iterate through subsections and integrate them into the section file
+            for subsection in section.subsections:
+                subsection_desc_msg = f"""st.markdown("<h3 style='text-align: center; color: #023558;'>{subsection.name}</h3>", unsafe_allow_html=True)
 st.markdown("<h4 style='text-align: center; color: #024558;'>{subsection.description}</h4>", unsafe_allow_html=True)"""
+                
+                # Add subsection description to section content
+                section_content.append(subsection_desc_msg)
+                
+                # Iterate through plots in the subsection
+                for plot in subsection.plots:
+                    # Write imports if not already done
+                    imports_viz = plot.generate_imports()
+                    if imports_viz and plot.visualization_tool not in imports_written:
+                        imports.append(imports_viz)
+                        imports_written.add(plot.visualization_tool)
                     
-                    # Write the subsection description
-                    section_file.write(subsection_desc_msg + "\n")
-                    
-                    # Iterate through plots in the subsection
-                    for plot in subsection.plots:
-                        if plot.plot_type == 'interactive':
-                            if plot.visualization_tool == 'plotly':
-                                section_file.write(f"st.plotly_chart({plot.read_plot_code()}, use_container_width=True)\n")
-                            elif plot.visualization_tool == 'bokeh':
-                                section_file.write(f"st.bokeh_chart({plot.read_plot_code()}, use_container_width=True)\n")
-                            elif plot.visualization_tool == 'altair':
-                                section_file.write(f"import altair as alt\n")
-                                section_file.write(f"chart = alt.Chart.from_json('{plot.read_plot_code()}')\n")
-                                section_file.write(f"st.altair_chart(chart, use_container_width=True)\n")
-                        elif plot.plot_type == 'static':
-                            section_file.write(f"st.image('{plot.file_path}', caption='{plot.caption}', use_column_width=True)\n")
+                    if plot.plot_type == 'interactive':
+                        if plot.visualization_tool == 'plotly':
+                            section_content.append(f"st.plotly_chart({plot.read_plot_fromjson()}, use_container_width=True)\n")
+                        #elif plot.visualization_tool == 'bokeh':
+                        #section_file.write(f"st.bokeh_chart({plot.read_plot_code()}, use_container_width=True)\n")
+                        elif plot.visualization_tool == 'altair':
+                            #section_file.write('import altair as alt\nimport json\n')
+                            section_content.append(f"st.vega_lite_chart(json.loads(alt.Chart.from_dict({plot.read_plot_fromjson()}).to_json()), use_container_width=True)\n")
+                    elif plot.plot_type == 'static':
+                        section_content.append(f"st.image('{plot.file_path}', caption='{plot.caption}', use_column_width=True)\n")
+
+            # Write everything to the file
+            with open(section_file_path, 'w') as section_file:
+                # Write imports at the top of the file
+                section_file.write("\n".join(imports) + "\n\n")
+
+                # Write the section content (descriptions, plots)
+                section_file.write("\n".join(section_content))
+
+
 
 

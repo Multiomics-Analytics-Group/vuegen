@@ -80,8 +80,7 @@ class YAMLMetadataManager(MetadataManager):
                             visualization_tool = plot_data.get('visualization_tool'),
                             file_path=plot_code,
                             title=plot_data.get('title'),
-                            caption=plot_data.get('caption'),
-                            #code=plot_code 
+                            caption=plot_data.get('caption')
                         )
                     else:
                         plot = Plot(

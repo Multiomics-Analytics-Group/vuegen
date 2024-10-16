@@ -1,0 +1,76 @@
+{
+    "target_id": null,
+    "root_id": "1002",
+    "doc": {
+      "defs": [],
+      "roots": {
+        "references": [
+          {
+            "attributes": {
+              "line_alpha": 1.0,
+              "line_color": "#1f77b4",
+              "line_width": 2,
+              "x": {
+                "field": "x"
+              },
+              "y": {
+                "field": "y"
+              }
+            },
+            "id": "1003",
+            "type": "Line"
+          },
+          {
+            "attributes": {
+              "data": {
+                "x": [1, 2, 3, 4, 5],
+                "y": [6, 7, 2, 4, 5]
+              }
+            },
+            "id": "1001",
+            "type": "ColumnDataSource"
+          },
+          {
+            "attributes": {
+              "plot": {
+                "id": "1002"
+              },
+              "renderers": [
+                {
+                  "id": "1003"
+                }
+              ],
+              "x_range": {
+                "id": "1004"
+              },
+              "y_range": {
+                "id": "1005"
+              }
+            },
+            "id": "1002",
+            "type": "Plot"
+          },
+          {
+            "attributes": {
+              "end": 5,
+              "start": 0
+            },
+            "id": "1004",
+            "type": "Range1d"
+          },
+          {
+            "attributes": {
+              "end": 7,
+              "start": 0
+            },
+            "id": "1005",
+            "type": "Range1d"
+          }
+        ],
+        "root_ids": [
+          "1002"
+        ]
+      },
+      "title": "Bokeh Line Plot"
+    }
+  }
