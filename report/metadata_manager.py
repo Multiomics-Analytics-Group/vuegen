@@ -1,5 +1,5 @@
 import yaml
-from report import Report, Section, Subsection, Plot
+from report import Report, Section, Subsection, Plot, PlotType, VisualizationTool
 from abc import ABC, abstractmethod
 
 class MetadataManager(ABC):
@@ -69,28 +69,24 @@ class YAMLMetadataManager(MetadataManager):
                 # Create Plots
                 for plot_data in subsection_data['plots']:
                     plot_file_path = plot_data['file_path']
-                    if plot_data['plot_type'] == 'interactive':
-                        #with open(plot_file_path, 'r') as plot_file:
-                         #   plot_code = plot_file.read()
+
+                    # Convert plot_type from string to PlotType Enum
+                    plot_type = PlotType[plot_data['plot_type'].upper()]
+
+                    # Convert visualization_tool from string to VisualizationTool Enum, if provided
+                    visualization_tool = (VisualizationTool[plot_data['visualization_tool'].upper()]
+                                          if plot_data.get('visualization_tool') else None)
                     
-                        plot = Plot(
-                            identifier=plot_data['identifier'],
-                            name=plot_data['name'],
-                            plot_type=plot_data['plot_type'],
-                            visualization_tool = plot_data.get('visualization_tool'),
-                            file_path=plot_file_path,
-                            title=plot_data.get('title'),
-                            caption=plot_data.get('caption'),
-                            csv_network_format=plot_data.get('csv_network_format')
-                        )
-                    else:
-                        plot = Plot(
-                            identifier=plot_data['identifier'],
-                            name=plot_data['name'],
-                            plot_type=plot_data['plot_type'],
-                            file_path=plot_file_path,
-                            title=plot_data.get('title'),
-                            caption=plot_data.get('caption')
+                    # Create Plot object
+                    plot = Plot(
+                        identifier=plot_data['identifier'],
+                        name=plot_data['name'],
+                        plot_type=plot_type,
+                        file_path=plot_file_path,
+                        visualization_tool=visualization_tool,
+                        title=plot_data.get('title'),
+                        caption=plot_data.get('caption'),
+                        csv_network_format=plot_data.get('csv_network_format')
                         )
                     subsection.plots.append(plot)
                 

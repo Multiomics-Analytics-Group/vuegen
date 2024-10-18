@@ -3,11 +3,25 @@ import sys
 import json
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
+from enum import Enum
 from typing import List, Optional
 import altair as alt
 from streamlit.web import cli as stcli
 import networkx as nx
 from pyvis.network import Network
+
+class PlotType(Enum):
+    INTERACTIVE = 'interactive'
+    STATIC = 'static'
+
+class VisualizationTool(Enum):
+    PLOTLY = 'plotly'
+    ALTAIR = 'altair'
+    PYVIS = 'pyvis'
+
+class CSVNetworkFormat(Enum):
+    EDGELIST = 'edgelist'
+    ADJLIST = 'adjlist'
 
 @dataclass
 class Plot:
@@ -20,28 +34,28 @@ class Plot:
         A unique identifier for the plot.
     name : str
         The name of the plot.
-    plot_type : str
-        The type of the plot ('interactive' or 'static').
+    plot_type : PlotType
+        The type of the plot (INTERACTIVE or STATIC).
     file_path : str
         The file path for the JSON representation of the plot (for interactive plots) or the image file path (for static plots).
-    visualization_tool : str, optional
-        The visualization_tool for rendering interactive plots ('plotly', 'bokeh', or 'altair'). 
-        It is not required for static plots (default is None).
+    visualization_tool : VisualizationTool, optional
+        The visualization_tool for rendering interactive plots (PLOTLY, ALTAIR, or PYVIS) (default is None).
+        It is not required for STATIC plots (default is None).
     title : str, optional
         The title of the plot (default is None).
     caption : str, optional
         A caption for the plot (default is None).
-    csv_network_format : str, optional
-        The format of the CSV file for network plots (edgelist or adjlist) (default is None).
+    csv_network_format : CSVNetworkFormat, optional
+        The format of the CSV file for network plots (EDGELIST OR ADJLIST) (default is None).
     """
     identifier: int
     name: str
     plot_type: str
     file_path: str
-    visualization_tool: Optional[str] = None
+    visualization_tool: Optional[VisualizationTool] = None
     title: Optional[str] = None
     caption: Optional[str] = None
-    csv_network_format: Optional[str] = None
+    csv_network_format: Optional[CSVNetworkFormat] = None
 
     def read_plot_fromjson(self) -> str:
         """
@@ -52,11 +66,11 @@ class Plot:
         str
             A string representation of the parsed plot code.
         """
-        if self.plot_type == 'interactive':
+        if self.plot_type == PlotType.INTERACTIVE:
             with open(self.file_path, 'r') as plot_file:
                 plot_json = plot_file.read()
             plot_dict = json.loads(plot_json) if plot_json else {}
-            if self.visualization_tool == 'altair':
+            if self.visualization_tool == VisualizationTool.ALTAIR:
                 altair_plot = alt.Chart.from_dict(plot_dict)
                 return altair_plot.to_dict()
             return str(plot_dict)
@@ -87,9 +101,9 @@ class Plot:
         if file_extension in file_extension_map:
             # Call the corresponding loading function
             if file_extension in ['.csv', '.txt'] and self.csv_network_format:
-                if self.csv_network_format == 'edgelist':
+                if self.csv_network_format == CSVNetworkFormat.EDGELIST:
                     G = nx.read_edgelist(self.file_path, delimiter=',')
-                elif self.csv_network_format == 'adjlist':
+                elif self.csv_network_format == CSVNetworkFormat.ADJLIST:
                     G = nx.read_adjlist(self.file_path)
                 else:
                     raise ValueError(f"Unsupported format for CSV/TXT file: {self.csv_network_format}")
@@ -139,12 +153,17 @@ class Plot:
             A NetworkX graph object.
         output_file : str
             The file path where the HTML should be saved.
+
+        Returns
+        -------
+        net : pyvis.network.Network
+            A PyVis network object.
         """
         # Create a PyVis network object
         net = Network(height='600px', width='100%', bgcolor='white', font_color='black')
         net.from_nx(G)
 
-        # Optionally customize nodes
+        # Customize the network visualization of nodes
         for node in net.nodes:
             node_id = node['id']
             node_data = G.nodes[node_id]
@@ -172,7 +191,7 @@ class Plot:
             A string representing the import statements needed for the plot.
         """
         imports = []
-        if self.visualization_tool == 'altair':
+        if self.visualization_tool == VisualizationTool.ALTAIR:
             imports.append('import altair as alt')
             imports.append('import json')
         return "\n".join(imports)
@@ -491,12 +510,12 @@ st.set_page_config(layout="wide", page_title="{self.report.name}")
                         imports.append(imports_viz)
                         imports_written.add(plot.visualization_tool)
                     
-                    if plot.plot_type == 'interactive':
-                        if plot.visualization_tool == 'plotly':
+                    if plot.plot_type == PlotType.INTERACTIVE:
+                        if plot.visualization_tool == VisualizationTool.PLOTLY:
                             section_content.append(f"\nst.plotly_chart({plot.read_plot_fromjson()}, use_container_width=True)\n")
-                        elif plot.visualization_tool == 'altair':
+                        elif plot.visualization_tool == VisualizationTool.ALTAIR:
                             section_content.append(f"\nst.vega_lite_chart(json.loads(alt.Chart.from_dict({plot.read_plot_fromjson()}).to_json()), use_container_width=True)\n")
-                        elif plot.visualization_tool == 'pyvis':
+                        elif plot.visualization_tool == VisualizationTool.PYVIS:
                             G = plot.read_network()
                             output_file = f"example_data/{plot.name.replace(' ', '_')}.html"  # Define the output file name
                             net = plot.create_and_save_pyvis_network(G, output_file)  # Get the Network object
@@ -518,7 +537,7 @@ net_html_height = 1200 if control_layout else 630
 # Load HTML into HTML component for display on Streamlit
 st.components.v1.html(html_data, height=net_html_height)""")
 
-                    elif plot.plot_type == 'static':
+                    elif plot.plot_type == PlotType.STATIC:
                         section_content.append(f"\nst.image('{plot.file_path}', caption='{plot.caption}', use_column_width=True)\n")
 
             # Write everything to the file
