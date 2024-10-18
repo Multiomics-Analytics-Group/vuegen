@@ -128,22 +128,6 @@ class Plot:
             return G
         else:
             raise ValueError(f"Unsupported file extension: {file_extension}")
-        
-
-    def read_plot_from_html(self):
-        """
-        Loads the contents of an HTML file.
-
-        Returns
-        -------
-        str
-            The contents of the HTML file as a string.
-        """
-        html_data = ""
-        with open(self.file_path, 'r', encoding='utf-8') as HtmlFile:
-            html_data = HtmlFile.read()
-        
-        return html_data
 
     def create_and_save_pyvis_network(self, G: nx.Graph, output_file: str) -> Network:
         """
@@ -509,33 +493,33 @@ st.set_page_config(layout="wide", page_title="{self.report.name}")
                     
                     if plot.plot_type == 'interactive':
                         if plot.visualization_tool == 'plotly':
-                            section_content.append(f"st.plotly_chart({plot.read_plot_fromjson()}, use_container_width=True)\n")
-                        #elif plot.visualization_tool == 'bokeh':
-                        #section_file.write(f"st.bokeh_chart({plot.read_plot_code()}, use_container_width=True)\n")
+                            section_content.append(f"\nst.plotly_chart({plot.read_plot_fromjson()}, use_container_width=True)\n")
                         elif plot.visualization_tool == 'altair':
-                            section_content.append(f"st.vega_lite_chart(json.loads(alt.Chart.from_dict({plot.read_plot_fromjson()}).to_json()), use_container_width=True)\n")
+                            section_content.append(f"\nst.vega_lite_chart(json.loads(alt.Chart.from_dict({plot.read_plot_fromjson()}).to_json()), use_container_width=True)\n")
                         elif plot.visualization_tool == 'pyvis':
                             G = plot.read_network()
                             output_file = f"example_data/{plot.name.replace(' ', '_')}.html"  # Define the output file name
                             net = plot.create_and_save_pyvis_network(G, output_file)  # Get the Network object
-                            #net_html = plot.read_plot_from_html()  # Read the HTML content from the file
+                            num_nodes = len(net.nodes)
+                            num_edges = len(net.edges)
 
                             # Write code to display the network in the Streamlit app
-                            section_content.append(f"""with open('{output_file}', 'r') as f:\n""")
-                            section_content.append(f"""    html_data = f.read()\n""")
-                            section_content.append(f"""st.markdown(f"<p style='text-align: center; color: black;'> <b>Number of nodes:</b> {len(net.nodes)} </p>", unsafe_allow_html=True)
-st.markdown(f"<p style='text-align: center; color: black;'> <b>Number of relationships:</b> {len(net.edges)} </p>", unsafe_allow_html=True)
+                            section_content.append(f"""
+with open('{output_file}', 'r') as f:
+    html_data = f.read()
+
+st.markdown(f"<p style='text-align: center; color: black;'> <b>Number of nodes:</b> {num_nodes} </p>", unsafe_allow_html=True)
+st.markdown(f"<p style='text-align: center; color: black;'> <b>Number of relationships:</b> {num_edges} </p>", unsafe_allow_html=True)
+
 # Streamlit checkbox for controlling the layout
 control_layout = st.checkbox('Add panel to control layout', value=True)
-if control_layout: 
+net_html_height = 1200 if control_layout else 630
+
 # Load HTML into HTML component for display on Streamlit
-    st.components.v1.html(html_data, height=1200)
-else:
-# Load HTML into HTML component for display on Streamlit
-    st.components.v1.html(html_data, height=630)""")                         
-                            #section_content.append(f"""st.components.v1.html(html_data, height=1100)\n""")
+st.components.v1.html(html_data, height=net_html_height)""")
+
                     elif plot.plot_type == 'static':
-                        section_content.append(f"st.image('{plot.file_path}', caption='{plot.caption}', use_column_width=True)\n")
+                        section_content.append(f"\nst.image('{plot.file_path}', caption='{plot.caption}', use_column_width=True)\n")
 
             # Write everything to the file
             with open(section_file_path, 'w') as section_file:
