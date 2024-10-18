@@ -10,80 +10,6 @@ import networkx as nx
 from pyvis.network import Network
 
 @dataclass
-class Report:
-    """
-    A report consisting of multiple sections and subsections.
-
-    Attributes
-    ----------
-    identifier : int
-        A unique identifier for the report.
-    name : str
-        The name of the report.
-    title : str, optional
-        The title of the report (default is None).
-    description : str, optional
-        A description of the report (default is None).
-    sections : List[Section]
-        A list of sections that belong to the report.
-    """
-    identifier: int
-    name: str
-    title: Optional[str] = None
-    description: Optional[str] = None
-    sections: List['Section'] = field(default_factory=list)
-
-
-@dataclass
-class Section:
-    """
-    A section within a report, containing multiple subsections.
-
-    Attributes
-    ----------
-    identifier : int
-        A unique identifier for the section.
-    name : str
-        The name of the section.
-    title : str, optional
-        The title of the section (default is None).
-    description : str, optional
-        A description of the section (default is None).
-    subsections : List[Subsection]
-        A list of subsections within this section.
-    """
-    identifier: int
-    name: str
-    title: Optional[str] = None
-    description: Optional[str] = None
-    subsections: List['Subsection'] = field(default_factory=list)
-
-@dataclass
-class Subsection:
-    """
-    A subsection within a section, containing multiple plots.
-
-    Attributes
-    ----------
-    identifier : int
-        A unique identifier for the subsection.
-    name : str
-        The name of the subsection.
-    title : str, optional
-        The title of the subsection (default is None).
-    description : str, optional
-        A description of the subsection (default is None).
-    plots : List[Plot]
-        A list of plots within this subsection.
-    """
-    identifier: int
-    name: str
-    title: Optional[str] = None
-    description: Optional[str] = None
-    plots: List['Plot'] = field(default_factory=list)
-
-
-@dataclass
 class Plot:
     """
     A plot within a subsection of a report.
@@ -202,6 +128,22 @@ class Plot:
             return G
         else:
             raise ValueError(f"Unsupported file extension: {file_extension}")
+        
+
+    def read_plot_from_html(self):
+        """
+        Loads the contents of an HTML file.
+
+        Returns
+        -------
+        str
+            The contents of the HTML file as a string.
+        """
+        html_data = ""
+        with open(self.file_path, 'r', encoding='utf-8') as HtmlFile:
+            html_data = HtmlFile.read()
+        
+        return html_data
 
     def create_and_save_pyvis_network(self, G: nx.Graph, output_file: str) -> Network:
         """
@@ -227,6 +169,10 @@ class Plot:
             node['borderWidth'] = 2
             node['borderWidthSelected'] = 2.5
 
+        # Apply the force_atlas_2based layout and show panel to control layout
+        net.force_atlas_2based(gravity=-30, central_gravity=0.005, spring_length=100, spring_strength=0.1, damping=0.4)
+        net.show_buttons(filter_=['physics'])
+            
         # Save the network as an HTML file
         net.save_graph(output_file)
 
@@ -246,6 +192,79 @@ class Plot:
             imports.append('import altair as alt')
             imports.append('import json')
         return "\n".join(imports)
+    
+@dataclass
+class Subsection:
+    """
+    A subsection within a section, containing multiple plots.
+
+    Attributes
+    ----------
+    identifier : int
+        A unique identifier for the subsection.
+    name : str
+        The name of the subsection.
+    title : str, optional
+        The title of the subsection (default is None).
+    description : str, optional
+        A description of the subsection (default is None).
+    plots : List[Plot]
+        A list of plots within this subsection.
+    """
+    identifier: int
+    name: str
+    title: Optional[str] = None
+    description: Optional[str] = None
+    plots: List['Plot'] = field(default_factory=list)
+
+@dataclass
+class Section:
+    """
+    A section within a report, containing multiple subsections.
+
+    Attributes
+    ----------
+    identifier : int
+        A unique identifier for the section.
+    name : str
+        The name of the section.
+    title : str, optional
+        The title of the section (default is None).
+    description : str, optional
+        A description of the section (default is None).
+    subsections : List[Subsection]
+        A list of subsections within this section.
+    """
+    identifier: int
+    name: str
+    title: Optional[str] = None
+    description: Optional[str] = None
+    subsections: List['Subsection'] = field(default_factory=list)
+
+@dataclass
+class Report:
+    """
+    A report consisting of multiple sections and subsections.
+
+    Attributes
+    ----------
+    identifier : int
+        A unique identifier for the report.
+    name : str
+        The name of the report.
+    title : str, optional
+        The title of the report (default is None).
+    description : str, optional
+        A description of the report (default is None).
+    sections : List[Section]
+        A list of sections that belong to the report.
+    """
+    identifier: int
+    name: str
+    title: Optional[str] = None
+    description: Optional[str] = None
+    sections: List['Section'] = field(default_factory=list)
+
 
 @dataclass
 class ReportView(ABC):
@@ -280,6 +299,29 @@ class ReportView(ABC):
         ----------
         output_dir : str, optional
             The directory where the generated report files will be saved (default is 'tmp').
+        """
+        pass
+
+    @abstractmethod
+    def _format_text(self, text: str, type: str, level: int, color: str) -> str:
+        """
+        Format text for the report view.
+        
+        Parameters
+        ----------
+        text : str
+            The text to be formatted.
+        type : str
+            The type of the text (e.g., 'header', 'paragraph').
+        level : int, optional
+            If the text is a header, the level of the header (e.g., 1 for h1, 2 for h2, etc.).
+        color : str, optional
+            The color of the header text.
+        
+        Returns
+        -------
+        str
+            The formatted text string.
         """
         pass
 
@@ -361,20 +403,25 @@ class StreamlitReportView(WebAppReportView):
         output_dir : str, optional
             The directory where the generated report files will be saved (default is 'tmp').
         """
+        # Create the output directory if it does not exist
         if not os.path.exists(output_dir):
             os.mkdir(output_dir)
         if not os.path.exists(os.path.join(output_dir, 'pages')):
             os.mkdir(os.path.join(output_dir, 'pages'))
 
-        pages_dir = os.path.join(output_dir, 'pages')
-        home_msg = '''import streamlit as st
-st.set_page_config(layout="wide", page_title="{}", menu_items={{}})
-st.markdown("<h1 style='text-align: center; color: #023858;'>{}</h1>", unsafe_allow_html=True)'''.format(self.name, self.name)
-        desc_msg = '''st.markdown("<h3 style='text-align: center; color: #020058;'>{}</h3>", unsafe_allow_html=True)'''.format(self.report.description)
-
+        # Define the Streamlit imports and home page content
+        streamlit_imports = f'''import streamlit as st
+st.set_page_config(layout="wide", page_title="{self.report.name}")
+'''
+        home_msg = self._format_text(text=self.report.title, type = 'header', level=1, color='#023858')
+        desc_msg = self._format_text(text=self.report.description, type = 'paragraph', color='#023858')
+        
+        # Write the home page content to a Python file
         with open(os.path.join(output_dir, self.name.replace(" ", "_") + ".py"), 'w') as homepage:
-            homepage.write(home_msg + "\n" + desc_msg)
+            homepage.write("\n".join([streamlit_imports, home_msg, desc_msg]))
 
+        # Create Python files for each section and its subsections and plots
+        pages_dir = os.path.join(output_dir, 'pages')
         self._build_plots(output_dir=pages_dir)
 
     def run_report(self, output_dir: str = 'tmp') -> None:
@@ -389,6 +436,33 @@ st.markdown("<h1 style='text-align: center; color: #023858;'>{}</h1>", unsafe_al
         sys.argv = ["streamlit", "run", os.path.join(output_dir, self.name.replace(" ", "_") + ".py")]
         sys.exit(stcli.main())
 
+    def _format_text(self, text: str, type: str, level: int = 1, color: str = '#020058') -> str:
+        """
+        Generates a Streamlit markdown text string with the specified level and color.
+        
+        Parameters
+        ----------
+        text : str
+            The text to be formatted.
+        type : str
+            The type of the text (e.g., 'header', 'paragraph').
+        level : int, optional
+            If the text is a header, the level of the header (e.g., 1 for h1, 2 for h2, etc.).
+        color : str, optional
+            The color of the header text.
+
+        Returns
+        -------
+        str
+            A formatted markdown string for the specified text.
+        """
+        if type == 'header':
+            tag = f"h{level}"
+        elif type == 'paragraph':
+            tag = 'p'
+
+        return f"""st.markdown("<{tag} style='text-align: center; color: {color};'>{text}</{tag}>", unsafe_allow_html=True)"""
+
     def _build_plots(self, output_dir: str) -> None:
         """
         Generates Python files for each section in the report, including subsections and plots.
@@ -401,24 +475,29 @@ st.markdown("<h1 style='text-align: center; color: #023858;'>{}</h1>", unsafe_al
         for section in self.report.sections:
             # Create the section file
             section_file_path = os.path.join(output_dir, section.name.replace(" ", "_") + ".py")
+            
             # Track imports to avoid duplication
             imports_written = set() 
             
-            # Collect section and subsection descriptions
-            section_desc_msg = f"""st.markdown("<h2 style='text-align: center; color: #020058;'>{section.name}</h2>", unsafe_allow_html=True)
-st.markdown("<h3 style='text-align: center; color: #020058;'>{section.description}</h3>", unsafe_allow_html=True)"""
+            # Collect section header and description
+            section_header = self._format_text(text=section.name, type='header', level=2, color='#020058')
+            section_desc = self._format_text(text=section.description, type='paragraph', color='#020058')
         
             # Collect imports and section content
             imports = ['import streamlit as st']
-            section_content = [section_desc_msg]
+            section_content = [section_header, section_desc]
 
             # Iterate through subsections and integrate them into the section file
             for subsection in section.subsections:
-                subsection_desc_msg = f"""st.markdown("<h3 style='text-align: center; color: #023558;'>{subsection.name}</h3>", unsafe_allow_html=True)
-st.markdown("<h4 style='text-align: center; color: #024558;'>{subsection.description}</h4>", unsafe_allow_html=True)"""
+                # Add subsection header and description
+                subsection_header = self._format_text(text=subsection.name, type='header', level=3, color='#023558')
+                subsection_desc = self._format_text(text=subsection.description, type='paragraph', color='#023558')
                 
-                # Add subsection description to section content
-                section_content.append(subsection_desc_msg)
+                # Collect subsection content
+                subsection_content = [subsection_header, subsection_desc]
+
+                # Add subsection content to the section content
+                section_content.extend(subsection_content)
                 
                 # Iterate through plots in the subsection
                 for plot in subsection.plots:
@@ -439,13 +518,22 @@ st.markdown("<h4 style='text-align: center; color: #024558;'>{subsection.descrip
                             G = plot.read_network()
                             output_file = f"example_data/{plot.name.replace(' ', '_')}.html"  # Define the output file name
                             net = plot.create_and_save_pyvis_network(G, output_file)  # Get the Network object
+                            #net_html = plot.read_plot_from_html()  # Read the HTML content from the file
 
                             # Write code to display the network in the Streamlit app
                             section_content.append(f"""with open('{output_file}', 'r') as f:\n""")
                             section_content.append(f"""    html_data = f.read()\n""")
                             section_content.append(f"""st.markdown(f"<p style='text-align: center; color: black;'> <b>Number of nodes:</b> {len(net.nodes)} </p>", unsafe_allow_html=True)
-st.markdown(f"<p style='text-align: center; color: black;'> <b>Number of relationships:</b> {len(net.edges)} </p>", unsafe_allow_html=True)""")                         
-                            section_content.append(f"""st.components.v1.html(html_data, height=600)\n""")
+st.markdown(f"<p style='text-align: center; color: black;'> <b>Number of relationships:</b> {len(net.edges)} </p>", unsafe_allow_html=True)
+# Streamlit checkbox for controlling the layout
+control_layout = st.checkbox('Add panel to control layout', value=True)
+if control_layout: 
+# Load HTML into HTML component for display on Streamlit
+    st.components.v1.html(html_data, height=1200)
+else:
+# Load HTML into HTML component for display on Streamlit
+    st.components.v1.html(html_data, height=630)""")                         
+                            #section_content.append(f"""st.components.v1.html(html_data, height=1100)\n""")
                     elif plot.plot_type == 'static':
                         section_content.append(f"st.image('{plot.file_path}', caption='{plot.caption}', use_column_width=True)\n")
 
