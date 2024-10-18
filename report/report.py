@@ -341,8 +341,10 @@ class WebAppReportView(ReportView):
     -------
     run_report(output_dir='tmp')
         Runs the generated web app report.
-    _build_plots(output_dir='tmp')
-        Generates plots for each section in the report.
+    _generate_sections(output_dir='tmp')
+        Generates and organizes plots for each subsection and section in the report.
+    _generate_plots(subsection: Subsection, imports_written: set, section_content: list)
+        Generates plot content for the given subsection.
     """
 
     report_framework: str
@@ -364,7 +366,7 @@ class WebAppReportView(ReportView):
         pass
 
     @abstractmethod
-    def _build_plots(self, output_dir: str) -> None:
+    def _generate_sections(self, output_dir: str) -> None:
         """
         Generates and organizes plots for each subsection and section in the report.
         
@@ -379,6 +381,26 @@ class WebAppReportView(ReportView):
         """
         pass
 
+    @abstractmethod
+    def _generate_plots(self, subsection: Subsection, imports_written: set, section_content: list) -> List[str]:
+        """
+        Generates plot content for the given subsection.
+        
+        Parameters
+        ----------
+        subsection : Subsection
+            The subsection containing the plots.
+        imports_written : set
+            A set of already written imports.
+        section_content : list
+            A list to which the generated content will be appended.
+
+        Returns
+        -------
+        list
+            A list of imports for the subsection.
+        """
+        pass
 
 class StreamlitReportView(WebAppReportView):
     """
@@ -425,7 +447,7 @@ st.set_page_config(layout="wide", page_title="{self.report.name}")
 
         # Create Python files for each section and its subsections and plots
         pages_dir = os.path.join(output_dir, 'pages')
-        self._build_plots(output_dir=pages_dir)
+        self._generate_sections(output_dir=pages_dir)
 
     def run_report(self, output_dir: str = 'tmp') -> None:
         """
@@ -466,7 +488,7 @@ st.set_page_config(layout="wide", page_title="{self.report.name}")
 
         return f"""st.markdown("<{tag} style='text-align: center; color: {color};'>{text}</{tag}>", unsafe_allow_html=True)"""
 
-    def _build_plots(self, output_dir: str) -> None:
+    def _generate_sections(self, output_dir: str) -> None:
         """
         Generates Python files for each section in the report, including subsections and plots.
         
@@ -502,28 +524,60 @@ st.set_page_config(layout="wide", page_title="{self.report.name}")
                 # Add subsection content to the section content
                 section_content.extend(subsection_content)
                 
-                # Iterate through plots in the subsection
-                for plot in subsection.plots:
-                    # Write imports if not already done
-                    imports_viz = plot.generate_imports()
-                    if imports_viz and plot.visualization_tool not in imports_written:
-                        imports.append(imports_viz)
-                        imports_written.add(plot.visualization_tool)
-                    
-                    if plot.plot_type == PlotType.INTERACTIVE:
-                        if plot.visualization_tool == VisualizationTool.PLOTLY:
-                            section_content.append(f"\nst.plotly_chart({plot.read_plot_fromjson()}, use_container_width=True)\n")
-                        elif plot.visualization_tool == VisualizationTool.ALTAIR:
-                            section_content.append(f"\nst.vega_lite_chart(json.loads(alt.Chart.from_dict({plot.read_plot_fromjson()}).to_json()), use_container_width=True)\n")
-                        elif plot.visualization_tool == VisualizationTool.PYVIS:
-                            G = plot.read_network()
-                            output_file = f"example_data/{plot.name.replace(' ', '_')}.html"  # Define the output file name
-                            net = plot.create_and_save_pyvis_network(G, output_file)  # Get the Network object
-                            num_nodes = len(net.nodes)
-                            num_edges = len(net.edges)
+                # Generate plots for the subsection
+                imports_subsection = self._generate_plots(subsection, imports_written, section_content)
 
-                            # Write code to display the network in the Streamlit app
-                            section_content.append(f"""
+                imports.extend(imports_subsection) 
+
+            # Write everything to the file
+            with open(section_file_path, 'w') as section_file:
+                # Write imports at the top of the file
+                section_file.write("\n".join(imports) + "\n\n")
+
+                # Write the section content (descriptions, plots)
+                section_file.write("\n".join(section_content))
+
+    def _generate_plots(self, subsection, imports_written, section_content):
+        """
+        Generate code to render plots in the given subsection, generating imports and content 
+        for the section based on the plot type and visualization tool.
+
+        Parameters
+        ----------
+        subsection : Subsection
+            The subsection containing the plots.
+        imports_written : set
+            A set of already written imports.
+        section_content : list
+            A list to which the generated content will be appended.
+
+        Returns
+        -------
+        list
+            A list of imports for the subsection.
+        """
+        imports = []
+        for plot in subsection.plots:
+            # Write imports if not already done
+            imports_viz = plot.generate_imports()
+            if imports_viz and plot.visualization_tool not in imports_written:
+                imports.append(imports_viz)
+                imports_written.add(plot.visualization_tool)
+            
+            if plot.plot_type == PlotType.INTERACTIVE:
+                if plot.visualization_tool == VisualizationTool.PLOTLY:
+                    section_content.append(f"\nst.plotly_chart({plot.read_plot_fromjson()}, use_container_width=True)\n")
+                elif plot.visualization_tool == VisualizationTool.ALTAIR:
+                    section_content.append(f"\nst.vega_lite_chart(json.loads(alt.Chart.from_dict({plot.read_plot_fromjson()}).to_json()), use_container_width=True)\n")
+                elif plot.visualization_tool == VisualizationTool.PYVIS:
+                    G = plot.read_network()
+                    output_file = f"example_data/{plot.name.replace(' ', '_')}.html"  # Define the output file name
+                    net = plot.create_and_save_pyvis_network(G, output_file)  # Get the Network object
+                    num_nodes = len(net.nodes)
+                    num_edges = len(net.edges)
+
+                    # Write code to display the network in the Streamlit app
+                    section_content.append(f"""
 with open('{output_file}', 'r') as f:
     html_data = f.read()
 
@@ -537,16 +591,10 @@ net_html_height = 1200 if control_layout else 630
 # Load HTML into HTML component for display on Streamlit
 st.components.v1.html(html_data, height=net_html_height)""")
 
-                    elif plot.plot_type == PlotType.STATIC:
-                        section_content.append(f"\nst.image('{plot.file_path}', caption='{plot.caption}', use_column_width=True)\n")
-
-            # Write everything to the file
-            with open(section_file_path, 'w') as section_file:
-                # Write imports at the top of the file
-                section_file.write("\n".join(imports) + "\n\n")
-
-                # Write the section content (descriptions, plots)
-                section_file.write("\n".join(section_content))
+            elif plot.plot_type == PlotType.STATIC:
+                section_content.append(f"\nst.image('{plot.file_path}', caption='{plot.caption}', use_column_width=True)\n")
+        
+        return imports
 
 
 
