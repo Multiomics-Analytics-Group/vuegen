@@ -43,6 +43,8 @@ class YAMLMetadataManager(MetadataManager):
             name=metadata['report']['name'],
             title=metadata['report'].get('title'),
             description=metadata['report'].get('description'),
+            graphical_abstract=metadata['report'].get('graphical_abstract'),
+            logo=metadata['report'].get('logo'),
             sections=[]
         )
 

@@ -259,6 +259,10 @@ class Report:
         The title of the report (default is None).
     description : str, optional
         A description of the report (default is None).
+    graphical_abstract : str, optional
+        The file path to the graphical abstract image (default is None).
+    logo : str, optional
+        The file path to the logo image (default is None).
     sections : List[Section]
         A list of sections that belong to the report.
     """
@@ -266,8 +270,9 @@ class Report:
     name: str
     title: Optional[str] = None
     description: Optional[str] = None
+    graphical_abstract: Optional[str] = None
+    logo: Optional[str] = None
     sections: List['Section'] = field(default_factory=list)
-
 
 @dataclass
 class ReportView(ABC):
@@ -294,14 +299,14 @@ class ReportView(ABC):
     interface_type: Optional[str] = None
 
     @abstractmethod
-    def generate_report(self, output_dir: str = 'tmp') -> None:
+    def generate_report(self, output_dir: str = 'sections') -> None:
         """
         Generates the report and creates output files.
         
         Parameters
         ----------
         output_dir : str, optional
-            The directory where the generated report files will be saved (default is 'tmp').
+            The folder where the generated report files will be saved (default is 'sections').
         """
         pass
 
@@ -339,12 +344,12 @@ class WebAppReportView(ReportView):
 
     Methods
     -------
-    run_report(output_dir='tmp')
+    run_report(output_dir='sections')
         Runs the generated web app report.
-    _generate_sections(output_dir='tmp')
+    _generate_sections(output_dir='sections')
         Generates and organizes plots for each subsection and section in the report.
-    _generate_plots(subsection: Subsection, imports_written: set, section_content: list)
-        Generates plot content for the given subsection.
+    _generate_plots(subsection: Subsection, imports_written: set, content: list)
+        Generates plots and content (imports and text) for the given subsection.
     """
 
     report_framework: str
@@ -354,14 +359,14 @@ class WebAppReportView(ReportView):
         self.report_framework = report_framework
 
     @abstractmethod
-    def run_report(self, output_dir: str = 'tmp') -> None:
+    def run_report(self, output_dir: str = 'sections') -> None:
         """
         Runs the generated report.
 
         Parameters
         ----------
         output_dir : str, optional
-            The directory where the report was generated (default is 'tmp').
+            The folder where the report was generated (default is 'sections').
         """
         pass
 
@@ -373,7 +378,7 @@ class WebAppReportView(ReportView):
         Parameters
         ----------
         output_dir : str
-            The directory where section files will be saved.
+            The folder where section files will be saved.
 
         Notes
         -----
@@ -382,7 +387,7 @@ class WebAppReportView(ReportView):
         pass
 
     @abstractmethod
-    def _generate_plots(self, subsection: Subsection, imports_written: set, section_content: list) -> List[str]:
+    def _generate_plots(self, subsection: Subsection, imports_written: set, content: list) -> List[str]:
         """
         Generates plot content for the given subsection.
         
@@ -392,7 +397,7 @@ class WebAppReportView(ReportView):
             The subsection containing the plots.
         imports_written : set
             A set of already written imports.
-        section_content : list
+        content : list
             A list to which the generated content will be appended.
 
         Returns
@@ -408,57 +413,83 @@ class StreamlitReportView(WebAppReportView):
 
     Methods
     -------
-    generate_report(output_dir='tmp')
-        Generates the Streamlit report and saves the report files to the specified directory.
-    run_report(output_dir='tmp')
+    generate_report(output_dir='sections')
+        Generates the Streamlit report and saves the report files to the specified folder.
+    run_report(output_dir='sections')
         Runs the generated Streamlit report.
-    _build_plots(output_dir='tmp')
+    _build_plots(output_dir='sections')
         Generates Python files for each section in the report, containing the plots.
     """
 
     def __init__(self, identifier: int, name: str, columns: Optional[List[str]], report: Report):
         super().__init__(identifier, name=name, columns=columns, report_framework='Streamlit', report=report)
 
-    def generate_report(self, output_dir: str = 'tmp') -> None:
+    def generate_report(self, output_dir: str = 'sections') -> None:
         """
         Generates the Streamlit report and creates Python files for each section and its subsections and plots.
 
         Parameters
         ----------
         output_dir : str, optional
-            The directory where the generated report files will be saved (default is 'tmp').
+            The folder where the generated report files will be saved (default is 'sections').
         """
-        # Create the output directory if it does not exist
+        # Create the output folder if it does not exist
         if not os.path.exists(output_dir):
             os.mkdir(output_dir)
-        if not os.path.exists(os.path.join(output_dir, 'pages')):
-            os.mkdir(os.path.join(output_dir, 'pages'))
 
-        # Define the Streamlit imports and home page content
+        # Define the Streamlit imports and report manager content
         streamlit_imports = f'''import streamlit as st
-st.set_page_config(layout="wide", page_title="{self.report.name}")
+st.set_page_config(layout="wide", page_title="{self.report.name}", page_icon="{self.report.logo}")
+st.logo("{self.report.logo}")
 '''
-        home_msg = self._format_text(text=self.report.title, type = 'header', level=1, color='#023858')
-        desc_msg = self._format_text(text=self.report.description, type = 'paragraph', color='#023858')
+        general_head = self._format_text(text=self.report.title, type = 'header', level=1, color='#023858')
+        report_manag_content = [streamlit_imports, general_head]
+
+        # Initialize a dictionary to store the navigation structure
+        report_manag_content.append("\nsections_pages = {}")
+
+        # Generate the home page and update the report manager content
+        self._generate_home_section(output_dir=output_dir, report_manag_content=report_manag_content)
+
+        for section in self.report.sections:
+            # Create a folder for each section
+            subsection_page_vars = []
+            section_name_var = section.name.replace(" ", "_")
+            if not os.path.exists(os.path.join(output_dir, section_name_var)):
+                os.mkdir(os.path.join(output_dir, section_name_var))
+            
+            for subsection in section.subsections:
+                subsection_name_var = subsection.name.replace(" ", "_")
+                subsection_file_path = os.path.join(section_name_var, section_name_var + "_" + subsection_name_var + ".py")
+
+                # Create a Page object for each subsection and add it to the home page content
+                report_manag_content.append(f"{subsection_name_var} = st.Page('{subsection_file_path}', title='{subsection.name}')")
+                subsection_page_vars.append(subsection_name_var)
+            
+            # Add all subsection Page objects to the corresponding section
+            report_manag_content.append(f"sections_pages['{section.name}'] = [{', '.join(subsection_page_vars)}]\n")
+
+        # Add navigation object to the home page content
+        report_manag_content.append(f'''report_nav = st.navigation(sections_pages)
+report_nav.run()''')
         
-        # Write the home page content to a Python file
-        with open(os.path.join(output_dir, self.name.replace(" ", "_") + ".py"), 'w') as homepage:
-            homepage.write("\n".join([streamlit_imports, home_msg, desc_msg]))
+        # Write the navigation and general content to a Python file
+        with open(os.path.join(output_dir, "report_manager.py"), 'w') as nav_manager:
+            nav_manager.write("\n".join(report_manag_content))
 
         # Create Python files for each section and its subsections and plots
-        pages_dir = os.path.join(output_dir, 'pages')
-        self._generate_sections(output_dir=pages_dir)
+        self._generate_sections(output_dir=output_dir)
 
-    def run_report(self, output_dir: str = 'tmp') -> None:
+    def run_report(self, output_dir: str = 'sections') -> None:
         """
         Runs the generated Streamlit report.
 
         Parameters
         ----------
         output_dir : str, optional
-            The directory where the report was generated (default is 'tmp').
+            The folder where the report was generated (default is 'sections').
         """
-        sys.argv = ["streamlit", "run", os.path.join(output_dir, self.name.replace(" ", "_") + ".py")]
+        sys.argv = ["streamlit", "run", os.path.join(output_dir, "report_manager.py")]
         sys.exit(stcli.main())
 
     def _format_text(self, text: str, type: str, level: int = 1, color: str = '#020058') -> str:
@@ -488,6 +519,37 @@ st.set_page_config(layout="wide", page_title="{self.report.name}")
 
         return f"""st.markdown("<{tag} style='text-align: center; color: {color};'>{text}</{tag}>", unsafe_allow_html=True)"""
 
+    def _generate_home_section(self, output_dir: str, report_manag_content: list) -> None:
+        """
+        Generates the homepage for the report and updates the report manager content.
+
+        Parameters
+        ----------
+        output_dir : str
+            The folder where the homepage files will be saved.
+        report_manag_content : list
+            A list to store the content that will be written to the report manager file.
+        """
+        # Create folder for the home page
+        if not os.path.exists(os.path.join(output_dir, "Home")):
+            os.mkdir(os.path.join(output_dir, "Home"))
+
+        # Create the home page content
+        home_content = []
+        home_content.append(f"import streamlit as st")
+        home_desc = self._format_text(text=self.report.description, type='paragraph', color='#020058')
+        home_content.append(home_desc)
+        if self.report.graphical_abstract:
+            home_content.append(f"\nst.image('{self.report.graphical_abstract}', use_column_width=True)")
+
+        # Write the home page content to a Python file
+        with open(os.path.join(output_dir, "Home", "homepage.py"), 'w') as home_page:
+            home_page.write("\n".join(home_content))
+
+        # Add the home page to the report manager content
+        report_manag_content.append(f"homepage = st.Page('home/homepage.py', title='Homepage')")
+        report_manag_content.append(f"sections_pages['Home'] = [homepage]\n")
+
     def _generate_sections(self, output_dir: str) -> None:
         """
         Generates Python files for each section in the report, including subsections and plots.
@@ -495,49 +557,44 @@ st.set_page_config(layout="wide", page_title="{self.report.name}")
         Parameters
         ----------
         output_dir : str
-            The directory where section files will be saved.
+            The folder where section files will be saved.
         """
         for section in self.report.sections:
-            # Create the section file
-            section_file_path = os.path.join(output_dir, section.name.replace(" ", "_") + ".py")
-            
-            # Track imports to avoid duplication
-            imports_written = set() 
-            
-            # Collect section header and description
-            section_header = self._format_text(text=section.name, type='header', level=2, color='#020058')
-            section_desc = self._format_text(text=section.description, type='paragraph', color='#020058')
-        
-            # Collect imports and section content
-            imports = ['import streamlit as st']
-            section_content = [section_header, section_desc]
+            section_name_var = section.name.replace(" ", "_")
 
-            # Iterate through subsections and integrate them into the section file
-            for subsection in section.subsections:
-                # Add subsection header and description
-                subsection_header = self._format_text(text=subsection.name, type='header', level=3, color='#023558')
-                subsection_desc = self._format_text(text=subsection.description, type='paragraph', color='#023558')
-                
-                # Collect subsection content
-                subsection_content = [subsection_header, subsection_desc]
+            if section.subsections:
+                # Iterate through subsections and integrate them into the section file
+                for subsection in section.subsections:
+                    # Track imports to avoid duplication
+                    imports_written_subsection = set()
 
-                # Add subsection content to the section content
-                section_content.extend(subsection_content)
-                
-                # Generate plots for the subsection
-                imports_subsection = self._generate_plots(subsection, imports_written, section_content)
+                    # Collect imports and section content
+                    imports = ['import streamlit as st']
 
-                imports.extend(imports_subsection) 
+                    # Create subsection file
+                    subsection_file_path = os.path.join(output_dir, section_name_var, section_name_var + "_" + subsection.name.replace(" ", "_") + ".py")
+                    
+                    # Add subsection header and description
+                    subsection_header = self._format_text(text=subsection.name, type='header', level=3, color='#023558')
+                    subsection_desc = self._format_text(text=subsection.description, type='paragraph', color='#023558')
+                    
+                    # Collect subsection content
+                    subsection_content = [subsection_header, subsection_desc]
+                    
+                    # Generate plots for the subsection
+                    imports_subsection = self._generate_plots(subsection, imports_written_subsection, subsection_content)
 
-            # Write everything to the file
-            with open(section_file_path, 'w') as section_file:
-                # Write imports at the top of the file
-                section_file.write("\n".join(imports) + "\n\n")
+                    imports.extend(imports_subsection) 
 
-                # Write the section content (descriptions, plots)
-                section_file.write("\n".join(section_content))
+                    # Write everything to the subsection file
+                    with open(subsection_file_path, 'w') as subsection_file:
+                        # Write imports at the top of the file
+                        subsection_file.write("\n".join(imports) + "\n\n")
 
-    def _generate_plots(self, subsection, imports_written, section_content):
+                        # Write the subsection content (descriptions, plots)
+                        subsection_file.write("\n".join(subsection_content))
+
+    def _generate_plots(self, subsection, imports_written, content):
         """
         Generate code to render plots in the given subsection, generating imports and content 
         for the section based on the plot type and visualization tool.
@@ -548,7 +605,7 @@ st.set_page_config(layout="wide", page_title="{self.report.name}")
             The subsection containing the plots.
         imports_written : set
             A set of already written imports.
-        section_content : list
+        content : list
             A list to which the generated content will be appended.
 
         Returns
@@ -566,9 +623,9 @@ st.set_page_config(layout="wide", page_title="{self.report.name}")
             
             if plot.plot_type == PlotType.INTERACTIVE:
                 if plot.visualization_tool == VisualizationTool.PLOTLY:
-                    section_content.append(f"\nst.plotly_chart({plot.read_plot_fromjson()}, use_container_width=True)\n")
+                    content.append(f"\nst.plotly_chart({plot.read_plot_fromjson()}, use_container_width=True)\n")
                 elif plot.visualization_tool == VisualizationTool.ALTAIR:
-                    section_content.append(f"\nst.vega_lite_chart(json.loads(alt.Chart.from_dict({plot.read_plot_fromjson()}).to_json()), use_container_width=True)\n")
+                    content.append(f"\nst.vega_lite_chart(json.loads(alt.Chart.from_dict({plot.read_plot_fromjson()}).to_json()), use_container_width=True)\n")
                 elif plot.visualization_tool == VisualizationTool.PYVIS:
                     G = plot.read_network()
                     output_file = f"example_data/{plot.name.replace(' ', '_')}.html"  # Define the output file name
@@ -577,7 +634,7 @@ st.set_page_config(layout="wide", page_title="{self.report.name}")
                     num_edges = len(net.edges)
 
                     # Write code to display the network in the Streamlit app
-                    section_content.append(f"""
+                    content.append(f"""
 with open('{output_file}', 'r') as f:
     html_data = f.read()
 
@@ -592,7 +649,7 @@ net_html_height = 1200 if control_layout else 630
 st.components.v1.html(html_data, height=net_html_height)""")
 
             elif plot.plot_type == PlotType.STATIC:
-                section_content.append(f"\nst.image('{plot.file_path}', caption='{plot.caption}', use_column_width=True)\n")
+                content.append(f"\nst.image('{plot.file_path}', caption='{plot.caption}', use_column_width=True)\n")
         
         return imports
 

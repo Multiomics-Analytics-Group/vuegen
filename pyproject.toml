@@ -8,7 +8,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = ">=3.9,<3.9.7 || >3.9.7,<4.0"
-streamlit = "1.23.1"
+streamlit = "1.39.0"
 holoviews = "1.16.2"
 plotly = "5.15.0"
 watchdog = "3.0.0"

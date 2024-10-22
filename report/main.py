@@ -8,5 +8,5 @@ if __name__ == '__main__':
 
     # Create report view
     report_view = r.StreamlitReportView(12312, "Multi-omics project report", report=report, columns=None)
-    report_view.generate_report(output_dir="tmp")
-    report_view.run_report(output_dir='tmp')
+    report_view.generate_report(output_dir="sections")
+    report_view.run_report(output_dir='sections')

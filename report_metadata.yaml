@@ -2,7 +2,9 @@ report:
   identifier: 1213412
   name: "Multi omics study of ZIKV infection"
   title: "Multi omics study of ZIKV infection"
-  description: "A description of the porjetc ................................."
+  description: "A description of the project ................................."
+  graphical_abstract: "example_data/zikv_capside.png"
+  logo: "example_data/mona_logo.png"
 
 sections:
   - identifier: 21324

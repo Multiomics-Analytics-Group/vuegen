@@ -160,7 +160,7 @@ cython_debug/
 #.idea/
 
 # Temporary files
-tmp/
+sections/
 
 # VS Code
 .DS_Store
