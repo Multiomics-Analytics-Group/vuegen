@@ -1,0 +1,15 @@
+"v1","v2","asso","diss","adja"
+"Bifidobacterium_adolescentis","Bifidobacterium_longum",0.723574219993015,0.37176994230773,0.62823005769227
+"Bifidobacterium_adolescentis","Collinsella_aerofaciens",0.713019963513302,0.378800763256027,0.621199236743973
+"Bifidobacterium_adolescentis","Eubacterium_biforme",0.706308055301874,0.383204869944346,0.616795130055654
+"Bifidobacterium_longum","Collinsella_aerofaciens",0.711998337178362,0.379474414698565,0.620525585301435
+"Bifidobacterium_longum","Eubacterium_biforme",0.706589645031715,0.383021118848743,0.616978881151258
+"Collinsella_aerofaciens","Eubacterium_biforme",0.720146004306612,0.374068172726167,0.625931827273833
+"Paracoccus_marcusii","Acinetobacter_johnsonii",0.702221865152149,0.385861461439109,0.614138538560891
+"Paracoccus_marcusii","Acinetobacter_rhizosphaerae",0.701061217428632,0.386612714852582,0.613387285147418
+"Acinetobacter_guillouiae","Acinetobacter_johnsonii",0.716785366392458,0.37630747641227,0.62369252358773
+"Acinetobacter_guillouiae","Acinetobacter_lwoffii",0.713160334593152,0.378708110163255,0.621291889836745
+"Acinetobacter_guillouiae","Acinetobacter_rhizosphaerae",0.732387004798615,0.365795704732426,0.634204295267574
+"Acinetobacter_johnsonii","Acinetobacter_lwoffii",0.745831149154566,0.356489025669398,0.643510974330602
+"Acinetobacter_johnsonii","Acinetobacter_rhizosphaerae",0.731715412478696,0.366254411250775,0.633745588749225
+"Acinetobacter_lwoffii","Acinetobacter_rhizosphaerae",0.725709033152322,0.370331585776637,0.629668414223363
