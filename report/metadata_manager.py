@@ -1,5 +1,5 @@
 import yaml
-from report import Report, Section, Subsection, Plot, PlotType, VisualizationTool
+from report import Report, Section, Subsection, Plot, PlotType, VisualizationTool, CSVNetworkFormat, DataFrame, DataFrameFormat, Markdown, ComponentType
 from abc import ABC, abstractmethod
 
 class MetadataManager(ABC):
@@ -65,32 +65,62 @@ class YAMLMetadataManager(MetadataManager):
                     name=subsection_data['name'],
                     title=subsection_data.get('title'),
                     description=subsection_data.get('description'),
-                    plots=[]
+                    components=[]
                 )
                 
-                # Create Plots
-                for plot_data in subsection_data['plots']:
-                    plot_file_path = plot_data['file_path']
+                # Create Components
+                for component_data in subsection_data['components']:
+                    component_type = ComponentType[component_data['component_type'].upper()]
+                    file_path = component_data['file_path']
+                    identifier = component_data['identifier']
+                    name = component_data['name']
+                    title = component_data.get('title')
+                    caption = component_data.get('caption')
 
-                    # Convert plot_type from string to PlotType Enum
-                    plot_type = PlotType[plot_data['plot_type'].upper()]
-
-                    # Convert visualization_tool from string to VisualizationTool Enum, if provided
-                    visualization_tool = (VisualizationTool[plot_data['visualization_tool'].upper()]
-                                          if plot_data.get('visualization_tool') else None)
-                    
-                    # Create Plot object
-                    plot = Plot(
-                        identifier=plot_data['identifier'],
-                        name=plot_data['name'],
-                        plot_type=plot_type,
-                        file_path=plot_file_path,
-                        visualization_tool=visualization_tool,
-                        title=plot_data.get('title'),
-                        caption=plot_data.get('caption'),
-                        csv_network_format=plot_data.get('csv_network_format')
+                    if component_type == ComponentType.PLOT:
+                        plot_type = PlotType[component_data['plot_type'].upper()]
+                        visualization_tool = (VisualizationTool[component_data['visualization_tool'].upper()]
+                                              if component_data.get('visualization_tool') else None)
+                        csv_network_format = (CSVNetworkFormat[component_data['csv_network_format'].upper()]
+                                              if component_data.get('csv_network_format') else None)
+                        
+                        component = Plot(
+                            identifier=identifier,
+                            name=name,
+                            file_path=file_path,
+                            plot_type=plot_type,
+                            visualization_tool=visualization_tool,
+                            title=title,
+                            caption=caption,
+                            csv_network_format=csv_network_format
                         )
-                    subsection.plots.append(plot)
+
+                    elif component_type == ComponentType.DATAFRAME:
+                        file_format = DataFrameFormat[component_data['file_format'].upper()]
+                        delimiter = component_data.get('delimiter')
+                        
+                        component = DataFrame(
+                            identifier=identifier,
+                            name=name,
+                            file_path=file_path,
+                            file_format=file_format,
+                            delimiter=delimiter,
+                            title=title,
+                            caption=caption
+                        )
+
+                    elif component_type == ComponentType.MARKDOWN:
+                        # Initialize Markdown component (assuming its constructor is similar)
+                        component = Markdown(
+                            identifier=identifier,
+                            name=name,
+                            file_path=file_path,
+                            component_type=component_type,
+                            title=title,
+                            caption=caption
+                        )
+
+                    subsection.components.append(component)
                 
                 section.subsections.append(subsection)
             

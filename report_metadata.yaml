@@ -16,15 +16,17 @@ sections:
         name: "Exploratory data analysis"
         title: "Exploratory data analysis"
         description: "This is the exploratory data analysis"
-        plots:
+        components:
           - identifier: 3324
             name: "plot1"
+            component_type: "plot"
             plot_type: "static"
             file_path: "example_data/zikv_capside.png"
             title: "ZIKV Capside from an image"
             caption: ""
           - identifier: 3323
             name: "plot2"
+            component_type: "plot"
             plot_type: "interactive"
             file_path: "example_data/plotly_barplot.json"
             visualization_tool: "plotly"
@@ -34,26 +36,42 @@ sections:
         name: "Methods"
         title: "Methods"
         description: "This is the methods section"
-        plots:
+        components:
           - identifier: 3423
             name: "plot2"
+            component_type: "plot"
             plot_type: "interactive"
             file_path: "example_data/plotly_lineplot.json"
             visualization_tool: "plotly"
             title: "A line plot example using plotly"
             caption: ""
+          - identifier: 3358
+            name: "md1"
+            component_type: "markdown"
+            file_path: "example_data/test_md.md"
+            title: "Markdown example"
+            caption: "This is a markdown example"
       - identifier: 5003
         name: "Results"
         title: "Results"
         description: "This is the results section"
-        plots:
+        components:
           - identifier: 2247
             name: "Network Visualization"
+            component_type: "plot"
             plot_type: "interactive"
             visualization_tool: "pyvis"
             file_path: "example_data/test.graphml"
             title: "Network Visualization"
             caption: "This shows a network visualization of the data"
+          - identifier: 3358
+            name: "dataframe1"
+            component_type: "dataframe"
+            file_path: "example_data/edgelist_test.csv"
+            file_format: "csv"
+            delimiter: ","
+            title: "Edge list"
+            caption: "This is the edge list of the network"
   - identifier: 24324
     name: "Transcriptomics"
     title: "Transcriptomics Example"
@@ -63,9 +81,10 @@ sections:
         name: "Exploratory data analysis"
         title: "Exploratory data analysis"
         description: "This is the exploratory data analysis"
-        plots:
+        components:
           - identifier: 3323
             name: "altair_plot1"
+            component_type: "plot"
             plot_type: "interactive"
             file_path: "example_data/altair_multilineplot.json"
             visualization_tool: "altair"
@@ -73,6 +92,7 @@ sections:
             caption: ""
           - identifier: 3423
             name: "plot2"
+            component_type: "plot"
             plot_type: "interactive"
             file_path: "example_data/plotly_lineplot.json"
             visualization_tool: "plotly"
@@ -80,6 +100,7 @@ sections:
             caption: ""
           - identifier: 3358
             name: "altair_plot2"
+            component_type: "plot"
             plot_type: "interactive"
             file_path: "example_data/altair_multilineplot.json"
             visualization_tool: "altair"

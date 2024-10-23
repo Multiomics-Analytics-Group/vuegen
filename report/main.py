@@ -4,7 +4,7 @@ from metadata_manager import YAMLMetadataManager
 if __name__ == '__main__':
     # Load report metadata from YAML file
     yaml_manager = YAMLMetadataManager()
-    report = yaml_manager.load_report_metadata('./report_metadata.yaml')
+    report = yaml_manager.load_report_metadata('./report_metadata_micw2graph.yaml')
 
     # Create report view
     report_view = r.StreamlitReportView(12312, "Multi-omics project report", report=report, columns=None)

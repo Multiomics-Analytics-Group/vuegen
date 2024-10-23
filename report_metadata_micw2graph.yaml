@@ -1,0 +1,126 @@
+report:
+  identifier: 1213412
+  name: "MicW2Graph"
+  title: "MicW2Graph"
+  description: >
+    Wastewater treatment (WWT) is the process of removing contaminants from used water before it is discharged back 
+    into the environment, which contributes to address water scarcity and to protect aquatic ecosystems. In this project, 
+    we investigated the microbiome of WWT to build MicW2Graph, an open-source knowledge graph (KG) that integrates metagenomic and 
+    metatranscriptomic information with their biological context, including biological processes, environmental and phenotypic 
+    features, chemical compounds, and additional metadata. We developed a workflow to collect meta-omics datasets from MGnify and 
+    infer potential interactions among microorganisms through microbial association networks (MANs). MicW2Graph enables the 
+    investigation of research questions related to WWT, focusing on aspects such as microbial connections, community memberships, 
+    and potential ecological functions.
+  graphical_abstract: "example_data/MicW2Graph/Methods_MicW2Graph.svg"
+  logo: "example_data/mona_logo.png"
+sections:
+  - identifier: 21324
+    name: "Exploratory Data analysis"
+    title: "Exploratory Data analysis"
+    description: ""
+    subsections:
+      - identifier: 5001
+        name: "Abundance data"
+        title: "Abundance data"
+        description: ""
+        components:
+          - identifier: 3423
+            name: "plot1"
+            component_type: "plot"
+            plot_type: "interactive"
+            file_path: "example_data/MicW2Graph/top_species_plot_biome.json"
+            visualization_tool: "plotly"
+            title: "Top 5 species by biome"
+            caption: ""
+          - identifier: 3358
+            name: "df1"
+            component_type: "dataframe"
+            file_path: "example_data/MicW2Graph/abundance_data_allbiomes.csv"
+            file_format: "csv"
+            delimiter: ","
+            title: "Abundance data for all studies (csv)"
+            caption: ""
+      - identifier: 5002
+        name: "Sample data"
+        title: "Sample data"
+        description: ""
+        components:
+          - identifier: 3324
+            name: "plot2"
+            component_type: "plot"
+            plot_type: "static"
+            file_path: "example_data/MicW2Graph/number_samples_per_study.png"
+            title: "Number of samples per study"
+            caption: ""
+          - identifier: 3323
+            name: "plot3"
+            component_type: "plot"
+            plot_type: "interactive"
+            file_path: "example_data/MicW2Graph/pie_plot_countries.json"
+            visualization_tool: "plotly"
+            title: "Sampling countries for all studies"
+            caption: ""
+          - identifier: 24324
+            name: "df2"
+            component_type: "dataframe"
+            file_path: "example_data/MicW2Graph/sample_info_allbiomes.txt"
+            file_format: "txt"
+            title: "Sample data for all studies (txt)"
+            caption: ""
+          - identifier: 24324
+            name: "df3"
+            component_type: "dataframe"
+            file_path: "example_data/MicW2Graph/sample_info_allbiomes.parquet"
+            file_format: "parquet"
+            title: "Sample data for all studies (parquet)"
+            caption: ""
+      - identifier: 5003
+        name: "Extra information"
+        title: "Extra information"
+        description: ""
+        components:
+          - identifier: 3358
+            name: "md1"
+            component_type: "markdown"
+            file_path: "example_data/test_md.md"
+            title: "Markdown example"
+            caption: "This is a markdown example"
+  - identifier: 24324
+    name: "Microbial Association Networks"
+    title: "Microbial Association Networks"
+    description: ""
+    subsections:
+      - identifier: 5003
+        name: "Network Visualization"
+        title: "Network Visualization"
+        description: ""
+        components:
+          - identifier: 2247
+            name: "network1"
+            component_type: "plot"
+            plot_type: "interactive"
+            visualization_tool: "pyvis"
+            file_path: "example_data/MicW2Graph/man_example.graphml"
+            title: "Network1"
+            caption: ""
+          - identifier: 3358
+            name: "altair_plot2"
+            component_type: "plot"
+            plot_type: "interactive"
+            file_path: "example_data/altair_multilineplot.json"
+            visualization_tool: "altair"
+            title: "Multiline plot (altair)"
+            caption: ""
+      - identifier: 5004
+        name: "Edge list"
+        title: "Edge list"
+        description: ""
+        components:
+          - identifier: 3358
+            name: "dataframe4"
+            component_type: "dataframe"
+            file_path: "example_data/MicW2Graph/man_example.csv"
+            file_format: "csv"
+            delimiter: ","
+            title: "Edge list (csv)"
+            caption: "This is the edge list of the network"

@@ -9,6 +9,12 @@ import altair as alt
 from streamlit.web import cli as stcli
 import networkx as nx
 from pyvis.network import Network
+import pandas as pd
+
+class ComponentType(Enum):
+    PLOT = 'plot'
+    DATAFRAME = 'dataframe'
+    MARKDOWN = 'markdown'
 
 class PlotType(Enum):
     INTERACTIVE = 'interactive'
@@ -23,41 +29,86 @@ class CSVNetworkFormat(Enum):
     EDGELIST = 'edgelist'
     ADJLIST = 'adjlist'
 
+class DataFrameFormat(Enum):
+    CSV = 'csv'
+    TXT = 'txt'
+    PARQUET = 'parquet'
+
 @dataclass
-class Plot:
+class Component(ABC):
+    """
+    Abstract base class for different components in a report subsection.
+
+    Attributes
+    ----------
+    identifier : int
+        A unique identifier for the component.
+    name : str
+        The name of the component.
+    file_path : str
+        The file path for the component (e.g., plot JSON file, image file, csv file, etc.).
+    component_type : ComponentType
+        The type of the component (PLOT, DATAFRAME, MARKDOWN).
+    title : Optional[str]
+        The title of the component (default is None). 
+    caption : Optional[str]
+        A caption for the component (default is None).
+    """
+    identifier: int
+    name: str
+    file_path: str 
+    component_type: ComponentType
+    title: Optional[str] = None
+    caption: Optional[str] = None
+
+    @abstractmethod
+    def load_from_file(self):
+        """
+        Read and parse a component from a file.
+        """
+        pass
+    
+    @abstractmethod
+    def generate_imports(self) -> str:
+        """
+        Generate the import statements required for the component.
+
+        Returns
+        -------
+        str
+            A string representing the import statements needed for the component.
+        """
+        pass
+
+class Plot(Component):
     """
     A plot within a subsection of a report.
 
     Attributes
     ----------
-    identifier : int
-        A unique identifier for the plot.
-    name : str
-        The name of the plot.
     plot_type : PlotType
         The type of the plot (INTERACTIVE or STATIC).
-    file_path : str
-        The file path for the JSON representation of the plot (for interactive plots) or the image file path (for static plots).
     visualization_tool : VisualizationTool, optional
-        The visualization_tool for rendering interactive plots (PLOTLY, ALTAIR, or PYVIS) (default is None).
+        The tool for rendering interactive plots (PLOTLY, ALTAIR, or PYVIS) (default is None).
         It is not required for STATIC plots (default is None).
-    title : str, optional
-        The title of the plot (default is None).
-    caption : str, optional
-        A caption for the plot (default is None).
     csv_network_format : CSVNetworkFormat, optional
-        The format of the CSV file for network plots (EDGELIST OR ADJLIST) (default is None).
+        The format of the CSV file for network plots (EDGELIST or ADJLIST) (default is None).
     """
-    identifier: int
-    name: str
-    plot_type: str
-    file_path: str
-    visualization_tool: Optional[VisualizationTool] = None
-    title: Optional[str] = None
-    caption: Optional[str] = None
-    csv_network_format: Optional[CSVNetworkFormat] = None
+    def __init__(self, identifier: int, name: str, file_path: str, plot_type: PlotType, 
+                visualization_tool: Optional[VisualizationTool]=None, title: str=None, 
+                caption: str=None, csv_network_format: Optional[CSVNetworkFormat]=None):
+        """
+        Initializes a Plot object.
+        """
+        # Call the constructor of the parent class (Component) to set common attributes
+        super().__init__(identifier, name, file_path, component_type = ComponentType.PLOT, title=title, caption=caption)
 
-    def read_plot_fromjson(self) -> str:
+        # Set specific attributes for the Plot class
+        self.plot_type = plot_type
+        self.visualization_tool = visualization_tool
+        self.csv_network_format = csv_network_format
+
+    def load_from_file(self) -> str:
         """
         Reads and parses the JSON representation of the plot. 
 
@@ -76,6 +127,21 @@ class Plot:
             return str(plot_dict)
         return ""
 
+    def generate_imports(self) -> str:
+        """
+        Generate the import statements required for the visualization tool.
+
+        Returns
+        -------
+        str
+            A string representing the import statements needed for the plot.
+        """
+        imports = []
+        if self.visualization_tool == VisualizationTool.ALTAIR:
+            imports.append('import altair as alt')
+            imports.append('import json')
+        return "\n".join(imports)
+    
     def read_network(self) -> nx.Graph:
         """
         Reads the network file and returns a NetworkX graph object.
@@ -181,25 +247,90 @@ class Plot:
 
         return net
     
+class DataFrame(Component):
+    """
+    A DataFrame within a subsection of a report.
+
+    Attributes
+    ----------
+    file_format : DataFrameFormat
+        The format of the file from which the DataFrame is loaded (e.g., CSV, TXT, PARQUET).
+    delimiter : Optional[str]
+        The delimiter to use if the file is a delimited text format (e.g., ';', '\t', etc).
+    """
+    def __init__(self, identifier: int, name: str, file_path: str, file_format: DataFrameFormat, 
+                 delimiter: Optional[str]=None, title: str=None, caption: str=None):
+        """
+        Initializes a DataFrame object.
+        """
+        super().__init__(identifier, name, file_path, component_type=ComponentType.DATAFRAME, title=title, caption=caption)
+        self.file_format = file_format
+        self.delimiter = delimiter
+
+    def load_from_file(self) -> pd.DataFrame:
+        """
+        Load and parse the DataFrame from a file based on its format.
+        
+        Returns
+        -------
+        pd.DataFrame
+            The loaded DataFrame object.
+        """
+        if self.file_format == DataFrameFormat.CSV:
+            return pd.read_csv(self.file_path, delimiter=self.delimiter) if self.delimiter else pd.read_csv(self.file_path)
+        elif self.file_format == DataFrameFormat.TXT:
+            return pd.read_csv(self.file_path, delimiter=self.delimiter) if self.delimiter else pd.read_csv(self.file_path, sep='\t')
+        elif self.file_format == DataFrameFormat.PARQUET:
+            return pd.read_parquet(self.file_path)
+        else:
+            raise ValueError(f"Unsupported file format: {self.file_format}")
+
     def generate_imports(self) -> str:
         """
-        Generate the import statements required for the visualization tool.
-
+        Generate the import statements required for handling DataFrames.
+        
         Returns
         -------
         str
-            A string representing the import statements needed for the plot.
+            A string representing the import statements needed for the DataFrame.
         """
-        imports = []
-        if self.visualization_tool == VisualizationTool.ALTAIR:
-            imports.append('import altair as alt')
-            imports.append('import json')
-        return "\n".join(imports)
+        return "import pandas as pd"
+
+
+@dataclass
+class Markdown(Component):
+    component_type = ComponentType.MARKDOWN
+    """
+    A Markdown text component within a subsection of a report.
+    """
+    
+    def load_from_file(self) -> str:
+        """
+        Load and return the markdown content from the file.
+        
+        Returns
+        -------
+        str
+            A string containing the markdown content.
+        """
+        with open(self.file_path, 'r') as markdown_file:
+            return markdown_file.read()
+
+    def generate_imports(self) -> str:
+        """
+        Generate the import statements required for Markdown rendering.
+        
+        Returns
+        -------
+        str
+            A string representing the import statements needed for rendering Markdown.
+        """
+        return "import markdown"
     
 @dataclass
 class Subsection:
     """
-    A subsection within a section, containing multiple plots.
+    A subsection within a section, containing multiple components (plots, DataFrames, Markdown text, etc).
 
     Attributes
     ----------
@@ -211,14 +342,64 @@ class Subsection:
         The title of the subsection (default is None).
     description : str, optional
         A description of the subsection (default is None).
-    plots : List[Plot]
-        A list of plots within this subsection.
+    components : List[Component]
+        A list of components within this subsection.
     """
     identifier: int
     name: str
     title: Optional[str] = None
     description: Optional[str] = None
-    plots: List['Plot'] = field(default_factory=list)
+    components: List['Component'] = field(default_factory=list)
+
+    def add_component(self, component: Component) -> None:
+        """
+        Adds a component (Plot, DataFrame, Markdown) to the subsection.
+        
+        Parameters
+        ----------
+        component : Component
+            The component to add to the subsection.
+        """
+        self.components.append(component)
+
+    def get_component_by_id(self, identifier: int) -> Optional[Component]:
+        """
+        Retrieves a component by its unique identifier.
+
+        Parameters
+        ----------
+        identifier : int
+            The unique identifier of the component.
+
+        Returns
+        -------
+        Optional[Component]
+            The component with the given identifier, or None if not found.
+        """
+        for component in self.components:
+            if component.identifier == identifier:
+                return component
+        return None
+    
+    def remove_component_by_id(self, identifier: int) -> bool:
+        """
+        Removes a component by its unique identifier.
+        
+        Parameters
+        ----------
+        identifier : int
+            The unique identifier of the component to remove.
+            
+        Returns
+        -------
+        bool
+            True if the component was successfully removed, False otherwise.
+        """
+        for i, component in enumerate(self.components):
+            if component.identifier == identifier:
+                del self.components[i]
+                return True
+        return False
 
 @dataclass
 class Section:
@@ -344,16 +525,13 @@ class WebAppReportView(ReportView):
 
     Methods
     -------
-    run_report(output_dir='sections')
+    run_report(output_dir)
         Runs the generated web app report.
-    _generate_sections(output_dir='sections')
-        Generates and organizes plots for each subsection and section in the report.
-    _generate_plots(subsection: Subsection, imports_written: set, content: list)
-        Generates plots and content (imports and text) for the given subsection.
+    _generate_sections(output_dir)
+        Creates sections and subsections for the report.
+    _generate_subsection(subsection, imports_written, content)
+        Creates components (plots, dataframes, markdown, etc) for a given subsection. 
     """
-
-    report_framework: str
-
     def __init__(self, identifier: int, name: str, columns: Optional[List[str]], report_framework: str, report: Report):
         super().__init__(identifier, name=name, columns=columns, interface_type='WebAppReportView', report=report)
         self.report_framework = report_framework
@@ -373,7 +551,7 @@ class WebAppReportView(ReportView):
     @abstractmethod
     def _generate_sections(self, output_dir: str) -> None:
         """
-        Generates and organizes plots for each subsection and section in the report.
+        Creates sections and subsections for the report.
         
         Parameters
         ----------
@@ -387,9 +565,9 @@ class WebAppReportView(ReportView):
         pass
 
     @abstractmethod
-    def _generate_plots(self, subsection: Subsection, imports_written: set, content: list) -> List[str]:
+    def _generate_subsection(self, subsection: Subsection, imports_written: set, content: list) -> List[str]:
         """
-        Generates plot content for the given subsection.
+        Creates components (plots, dataframes, markdown, etc) for a given subsection. 
         
         Parameters
         ----------
@@ -413,12 +591,18 @@ class StreamlitReportView(WebAppReportView):
 
     Methods
     -------
-    generate_report(output_dir='sections')
+    generate_report(output_dir)
         Generates the Streamlit report and saves the report files to the specified folder.
-    run_report(output_dir='sections')
+    run_report(output_dir)
         Runs the generated Streamlit report.
-    _build_plots(output_dir='sections')
-        Generates Python files for each section in the report, containing the plots.
+    _fornat_text(text, type, level, color)
+        Generates a Streamlit markdown text string with the specified type (header, paragraph), level and color.
+    _generate_home_section(output_dir, report_manag_content)
+        Generates the homepage for the report and updates the report manager content.
+    _generate_sections(output_dir)
+        Generates Python files for each section in the report, including subsections and its components (plots, dataframes, markdown).
+    _generate_subsection(subsection, imports_written, content)
+        Creates components (plots, dataframes, markdown, etc) for a given subsection. 
     """
 
     def __init__(self, identifier: int, name: str, columns: Optional[List[str]], report: Report):
@@ -492,7 +676,7 @@ report_nav.run()''')
         sys.argv = ["streamlit", "run", os.path.join(output_dir, "report_manager.py")]
         sys.exit(stcli.main())
 
-    def _format_text(self, text: str, type: str, level: int = 1, color: str = '#020058') -> str:
+    def _format_text(self, text: str, type: str, level: int = 1, color: str = '#000000') -> str:
         """
         Generates a Streamlit markdown text string with the specified level and color.
         
@@ -517,7 +701,7 @@ report_nav.run()''')
         elif type == 'paragraph':
             tag = 'p'
 
-        return f"""st.markdown("<{tag} style='text-align: center; color: {color};'>{text}</{tag}>", unsafe_allow_html=True)"""
+        return f"""st.markdown('''<{tag} style='text-align: center; color: {color};'>{text}</{tag}>''', unsafe_allow_html=True)"""
 
     def _generate_home_section(self, output_dir: str, report_manag_content: list) -> None:
         """
@@ -537,7 +721,7 @@ report_nav.run()''')
         # Create the home page content
         home_content = []
         home_content.append(f"import streamlit as st")
-        home_desc = self._format_text(text=self.report.description, type='paragraph', color='#020058')
+        home_desc = self._format_text(text=self.report.description, type='paragraph')
         home_content.append(home_desc)
         if self.report.graphical_abstract:
             home_content.append(f"\nst.image('{self.report.graphical_abstract}', use_column_width=True)")
@@ -552,7 +736,7 @@ report_nav.run()''')
 
     def _generate_sections(self, output_dir: str) -> None:
         """
-        Generates Python files for each section in the report, including subsections and plots.
+        Generates Python files for each section in the report, including subsections and its components (plots, dataframes, markdown).
         
         Parameters
         ----------
@@ -576,13 +760,13 @@ report_nav.run()''')
                     
                     # Add subsection header and description
                     subsection_header = self._format_text(text=subsection.name, type='header', level=3, color='#023558')
-                    subsection_desc = self._format_text(text=subsection.description, type='paragraph', color='#023558')
+                    subsection_desc = self._format_text(text=subsection.description, type='paragraph')
                     
                     # Collect subsection content
                     subsection_content = [subsection_header, subsection_desc]
                     
                     # Generate plots for the subsection
-                    imports_subsection = self._generate_plots(subsection, imports_written_subsection, subsection_content)
+                    imports_subsection = self._generate_subsection(subsection, imports_written_subsection, subsection_content)
 
                     imports.extend(imports_subsection) 
 
@@ -594,15 +778,15 @@ report_nav.run()''')
                         # Write the subsection content (descriptions, plots)
                         subsection_file.write("\n".join(subsection_content))
 
-    def _generate_plots(self, subsection, imports_written, content):
+    def _generate_subsection(self, subsection, imports_written, content):
         """
-        Generate code to render plots in the given subsection, generating imports and content 
-        for the section based on the plot type and visualization tool.
+        Generate code to render components (plots, dataframes, markdown) in the given subsection, 
+        creating imports and content for the subsection based on the component type.
 
         Parameters
         ----------
         subsection : Subsection
-            The subsection containing the plots.
+            The subsection containing the components.
         imports_written : set
             A set of already written imports.
         content : list
@@ -614,27 +798,36 @@ report_nav.run()''')
             A list of imports for the subsection.
         """
         imports = []
-        for plot in subsection.plots:
+        
+        for component in subsection.components:
             # Write imports if not already done
-            imports_viz = plot.generate_imports()
-            if imports_viz and plot.visualization_tool not in imports_written:
-                imports.append(imports_viz)
-                imports_written.add(plot.visualization_tool)
-            
-            if plot.plot_type == PlotType.INTERACTIVE:
-                if plot.visualization_tool == VisualizationTool.PLOTLY:
-                    content.append(f"\nst.plotly_chart({plot.read_plot_fromjson()}, use_container_width=True)\n")
-                elif plot.visualization_tool == VisualizationTool.ALTAIR:
-                    content.append(f"\nst.vega_lite_chart(json.loads(alt.Chart.from_dict({plot.read_plot_fromjson()}).to_json()), use_container_width=True)\n")
-                elif plot.visualization_tool == VisualizationTool.PYVIS:
-                    G = plot.read_network()
-                    output_file = f"example_data/{plot.name.replace(' ', '_')}.html"  # Define the output file name
-                    net = plot.create_and_save_pyvis_network(G, output_file)  # Get the Network object
-                    num_nodes = len(net.nodes)
-                    num_edges = len(net.edges)
+            imports_component = component.generate_imports()
+            if imports_component and component.component_type not in imports_written:
+                imports.append(imports_component)
+                imports_written.add(component.component_type)
 
-                    # Write code to display the network in the Streamlit app
-                    content.append(f"""
+            # Handle different types of components
+            if component.component_type == ComponentType.PLOT:
+                # Cast component to Plot
+                plot = component 
+                if plot.plot_type == PlotType.INTERACTIVE:
+                    if plot.visualization_tool == VisualizationTool.PLOTLY:
+                        content.append(self._format_text(text=plot.title, type='header', level=4, color='#2b8cbe'))
+                        content.append(f"\nst.plotly_chart({plot.load_from_file()}, use_container_width=True)\n")
+                    elif plot.visualization_tool == VisualizationTool.ALTAIR:
+                        content.append(self._format_text(text=plot.title, type='header', level=4, color='#2b8cbe'))
+                        content.append(f"\nst.vega_lite_chart(json.loads(alt.Chart.from_dict({plot.load_from_file()}).to_json()), use_container_width=True)\n")
+                    elif plot.visualization_tool == VisualizationTool.PYVIS:
+                        G = plot.read_network()
+                        # Define the output file name
+                        output_file = f"example_data/{plot.name.replace(' ', '_')}.html"
+                         # Get the Network object
+                        net = plot.create_and_save_pyvis_network(G, output_file)
+                        num_nodes = len(net.nodes)
+                        num_edges = len(net.edges)
+                        content.append(self._format_text(text=plot.title, type='header', level=4, color='#2b8cbe'))
+
+                        content.append(f"""
 with open('{output_file}', 'r') as f:
     html_data = f.read()
 
@@ -648,11 +841,29 @@ net_html_height = 1200 if control_layout else 630
 # Load HTML into HTML component for display on Streamlit
 st.components.v1.html(html_data, height=net_html_height)""")
 
-            elif plot.plot_type == PlotType.STATIC:
-                content.append(f"\nst.image('{plot.file_path}', caption='{plot.caption}', use_column_width=True)\n")
-        
+                elif plot.plot_type == PlotType.STATIC:
+                    content.append(self._format_text(text=plot.title, type='header', level=4, color='#2b8cbe'))
+                    content.append(f"\nst.image('{plot.file_path}', caption='{plot.caption}', use_column_width=True)\n")
+
+            elif component.component_type == ComponentType.DATAFRAME:
+                # Cast component to DataFrame
+                dataframe = component 
+                if dataframe.file_format == DataFrameFormat.CSV:
+                    content.append(self._format_text(text=dataframe.title, type='header', level=4, color='#2b8cbe'))
+                    content.append(f"""df = pd.read_csv('{dataframe.file_path}')
+st.dataframe(df, use_container_width=True)\n""")
+                elif dataframe.file_format == DataFrameFormat.PARQUET:
+                    content.append(self._format_text(text=dataframe.title, type='header', level=4, color='#2b8cbe'))
+                    content.append(f"""df = pd.read_parquet('{dataframe.file_path}')
+st.dataframe(df, use_container_width=True)\n""")
+                elif dataframe.file_format == DataFrameFormat.TXT:
+                    content.append(self._format_text(text=dataframe.title, type='header', level=4, color='#2b8cbe'))
+                    content.append(f"""df = pd.read_csv('{dataframe.file_path}', sep='\\t')
+st.dataframe(df, use_container_width=True)\n""")
+
+            elif component.component_type == ComponentType.MARKDOWN:
+                # Cast component to Markdown
+                markdown = component 
+                content.append(self._format_text(text=markdown.title, type='header', level=4, color='#2b8cbe'))
+                content.append(f"st.markdown('''{markdown.load_from_file()}''', unsafe_allow_html=True)\n")
         return imports
-
-
-
-
