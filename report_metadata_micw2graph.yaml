@@ -48,6 +48,14 @@ sections:
             delimiter: ","
             title: "Abundance data for all studies (excel)"
             caption: ""
+          - identifier: 3356
+            name: "altair_plot5"
+            component_type: "plot"
+            plot_type: "interactive"
+            file_path: "example_data/altair_multilineplot.json"
+            visualization_tool: "altair"
+            title: "Multiline plot (altair)"
+            caption: ""
       - identifier: 5002
         name: "Sample data"
         title: "Sample data"
@@ -113,6 +121,14 @@ sections:
             caption: ""
           - identifier: 3358
             name: "altair_plot2"
+            component_type: "plot"
+            plot_type: "interactive"
+            file_path: "example_data/altair_multilineplot.json"
+            visualization_tool: "altair"
+            title: "Multiline plot (altair)"
+            caption: ""
+          - identifier: 3350
+            name: "altair_plot3"
             component_type: "plot"
             plot_type: "interactive"
             file_path: "example_data/altair_multilineplot.json"

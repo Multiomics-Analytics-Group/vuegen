@@ -60,13 +60,6 @@ class Component(ABC):
     component_type: ComponentType
     title: Optional[str] = None
     caption: Optional[str] = None
-
-    @abstractmethod
-    def load_from_file(self):
-        """
-        Read and parse a component from a file.
-        """
-        pass
     
     @abstractmethod
     def generate_imports(self) -> str:
@@ -108,25 +101,6 @@ class Plot(Component):
         self.visualization_tool = visualization_tool
         self.csv_network_format = csv_network_format
 
-    def load_from_file(self) -> str:
-        """
-        Reads and parses the JSON representation of the plot. 
-
-        Returns
-        -------
-        str
-            A string representation of the parsed plot code.
-        """
-        if self.plot_type == PlotType.INTERACTIVE:
-            with open(self.file_path, 'r') as plot_file:
-                plot_json = plot_file.read()
-            plot_dict = json.loads(plot_json) if plot_json else {}
-            if self.visualization_tool == VisualizationTool.ALTAIR:
-                altair_plot = alt.Chart.from_dict(plot_dict)
-                return altair_plot.to_dict()
-            return str(plot_dict)
-        return ""
-
     def generate_imports(self) -> str:
         """
         Generate the import statements required for the visualization tool.
@@ -137,9 +111,9 @@ class Plot(Component):
             A string representing the import statements needed for the plot.
         """
         imports = []
+        imports.append('import json')
         if self.visualization_tool == VisualizationTool.ALTAIR:
             imports.append('import altair as alt')
-            imports.append('import json')
         return "\n".join(imports)
     
     def read_network(self) -> nx.Graph:
@@ -267,17 +241,6 @@ class DataFrame(Component):
         self.file_format = file_format
         self.delimiter = delimiter
 
-    def load_from_file(self) -> str:
-        """
-        Reads and parses the DataFrame from a file.
-
-        Returns
-        -------
-        str
-            A string representation of the parsed DataFrame.
-        """
-        return ""
-
     def generate_imports(self) -> str:
         """
         Generate the import statements required for handling DataFrames.
@@ -296,18 +259,6 @@ class Markdown(Component):
     """
     A Markdown text component within a subsection of a report.
     """
-    
-    def load_from_file(self) -> str:
-        """
-        Load and return the markdown content from the file.
-        
-        Returns
-        -------
-        str
-            A string containing the markdown content.
-        """
-        with open(self.file_path, 'r') as markdown_file:
-            return markdown_file.read()
 
     def generate_imports(self) -> str:
         """
@@ -318,7 +269,7 @@ class Markdown(Component):
         str
             A string representing the import statements needed for rendering Markdown.
         """
-        return "import markdown"
+        return ""
     
 @dataclass
 class Subsection:
@@ -743,10 +694,8 @@ report_nav.run()''')
                 # Iterate through subsections and integrate them into the section file
                 for subsection in section.subsections:
                     # Track imports to avoid duplication
-                    imports_written_subsection = set()
-
-                    # Collect imports and section content
-                    imports = ['import streamlit as st']
+                    imports = []
+                    imports.append('import streamlit as st')
 
                     # Create subsection file
                     subsection_file_path = os.path.join(output_dir, section_name_var, section_name_var + "_" + subsection.name.replace(" ", "_") + ".py")
@@ -759,19 +708,26 @@ report_nav.run()''')
                     subsection_content = [subsection_header, subsection_desc]
                     
                     # Generate plots for the subsection
-                    imports_subsection = self._generate_subsection(subsection, imports_written_subsection, subsection_content)
+                    imports_subsection = self._generate_subsection(subsection, subsection_content)
 
                     imports.extend(imports_subsection) 
+                    
+                    # Remove duplicated imports
+                    unique_imports = set()
+
+                    # Split each string by newlines and update the set
+                    for imp in imports:
+                        unique_imports.update(imp.split('\n'))
 
                     # Write everything to the subsection file
                     with open(subsection_file_path, 'w') as subsection_file:
                         # Write imports at the top of the file
-                        subsection_file.write("\n".join(imports) + "\n\n")
+                        subsection_file.write("\n".join(unique_imports) + "\n\n")
 
                         # Write the subsection content (descriptions, plots)
                         subsection_file.write("\n".join(subsection_content))
 
-    def _generate_subsection(self, subsection, imports_written, content):
+    def _generate_subsection(self, subsection, content) -> List[str]:
         """
         Generate code to render components (plots, dataframes, markdown) in the given subsection, 
         creating imports and content for the subsection based on the component type.
@@ -790,14 +746,14 @@ report_nav.run()''')
         list
             A list of imports for the subsection.
         """
-        imports = []
-        
+        #imports_written_subsection = []
+        imports_written_subsection = []
         for component in subsection.components:
             # Write imports if not already done
             imports_component = component.generate_imports()
-            if imports_component and component.component_type not in imports_written:
-                imports.append(imports_component)
-                imports_written.add(component.component_type)
+            #if imports_component and component.component_type not in imports_written:
+            imports_written_subsection.append(imports_component)
+            #imports_written.add(component.component_type)
 
             # Handle different types of components
             if component.component_type == ComponentType.PLOT:
@@ -806,10 +762,15 @@ report_nav.run()''')
                 if plot.plot_type == PlotType.INTERACTIVE:
                     if plot.visualization_tool == VisualizationTool.PLOTLY:
                         content.append(self._format_text(text=plot.title, type='header', level=4, color='#2b8cbe'))
-                        content.append(f"\nst.plotly_chart({plot.load_from_file()}, use_container_width=True)\n")
+                        content.append(f"""\nwith open('{plot.file_path}', 'r') as plot_file:
+    plot_json = json.load(plot_file)
+st.plotly_chart(plot_json, use_container_width=True)\n""")
                     elif plot.visualization_tool == VisualizationTool.ALTAIR:
                         content.append(self._format_text(text=plot.title, type='header', level=4, color='#2b8cbe'))
-                        content.append(f"\nst.vega_lite_chart(json.loads(alt.Chart.from_dict({plot.load_from_file()}).to_json()), use_container_width=True)\n")
+                        content.append(f"""\nwith open('{plot.file_path}', 'r') as plot_file:
+    plot_json = json.load(plot_file)
+altair_plot = alt.Chart.from_dict(plot_json)
+st.vega_lite_chart(json.loads(altair_plot.to_json()), use_container_width=True)\n""")
                     elif plot.visualization_tool == VisualizationTool.PYVIS:
                         G = plot.read_network()
                         # Define the output file name
@@ -868,5 +829,7 @@ st.dataframe(df, use_container_width=True)\n""")
                 # Cast component to Markdown
                 markdown = component 
                 content.append(self._format_text(text=markdown.title, type='header', level=4, color='#2b8cbe'))
-                content.append(f"st.markdown('''{markdown.load_from_file()}''', unsafe_allow_html=True)\n")
-        return imports
+                content.append(f"""with open('{markdown.file_path}', 'r') as markdown_file:
+    markdown_content = markdown_file.read()
+st.markdown(markdown_content, unsafe_allow_html=True)\n""")
+        return imports_written_subsection
