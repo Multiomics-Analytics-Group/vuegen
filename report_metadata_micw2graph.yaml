@@ -30,7 +30,7 @@ sections:
             plot_type: "interactive"
             file_path: "example_data/MicW2Graph/top_species_plot_biome.json"
             visualization_tool: "plotly"
-            title: "Top 5 species by biome"
+            title: "Top 5 species by biome (plotly)"
             caption: ""
           - identifier: 3358
             name: "df1"
@@ -39,6 +39,14 @@ sections:
             file_format: "csv"
             delimiter: ","
             title: "Abundance data for all studies (csv)"
+            caption: ""
+          - identifier: 3358
+            name: "df1"
+            component_type: "dataframe"
+            file_path: "example_data/MicW2Graph/abundance_data_allbiomes.xls"
+            file_format: "excel"
+            delimiter: ","
+            title: "Abundance data for all studies (excel)"
             caption: ""
       - identifier: 5002
         name: "Sample data"
@@ -50,7 +58,7 @@ sections:
             component_type: "plot"
             plot_type: "static"
             file_path: "example_data/MicW2Graph/number_samples_per_study.png"
-            title: "Number of samples per study"
+            title: "Number of samples per study (png)"
             caption: ""
           - identifier: 3323
             name: "plot3"
@@ -58,7 +66,7 @@ sections:
             plot_type: "interactive"
             file_path: "example_data/MicW2Graph/pie_plot_countries.json"
             visualization_tool: "plotly"
-            title: "Sampling countries for all studies"
+            title: "Sampling countries for all studies (plotly)"
             caption: ""
           - identifier: 24324
             name: "df2"
@@ -101,7 +109,7 @@ sections:
             plot_type: "interactive"
             visualization_tool: "pyvis"
             file_path: "example_data/MicW2Graph/man_example.graphml"
-            title: "Network1"
+            title: "Network1 (graphml)"
             caption: ""
           - identifier: 3358
             name: "altair_plot2"

@@ -9,7 +9,6 @@ import altair as alt
 from streamlit.web import cli as stcli
 import networkx as nx
 from pyvis.network import Network
-import pandas as pd
 
 class ComponentType(Enum):
     PLOT = 'plot'
@@ -33,6 +32,7 @@ class DataFrameFormat(Enum):
     CSV = 'csv'
     TXT = 'txt'
     PARQUET = 'parquet'
+    EXCEL = 'excel'
 
 @dataclass
 class Component(ABC):
@@ -267,23 +267,16 @@ class DataFrame(Component):
         self.file_format = file_format
         self.delimiter = delimiter
 
-    def load_from_file(self) -> pd.DataFrame:
+    def load_from_file(self) -> str:
         """
-        Load and parse the DataFrame from a file based on its format.
-        
+        Reads and parses the DataFrame from a file.
+
         Returns
         -------
-        pd.DataFrame
-            The loaded DataFrame object.
+        str
+            A string representation of the parsed DataFrame.
         """
-        if self.file_format == DataFrameFormat.CSV:
-            return pd.read_csv(self.file_path, delimiter=self.delimiter) if self.delimiter else pd.read_csv(self.file_path)
-        elif self.file_format == DataFrameFormat.TXT:
-            return pd.read_csv(self.file_path, delimiter=self.delimiter) if self.delimiter else pd.read_csv(self.file_path, sep='\t')
-        elif self.file_format == DataFrameFormat.PARQUET:
-            return pd.read_parquet(self.file_path)
-        else:
-            raise ValueError(f"Unsupported file format: {self.file_format}")
+        return ""
 
     def generate_imports(self) -> str:
         """
@@ -850,7 +843,11 @@ st.components.v1.html(html_data, height=net_html_height)""")
                 dataframe = component 
                 if dataframe.file_format == DataFrameFormat.CSV:
                     content.append(self._format_text(text=dataframe.title, type='header', level=4, color='#2b8cbe'))
-                    content.append(f"""df = pd.read_csv('{dataframe.file_path}')
+                    if dataframe.delimiter:
+                        content.append(f"""df = pd.read_csv('{dataframe.file_path}', delimiter='{dataframe.delimiter}')
+st.dataframe(df, use_container_width=True)\n""")
+                    else:
+                        content.append(f"""df = pd.read_csv('{dataframe.file_path}')
 st.dataframe(df, use_container_width=True)\n""")
                 elif dataframe.file_format == DataFrameFormat.PARQUET:
                     content.append(self._format_text(text=dataframe.title, type='header', level=4, color='#2b8cbe'))
@@ -860,6 +857,12 @@ st.dataframe(df, use_container_width=True)\n""")
                     content.append(self._format_text(text=dataframe.title, type='header', level=4, color='#2b8cbe'))
                     content.append(f"""df = pd.read_csv('{dataframe.file_path}', sep='\\t')
 st.dataframe(df, use_container_width=True)\n""")
+                elif dataframe.file_format == DataFrameFormat.EXCEL:
+                    content.append(self._format_text(text=dataframe.title, type='header', level=4, color='#2b8cbe'))
+                    content.append(f"""df = pd.read_excel('{dataframe.file_path}')
+st.dataframe(df, use_container_width=True)\n""")
+                else:
+                    raise ValueError(f"Unsupported DataFrame file format: {dataframe.file_format}")
 
             elif component.component_type == ComponentType.MARKDOWN:
                 # Cast component to Markdown
