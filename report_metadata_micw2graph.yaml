@@ -32,6 +32,14 @@ sections:
             visualization_tool: "plotly"
             title: "Top 5 species by biome (plotly)"
             caption: ""
+          - identifier: 3350
+            name: "altair_plot1"
+            component_type: "plot"
+            plot_type: "interactive"
+            file_path: "example_data/altair_multilineplot.json"
+            visualization_tool: "altair"
+            title: "Multiline plot (altair)"
+            caption: ""
           - identifier: 3358
             name: "df1"
             component_type: "dataframe"
@@ -47,14 +55,6 @@ sections:
             file_format: "excel"
             delimiter: ","
             title: "Abundance data for all studies (excel)"
-            caption: ""
-          - identifier: 3356
-            name: "altair_plot5"
-            component_type: "plot"
-            plot_type: "interactive"
-            file_path: "example_data/altair_multilineplot.json"
-            visualization_tool: "altair"
-            title: "Multiline plot (altair)"
             caption: ""
       - identifier: 5002
         name: "Sample data"
@@ -107,8 +107,8 @@ sections:
     description: ""
     subsections:
       - identifier: 5003
-        name: "Network Visualization"
-        title: "Network Visualization"
+        name: "Network Visualization1"
+        title: "Network Visualization1"
         description: ""
         components:
           - identifier: 2247
@@ -119,21 +119,18 @@ sections:
             file_path: "example_data/MicW2Graph/man_example.graphml"
             title: "Network1 (graphml)"
             caption: ""
-          - identifier: 3358
-            name: "altair_plot2"
+      - identifier: 5003
+        name: "Network Visualization2"
+        title: "Network Visualization2"
+        description: ""
+        components:
+          - identifier: 2240
+            name: "network2"
             component_type: "plot"
             plot_type: "interactive"
-            file_path: "example_data/altair_multilineplot.json"
-            visualization_tool: "altair"
-            title: "Multiline plot (altair)"
-            caption: ""
-          - identifier: 3350
-            name: "altair_plot3"
-            component_type: "plot"
-            plot_type: "interactive"
-            file_path: "example_data/altair_multilineplot.json"
-            visualization_tool: "altair"
-            title: "Multiline plot (altair)"
+            visualization_tool: "pyvis"
+            file_path: "example_data/MicW2Graph/man_example.csv"
+            title: "Network2 (edge list csv)"
             caption: ""
       - identifier: 5004
         name: "Edge list"

@@ -1,12 +1,12 @@
-import report as r
+import streamlit_reportview as reportview
 from metadata_manager import YAMLMetadataManager
 
 if __name__ == '__main__':
     # Load report metadata from YAML file
     yaml_manager = YAMLMetadataManager()
-    report = yaml_manager.load_report_metadata('./report_metadata_micw2graph.yaml')
+    report_metadata = yaml_manager.load_report_metadata('./report_metadata_micw2graph.yaml')
 
     # Create report view
-    report_view = r.StreamlitReportView(12312, "Multi-omics project report", report=report, columns=None)
-    report_view.generate_report(output_dir="sections")
-    report_view.run_report(output_dir='sections')
+    st_report = reportview.StreamlitReportView(12312, "MicW2Graph", report=report_metadata, columns=None)
+    st_report.generate_report(output_dir="sections")
+    st_report.run_report(output_dir='sections')
