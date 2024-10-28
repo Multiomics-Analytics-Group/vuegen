@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import List, Optional
 import networkx as nx
+import pandas as pd
 from pyvis.network import Network
 
 class ComponentType(Enum):
@@ -128,57 +129,38 @@ class Plot(Component):
             '.gexf': nx.read_gexf,
             '.csv': nx.read_edgelist,
             '.txt': nx.read_edgelist,
-            # Add more mappings as needed
         }
 
-        # Determine the file extension
+        # Determine the file extension and check if it is supported
         file_extension = os.path.splitext(self.file_path)[-1].lower()
 
-        if file_extension in file_extension_map:
-            # Call the corresponding loading function
-            if file_extension in ['.csv', '.txt'] and self.csv_network_format:
-                if self.csv_network_format == CSVNetworkFormat.EDGELIST:
-                    G = nx.read_edgelist(self.file_path, delimiter=',')
-                elif self.csv_network_format == CSVNetworkFormat.ADJLIST:
-                    G = nx.read_adjlist(self.file_path)
-                else:
-                    raise ValueError(f"Unsupported format for CSV/TXT file: {self.csv_network_format}")
-            else:
-                G = file_extension_map[file_extension](self.file_path)
-
-             # Clean up edge attributes to avoid conflicts
-            for u, v, data in G.edges(data=True):
-                data.pop('source', None)
-                data.pop('target', None)
-
-            # Assign node labels as their IDs
-            for node in G.nodes(data=True):
-                G.nodes[node[0]]['label'] = G.nodes[node[0]].get('name', node[0])  # Set node label to its name or ID
-
-            # Obtain and set degree values for nodes
-            degrees = {node: G.degree(node) for node in G.nodes()}
-
-            if file_extension in ['.gml', '.graphml', '.gexf']:
-                # Assign sizes based on degrees
-                min_size = 5  # Define minimum node size
-                max_size = 30  # Define maximum node size
-                min_degree = min(degrees.values())
-                max_degree = max(degrees.values())
-
-                for node in G.nodes():
-                    degree = degrees[node]
-                    if degree == min_degree:
-                        size = min_size
-                    elif degree == max_degree:
-                        size = max_size
-                    else:
-                        size = min_size + (max_size - min_size) * ((degree - min_degree) / (max_degree - min_degree))
-                    
-                    G.nodes[node]['size'] = size  # Assign size based on degree
-
-            return G
-        else:
+        # Check if the file extension is supported
+        if file_extension not in file_extension_map:
             raise ValueError(f"Unsupported file extension: {file_extension}")
+
+        # Handle .csv and .txt files with custom delimiters based on format (edgelist or adjlist)
+        if file_extension in ['.csv', '.txt'] and self.csv_network_format:
+            delimiter = ',' if file_extension == '.csv' else '\\t'
+            df_net = pd.read_csv(self.file_path, delimiter=delimiter)
+
+            if self.csv_network_format == CSVNetworkFormat.EDGELIST:
+                # Assert that "source" and "target" columns are present in the DataFrame
+                required_columns = {"source", "target"}
+                assert required_columns.issubset(df_net.columns), f"CSV must contain columns named {required_columns} to name the source and target nodes."
+                # Use additional columns as edge attributes, excluding "source" and "target"
+                edge_attributes = [col for col in df_net.columns if col not in required_columns]
+                # Return a NetworkX graph object from the edgelist
+                return nx.from_pandas_edgelist(df_net, source="source", target="target", edge_attr=edge_attributes)
+            elif self.csv_network_format == CSVNetworkFormat.ADJLIST:
+                return nx.from_pandas_adjacency(df_net)
+            else:
+                raise ValueError(f"Unsupported format for CSV/TXT file: {self.csv_network_format}")
+
+        G = file_extension_map[file_extension](self.file_path)
+        G = self._add_size_attribute(G)
+        
+        # Return the NetworkX graph object created from the specified network file
+        return G
 
     def create_and_save_pyvis_network(self, G: nx.Graph, output_file: str) -> Network:
         """
@@ -217,6 +199,51 @@ class Plot(Component):
         net.save_graph(output_file)
 
         return net
+    
+    def _add_size_attribute(self, G: nx.Graph) -> nx.Graph:
+        """
+        Adds a 'size' attribute to the nodes of a NetworkX graph based on their degree centrality.
+        
+        Parameters
+        ----------
+        G : networkx.Graph
+            A NetworkX graph object.
+
+        Returns
+        -------
+        networkx.Graph
+            A NetworkX graph object with the 'size' attribute added to the nodes.
+        """
+        # Clean up edge attributes to avoid conflicts
+        for u, v, data in G.edges(data=True):
+            data.pop('source', None)
+            data.pop('target', None)
+
+        # Assign node labels as their IDs
+        for node in G.nodes(data=True):
+            G.nodes[node[0]]['label'] = G.nodes[node[0]].get('name', node[0])  # Set node label to its name or ID
+
+            # Obtain and set degree values for nodes
+            degrees = {node: G.degree(node) for node in G.nodes()}
+            
+            # Assign sizes based on degrees
+            min_size = 5  # Define minimum node size
+            max_size = 30  # Define maximum node size
+            min_degree = min(degrees.values())
+            max_degree = max(degrees.values())
+
+            for node in G.nodes():
+                degree = degrees[node]
+                if degree == min_degree:
+                    size = min_size
+                elif degree == max_degree:
+                    size = max_size
+                else:
+                    size = min_size + (max_size - min_size) * ((degree - min_degree) / (max_degree - min_degree))
+                
+                G.nodes[node]['size'] = size  # Assign size based on degree
+
+        return G
     
 class DataFrame(Component):
     """

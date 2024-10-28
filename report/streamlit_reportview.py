@@ -221,14 +221,11 @@ report_nav.run()''')
         list
             A list of imports for the subsection.
         """
-        #imports_written_subsection = []
         imports_written_subsection = []
         for component in subsection.components:
             # Write imports if not already done
             imports_component = component.generate_imports()
-            #if imports_component and component.component_type not in imports_written:
             imports_written_subsection.append(imports_component)
-            #imports_written.add(component.component_type)
 
             # Handle different types of components
             if component.component_type == r.ComponentType.PLOT:
@@ -250,7 +247,7 @@ st.vega_lite_chart(json.loads(altair_plot.to_json()), use_container_width=True)\
                         G = plot.read_network()
                         # Define the output file name
                         output_file = f"example_data/{plot.name.replace(' ', '_')}.html"
-                         # Get the Network object
+                        # Get the Network object
                         net = plot.create_and_save_pyvis_network(G, output_file)
                         num_nodes = len(net.nodes)
                         num_edges = len(net.edges)

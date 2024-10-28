@@ -1,4 +1,4 @@
-"v1","v2","asso","diss","adja"
+"source","target","asso","diss","adja"
 "Bifidobacterium_adolescentis","Bifidobacterium_longum",0.723574219993015,0.37176994230773,0.62823005769227
 "Bifidobacterium_adolescentis","Collinsella_aerofaciens",0.713019963513302,0.378800763256027,0.621199236743973
 "Bifidobacterium_adolescentis","Eubacterium_biforme",0.706308055301874,0.383204869944346,0.616795130055654
