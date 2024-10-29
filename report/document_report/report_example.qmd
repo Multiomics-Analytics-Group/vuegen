@@ -1,0 +1,73 @@
+---
+title: "Document Report Example"
+author: "Sebastian Ayala Ruano"
+toc: true
+format:
+  html:
+    code-fold: true
+    page-layout: full
+    self-contained: true
+jupyter: python3
+---
+
+# MicW2Graph 
+Wastewater treatment (WWT) is the process of removing contaminants from used water before it is discharged back  into the environment, which contributes to address water scarcity and to protect aquatic ecosystems. In this project,  we investigated the microbiome of WWT to build MicW2Graph, an open-source knowledge graph (KG) that integrates metagenomic and  metatranscriptomic information with their biological context, including biological processes, environmental and phenotypic  features, chemical compounds, and additional metadata. We developed a workflow to collect meta-omics datasets from MGnify and  infer potential interactions among microorganisms through microbial association networks (MANs). MicW2Graph enables the  investigation of research questions related to WWT, focusing on aspects such as microbial connections, community memberships,  and potential ecological functions.
+
+
+<div style="text-align: center;">
+  <img src="../../example_data/MicW2Graph/Methods_MicW2Graph.svg" alt="Descriptive text" width="750px">
+</div>
+
+## Abundance data
+### Top 5 species by biome (plotly)
+```{python}
+#| label: fig-top_species_plot_biome
+import json
+import plotly.io as pio
+
+with open('../../example_data/MicW2Graph/top_species_plot_biome.json', 'r') as plot_file:
+    plot_data = plot_file.read()
+
+# Load the plot from JSON file
+fig_plotly = pio.from_json(plot_data)
+
+# Display the plot
+fig_plotly.show()
+```
+
+### Multiline plot (altair)
+
+```{python}
+#| label: fig-multiline_plot
+import altair as alt
+
+with open('../../example_data/altair_multilineplot.json', 'r') as plot_file:
+    plot_data = plot_file.read()
+
+fig_altair = alt.Chart.from_json(plot_data)
+
+fig_altair
+```
+
+#### Abundance data for all studies (csv)
+
+```{python}
+#| label: table-abundance_data_allbiomes-csv
+#| table-cap: "Abundance data for all studies (csv)"
+#| table-type: "csv"
+import pandas as pd
+from itables import show
+df = pd.read_csv('../../example_data/MicW2Graph/abundance_data_allbiomes.csv', delimiter=',')
+show(df)
+```
+
+
+#### Abundance data for all studies (excel)
+
+```{python}
+#| label: table-abundance_data_allbiomes-excel
+#| table-cap: "Abundance data for all studies (escel)"
+#| table-type: "excel"
+df2 = pd.read_excel('../../example_data/MicW2Graph/abundance_data_allbiomes.xls')
+show(df2)
+```
