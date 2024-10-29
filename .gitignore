@@ -1,5 +1,6 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
+report/__pycache__/
 *.py[cod]
 *$py.class
 
@@ -160,7 +161,8 @@ cython_debug/
 #.idea/
 
 # Temporary files
-sections/
+streamlit_report/
+document_report/
 
 # VS Code
 .DS_Store

@@ -27,7 +27,7 @@ class StreamlitReportView(r.WebAppReportView):
     def __init__(self, identifier: int, name: str, columns: Optional[List[str]], report: r.Report):
         super().__init__(identifier, name=name, columns=columns, report_framework='Streamlit', report=report)
 
-    def generate_report(self, output_dir: str = 'report/streamlit_report/sections') -> None:
+    def generate_report(self, output_dir: str = 'streamlit_report/sections') -> None:
         """
         Generates the Streamlit report and creates Python files for each section and its subsections and plots.
 

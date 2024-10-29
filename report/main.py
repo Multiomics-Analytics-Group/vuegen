@@ -8,5 +8,5 @@ if __name__ == '__main__':
 
     # Create report view
     st_report = reportview.StreamlitReportView(12312, "MicW2Graph", report=report_metadata, columns=None)
-    st_report.generate_report(output_dir="report/streamlit_report/sections")
-    st_report.run_report(output_dir="report/streamlit_report/sections")
+    st_report.generate_report(output_dir="streamlit_report/sections")
+    st_report.run_report(output_dir="streamlit_report/sections")
