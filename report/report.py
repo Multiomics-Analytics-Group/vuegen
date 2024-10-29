@@ -410,6 +410,31 @@ class ReportView(ABC):
         pass
 
     @abstractmethod
+    def run_report(self, output_dir: str = 'sections') -> None:
+        """
+        Runs the generated report.
+
+        Parameters
+        ----------
+        output_dir : str, optional
+            The folder where the report was generated (default is 'sections').
+        """
+        pass
+
+class WebAppReportView(ReportView):
+    """
+    An abstract class for web application report views.
+
+    Attributes
+    ----------
+    report_framework : str
+        The web app framework used to generate the report (e.g., 'Streamlit').
+    """
+    def __init__(self, identifier: int, name: str, columns: Optional[List[str]], report_framework: str, report: Report):
+        super().__init__(identifier, name=name, columns=columns, interface_type='WebAppReportView', report=report)
+        self.report_framework = report_framework
+
+    @abstractmethod
     def _format_text(self, text: str, type: str, level: int, color: str) -> str:
         """
         Format text for the report view.
@@ -429,40 +454,6 @@ class ReportView(ABC):
         -------
         str
             The formatted text string.
-        """
-        pass
-
-class WebAppReportView(ReportView):
-    """
-    An abstract class for web application report views.
-
-    Attributes
-    ----------
-    report_framework : str
-        The web app framework used to generate the report (e.g., 'Streamlit').
-
-    Methods
-    -------
-    run_report(output_dir)
-        Runs the generated web app report.
-    _generate_sections(output_dir)
-        Creates sections and subsections for the report.
-    _generate_subsection(subsection, imports_written, content)
-        Creates components (plots, dataframes, markdown, etc) for a given subsection. 
-    """
-    def __init__(self, identifier: int, name: str, columns: Optional[List[str]], report_framework: str, report: Report):
-        super().__init__(identifier, name=name, columns=columns, interface_type='WebAppReportView', report=report)
-        self.report_framework = report_framework
-
-    @abstractmethod
-    def run_report(self, output_dir: str = 'sections') -> None:
-        """
-        Runs the generated report.
-
-        Parameters
-        ----------
-        output_dir : str, optional
-            The folder where the report was generated (default is 'sections').
         """
         pass
 
