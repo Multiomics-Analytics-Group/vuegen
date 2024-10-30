@@ -34,7 +34,7 @@ class StreamlitReportView(r.WebAppReportView):
         Parameters
         ----------
         output_dir : str, optional
-            The folder where the generated report files will be saved (default is 'sections').
+            The folder where the generated report files will be saved (default is 'streamlit_report/sections').
         """
         # Create the output folder if it does not exist
         if not os.path.exists(output_dir):
@@ -296,7 +296,6 @@ st.dataframe(df, use_container_width=True)\n""")
 st.dataframe(df, use_container_width=True)\n""")
                 else:
                     raise ValueError(f"Unsupported DataFrame file format: {dataframe.file_format}")
-
             elif component.component_type == r.ComponentType.MARKDOWN:
                 # Cast component to Markdown
                 markdown = component 

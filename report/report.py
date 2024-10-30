@@ -111,6 +111,8 @@ class Plot(Component):
         imports.append('import json')
         if self.visualization_tool == VisualizationTool.ALTAIR:
             imports.append('import altair as alt')
+        elif self.visualization_tool == VisualizationTool.PLOTLY:
+            imports.append('import plotly.io as pio')
         return "\n".join(imports)
     
     def read_network(self) -> nx.Graph:
@@ -274,7 +276,7 @@ class DataFrame(Component):
         str
             A string representing the import statements needed for the DataFrame.
         """
-        return "import pandas as pd"
+        return "import pandas as pd\nfrom itables import show"
 
 
 @dataclass
@@ -293,7 +295,7 @@ class Markdown(Component):
         str
             A string representing the import statements needed for rendering Markdown.
         """
-        return ""
+        return "import IPython.display as display"
     
 @dataclass
 class Subsection:
@@ -388,14 +390,12 @@ class ReportView(ABC):
         The report that this ABC is associated with.
     columns : List[str], optional
         Column names used in the report view ABC (default is None).
-    interface_type : str, optional
-        The type of the ABC (e.g., 'WebAppReportView', 'DocumentReportView', PresentReportView, 'WikiReportView', 'NotebookReportView') (default is None).
+    
     """
     identifier: int
     name: str
     report: Report
     columns: Optional[List[str]] = None
-    interface_type: Optional[str] = None
 
     @abstractmethod
     def generate_report(self, output_dir: str = 'sections') -> None:
@@ -431,7 +431,7 @@ class WebAppReportView(ReportView):
         The web app framework used to generate the report (e.g., 'Streamlit').
     """
     def __init__(self, identifier: int, name: str, columns: Optional[List[str]], report_framework: str, report: Report):
-        super().__init__(identifier, name=name, columns=columns, interface_type='WebAppReportView', report=report)
+        super().__init__(identifier, name=name, columns=columns, report=report)
         self.report_framework = report_framework
 
     @abstractmethod
