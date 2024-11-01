@@ -1,24 +1,9 @@
 import yaml
 import report as r
-from abc import ABC, abstractmethod
 
-class MetadataManager(ABC):
+class MetadataManager():
     """
-    Abstract base class for managing metadata from various sources (e.g., YAML, JSON, etc).
-    
-    Methods
-    -------
-    load_report_metadata(file_path)
-        Load and parse the metadata from a specified file and return a Report object.
-    """
-    
-    @abstractmethod
-    def load_report_metadata(self, file_path: str) -> r.Report:
-        pass
-
-class YAMLMetadataManager(MetadataManager):
-    """
-    Class for handling metadata from YAML files.
+    Class for handling metadata of reports from YAML files.
     """
     def load_report_metadata(self, file_path: str) -> r.Report:
         """

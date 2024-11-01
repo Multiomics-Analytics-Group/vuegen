@@ -13,6 +13,10 @@ report:
     and potential ecological functions.
   graphical_abstract: "example_data/MicW2Graph/Methods_MicW2Graph.png"
   logo: "example_data/mona_logo.png"
+  report_type: "document"
+  report_format:
+    - "pdf"
+    - "html"
 sections:
   - identifier: 21324
     name: "Exploratory Data analysis"

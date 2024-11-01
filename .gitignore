@@ -162,7 +162,7 @@ cython_debug/
 
 # Temporary files
 streamlit_report/
-document_report/
+quarto_report/
 
 # VS Code
 .DS_Store

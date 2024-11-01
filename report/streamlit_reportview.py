@@ -24,8 +24,8 @@ class StreamlitReportView(r.WebAppReportView):
         Creates components (plots, dataframes, markdown, etc) for a given subsection. 
     """
 
-    def __init__(self, identifier: int, name: str, columns: Optional[List[str]], report: r.Report):
-        super().__init__(identifier, name=name, columns=columns, report_framework='Streamlit', report=report)
+    def __init__(self, identifier: int, name: str, report: r.Report, report_type: r.ReportType, columns: Optional[List[str]]):
+        super().__init__(identifier, name=name, report=report, report_type = r.ReportType.STREAMLIT, columns=columns)
 
     def generate_report(self, output_dir: str = 'streamlit_report/sections') -> None:
         """

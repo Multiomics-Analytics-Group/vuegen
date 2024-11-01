@@ -7,6 +7,12 @@ import networkx as nx
 import pandas as pd
 from pyvis.network import Network
 
+class ReportType(Enum):
+    STREAMLIT = "streamlit"
+    DOCUMENT = "document"
+    PRESENTATION = "presentation"
+    NOTEBOOK = "notebook"
+
 class ComponentType(Enum):
     PLOT = 'plot'
     DATAFRAME = 'dataframe'
@@ -395,6 +401,7 @@ class ReportView(ABC):
     identifier: int
     name: str
     report: Report
+    report_type: ReportType
     columns: Optional[List[str]] = None
 
     @abstractmethod
@@ -421,6 +428,7 @@ class ReportView(ABC):
         """
         pass
 
+@dataclass
 class WebAppReportView(ReportView):
     """
     An abstract class for web application report views.
@@ -430,9 +438,6 @@ class WebAppReportView(ReportView):
     report_framework : str
         The web app framework used to generate the report (e.g., 'Streamlit').
     """
-    def __init__(self, identifier: int, name: str, columns: Optional[List[str]], report_framework: str, report: Report):
-        super().__init__(identifier, name=name, columns=columns, report=report)
-        self.report_framework = report_framework
 
     @abstractmethod
     def _format_text(self, text: str, type: str, level: int, color: str) -> str:
