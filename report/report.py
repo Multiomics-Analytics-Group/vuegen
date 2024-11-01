@@ -1,41 +1,41 @@
 import os
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum, auto
 from typing import List, Optional
 import networkx as nx
 import pandas as pd
 from pyvis.network import Network
 
-class ReportType(Enum):
-    STREAMLIT = "streamlit"
-    DOCUMENT = "document"
-    PRESENTATION = "presentation"
-    NOTEBOOK = "notebook"
+class ReportType(StrEnum):
+    STREAMLIT = auto()
+    DOCUMENT = auto()
+    PRESENTATION = auto()
+    NOTEBOOK = auto()
 
-class ComponentType(Enum):
-    PLOT = 'plot'
-    DATAFRAME = 'dataframe'
-    MARKDOWN = 'markdown'
+class ComponentType(StrEnum):
+    PLOT = auto()
+    DATAFRAME = auto()
+    MARKDOWN = auto()
 
-class PlotType(Enum):
-    INTERACTIVE = 'interactive'
-    STATIC = 'static'
+class PlotType(StrEnum):
+    INTERACTIVE = auto()
+    STATIC = auto()
 
-class VisualizationTool(Enum):
-    PLOTLY = 'plotly'
-    ALTAIR = 'altair'
-    PYVIS = 'pyvis'
+class VisualizationTool(StrEnum):
+    PLOTLY = auto()
+    ALTAIR = auto()
+    PYVIS = auto()
 
-class CSVNetworkFormat(Enum):
-    EDGELIST = 'edgelist'
-    ADJLIST = 'adjlist'
+class CSVNetworkFormat(StrEnum):
+    EDGELIST = auto()
+    ADJLIST = auto()
 
-class DataFrameFormat(Enum):
-    CSV = 'csv'
-    TXT = 'txt'
-    PARQUET = 'parquet'
-    EXCEL = 'excel'
+class DataFrameFormat(StrEnum):
+    CSV = auto()
+    TXT = auto()
+    PARQUET = auto()
+    EXCEL = auto()
 
 @dataclass
 class Component(ABC):

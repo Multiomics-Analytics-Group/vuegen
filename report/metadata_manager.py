@@ -112,4 +112,4 @@ class MetadataManager():
             
             report.sections.append(section)
 
-        return report
+        return report, metadata

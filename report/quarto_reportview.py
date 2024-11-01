@@ -1,17 +1,17 @@
 import os
 import subprocess
 import report as r
-from enum import Enum
+from enum import StrEnum, auto
 from typing import List, Optional
 
-class ReportFormat(Enum):
-    HTML = "html"
-    PDF = "pdf"
-    DOCX = "docx"
-    ODT = "odt"
-    REVEALJS = "revealjs"
-    PPTX = "pptx"
-    JUPYTER = "jupyter"
+class ReportFormat(StrEnum):
+    HTML = auto()
+    PDF = auto()
+    DOCX = auto()
+    ODT = auto()
+    REVEALJS = auto()
+    PPTX = auto()
+    JUPYTER = auto()
 
 class QuartoReportView(r.ReportView):
     """
