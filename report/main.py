@@ -10,8 +10,9 @@ if __name__ == '__main__':
 
     # Create report view
     doc_report = doc_reportview.QuartoReportView(report_metadata['report']['identifier'], report_metadata['report']['name'], 
-                                                report=report, report_type = ReportType[report_metadata['report']['report_type'].upper()],
-                                                report_formats = [doc_reportview.ReportFormat[fmt.upper()] for fmt in report_metadata['report']['report_format']], 
+                                                report=report, 
+                                                report_type = ReportType[report_metadata['report']['report_type'].upper()],
+                                                report_format = doc_reportview.ReportFormat[report_metadata['report']['report_format'].upper()], 
                                                 columns=None)
     doc_report.generate_report(output_dir="quarto_report/")
     doc_report.run_report(output_dir="quarto_report/")

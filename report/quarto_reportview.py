@@ -26,9 +26,9 @@ class QuartoReportView(r.ReportView):
     """
 
     def __init__(self, identifier: int, name: str, report: r.Report, report_type: r.ReportType, 
-                columns: Optional[List[str]], report_formats: List[ReportFormat]):
+                columns: Optional[List[str]], report_format: ReportFormat):
         super().__init__(identifier, name=name, report=report, report_type = report_type, columns=columns)
-        self.report_formats = report_formats
+        self.report_format = report_format
 
     def generate_report(self, output_dir: str = 'quarto_report/') -> None:
         """
@@ -122,41 +122,41 @@ format:"""
         # Check the report type
         if self.report_type == r.ReportType.DOCUMENT:
             # Add specific format settings
-            if ReportFormat.HTML in self.report_formats:
+            if ReportFormat.HTML == self.report_format:
                 yaml_header += f"""
   html:
     page-layout: full
     self-contained: true
     toc-location: left
     toc-depth: 3"""
-            if ReportFormat.PDF in self.report_formats:
+            if ReportFormat.PDF == self.report_format:
                 yaml_header += f"""
   pdf:
     toc: false
                 """
-            if ReportFormat.DOCX in self.report_formats:
+            if ReportFormat.DOCX == self.report_format:
                 yaml_header += f"""
   docx:
     toc: false
                 """
-            if ReportFormat.ODT in self.report_formats:
+            if ReportFormat.ODT == self.report_format:
                 yaml_header += f"""
   odt:
     toc: false
                 """
         elif self.report_type == r.ReportType.PRESENTATION:
-            if ReportFormat.REVEALJS in self.report_formats:
+            if ReportFormat.REVEALJS == self.report_format:
                 yaml_header += f"""
   revealjs:
     toc: false
                 """
-            if ReportFormat.PPTX in self.report_formats:
+            if ReportFormat.PPTX == self.report_format:
                 yaml_header += f"""
   pptx:
     toc: false
                 """
         elif self.report_type == r.ReportType.NOTEBOOK:
-            if ReportFormat.JUPYTER in self.report_formats:
+            if ReportFormat.JUPYTER == self.report_format:
                 yaml_header += f"""
   jupyter:
     kernel: python3
@@ -187,109 +187,175 @@ format:"""
             A list of imports for the subsection.
         """
         imports_written_subsection = []
+        is_report_static = self.report_format in {ReportFormat.PDF, ReportFormat.DOCX, ReportFormat.ODT}
+
         for component in subsection.components:
-            # Write imports if not already done
             imports_component = component.generate_imports()
             imports_written_subsection.append(imports_component)
 
-            # Handle different types of components
             if component.component_type == r.ComponentType.PLOT:
-                # Cast component to Plot
-                plot = component 
-                if plot.plot_type == r.PlotType.INTERACTIVE:
-                    if plot.visualization_tool == r.VisualizationTool.PLOTLY:
-                        # Add the plot title as a header
-                        content.append(f'### {plot.title}')
-                        content.append(f"""```{{python}}
-#| label: {plot.name}
-#| echo: false
-with open('{os.path.join("..", plot.file_path)}', 'r') as plot_file:
-    plot_data = plot_file.read()
-fig_plotly = pio.from_json(plot_data)
-fig_plotly.show()
-```\n""")
-                    elif plot.visualization_tool == r.VisualizationTool.ALTAIR:
-                        content.append(f'### {plot.title}')
-                        content.append(f"""```{{python}}
-#| label: {plot.name}
-#| echo: false
-with open('{os.path.join("..", plot.file_path)}', 'r') as plot_file:
-    plot_data = plot_file.read()
-fig_altair = alt.Chart.from_json(plot_data)
-fig_altair
-```\n""")
-                    elif plot.visualization_tool == r.VisualizationTool.PYVIS:
-                        G = plot.read_network()
-                        # Define the output file name
-                        output_file = f"example_data/{plot.name.replace(' ', '_')}.html"
-                        # Get the Network object
-                        net = plot.create_and_save_pyvis_network(G, output_file)
-                        num_nodes = len(net.nodes)
-                        num_edges = len(net.edges)
-                        content.append(f'### {plot.title}')
-                        content.append(f'**Number of nodes:** {num_nodes}\n')
-                        content.append(f'**Number of edges:** {num_edges}\n')
-
-                        content.append(f"""<div style="text-align: center;">
-  <iframe src="{os.path.join("..", output_file)}" alt="{plot.name} plot" width="800px" height="630px"></iframe>
-</div>\n""")
-
-                elif plot.plot_type == r.PlotType.STATIC:
-                    content.append(f'### {plot.title}')
-                    content.append(f"""::: {{style="text-align: center;"}}
-![{plot.name}]({os.path.join('..', plot.file_path)}){{ width=650px }}
-:::\n""")
-
+                self._add_plot_to_content(component, content, is_report_static)
+            
             elif component.component_type == r.ComponentType.DATAFRAME:
-                # Cast component to DataFrame
-                dataframe = component 
-                if dataframe.file_format == r.DataFrameFormat.CSV:
-                    content.append(f'### {dataframe.title}')
-                    if dataframe.delimiter:
-                        content.append(f"""```{{python}}
-#| label: {dataframe.name}
-#| echo: false
-df = pd.read_csv('{os.path.join("..", dataframe.file_path)}', delimiter='{dataframe.delimiter}')
-show(df)
-```\n""")
-                    else:
-                        content.append(f"""```{{python}}
-#| label: {dataframe.name}
-#| echo: false
-df = pd.read_csv('{os.path.join("..", dataframe.file_path)}')
-show(df)
-```\n""")
-                elif dataframe.file_format == r.DataFrameFormat.PARQUET:
-                    content.append(f'### {dataframe.title}')
-                    content.append(f"""```{{python}}
-#| label: {dataframe.name}
-#| echo: false
-df = pd.read_parquet('{os.path.join("..", dataframe.file_path)}')
-show(df)
-```\n""")
-                elif dataframe.file_format == r.DataFrameFormat.TXT:
-                    content.append(f'### {dataframe.title}')
-                    content.append(f"""```{{python}}
-#| label: {dataframe.name}
-#| echo: false
-df = pd.read_csv('{os.path.join("..", dataframe.file_path)}', sep='\\t')
-show(df)
-```\n""")
-                elif dataframe.file_format == r.DataFrameFormat.EXCEL:
-                    content.append(f'### {dataframe.title}')
-                    content.append(f"""```{{python}}
-#| label: {dataframe.name}
-#| echo: false
-df = pd.read_excel('{os.path.join("..", dataframe.file_path)}')
-show(df)
-```\n""")
-                else:
-                    raise ValueError(f"Unsupported DataFrame file format: {dataframe.file_format}")
+                self._add_dataframe_to_content(component, content, is_report_static)
+            
             elif component.component_type == r.ComponentType.MARKDOWN:
-                # Cast component to Markdown
-                markdown = component 
-                content.append(f'### {markdown.title}')
+                self._add_markdown_to_content(component, content)
+        
+        return imports_written_subsection
+
+    def _add_plot_to_content(self, plot, content, is_report_static):
+        """
+        Adds plot content based on whether the report type is static or interactive.
+
+        Parameters
+        ----------
+        plot : Plot
+            The plot component to add to content.
+        content : list
+            The list to append content to.
+        is_report_static : bool
+            A boolean indicating whether the report is static or interactive.
+        """
+        content.append(f'### {plot.title}')
+        if plot.plot_type == r.PlotType.INTERACTIVE:
+            if plot.visualization_tool == r.VisualizationTool.PLOTLY:
                 content.append(f"""```{{python}}
+#| label: {plot.name}
+#| echo: false
+with open('{os.path.join("..", plot.file_path)}', 'r') as plot_file:
+    plot_data = plot_file.read()
+fig_plotly = pio.from_json(plot_data)""")
+                if is_report_static:
+                    # Define the output file name
+                    plotly_plot_static = f"quarto_report/{plot.name.replace(' ', '_')}.png"
+                    content.append(f"""fig_plotly.write_image("{os.path.join("..", plotly_plot_static)}")\n```\n""")
+                    self._add_image_content(content, plotly_plot_static, plot.name)
+                else:
+                    content.append(f"""fig_plotly.show()\n```\n""")
+            elif plot.visualization_tool == r.VisualizationTool.ALTAIR:
+                content.append(f"""```{{python}}
+#| label: {plot.name}
+#| echo: false
+with open('{os.path.join("..", plot.file_path)}', 'r') as plot_file:
+    plot_data = plot_file.read()
+fig_altair = alt.Chart.from_json(plot_data)""")
+                if is_report_static:
+                    # Define the output file name
+                    altair_plot_static = f"quarto_report/{plot.name.replace(' ', '_')}.png"
+                    content.append(f"""fig_altair.save("{os.path.join("..", altair_plot_static)}")\n```\n""")
+                    self._add_image_content(content, altair_plot_static, plot.name)
+                else:
+                    content.append(f"""fig_altair\n```\n""")
+            elif plot.visualization_tool == r.VisualizationTool.PYVIS:
+                G = plot.read_network()
+                num_nodes = G.number_of_nodes()
+                num_edges = G.number_of_edges()
+                content.append(f'**Number of nodes:** {num_nodes}')
+                content.append(f'**Number of edges:** {num_edges}\n')
+                if is_report_static:
+                    # Define the output file name
+                    net_static = f"quarto_report/{plot.name.replace(' ', '_')}.png"
+                    plot.save_netwrok_image(G, net_static, "png")
+                    self._add_image_content(content, net_static, plot.name)
+                else:
+                    # Define the output file name
+                    output_file = f"quarto_report/{plot.name.replace(' ', '_')}.html"
+                    # Get the Network object
+                    net = plot.create_and_save_pyvis_network(G, output_file)
+
+                    content.append(f"""<div style="text-align: center;">
+<iframe src="{os.path.join("..", output_file)}" alt="{plot.name} plot" width="800px" height="630px"></iframe>
+</div>\n""")
+        elif plot.plot_type == r.PlotType.STATIC:
+            self._add_image_content(content, plot.file_path, plot.name)
+
+    def _add_dataframe_to_content(self, dataframe, content, is_report_static):
+        """
+        Adds dataframe content based on the report type.
+
+        Parameters
+        ----------
+        dataframe : DataFrame
+            The dataframe component to add to content.
+        content : list
+            The list to append content to.
+        is_report_static : bool
+            A boolean indicating whether the report is static or interactive.
+        """
+        content.append(f'### {dataframe.title}')
+        if dataframe.file_format == r.DataFrameFormat.CSV:
+            if dataframe.delimiter:
+                content.append(f"""```{{python}}
+#| label: {dataframe.name}
+#| echo: false
+df = pd.read_csv('{os.path.join("..", dataframe.file_path)}', delimiter='{dataframe.delimiter}')""")
+                if is_report_static:
+                    df_image = f"quarto_report/{dataframe.name.replace(' ', '_')}.png"
+                    content.append(f"""dfi.export(df, '{os.path.join("..", df_image)}', max_rows=10, max_cols=5)\n```\n""")
+                    self._add_image_content(content, df_image, dataframe.name)
+                else:
+                    content.append(f"show(df)\n```\n")
+            else:
+                content.append(f"""```{{python}}
+#| label: {dataframe.name}
+#| echo: false
+df = pd.read_csv('{os.path.join("..", dataframe.file_path)}')""")
+                if is_report_static:
+                    df_image = f"quarto_report/{dataframe.name.replace(' ', '_')}.png"
+                    content.append(f"""dfi.export(df, '{os.path.join("..", df_image)}', max_rows=10, max_cols=5)\n```\n""")
+                    self._add_image_content(content, df_image, dataframe.name)
+                else:
+                    content.append(f"show(df)\n```\n")
+        elif dataframe.file_format == r.DataFrameFormat.PARQUET:
+            content.append(f"""```{{python}}
+#| label: {dataframe.name}
+#| echo: false
+df = pd.read_parquet('{os.path.join("..", dataframe.file_path)}')""")
+            if is_report_static:
+                df_image = f"quarto_report/{dataframe.name.replace(' ', '_')}.png"
+                content.append(f"""dfi.export(df, '{os.path.join("..", df_image)}', max_rows=10, max_cols=5)\n```\n""")
+                self._add_image_content(content, df_image, dataframe.name)
+            else:
+                content.append(f"show(df)\n```\n")
+        elif dataframe.file_format == r.DataFrameFormat.TXT:
+            content.append(f"""```{{python}}
+#| label: {dataframe.name}
+#| echo: false
+df = pd.read_csv('{os.path.join("..", dataframe.file_path)}', sep='\\t')""")
+            if is_report_static:
+                df_image = f"quarto_report/{dataframe.name.replace(' ', '_')}.png"
+                content.append(f"""dfi.export(df, '{os.path.join("..", df_image)}', max_rows=10, max_cols=5)\n```\n""")
+                self._add_image_content(content, df_image, dataframe.name)
+            else:
+                content.append(f"show(df)\n```\n")
+        elif dataframe.file_format == r.DataFrameFormat.EXCEL:
+            content.append(f"""```{{python}}
+#| label: {dataframe.name}
+#| echo: false
+df = pd.read_excel('{os.path.join("..", dataframe.file_path)}')""")
+            if is_report_static:
+                df_image = f"quarto_report/{dataframe.name.replace(' ', '_')}.png"
+                content.append(f"""dfi.export(df, '{os.path.join("..", df_image)}', max_rows=10, max_cols=5)\n```\n""")
+                self._add_image_content(content, df_image, dataframe.name)
+            else:
+                content.append(f"show(df)\n```\n")
+        else:
+            raise ValueError(f"Unsupported DataFrame file format: {dataframe.file_format}")
+
+    def _add_markdown_to_content(self, markdown, content):
+        """
+        Adds markdown content to the report.
+
+        Parameters
+        ----------
+        markdown : Markdown
+            The markdown component to add to content.
+        content : list
+            The list to append content to.
+        """
+        content.append(f'### {markdown.title}')
+        content.append(f"""```{{python}}
 #| label: {markdown.name}
 #| table-cap: "MD file"
 #| table-type: "md"
@@ -298,4 +364,22 @@ with open('{os.path.join("..", markdown.file_path)}', 'r') as markdown_file:
     markdown_content = markdown_file.read()
 display.Markdown(markdown_content)
 ```\n""")
-        return imports_written_subsection
+
+    def _add_image_content(self, content: list, image_path: str, alt_text: str, width: int = 650) -> None:
+        """
+        Adds an image to the content list in a centered format with a specified width.
+
+        Parameters
+        ----------
+        content : list
+            The list to which the image markdown will be appended.
+        image_path : str
+            Path to the image file.
+        alt_text : str
+            Alternative text for the image.
+        width : int, optional
+            Width of the image in pixels (default is 650).
+        """
+        content.append(f"""::: {{style="text-align: center;"}}
+![{alt_text}]({os.path.join('..', image_path)}){{ width={width}px }}
+:::\n""")

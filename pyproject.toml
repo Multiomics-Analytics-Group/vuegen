@@ -22,6 +22,9 @@ nbclient = "^0.10.0"
 matplotlib = "^3.9.2"
 altair = "^5.4.1"
 itables = "^2.2.2"
+kaleido = "0.2.0"
+vl-convert-python = "^1.7.0"
+dataframe-image = "^0.2.6"
 
 
 [tool.poetry.group.dev.dependencies]

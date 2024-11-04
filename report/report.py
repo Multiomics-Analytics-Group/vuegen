@@ -5,6 +5,7 @@ from enum import StrEnum, auto
 from typing import List, Optional
 import networkx as nx
 import pandas as pd
+import matplotlib.pyplot as plt
 from pyvis.network import Network
 
 class ReportType(StrEnum):
@@ -169,6 +170,26 @@ class Plot(Component):
         
         # Return the NetworkX graph object created from the specified network file
         return G
+    
+    def save_netwrok_image(self, G: nx.Graph, output_file: str, format: str, dpi: int=300) -> None:
+        """
+        Saves a NetworkX graph as an image file in the specified format and resolution.
+        
+        Parameters
+        ----------
+        G : networkx.Graph
+            A NetworkX graph object.
+        output_file : str
+            The file path where the image should be saved.
+        format : str
+            The format of the image file (e.g., 'png', 'jpg', 'svg').
+        dpi : int, optional
+            The resolution of the image in dots per inch (default is 300).
+        """
+        # Draw the graph and save it as an image file
+        nx.draw(G, with_labels=True) 
+        plt.savefig(output_file, format=format, dpi=dpi)
+        plt.clf()
 
     def create_and_save_pyvis_network(self, G: nx.Graph, output_file: str) -> Network:
         """
@@ -282,7 +303,7 @@ class DataFrame(Component):
         str
             A string representing the import statements needed for the DataFrame.
         """
-        return "import pandas as pd\nfrom itables import show"
+        return "import pandas as pd\nfrom itables import show\nimport dataframe_image as dfi"
 
 
 @dataclass
