@@ -116,16 +116,18 @@ class QuartoReportView(r.ReportView):
         # Base YAML header with title
         yaml_header = f"""---
 title: {self.report.title}
+fig-align: center
 format:"""
 
         # Define format-specific YAML configurations
         format_configs = {
             (r.ReportType.DOCUMENT, ReportFormat.HTML): """
   html:
-    page-layout: full
-    self-contained: true
+    toc: true
     toc-location: left
-    toc-depth: 3""",
+    toc-depth: 3
+    page-layout: full
+    self-contained: true""",
             (r.ReportType.DOCUMENT, ReportFormat.PDF): """
   pdf:
     toc: false""",
@@ -138,7 +140,11 @@ format:"""
             (r.ReportType.PRESENTATION, ReportFormat.REVEALJS): """
   revealjs:
     toc: false
-    smaller: true""",
+    smaller: true
+    controls: true
+    navigation-mode: vertical
+    controls-layout: bottom-right
+    output-file: quarto_report_revealjs.html""",
             (r.ReportType.PRESENTATION, ReportFormat.PPTX): """
   pptx:
     toc: false
@@ -235,7 +241,8 @@ format:"""
 #| echo: false
 with open('{os.path.join("..", plot.file_path)}', 'r') as plot_file:
     plot_data = plot_file.read()
-fig_plotly = pio.from_json(plot_data)""")
+fig_plotly = pio.from_json(plot_data)
+fig_plotly.update_layout(width=950, height=500)""")
                 if is_report_static:
                     # Define the output file name
                     plotly_plot_static = f"quarto_report/{plot.name.replace(' ', '_')}.png"
@@ -249,7 +256,7 @@ fig_plotly = pio.from_json(plot_data)""")
 #| echo: false
 with open('{os.path.join("..", plot.file_path)}', 'r') as plot_file:
     plot_data = plot_file.read()
-fig_altair = alt.Chart.from_json(plot_data)""")
+fig_altair = alt.Chart.from_json(plot_data).properties(width=900, height=400)""")
                 if is_report_static:
                     # Define the output file name
                     altair_plot_static = f"quarto_report/{plot.name.replace(' ', '_')}.png"
@@ -261,7 +268,7 @@ fig_altair = alt.Chart.from_json(plot_data)""")
                 G = plot.read_network()
                 num_nodes = G.number_of_nodes()
                 num_edges = G.number_of_edges()
-                plot_content.append(f'**Number of nodes:** {num_nodes}')
+                plot_content.append(f'**Number of nodes:** {num_nodes}\n')
                 plot_content.append(f'**Number of edges:** {num_edges}\n')
                 if is_report_static:
                     # Define the output file name
@@ -278,7 +285,7 @@ fig_altair = alt.Chart.from_json(plot_data)""")
 <iframe src="{os.path.join("..", output_file)}" alt="{plot.name} plot" width="800px" height="630px"></iframe>
 </div>\n""")
         elif plot.plot_type == r.PlotType.STATIC:
-            plot_content.append(self._generate_image_content(plot.file_path, plot.name))
+            plot_content.append(self._generate_image_content(plot.file_path, width=950))
         
         return plot_content
 
@@ -363,7 +370,7 @@ display.Markdown(markdown_content)
 ```\n""")
         return markdown_content
 
-    def _generate_image_content(self, image_path: str, alt_text: str, width: int = 650) -> str:
+    def _generate_image_content(self, image_path: str, alt_text: str = "", width: int = 650, height: int = 400) -> str:
         """
         Adds an image to the content list in a centered format with a specified width.
 
@@ -371,10 +378,12 @@ display.Markdown(markdown_content)
         ----------
         image_path : str
             Path to the image file.
-        alt_text : str
-            Alternative text for the image.
         width : int, optional
             Width of the image in pixels (default is 650).
+        height : int, optional
+            Height of the image in pixels (default is 500).
+        alt_text : str, optional
+            Alternative text for the image (default is an empty string).
         
         Returns
         -------
@@ -382,7 +391,7 @@ display.Markdown(markdown_content)
             The formatted image content.
         """
         return f"""
-![{alt_text}]({os.path.join('..', image_path)}){{ width={width}px fig-align="center"}}\n"""
+![{alt_text}]({os.path.join('..', image_path)}){{ width={width}px height={height}px fig-align="center"}}\n"""
     
     def _show_dataframe(self, dataframe, is_report_static) -> List[str]:
         """
@@ -409,6 +418,6 @@ display.Markdown(markdown_content)
             dataframe_content.append(self._generate_image_content(df_image, dataframe.name))
         else:
             # Append code to display the DataFrame interactively
-            dataframe_content.append("show(df)\n```\n")
+            dataframe_content.append(f"""show(df, classes="display nowrap compact", lengthMenu=[3, 5, 10])\n```\n""")
         
         return dataframe_content
