@@ -235,33 +235,24 @@ format:"""
         plot_content = []
         plot_content.append(f'### {plot.title}')
         if plot.plot_type == r.PlotType.INTERACTIVE:
+            # Define plot path
+            if is_report_static:
+                static_plot_path = f"quarto_report/{plot.name.replace(' ', '_')}.png"
+            else:
+                html_plot_file = f"quarto_report/{plot.name.replace(' ', '_')}.html"
+
             if plot.visualization_tool == r.VisualizationTool.PLOTLY:
-                plot_content.append(f"""```{{python}}
-#| label: {plot.name}
-#| echo: false
-with open('{os.path.join("..", plot.file_path)}', 'r') as plot_file:
-    plot_data = plot_file.read()
-fig_plotly = pio.from_json(plot_data)
-fig_plotly.update_layout(width=950, height=500)""")
+                plot_content.append(self._create_plot_code(plot))
                 if is_report_static:
-                    # Define the output file name
-                    plotly_plot_static = f"quarto_report/{plot.name.replace(' ', '_')}.png"
-                    plot_content.append(f"""fig_plotly.write_image("{os.path.join("..", plotly_plot_static)}")\n```\n""")
-                    plot_content.append(self._generate_image_content(plotly_plot_static, plot.name))
+                    plot_content.append(f"""fig_plotly.write_image("{os.path.join("..", static_plot_path)}")\n```\n""")
+                    plot_content.append(self._generate_image_content(static_plot_path, plot.name))
                 else:
                     plot_content.append(f"""fig_plotly.show()\n```\n""")
             elif plot.visualization_tool == r.VisualizationTool.ALTAIR:
-                plot_content.append(f"""```{{python}}
-#| label: {plot.name}
-#| echo: false
-with open('{os.path.join("..", plot.file_path)}', 'r') as plot_file:
-    plot_data = plot_file.read()
-fig_altair = alt.Chart.from_json(plot_data).properties(width=900, height=400)""")
+                plot_content.append(self._create_plot_code(plot))
                 if is_report_static:
-                    # Define the output file name
-                    altair_plot_static = f"quarto_report/{plot.name.replace(' ', '_')}.png"
-                    plot_content.append(f"""fig_altair.save("{os.path.join("..", altair_plot_static)}")\n```\n""")
-                    plot_content.append(self._generate_image_content(altair_plot_static, plot.name))
+                    plot_content.append(f"""fig_altair.save("{os.path.join("..", static_plot_path)}")\n```\n""")
+                    plot_content.append(self._generate_image_content(static_plot_path, plot.name))
                 else:
                     plot_content.append(f"""fig_altair\n```\n""")
             elif plot.visualization_tool == r.VisualizationTool.PYVIS:
@@ -271,23 +262,51 @@ fig_altair = alt.Chart.from_json(plot_data).properties(width=900, height=400)"""
                 plot_content.append(f'**Number of nodes:** {num_nodes}\n')
                 plot_content.append(f'**Number of edges:** {num_edges}\n')
                 if is_report_static:
-                    # Define the output file name
-                    net_static = f"quarto_report/{plot.name.replace(' ', '_')}.png"
-                    plot.save_netwrok_image(G, net_static, "png")
-                    plot_content.append(self._generate_image_content(net_static, plot.name))
+                    plot.save_netwrok_image(G, static_plot_path, "png")
+                    plot_content.append(self._generate_image_content(static_plot_path, plot.name))
                 else:
-                    # Define the output file name
-                    output_file = f"quarto_report/{plot.name.replace(' ', '_')}.html"
                     # Get the Network object
-                    net = plot.create_and_save_pyvis_network(G, output_file)
-
-                    plot_content.append(f"""<div style="text-align: center;">
-<iframe src="{os.path.join("..", output_file)}" alt="{plot.name} plot" width="800px" height="630px"></iframe>
-</div>\n""")
+                    net = plot.create_and_save_pyvis_network(G, html_plot_file)
+                    plot_content.append(self._create_plot_code(plot, html_plot_file))
         elif plot.plot_type == r.PlotType.STATIC:
             plot_content.append(self._generate_image_content(plot.file_path, width=950))
         
         return plot_content
+
+    def _create_plot_code(self, plot, output_file = "") -> str:
+        """
+        Create the code template for a plot based on its visualization tool. 
+
+        Parameters
+        ----------
+        plot : Plot
+            The plot component to generate the code template for.
+        output_file: str, optional
+            The output html file name to be displayed with a pyvis plot.
+        Returns
+        -------
+        str
+            The generated code template as a string.
+        """
+        # Start with the common data loading code
+        template = f"""```{{python}}
+#| label: {plot.name}
+#| echo: false
+with open('{os.path.join("..", plot.file_path)}', 'r') as plot_file:
+    plot_data = plot_file.read()
+    """
+        # Add specific code for each visualization tool
+        if plot.visualization_tool == r.VisualizationTool.PLOTLY:
+            template += """fig_plotly = pio.from_json(plot_data)
+fig_plotly.update_layout(width=950, height=500)
+    """
+        elif plot.visualization_tool == r.VisualizationTool.ALTAIR:
+            template += """fig_altair = alt.Chart.from_json(plot_data).properties(width=900, height=400)"""
+        elif plot.visualization_tool == r.VisualizationTool.PYVIS:
+            template = f"""<div style="text-align: center;">
+<iframe src="{os.path.join("..", output_file)}" alt="{plot.name} plot" width="800px" height="630px"></iframe>
+</div>\n"""
+        return template
 
     def _generate_dataframe_content(self, dataframe, is_report_static) -> List[str]:
         """
@@ -307,36 +326,26 @@ fig_altair = alt.Chart.from_json(plot_data).properties(width=900, height=400)"""
         """
         datframe_content = []
         datframe_content.append(f'### {dataframe.title}')
+        # Append header for DataFrame loading
+        datframe_content.append(f"""```{{python}}
+#| label: {dataframe.name}
+#| echo: false
+""")
         if dataframe.file_format == r.DataFrameFormat.CSV:
             if dataframe.delimiter:
-                datframe_content.append(f"""```{{python}}
-#| label: {dataframe.name}
-#| echo: false
-df = pd.read_csv('{os.path.join("..", dataframe.file_path)}', delimiter='{dataframe.delimiter}')""")
+                datframe_content.append(f"""df = pd.read_csv('{os.path.join("..", dataframe.file_path)}', delimiter='{dataframe.delimiter}')""")
                 datframe_content.extend(self._show_dataframe(dataframe, is_report_static))
             else:
-                datframe_content.append(f"""```{{python}}
-#| label: {dataframe.name}
-#| echo: false
-df = pd.read_csv('{os.path.join("..", dataframe.file_path)}')""")
+                datframe_content.append(f"""df = pd.read_csv('{os.path.join("..", dataframe.file_path)}')""")
                 datframe_content.extend(self._show_dataframe(dataframe, is_report_static))
         elif dataframe.file_format == r.DataFrameFormat.PARQUET:
-            datframe_content.append(f"""```{{python}}
-#| label: {dataframe.name}
-#| echo: false
-df = pd.read_parquet('{os.path.join("..", dataframe.file_path)}')""")
+            datframe_content.append(f"""df = pd.read_parquet('{os.path.join("..", dataframe.file_path)}')""")
             datframe_content.extend(self._show_dataframe(dataframe, is_report_static))
         elif dataframe.file_format == r.DataFrameFormat.TXT:
-            datframe_content.append(f"""```{{python}}
-#| label: {dataframe.name}
-#| echo: false
-df = pd.read_csv('{os.path.join("..", dataframe.file_path)}', sep='\\t')""")
+            datframe_content.append(f"""df = pd.read_csv('{os.path.join("..", dataframe.file_path)}', sep='\\t')""")
             datframe_content.extend(self._show_dataframe(dataframe, is_report_static))
         elif dataframe.file_format == r.DataFrameFormat.EXCEL:
-            datframe_content.append(f"""```{{python}}
-#| label: {dataframe.name}
-#| echo: false
-df = pd.read_excel('{os.path.join("..", dataframe.file_path)}')""")
+            datframe_content.append(f"""df = pd.read_excel('{os.path.join("..", dataframe.file_path)}')""")
             datframe_content.extend(self._show_dataframe(dataframe, is_report_static))
         else:
             raise ValueError(f"Unsupported DataFrame file format: {dataframe.file_format}")
