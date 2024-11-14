@@ -448,6 +448,26 @@ class ReportView(ABC):
             The folder where the report was generated (default is 'sections').
         """
         pass
+    
+    @abstractmethod
+    def _generate_component_imports(self) -> str:
+        """
+        Generate necessary imports for a component of the report.
+
+        Parameters
+        ----------
+        component : r.Component
+            The component for which to generate the required imports. The component can be of type:
+            - PLOT
+            - DATAFRAME
+            - MARKDOWN
+        
+        Returns
+        -------
+        str
+            A str of import statements for the component.
+        """
+        pass 
 
 @dataclass
 class WebAppReportView(ReportView):

@@ -11,7 +11,7 @@ class ReportFormat(StrEnum):
     ODT = auto()
     REVEALJS = auto()
     PPTX = auto()
-    JUPYTER = auto()
+    JUPYTER = auto() 
 
 class QuartoReportView(r.ReportView):
     """
@@ -52,7 +52,7 @@ class QuartoReportView(r.ReportView):
         
         # Create qmd content for the report
         qmd_content = []
-        imports_report = []
+        report_imports = []
 
         # Add the title and description of the report
         qmd_content.append(f'''{self.report.description}\n''')
@@ -70,18 +70,17 @@ class QuartoReportView(r.ReportView):
                 # Iterate through subsections and integrate them into the section file
                 for subsection in section.subsections:                    
                     # Generate content for the subsection
-                    subsection_content, imports_subsection = self._generate_subsection(subsection, is_report_static, is_report_revealjs)
+                    subsection_content, subsection_imports = self._generate_subsection(subsection, is_report_static, is_report_revealjs)
                     qmd_content.extend(subsection_content)
-                    imports_report.extend(imports_subsection) 
+                    report_imports.extend(subsection_imports) 
         
         # Remove duplicated imports
-        unique_imports = set()
+        report_unique_imports = set()
+        for imp in report_imports:
+            report_unique_imports.update(imp.split('\n'))
 
-        # Split each string by newlines and update the set
-        for imp in imports_report:
-            unique_imports.update(imp.split('\n'))
-
-        formatted_imports = "\n".join(unique_imports)
+        # Format imports
+        report_formatted_imports = "\n".join(report_unique_imports)
         
         # Write the navigation and general content to a Python file
         with open(os.path.join(output_dir, "quarto_report.qmd"), 'w') as quarto_report:
@@ -89,7 +88,7 @@ class QuartoReportView(r.ReportView):
             quarto_report.write(f"""```{{python}}
 #| label: 'Imports'
 #| echo: false
-{formatted_imports}
+{report_formatted_imports}
 ```\n\n""")
             quarto_report.write("\n".join(qmd_content))
 
@@ -189,7 +188,7 @@ format:"""
             - list of imports for the subsection (List[str])
         """
         subsection_content = []
-        imports_written_subsection = []
+        subsection_imports = []
 
         # Add subsection header and description
         subsection_content.append(f'## {subsection.title}')
@@ -199,8 +198,8 @@ format:"""
             subsection_content.append(f'::: {{.panel-tabset}}\n')
 
         for component in subsection.components:
-            imports_component = component.generate_imports()
-            imports_written_subsection.append(imports_component)
+            imports_component = self._generate_component_imports(component)
+            subsection_imports.append(imports_component)
 
             if component.component_type == r.ComponentType.PLOT:
                 subsection_content.extend(self._generate_plot_content(component, is_report_static))
@@ -214,7 +213,7 @@ format:"""
         if is_report_revealjs:
             subsection_content.append(':::\n')
         
-        return subsection_content, imports_written_subsection
+        return subsection_content, subsection_imports
 
     def _generate_plot_content(self, plot, is_report_static) -> List[str]:
         """
@@ -242,14 +241,14 @@ format:"""
                 html_plot_file = f"quarto_report/{plot.name.replace(' ', '_')}.html"
 
             if plot.visualization_tool == r.VisualizationTool.PLOTLY:
-                plot_content.append(self._create_plot_code(plot))
+                plot_content.append(self._generate_plot_code(plot))
                 if is_report_static:
                     plot_content.append(f"""fig_plotly.write_image("{os.path.join("..", static_plot_path)}")\n```\n""")
                     plot_content.append(self._generate_image_content(static_plot_path, plot.name))
                 else:
                     plot_content.append(f"""fig_plotly.show()\n```\n""")
             elif plot.visualization_tool == r.VisualizationTool.ALTAIR:
-                plot_content.append(self._create_plot_code(plot))
+                plot_content.append(self._generate_plot_code(plot))
                 if is_report_static:
                     plot_content.append(f"""fig_altair.save("{os.path.join("..", static_plot_path)}")\n```\n""")
                     plot_content.append(self._generate_image_content(static_plot_path, plot.name))
@@ -267,13 +266,13 @@ format:"""
                 else:
                     # Get the Network object
                     net = plot.create_and_save_pyvis_network(G, html_plot_file)
-                    plot_content.append(self._create_plot_code(plot, html_plot_file))
+                    plot_content.append(self._generate_plot_code(plot, html_plot_file))
         elif plot.plot_type == r.PlotType.STATIC:
             plot_content.append(self._generate_image_content(plot.file_path, width=950))
         
         return plot_content
 
-    def _create_plot_code(self, plot, output_file = "") -> str:
+    def _generate_plot_code(self, plot, output_file = "") -> str:
         """
         Create the code template for a plot based on its visualization tool. 
 
@@ -430,3 +429,48 @@ display.Markdown(markdown_content)
             dataframe_content.append(f"""show(df, classes="display nowrap compact", lengthMenu=[3, 5, 10])\n```\n""")
         
         return dataframe_content
+    
+    def _generate_component_imports(self, component: r.Component) -> str:
+        """
+        Generate necessary imports for a component of the report.
+
+        Parameters
+        ----------
+        component : r.Component
+            The component for which to generate the required imports. The component can be of type:
+            - PLOT
+            - DATAFRAME
+            - MARKDOWN
+        
+        Returns
+        -------
+        str
+            A str of import statements for the component.
+        """
+        # Dictionary to hold the imports for each component type
+        components_imports = {
+            'plot': {
+                r.VisualizationTool.ALTAIR: 'import altair as alt',
+                r.VisualizationTool.PLOTLY: 'import plotly.io as pio'
+            },
+            'dataframe': 'import pandas as pd\nfrom itables import show\nimport dataframe_image as dfi',
+            'markdown': 'import IPython.display as display'
+        }
+
+        # Iterate over sections and subsections to determine needed imports 
+        component_type = component.component_type
+
+        # Add relevant imports based on component type and visualization tool
+        if component_type == r.ComponentType.PLOT:
+            visualization_tool = getattr(component, 'visualization_tool', None)
+            if visualization_tool in components_imports['plot']:
+                return components_imports['plot'][visualization_tool]
+
+        elif component_type == r.ComponentType.DATAFRAME:
+            return components_imports['dataframe']
+
+        elif component_type == r.ComponentType.MARKDOWN:
+            return components_imports['markdown']
+
+        # If no relevant import is found, return an empty string
+        return ''

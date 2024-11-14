@@ -22,3 +22,4 @@ if __name__ == '__main__':
     #                                              report=report, report_type = ReportType[report_metadata['report']['report_type'].upper()], columns=None)
     #st_report.generate_report(output_dir="streamlit_report/sections")
     #st_report.run_report(output_dir="streamlit_report/sections")
+
