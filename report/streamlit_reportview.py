@@ -41,12 +41,11 @@ class StreamlitReportView(r.WebAppReportView):
             os.makedirs(output_dir, exist_ok=True)
 
         # Define the Streamlit imports and report manager content
-        streamlit_imports = f'''import streamlit as st
+        report_manag_content = []
+        report_manag_content.append(f"""import streamlit as st\n
 st.set_page_config(layout="wide", page_title="{self.report.name}", page_icon="{self.report.logo}")
-st.logo("{self.report.logo}")
-'''
-        general_head = self._format_text(text=self.report.title, type = 'header', level=1, color='#023858')
-        report_manag_content = [streamlit_imports, general_head]
+st.logo("{self.report.logo}")""")
+        report_manag_content.append(self._format_text(text=self.report.title, type = 'header', level=1, color='#023858'))
 
         # Initialize a dictionary to store the navigation structure
         report_manag_content.append("\nsections_pages = {}")
@@ -73,8 +72,8 @@ st.logo("{self.report.logo}")
             report_manag_content.append(f"sections_pages['{section.name}'] = [{', '.join(subsection_page_vars)}]\n")
 
         # Add navigation object to the home page content
-        report_manag_content.append(f'''report_nav = st.navigation(sections_pages)
-report_nav.run()''')
+        report_manag_content.append(f"""report_nav = st.navigation(sections_pages)
+report_nav.run()""")
         
         # Write the navigation and general content to a Python file
         with open(os.path.join(output_dir, "report_manager.py"), 'w') as nav_manager:
@@ -216,7 +215,7 @@ report_nav.run()''')
         """
         subsection_content = []
         subsection_imports = []
-
+        
         # Add subsection header and description
         subsection_content.append(self._format_text(text=subsection.name, type='header', level=3, color='#023558'))
         subsection_content.append(self._format_text(text=subsection.description, type='paragraph'))
@@ -228,42 +227,11 @@ report_nav.run()''')
 
             # Handle different types of components
             if component.component_type == r.ComponentType.PLOT:
-                # Cast component to Plot
-                plot = component 
-                subsection_content.extend(self._generate_plot_content(plot))
-
+                subsection_content.extend(self._generate_plot_content(component))
             elif component.component_type == r.ComponentType.DATAFRAME:
-                # Cast component to DataFrame
-                dataframe = component 
-                if dataframe.file_format == r.DataFrameFormat.CSV:
-                    subsection_content.append(self._format_text(text=dataframe.title, type='header', level=4, color='#2b8cbe'))
-                    if dataframe.delimiter:
-                        subsection_content.append(f"""df = pd.read_csv('{dataframe.file_path}', delimiter='{dataframe.delimiter}')
-st.dataframe(df, use_container_width=True)\n""")
-                    else:
-                        subsection_content.append(f"""df = pd.read_csv('{dataframe.file_path}')
-st.dataframe(df, use_container_width=True)\n""")
-                elif dataframe.file_format == r.DataFrameFormat.PARQUET:
-                    subsection_content.append(self._format_text(text=dataframe.title, type='header', level=4, color='#2b8cbe'))
-                    subsection_content.append(f"""df = pd.read_parquet('{dataframe.file_path}')
-st.dataframe(df, use_container_width=True)\n""")
-                elif dataframe.file_format == r.DataFrameFormat.TXT:
-                    subsection_content.append(self._format_text(text=dataframe.title, type='header', level=4, color='#2b8cbe'))
-                    subsection_content.append(f"""df = pd.read_csv('{dataframe.file_path}', sep='\\t')
-st.dataframe(df, use_container_width=True)\n""")
-                elif dataframe.file_format == r.DataFrameFormat.EXCEL:
-                    subsection_content.append(self._format_text(text=dataframe.title, type='header', level=4, color='#2b8cbe'))
-                    subsection_content.append(f"""df = pd.read_excel('{dataframe.file_path}')
-st.dataframe(df, use_container_width=True)\n""")
-                else:
-                    raise ValueError(f"Unsupported DataFrame file format: {dataframe.file_format}")
+                subsection_content.extend(self._generate_dataframe_content(component))
             elif component.component_type == r.ComponentType.MARKDOWN:
-                # Cast component to Markdown
-                markdown = component 
-                subsection_content.append(self._format_text(text=markdown.title, type='header', level=4, color='#2b8cbe'))
-                subsection_content.append(f"""with open('{markdown.file_path}', 'r') as markdown_file:
-    markdown_content = markdown_file.read()
-st.markdown(markdown_content, unsafe_allow_html=True)\n""")
+                subsection_content.extend(self._generate_markdown_content(component))
         return subsection_content, subsection_imports
     
     def _generate_plot_content(self, plot) -> List[str]:
@@ -286,14 +254,9 @@ st.markdown(markdown_content, unsafe_allow_html=True)\n""")
         if plot.plot_type == r.PlotType.INTERACTIVE:
             # Handle interactive plot
             if plot.visualization_tool == r.VisualizationTool.PLOTLY:
-                plot_content.append(f"""with open('{plot.file_path}', 'r') as plot_file:
-    plot_json = json.load(plot_file)
-st.plotly_chart(plot_json, use_container_width=True)\n""")
+                plot_content.append(self._generate_plot_code(plot))
             elif plot.visualization_tool == r.VisualizationTool.ALTAIR:
-                plot_content.append(f"""with open('{plot.file_path}', 'r') as plot_file:
-    plot_json = json.load(plot_file)
-altair_plot = alt.Chart.from_dict(plot_json)
-st.vega_lite_chart(json.loads(altair_plot.to_json()), use_container_width=True)\n""")
+                plot_content.append(self._generate_plot_code(plot))
             elif plot.visualization_tool == r.VisualizationTool.PYVIS:
                 # For PyVis, handle the network visualization
                 G = plot.read_network()
@@ -303,22 +266,103 @@ st.vega_lite_chart(json.loads(altair_plot.to_json()), use_container_width=True)\
                 num_edges = len(net.edges)
                 plot_content.append(f"""with open('{html_plot_file}', 'r') as f:
     html_data = f.read()
-
 st.markdown(f"<p style='text-align: center; color: black;'> <b>Number of nodes:</b> {num_nodes} </p>", unsafe_allow_html=True)
-st.markdown(f"<p style='text-align: center; color: black;'> <b>Number of relationships:</b> {num_edges} </p>", unsafe_allow_html=True)
-
-# Streamlit checkbox for controlling the layout
-control_layout = st.checkbox('Add panel to control layout', value=True)
-net_html_height = 1200 if control_layout else 630
-
-# Load HTML into HTML component for display on Streamlit
-st.components.v1.html(html_data, height=net_html_height)\n""")
+st.markdown(f"<p style='text-align: center; color: black;'> <b>Number of relationships:</b> {num_edges} </p>", unsafe_allow_html=True)""")
+                plot_content.append(self._generate_plot_code(plot))
         elif plot.plot_type == r.PlotType.STATIC:
             # Handle static plot
             plot_content.append(f"\nst.image('{plot.file_path}', caption='{plot.caption}', use_column_width=True)\n")
 
         return plot_content
     
+    def _generate_plot_code(self, plot) -> str:
+        """
+        Create the plot code based on its visualization tool. 
+
+        Parameters
+        ----------
+        plot : Plot
+            The plot component to generate the code template for.
+        output_file: str, optional
+            The output html file name to be displayed with a pyvis plot.
+        Returns
+        -------
+        str
+            The generated plot code as a string.
+        """
+        # Start with the common data loading code
+        plot_code = f"""with open('{plot.file_path}', 'r') as plot_file:
+    plot_json = json.load(plot_file)\n"""
+        # Add specific code for each visualization tool
+        if plot.visualization_tool == r.VisualizationTool.PLOTLY:
+            plot_code += "st.plotly_chart(plot_json, use_container_width=True)\n"
+
+        elif plot.visualization_tool == r.VisualizationTool.ALTAIR:
+            plot_code += """altair_plot = alt.Chart.from_dict(plot_json)
+st.vega_lite_chart(json.loads(altair_plot.to_json()), use_container_width=True)\n"""
+        
+        elif plot.visualization_tool == r.VisualizationTool.PYVIS:
+            plot_code = """# Streamlit checkbox for controlling the layout
+control_layout = st.checkbox('Add panel to control layout', value=True)
+net_html_height = 1200 if control_layout else 630
+# Load HTML into HTML component for display on Streamlit
+st.components.v1.html(html_data, height=net_html_height)\n"""
+
+        return plot_code
+    
+    def _generate_dataframe_content(self, dataframe) -> List[str]:
+        """
+        Generate content for a DataFrame component.
+
+        Parameters
+        ----------
+        dataframe : DataFrame
+            The dataframe component to generate content for.
+
+        Returns
+        -------
+        list : List[str]
+            The list of content lines for the DataFrame.
+        """
+        dataframe_content = []
+        dataframe_content.append(self._format_text(text=dataframe.title, type='header', level=4, color='#2b8cbe'))
+        
+        if dataframe.file_format == r.DataFrameFormat.CSV:
+            dataframe_content.append(f"df = pd.read_csv('{dataframe.file_path}')")
+        elif dataframe.file_format == r.DataFrameFormat.PARQUET:
+            dataframe_content.append(f"df = pd.read_parquet('{dataframe.file_path}')")
+        elif dataframe.file_format == r.DataFrameFormat.TXT:
+            dataframe_content.append(f"df = pd.read_csv('{dataframe.file_path}', sep='\\t')")
+        elif dataframe.file_format == r.DataFrameFormat.EXCEL:
+            dataframe_content.append(f"df = pd.read_excel('{dataframe.file_path}')")
+        else:
+            raise ValueError(f"Unsupported DataFrame file format: {dataframe.file_format}")
+        
+        dataframe_content.append("st.dataframe(df, use_container_width=True)")
+        
+        return dataframe_content
+    
+    def _generate_markdown_content(self, markdown) -> List[str]:
+        """
+        Generate content for a Markdown component.
+
+        Parameters
+        ----------
+        markdown : Markdown
+            The markdown component to generate content for.
+
+        Returns
+        -------
+        list : List[str]
+            The list of content lines for the markdown.
+        """
+        markdown_content = []
+        markdown_content.append(self._format_text(text=markdown.title, type='header', level=4, color='#2b8cbe'))
+        markdown_content.append(f"""with open('{markdown.file_path}', 'r') as markdown_file:
+    markdown_content = markdown_file.read()
+st.markdown(markdown_content, unsafe_allow_html=True)\n""")
+        
+        return markdown_content
 
     def _generate_component_imports(self, component: r.Component) -> str:
         """
@@ -344,7 +388,6 @@ st.components.v1.html(html_data, height=net_html_height)\n""")
             },
             'dataframe': 'import pandas as pd'
         }
-
         # Iterate over sections and subsections to determine needed imports 
         component_type = component.component_type
 

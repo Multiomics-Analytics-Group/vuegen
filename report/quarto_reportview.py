@@ -50,7 +50,7 @@ class QuartoReportView(r.ReportView):
         # Define the YAML header for the quarto report
         yaml_header = self._create_yaml_header()
         
-        # Create qmd content for the report
+        # Create qmd content and imports for the report 
         qmd_content = []
         report_imports = []
 
@@ -274,7 +274,7 @@ format:"""
 
     def _generate_plot_code(self, plot, output_file = "") -> str:
         """
-        Create the code template for a plot based on its visualization tool. 
+        Create the plot code based on its visualization tool. 
 
         Parameters
         ----------
@@ -285,10 +285,10 @@ format:"""
         Returns
         -------
         str
-            The generated code template as a string.
+            The generated plot code as a string.
         """
         # Start with the common data loading code
-        template = f"""```{{python}}
+        plot_code = f"""```{{python}}
 #| label: {plot.name}
 #| echo: false
 with open('{os.path.join("..", plot.file_path)}', 'r') as plot_file:
@@ -296,16 +296,16 @@ with open('{os.path.join("..", plot.file_path)}', 'r') as plot_file:
     """
         # Add specific code for each visualization tool
         if plot.visualization_tool == r.VisualizationTool.PLOTLY:
-            template += """fig_plotly = pio.from_json(plot_data)
+            plot_code += """fig_plotly = pio.from_json(plot_data)
 fig_plotly.update_layout(width=950, height=500)
     """
         elif plot.visualization_tool == r.VisualizationTool.ALTAIR:
-            template += """fig_altair = alt.Chart.from_json(plot_data).properties(width=900, height=400)"""
+            plot_code += """fig_altair = alt.Chart.from_json(plot_data).properties(width=900, height=400)"""
         elif plot.visualization_tool == r.VisualizationTool.PYVIS:
-            template = f"""<div style="text-align: center;">
+            plot_code = f"""<div style="text-align: center;">
 <iframe src="{os.path.join("..", output_file)}" alt="{plot.name} plot" width="800px" height="630px"></iframe>
 </div>\n"""
-        return template
+        return plot_code
 
     def _generate_dataframe_content(self, dataframe, is_report_static) -> List[str]:
         """

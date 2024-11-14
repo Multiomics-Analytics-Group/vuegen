@@ -64,18 +64,6 @@ class Component(ABC):
     component_type: ComponentType
     title: Optional[str] = None
     caption: Optional[str] = None
-    
-    @abstractmethod
-    def generate_imports(self) -> str:
-        """
-        Generate the import statements required for the component.
-
-        Returns
-        -------
-        str
-            A string representing the import statements needed for the component.
-        """
-        pass
 
 class Plot(Component):
     """
@@ -104,23 +92,6 @@ class Plot(Component):
         self.plot_type = plot_type
         self.visualization_tool = visualization_tool
         self.csv_network_format = csv_network_format
-
-    def generate_imports(self) -> str:
-        """
-        Generate the import statements required for the visualization tool.
-
-        Returns
-        -------
-        str
-            A string representing the import statements needed for the plot.
-        """
-        imports = []
-        imports.append('import json')
-        if self.visualization_tool == VisualizationTool.ALTAIR:
-            imports.append('import altair as alt')
-        elif self.visualization_tool == VisualizationTool.PLOTLY:
-            imports.append('import plotly.io as pio')
-        return "\n".join(imports)
     
     def read_network(self) -> nx.Graph:
         """
@@ -294,35 +265,12 @@ class DataFrame(Component):
         self.file_format = file_format
         self.delimiter = delimiter
 
-    def generate_imports(self) -> str:
-        """
-        Generate the import statements required for handling DataFrames.
-        
-        Returns
-        -------
-        str
-            A string representing the import statements needed for the DataFrame.
-        """
-        return "import pandas as pd\nfrom itables import show\nimport dataframe_image as dfi"
-
-
 @dataclass
 class Markdown(Component):
     component_type = ComponentType.MARKDOWN
     """
     A Markdown text component within a subsection of a report.
     """
-
-    def generate_imports(self) -> str:
-        """
-        Generate the import statements required for Markdown rendering.
-        
-        Returns
-        -------
-        str
-            A string representing the import statements needed for rendering Markdown.
-        """
-        return "import IPython.display as display"
     
 @dataclass
 class Subsection:
