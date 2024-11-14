@@ -167,23 +167,17 @@ report_nav.run()""")
             if section.subsections:
                 # Iterate through subsections and integrate them into the section file
                 for subsection in section.subsections:
-                    # Create subsection content and imports for the report 
-                    imports = []
-                    imports.append('import streamlit as st')
-
                     # Create subsection file
                     subsection_file_path = os.path.join(output_dir, section_name_var, section_name_var + "_" + subsection.name.replace(" ", "_") + ".py")
                     
-                    # Generate content for the subsection
+                    # Generate content and imports for the subsection
                     subsection_content, subsection_imports = self._generate_subsection(subsection)
-                    imports.extend(subsection_imports) 
+
+                    # Flatten the subsection_imports into a single list
+                    flattened_subsection_imports = [imp for sublist in subsection_imports for imp in sublist]
                     
                     # Remove duplicated imports
-                    unique_imports = set()
-
-                    # Split each string by newlines and update the set
-                    for imp in imports:
-                        unique_imports.update(imp.split('\n'))
+                    unique_imports = list(set(flattened_subsection_imports))
 
                     # Write everything to the subsection file
                     with open(subsection_file_path, 'w') as subsection_file:
@@ -363,8 +357,8 @@ st.components.v1.html(html_data, height=net_html_height)\n"""
 st.markdown(markdown_content, unsafe_allow_html=True)\n""")
         
         return markdown_content
-
-    def _generate_component_imports(self, component: r.Component) -> str:
+    
+    def _generate_component_imports(self, component: r.Component) -> List[str]:
         """
         Generate necessary imports for a component of the report.
 
@@ -377,28 +371,29 @@ st.markdown(markdown_content, unsafe_allow_html=True)\n""")
         
         Returns
         -------
-        str
-            A str of import statements for the component.
+        list : List[str]
+            A list of import statements for the component.
         """
         # Dictionary to hold the imports for each component type
         components_imports = {
             'plot': {
-                r.VisualizationTool.ALTAIR: 'import json\nimport altair as alt',
-                r.VisualizationTool.PLOTLY: 'import json'
+                r.VisualizationTool.ALTAIR: ['import json', 'import altair as alt'],
+                r.VisualizationTool.PLOTLY: ['import json']
             },
-            'dataframe': 'import pandas as pd'
+            'dataframe': ['import pandas as pd']
         }
-        # Iterate over sections and subsections to determine needed imports 
+
         component_type = component.component_type
+        component_imports = ['import streamlit as st']
 
         # Add relevant imports based on component type and visualization tool
         if component_type == r.ComponentType.PLOT:
             visualization_tool = getattr(component, 'visualization_tool', None)
             if visualization_tool in components_imports['plot']:
-                return components_imports['plot'][visualization_tool]
+                component_imports.extend(components_imports['plot'][visualization_tool])
 
         elif component_type == r.ComponentType.DATAFRAME:
-            return components_imports['dataframe']
+            component_imports.extend(components_imports['dataframe'])
 
-        # If no relevant import is found, return an empty string
-        return ''
+        # Return the list of import statements
+        return component_imports

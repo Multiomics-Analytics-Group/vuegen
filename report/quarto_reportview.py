@@ -74,10 +74,11 @@ class QuartoReportView(r.ReportView):
                     qmd_content.extend(subsection_content)
                     report_imports.extend(subsection_imports) 
         
+        # Flatten the subsection_imports into a single list
+        flattened_report_imports = [imp for sublist in report_imports for imp in sublist]
+        
         # Remove duplicated imports
-        report_unique_imports = set()
-        for imp in report_imports:
-            report_unique_imports.update(imp.split('\n'))
+        report_unique_imports = list(set(flattened_report_imports))
 
         # Format imports
         report_formatted_imports = "\n".join(report_unique_imports)
@@ -85,7 +86,7 @@ class QuartoReportView(r.ReportView):
         # Write the navigation and general content to a Python file
         with open(os.path.join(output_dir, "quarto_report.qmd"), 'w') as quarto_report:
             quarto_report.write(yaml_header)
-            quarto_report.write(f"""```{{python}}
+            quarto_report.write(f"""\n```{{python}}
 #| label: 'Imports'
 #| echo: false
 {report_formatted_imports}
@@ -430,7 +431,7 @@ display.Markdown(markdown_content)
         
         return dataframe_content
     
-    def _generate_component_imports(self, component: r.Component) -> str:
+    def _generate_component_imports(self, component: r.Component) -> List[str]:
         """
         Generate necessary imports for a component of the report.
 
@@ -444,33 +445,32 @@ display.Markdown(markdown_content)
         
         Returns
         -------
-        str
-            A str of import statements for the component.
+        list : List[str]
+            A list of import statements for the component.
         """
         # Dictionary to hold the imports for each component type
         components_imports = {
             'plot': {
-                r.VisualizationTool.ALTAIR: 'import altair as alt',
-                r.VisualizationTool.PLOTLY: 'import plotly.io as pio'
+                r.VisualizationTool.ALTAIR: ['import altair as alt'],
+                r.VisualizationTool.PLOTLY: ['import plotly.io as pio']
             },
-            'dataframe': 'import pandas as pd\nfrom itables import show\nimport dataframe_image as dfi',
-            'markdown': 'import IPython.display as display'
+            'dataframe': ['import pandas as pd', 'from itables import show', 'import dataframe_image as dfi'],
+            'markdown': ['import IPython.display as display']
         }
 
         # Iterate over sections and subsections to determine needed imports 
         component_type = component.component_type
+        component_imports = []
 
         # Add relevant imports based on component type and visualization tool
         if component_type == r.ComponentType.PLOT:
             visualization_tool = getattr(component, 'visualization_tool', None)
             if visualization_tool in components_imports['plot']:
-                return components_imports['plot'][visualization_tool]
-
+                component_imports.extend(components_imports['plot'][visualization_tool])
         elif component_type == r.ComponentType.DATAFRAME:
-            return components_imports['dataframe']
-
+            component_imports.extend(components_imports['dataframe'])
         elif component_type == r.ComponentType.MARKDOWN:
-            return components_imports['markdown']
+            component_imports.extend(components_imports['markdown'])
 
-        # If no relevant import is found, return an empty string
-        return ''
+        # Return the list of import statements
+        return component_imports
