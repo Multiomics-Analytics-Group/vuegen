@@ -198,8 +198,8 @@ format:"""
             subsection_content.append(f'::: {{.panel-tabset}}\n')
 
         for component in subsection.components:
-            imports_component = self._generate_component_imports(component)
-            subsection_imports.append(imports_component)
+            component_imports = self._generate_component_imports(component)
+            subsection_imports.append(component_imports)
 
             if component.component_type == r.ComponentType.PLOT:
                 subsection_content.extend(self._generate_plot_content(component, is_report_static))

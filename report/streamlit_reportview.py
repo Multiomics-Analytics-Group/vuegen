@@ -146,11 +146,11 @@ report_nav.run()''')
             home_content.append(f"\nst.image('{self.report.graphical_abstract}', use_column_width=True)")
 
         # Write the home page content to a Python file
-        with open(os.path.join(output_dir, "Home", "homepage.py"), 'w') as home_page:
+        with open(os.path.join(output_dir, "Home", "Homepage.py"), 'w') as home_page:
             home_page.write("\n".join(home_content))
 
         # Add the home page to the report manager content
-        report_manag_content.append(f"homepage = st.Page('home/homepage.py', title='Homepage')")
+        report_manag_content.append(f"homepage = st.Page('Home/Homepage.py', title='Homepage')")
         report_manag_content.append(f"sections_pages['Home'] = [homepage]\n")
 
     def _generate_sections(self, output_dir: str) -> None:
@@ -168,24 +168,16 @@ report_nav.run()''')
             if section.subsections:
                 # Iterate through subsections and integrate them into the section file
                 for subsection in section.subsections:
-                    # Track imports to avoid duplication
+                    # Create subsection content and imports for the report 
                     imports = []
                     imports.append('import streamlit as st')
 
                     # Create subsection file
                     subsection_file_path = os.path.join(output_dir, section_name_var, section_name_var + "_" + subsection.name.replace(" ", "_") + ".py")
                     
-                    # Add subsection header and description
-                    subsection_header = self._format_text(text=subsection.name, type='header', level=3, color='#023558')
-                    subsection_desc = self._format_text(text=subsection.description, type='paragraph')
-                    
-                    # Collect subsection content
-                    subsection_content = [subsection_header, subsection_desc]
-                    
-                    # Generate plots for the subsection
-                    imports_subsection = self._generate_subsection(subsection, subsection_content)
-
-                    imports.extend(imports_subsection) 
+                    # Generate content for the subsection
+                    subsection_content, subsection_imports = self._generate_subsection(subsection)
+                    imports.extend(subsection_imports) 
                     
                     # Remove duplicated imports
                     unique_imports = set()
@@ -202,7 +194,7 @@ report_nav.run()''')
                         # Write the subsection content (descriptions, plots)
                         subsection_file.write("\n".join(subsection_content))
 
-    def _generate_subsection(self, subsection, content) -> List[str]:
+    def _generate_subsection(self, subsection) -> List[str]:
         """
         Generate code to render components (plots, dataframes, markdown) in the given subsection, 
         creating imports and content for the subsection based on the component type.
@@ -218,43 +210,98 @@ report_nav.run()''')
 
         Returns
         -------
-        list
-            A list of imports for the subsection.
+        tuple : (List[str], List[str])
+            - list of subsection content lines (List[str])
+            - list of imports for the subsection (List[str])
         """
-        imports_written_subsection = []
+        subsection_content = []
+        subsection_imports = []
+
+        # Add subsection header and description
+        subsection_content.append(self._format_text(text=subsection.name, type='header', level=3, color='#023558'))
+        subsection_content.append(self._format_text(text=subsection.description, type='paragraph'))
+
         for component in subsection.components:
             # Write imports if not already done
-            imports_component = component.generate_imports()
-            imports_written_subsection.append(imports_component)
+            component_imports = self._generate_component_imports(component)
+            subsection_imports.append(component_imports)
 
             # Handle different types of components
             if component.component_type == r.ComponentType.PLOT:
                 # Cast component to Plot
                 plot = component 
-                if plot.plot_type == r.PlotType.INTERACTIVE:
-                    if plot.visualization_tool == r.VisualizationTool.PLOTLY:
-                        content.append(self._format_text(text=plot.title, type='header', level=4, color='#2b8cbe'))
-                        content.append(f"""\nwith open('{plot.file_path}', 'r') as plot_file:
+                subsection_content.extend(self._generate_plot_content(plot))
+
+            elif component.component_type == r.ComponentType.DATAFRAME:
+                # Cast component to DataFrame
+                dataframe = component 
+                if dataframe.file_format == r.DataFrameFormat.CSV:
+                    subsection_content.append(self._format_text(text=dataframe.title, type='header', level=4, color='#2b8cbe'))
+                    if dataframe.delimiter:
+                        subsection_content.append(f"""df = pd.read_csv('{dataframe.file_path}', delimiter='{dataframe.delimiter}')
+st.dataframe(df, use_container_width=True)\n""")
+                    else:
+                        subsection_content.append(f"""df = pd.read_csv('{dataframe.file_path}')
+st.dataframe(df, use_container_width=True)\n""")
+                elif dataframe.file_format == r.DataFrameFormat.PARQUET:
+                    subsection_content.append(self._format_text(text=dataframe.title, type='header', level=4, color='#2b8cbe'))
+                    subsection_content.append(f"""df = pd.read_parquet('{dataframe.file_path}')
+st.dataframe(df, use_container_width=True)\n""")
+                elif dataframe.file_format == r.DataFrameFormat.TXT:
+                    subsection_content.append(self._format_text(text=dataframe.title, type='header', level=4, color='#2b8cbe'))
+                    subsection_content.append(f"""df = pd.read_csv('{dataframe.file_path}', sep='\\t')
+st.dataframe(df, use_container_width=True)\n""")
+                elif dataframe.file_format == r.DataFrameFormat.EXCEL:
+                    subsection_content.append(self._format_text(text=dataframe.title, type='header', level=4, color='#2b8cbe'))
+                    subsection_content.append(f"""df = pd.read_excel('{dataframe.file_path}')
+st.dataframe(df, use_container_width=True)\n""")
+                else:
+                    raise ValueError(f"Unsupported DataFrame file format: {dataframe.file_format}")
+            elif component.component_type == r.ComponentType.MARKDOWN:
+                # Cast component to Markdown
+                markdown = component 
+                subsection_content.append(self._format_text(text=markdown.title, type='header', level=4, color='#2b8cbe'))
+                subsection_content.append(f"""with open('{markdown.file_path}', 'r') as markdown_file:
+    markdown_content = markdown_file.read()
+st.markdown(markdown_content, unsafe_allow_html=True)\n""")
+        return subsection_content, subsection_imports
+    
+    def _generate_plot_content(self, plot) -> List[str]:
+        """
+        Generate content for a plot component based on the plot type (static or interactive).
+        
+        Parameters
+        ----------
+        plot : Plot
+            The plot component to generate content for.
+
+        Returns
+        -------
+        list : List[str]
+            The list of content lines for the plot.
+        """
+        plot_content = []
+        plot_content.append(self._format_text(text=plot.title, type='header', level=4, color='#2b8cbe'))
+
+        if plot.plot_type == r.PlotType.INTERACTIVE:
+            # Handle interactive plot
+            if plot.visualization_tool == r.VisualizationTool.PLOTLY:
+                plot_content.append(f"""with open('{plot.file_path}', 'r') as plot_file:
     plot_json = json.load(plot_file)
 st.plotly_chart(plot_json, use_container_width=True)\n""")
-                    elif plot.visualization_tool == r.VisualizationTool.ALTAIR:
-                        content.append(self._format_text(text=plot.title, type='header', level=4, color='#2b8cbe'))
-                        content.append(f"""\nwith open('{plot.file_path}', 'r') as plot_file:
+            elif plot.visualization_tool == r.VisualizationTool.ALTAIR:
+                plot_content.append(f"""with open('{plot.file_path}', 'r') as plot_file:
     plot_json = json.load(plot_file)
 altair_plot = alt.Chart.from_dict(plot_json)
 st.vega_lite_chart(json.loads(altair_plot.to_json()), use_container_width=True)\n""")
-                    elif plot.visualization_tool == r.VisualizationTool.PYVIS:
-                        G = plot.read_network()
-                        # Define the output file name
-                        output_file = f"example_data/{plot.name.replace(' ', '_')}.html"
-                        # Get the Network object
-                        net = plot.create_and_save_pyvis_network(G, output_file)
-                        num_nodes = len(net.nodes)
-                        num_edges = len(net.edges)
-                        content.append(self._format_text(text=plot.title, type='header', level=4, color='#2b8cbe'))
-
-                        content.append(f"""
-with open('{output_file}', 'r') as f:
+            elif plot.visualization_tool == r.VisualizationTool.PYVIS:
+                # For PyVis, handle the network visualization
+                G = plot.read_network()
+                html_plot_file = f"streamlit_report/{plot.name.replace(' ', '_')}.html"
+                net = plot.create_and_save_pyvis_network(G, html_plot_file)
+                num_nodes = len(net.nodes)
+                num_edges = len(net.edges)
+                plot_content.append(f"""with open('{html_plot_file}', 'r') as f:
     html_data = f.read()
 
 st.markdown(f"<p style='text-align: center; color: black;'> <b>Number of nodes:</b> {num_nodes} </p>", unsafe_allow_html=True)
@@ -265,42 +312,50 @@ control_layout = st.checkbox('Add panel to control layout', value=True)
 net_html_height = 1200 if control_layout else 630
 
 # Load HTML into HTML component for display on Streamlit
-st.components.v1.html(html_data, height=net_html_height)""")
+st.components.v1.html(html_data, height=net_html_height)\n""")
+        elif plot.plot_type == r.PlotType.STATIC:
+            # Handle static plot
+            plot_content.append(f"\nst.image('{plot.file_path}', caption='{plot.caption}', use_column_width=True)\n")
 
-                elif plot.plot_type == r.PlotType.STATIC:
-                    content.append(self._format_text(text=plot.title, type='header', level=4, color='#2b8cbe'))
-                    content.append(f"\nst.image('{plot.file_path}', caption='{plot.caption}', use_column_width=True)\n")
+        return plot_content
+    
 
-            elif component.component_type == r.ComponentType.DATAFRAME:
-                # Cast component to DataFrame
-                dataframe = component 
-                if dataframe.file_format == r.DataFrameFormat.CSV:
-                    content.append(self._format_text(text=dataframe.title, type='header', level=4, color='#2b8cbe'))
-                    if dataframe.delimiter:
-                        content.append(f"""df = pd.read_csv('{dataframe.file_path}', delimiter='{dataframe.delimiter}')
-st.dataframe(df, use_container_width=True)\n""")
-                    else:
-                        content.append(f"""df = pd.read_csv('{dataframe.file_path}')
-st.dataframe(df, use_container_width=True)\n""")
-                elif dataframe.file_format == r.DataFrameFormat.PARQUET:
-                    content.append(self._format_text(text=dataframe.title, type='header', level=4, color='#2b8cbe'))
-                    content.append(f"""df = pd.read_parquet('{dataframe.file_path}')
-st.dataframe(df, use_container_width=True)\n""")
-                elif dataframe.file_format == r.DataFrameFormat.TXT:
-                    content.append(self._format_text(text=dataframe.title, type='header', level=4, color='#2b8cbe'))
-                    content.append(f"""df = pd.read_csv('{dataframe.file_path}', sep='\\t')
-st.dataframe(df, use_container_width=True)\n""")
-                elif dataframe.file_format == r.DataFrameFormat.EXCEL:
-                    content.append(self._format_text(text=dataframe.title, type='header', level=4, color='#2b8cbe'))
-                    content.append(f"""df = pd.read_excel('{dataframe.file_path}')
-st.dataframe(df, use_container_width=True)\n""")
-                else:
-                    raise ValueError(f"Unsupported DataFrame file format: {dataframe.file_format}")
-            elif component.component_type == r.ComponentType.MARKDOWN:
-                # Cast component to Markdown
-                markdown = component 
-                content.append(self._format_text(text=markdown.title, type='header', level=4, color='#2b8cbe'))
-                content.append(f"""with open('{markdown.file_path}', 'r') as markdown_file:
-    markdown_content = markdown_file.read()
-st.markdown(markdown_content, unsafe_allow_html=True)\n""")
-        return imports_written_subsection
+    def _generate_component_imports(self, component: r.Component) -> str:
+        """
+        Generate necessary imports for a component of the report.
+
+        Parameters
+        ----------
+        component : r.Component
+            The component for which to generate the required imports. The component can be of type:
+            - PLOT
+            - DATAFRAME
+        
+        Returns
+        -------
+        str
+            A str of import statements for the component.
+        """
+        # Dictionary to hold the imports for each component type
+        components_imports = {
+            'plot': {
+                r.VisualizationTool.ALTAIR: 'import json\nimport altair as alt',
+                r.VisualizationTool.PLOTLY: 'import json'
+            },
+            'dataframe': 'import pandas as pd'
+        }
+
+        # Iterate over sections and subsections to determine needed imports 
+        component_type = component.component_type
+
+        # Add relevant imports based on component type and visualization tool
+        if component_type == r.ComponentType.PLOT:
+            visualization_tool = getattr(component, 'visualization_tool', None)
+            if visualization_tool in components_imports['plot']:
+                return components_imports['plot'][visualization_tool]
+
+        elif component_type == r.ComponentType.DATAFRAME:
+            return components_imports['dataframe']
+
+        # If no relevant import is found, return an empty string
+        return ''
