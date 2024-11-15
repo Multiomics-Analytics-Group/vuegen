@@ -1,7 +1,7 @@
 import os
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from enum import StrEnum, auto
+from enum import StrEnum, Enum, auto
 from typing import List, Optional, NamedTuple
 import networkx as nx
 import pandas as pd
@@ -27,6 +27,18 @@ class IntVisualizationTool(StrEnum):
     PLOTLY = auto()
     ALTAIR = auto()
     PYVIS = auto()
+
+class NetworkFormat(StrEnum):
+    GML = auto()
+    GRAPHML = auto()
+    GEXF = auto()
+    CSV = auto()
+    TXT = auto()
+
+    @property
+    def value_with_dot(self):
+        """Return the file extension with the dot."""
+        return f".{self.name.lower()}"
 
 class CSVNetworkFormat(StrEnum):
     EDGELIST = auto()
@@ -105,11 +117,9 @@ class Plot(Component):
         """
         # Mapping of file extensions to NetworkX loading functions
         file_extension_map = {
-            '.gml': nx.read_gml,
-            '.graphml': nx.read_graphml,
-            '.gexf': nx.read_gexf,
-            '.csv': nx.read_edgelist,
-            '.txt': nx.read_edgelist,
+            NetworkFormat.GML.value_with_dot: nx.read_gml,
+            NetworkFormat.GRAPHML.value_with_dot: nx.read_graphml,
+            NetworkFormat.GEXF.value_with_dot: nx.read_gexf
         }
 
         # Check if the file exists
@@ -119,13 +129,16 @@ class Plot(Component):
         # Determine the file extension and check if it is supported
         file_extension = os.path.splitext(self.file_path)[-1].lower()
 
-        # Check if the file extension is supported
-        if file_extension not in file_extension_map:
-            raise ValueError(f"Unsupported file extension: {file_extension}. Supported extensions are: .gml, .graphml, .gexf, .csv, .txt.")
+        # Check if the file extension matches any Enum value
+        if not any(file_extension == fmt.value_with_dot for fmt in NetworkFormat):
+            raise ValueError(
+                f"Unsupported file extension: {file_extension}. Supported extensions are: "
+                f"{', '.join(fmt.value for fmt in NetworkFormat)}."
+            )
 
-        # Handle .csv and .txt files with custom delimiters based on format (edgelist or adjlist)
+        # Handle .csv and .txt files with custom delimiters based on the text format (edgelist or adjlist)
         try:
-            if file_extension in ['.csv', '.txt'] and self.csv_network_format:
+            if file_extension in [NetworkFormat.CSV.value_with_dot, NetworkFormat.TXT.value_with_dot] and self.csv_network_format:
                 delimiter = ',' if file_extension == '.csv' else '\\t'
                 try:
                     df_net = pd.read_csv(self.file_path, delimiter=delimiter)
