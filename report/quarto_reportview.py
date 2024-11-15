@@ -11,7 +11,7 @@ class ReportFormat(StrEnum):
     ODT = auto()
     REVEALJS = auto()
     PPTX = auto()
-    JUPYTER = auto() 
+    JUPYTER = auto()  
 
 class QuartoReportView(r.ReportView):
     """
@@ -241,21 +241,21 @@ format:"""
             else:
                 html_plot_file = f"quarto_report/{plot.name.replace(' ', '_')}.html"
 
-            if plot.visualization_tool == r.VisualizationTool.PLOTLY:
+            if plot.int_visualization_tool == r.IntVisualizationTool.PLOTLY:
                 plot_content.append(self._generate_plot_code(plot))
                 if is_report_static:
                     plot_content.append(f"""fig_plotly.write_image("{os.path.join("..", static_plot_path)}")\n```\n""")
                     plot_content.append(self._generate_image_content(static_plot_path, plot.name))
                 else:
                     plot_content.append(f"""fig_plotly.show()\n```\n""")
-            elif plot.visualization_tool == r.VisualizationTool.ALTAIR:
+            elif plot.int_visualization_tool == r.IntVisualizationTool.ALTAIR:
                 plot_content.append(self._generate_plot_code(plot))
                 if is_report_static:
                     plot_content.append(f"""fig_altair.save("{os.path.join("..", static_plot_path)}")\n```\n""")
                     plot_content.append(self._generate_image_content(static_plot_path, plot.name))
                 else:
                     plot_content.append(f"""fig_altair\n```\n""")
-            elif plot.visualization_tool == r.VisualizationTool.PYVIS:
+            elif plot.int_visualization_tool == r.IntVisualizationTool.PYVIS:
                 G = plot.read_network()
                 num_nodes = G.number_of_nodes()
                 num_edges = G.number_of_edges()
@@ -296,13 +296,13 @@ with open('{os.path.join("..", plot.file_path)}', 'r') as plot_file:
     plot_data = plot_file.read()
     """
         # Add specific code for each visualization tool
-        if plot.visualization_tool == r.VisualizationTool.PLOTLY:
+        if plot.int_visualization_tool == r.IntVisualizationTool.PLOTLY:
             plot_code += """fig_plotly = pio.from_json(plot_data)
 fig_plotly.update_layout(width=950, height=500)
     """
-        elif plot.visualization_tool == r.VisualizationTool.ALTAIR:
+        elif plot.int_visualization_tool == r.IntVisualizationTool.ALTAIR:
             plot_code += """fig_altair = alt.Chart.from_json(plot_data).properties(width=900, height=400)"""
-        elif plot.visualization_tool == r.VisualizationTool.PYVIS:
+        elif plot.int_visualization_tool == r.IntVisualizationTool.PYVIS:
             plot_code = f"""<div style="text-align: center;">
 <iframe src="{os.path.join("..", output_file)}" alt="{plot.name} plot" width="800px" height="630px"></iframe>
 </div>\n"""
@@ -451,8 +451,8 @@ display.Markdown(markdown_content)
         # Dictionary to hold the imports for each component type
         components_imports = {
             'plot': {
-                r.VisualizationTool.ALTAIR: ['import altair as alt'],
-                r.VisualizationTool.PLOTLY: ['import plotly.io as pio']
+                r.IntVisualizationTool.ALTAIR: ['import altair as alt'],
+                r.IntVisualizationTool.PLOTLY: ['import plotly.io as pio']
             },
             'dataframe': ['import pandas as pd', 'from itables import show', 'import dataframe_image as dfi'],
             'markdown': ['import IPython.display as display']
@@ -464,9 +464,9 @@ display.Markdown(markdown_content)
 
         # Add relevant imports based on component type and visualization tool
         if component_type == r.ComponentType.PLOT:
-            visualization_tool = getattr(component, 'visualization_tool', None)
-            if visualization_tool in components_imports['plot']:
-                component_imports.extend(components_imports['plot'][visualization_tool])
+            int_visualization_tool = getattr(component, 'int_visualization_tool', None)
+            if int_visualization_tool in components_imports['plot']:
+                component_imports.extend(components_imports['plot'][int_visualization_tool])
         elif component_type == r.ComponentType.DATAFRAME:
             component_imports.extend(components_imports['dataframe'])
         elif component_type == r.ComponentType.MARKDOWN:

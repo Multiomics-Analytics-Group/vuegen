@@ -196,10 +196,6 @@ report_nav.run()""")
         ----------
         subsection : Subsection
             The subsection containing the components.
-        imports_written : set
-            A set of already written imports.
-        content : list
-            A list to which the generated content will be appended.
 
         Returns
         -------
@@ -247,11 +243,11 @@ report_nav.run()""")
 
         if plot.plot_type == r.PlotType.INTERACTIVE:
             # Handle interactive plot
-            if plot.visualization_tool == r.VisualizationTool.PLOTLY:
+            if plot.int_visualization_tool == r.IntVisualizationTool.PLOTLY:
                 plot_content.append(self._generate_plot_code(plot))
-            elif plot.visualization_tool == r.VisualizationTool.ALTAIR:
+            elif plot.int_visualization_tool == r.IntVisualizationTool.ALTAIR:
                 plot_content.append(self._generate_plot_code(plot))
-            elif plot.visualization_tool == r.VisualizationTool.PYVIS:
+            elif plot.int_visualization_tool == r.IntVisualizationTool.PYVIS:
                 # For PyVis, handle the network visualization
                 G = plot.read_network()
                 html_plot_file = f"streamlit_report/{plot.name.replace(' ', '_')}.html"
@@ -288,14 +284,14 @@ st.markdown(f"<p style='text-align: center; color: black;'> <b>Number of relatio
         plot_code = f"""with open('{plot.file_path}', 'r') as plot_file:
     plot_json = json.load(plot_file)\n"""
         # Add specific code for each visualization tool
-        if plot.visualization_tool == r.VisualizationTool.PLOTLY:
+        if plot.int_visualization_tool == r.IntVisualizationTool.PLOTLY:
             plot_code += "st.plotly_chart(plot_json, use_container_width=True)\n"
 
-        elif plot.visualization_tool == r.VisualizationTool.ALTAIR:
+        elif plot.int_visualization_tool == r.IntVisualizationTool.ALTAIR:
             plot_code += """altair_plot = alt.Chart.from_dict(plot_json)
 st.vega_lite_chart(json.loads(altair_plot.to_json()), use_container_width=True)\n"""
         
-        elif plot.visualization_tool == r.VisualizationTool.PYVIS:
+        elif plot.int_visualization_tool == r.IntVisualizationTool.PYVIS:
             plot_code = """# Streamlit checkbox for controlling the layout
 control_layout = st.checkbox('Add panel to control layout', value=True)
 net_html_height = 1200 if control_layout else 630
@@ -377,8 +373,8 @@ st.markdown(markdown_content, unsafe_allow_html=True)\n""")
         # Dictionary to hold the imports for each component type
         components_imports = {
             'plot': {
-                r.VisualizationTool.ALTAIR: ['import json', 'import altair as alt'],
-                r.VisualizationTool.PLOTLY: ['import json']
+                r.IntVisualizationTool.ALTAIR: ['import json', 'import altair as alt'],
+                r.IntVisualizationTool.PLOTLY: ['import json']
             },
             'dataframe': ['import pandas as pd']
         }
@@ -388,12 +384,11 @@ st.markdown(markdown_content, unsafe_allow_html=True)\n""")
 
         # Add relevant imports based on component type and visualization tool
         if component_type == r.ComponentType.PLOT:
-            visualization_tool = getattr(component, 'visualization_tool', None)
-            if visualization_tool in components_imports['plot']:
-                component_imports.extend(components_imports['plot'][visualization_tool])
-
+            int_visualization_tool = getattr(component, 'int_visualization_tool', None)
+            if int_visualization_tool in components_imports['plot']:
+                component_imports.extend(components_imports['plot'][int_visualization_tool])
         elif component_type == r.ComponentType.DATAFRAME:
             component_imports.extend(components_imports['dataframe'])
 
         # Return the list of import statements
-        return component_imports
+        return component_imports     

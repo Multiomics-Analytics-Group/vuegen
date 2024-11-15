@@ -24,7 +24,7 @@ class MetadataManager():
         
         # Create a Report object
         report = r.Report(
-            identifier=metadata['report']['identifier'],
+            id=metadata['report']['id'],
             name=metadata['report']['name'],
             title=metadata['report'].get('title'),
             description=metadata['report'].get('description'),
@@ -36,7 +36,7 @@ class MetadataManager():
         # Create Sections
         for section_data in metadata['sections']:
             section = r.Section(
-                identifier=section_data['identifier'],
+                id=section_data['id'],
                 name=section_data['name'],
                 title=section_data.get('title'),
                 description=section_data.get('description'),
@@ -46,7 +46,7 @@ class MetadataManager():
             # Create Subsections
             for subsection_data in section_data['subsections']:
                 subsection = r.Subsection(
-                    identifier=subsection_data['identifier'],
+                    id=subsection_data['id'],
                     name=subsection_data['name'],
                     title=subsection_data.get('title'),
                     description=subsection_data.get('description'),
@@ -57,7 +57,7 @@ class MetadataManager():
                 for component_data in subsection_data['components']:
                     component_type = r.ComponentType[component_data['component_type'].upper()]
                     file_path = component_data['file_path']
-                    identifier = component_data['identifier']
+                    id = component_data['id']
                     name = component_data['name']
                     title = component_data.get('title')
                     caption = component_data.get('caption')
@@ -65,17 +65,17 @@ class MetadataManager():
                     # Define a component based on its type
                     if component_type == r.ComponentType.PLOT:
                         plot_type = r.PlotType[component_data['plot_type'].upper()]
-                        visualization_tool = (r.VisualizationTool[component_data['visualization_tool'].upper()]
-                                              if component_data.get('visualization_tool') else None)
+                        int_visualization_tool = (r.IntVisualizationTool[component_data['int_visualization_tool'].upper()]
+                                              if component_data.get('int_visualization_tool') else None)
                         csv_network_format = (r.CSVNetworkFormat[component_data['csv_network_format'].upper()]
                                               if component_data.get('csv_network_format') else None)
                         # Create a Plot component
                         component = r.Plot(
-                            identifier=identifier,
+                            id=id,
                             name=name,
                             file_path=file_path,
                             plot_type=plot_type,
-                            visualization_tool=visualization_tool,
+                            int_visualization_tool=int_visualization_tool,
                             title=title,
                             caption=caption,
                             csv_network_format=csv_network_format
@@ -86,7 +86,7 @@ class MetadataManager():
                         delimiter = component_data.get('delimiter')
                         # Create a DataFrame component
                         component = r.DataFrame(
-                            identifier=identifier,
+                            id=id,
                             name=name,
                             file_path=file_path,
                             file_format=file_format,
@@ -98,7 +98,7 @@ class MetadataManager():
                     elif component_type == r.ComponentType.MARKDOWN:
                         # Create a Markdown component
                         component = r.Markdown(
-                            identifier=identifier,
+                            id=id,
                             name=name,
                             file_path=file_path,
                             component_type=component_type,

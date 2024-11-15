@@ -2,7 +2,7 @@ import os
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from enum import StrEnum, auto
-from typing import List, Optional
+from typing import List, Optional, NamedTuple
 import networkx as nx
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -23,7 +23,7 @@ class PlotType(StrEnum):
     INTERACTIVE = auto()
     STATIC = auto()
 
-class VisualizationTool(StrEnum):
+class IntVisualizationTool(StrEnum):
     PLOTLY = auto()
     ALTAIR = auto()
     PYVIS = auto()
@@ -39,13 +39,14 @@ class DataFrameFormat(StrEnum):
     EXCEL = auto()
 
 @dataclass
-class Component(ABC):
+class Component():
     """
-    Abstract base class for different components in a report subsection.
+    Base class for different components in a report subsection. The attributes are inmutable 
+    because they are loaded from a config file and should not be changed after initialization.
 
     Attributes
     ----------
-    identifier : int
+    id : int
         A unique identifier for the component.
     name : str
         The name of the component.
@@ -58,7 +59,7 @@ class Component(ABC):
     caption : Optional[str]
         A caption for the component (default is None).
     """
-    identifier: int
+    id: int
     name: str
     file_path: str 
     component_type: ComponentType
@@ -73,24 +74,24 @@ class Plot(Component):
     ----------
     plot_type : PlotType
         The type of the plot (INTERACTIVE or STATIC).
-    visualization_tool : VisualizationTool, optional
+    int_visualization_tool : IntVisualizationTool, optional
         The tool for rendering interactive plots (PLOTLY, ALTAIR, or PYVIS) (default is None).
         It is not required for STATIC plots (default is None).
     csv_network_format : CSVNetworkFormat, optional
         The format of the CSV file for network plots (EDGELIST or ADJLIST) (default is None).
     """
-    def __init__(self, identifier: int, name: str, file_path: str, plot_type: PlotType, 
-                visualization_tool: Optional[VisualizationTool]=None, title: str=None, 
+    def __init__(self, id: int, name: str, file_path: str, plot_type: PlotType, 
+                int_visualization_tool: Optional[IntVisualizationTool]=None, title: str=None, 
                 caption: str=None, csv_network_format: Optional[CSVNetworkFormat]=None):
         """
         Initializes a Plot object.
         """
         # Call the constructor of the parent class (Component) to set common attributes
-        super().__init__(identifier, name, file_path, component_type = ComponentType.PLOT, title=title, caption=caption)
+        super().__init__(id, name, file_path, component_type = ComponentType.PLOT, title=title, caption=caption)
 
         # Set specific attributes for the Plot class
         self.plot_type = plot_type
-        self.visualization_tool = visualization_tool
+        self.int_visualization_tool = int_visualization_tool
         self.csv_network_format = csv_network_format
     
     def read_network(self) -> nx.Graph:
@@ -111,36 +112,47 @@ class Plot(Component):
             '.txt': nx.read_edgelist,
         }
 
+        # Check if the file exists
+        if not os.path.isfile(self.file_path):
+            raise FileNotFoundError(f"The file at {self.file_path} was not found or cannot be accessed.")
+
         # Determine the file extension and check if it is supported
         file_extension = os.path.splitext(self.file_path)[-1].lower()
 
         # Check if the file extension is supported
         if file_extension not in file_extension_map:
-            raise ValueError(f"Unsupported file extension: {file_extension}")
+            raise ValueError(f"Unsupported file extension: {file_extension}. Supported extensions are: .gml, .graphml, .gexf, .csv, .txt.")
 
         # Handle .csv and .txt files with custom delimiters based on format (edgelist or adjlist)
-        if file_extension in ['.csv', '.txt'] and self.csv_network_format:
-            delimiter = ',' if file_extension == '.csv' else '\\t'
-            df_net = pd.read_csv(self.file_path, delimiter=delimiter)
+        try:
+            if file_extension in ['.csv', '.txt'] and self.csv_network_format:
+                delimiter = ',' if file_extension == '.csv' else '\\t'
+                try:
+                    df_net = pd.read_csv(self.file_path, delimiter=delimiter)
+                except pd.errors.ParserError:
+                    raise ValueError(f"Error parsing the file {self.file_path}. Please check the file format or delimiter.")
 
-            if self.csv_network_format == CSVNetworkFormat.EDGELIST:
-                # Assert that "source" and "target" columns are present in the DataFrame
-                required_columns = {"source", "target"}
-                assert required_columns.issubset(df_net.columns), f"CSV must contain columns named {required_columns} to name the source and target nodes."
-                # Use additional columns as edge attributes, excluding "source" and "target"
-                edge_attributes = [col for col in df_net.columns if col not in required_columns]
-                # Return a NetworkX graph object from the edgelist
-                return nx.from_pandas_edgelist(df_net, source="source", target="target", edge_attr=edge_attributes)
-            elif self.csv_network_format == CSVNetworkFormat.ADJLIST:
-                return nx.from_pandas_adjacency(df_net)
-            else:
-                raise ValueError(f"Unsupported format for CSV/TXT file: {self.csv_network_format}")
-
-        G = file_extension_map[file_extension](self.file_path)
-        G = self._add_size_attribute(G)
-        
-        # Return the NetworkX graph object created from the specified network file
-        return G
+                if self.csv_network_format == CSVNetworkFormat.EDGELIST:
+                    # Assert that "source" and "target" columns are present in the DataFrame
+                    required_columns = {"source", "target"}
+                    assert required_columns.issubset(df_net.columns), f"CSV must contain columns named {required_columns} to name the source and target nodes."
+                    
+                    # Use additional columns as edge attributes, excluding "source" and "target"
+                    edge_attributes = [col for col in df_net.columns if col not in required_columns]
+                    
+                    # Return a NetworkX graph object from the edgelist
+                    return nx.from_pandas_edgelist(df_net, source="source", target="target", edge_attr=edge_attributes)
+                elif self.csv_network_format == CSVNetworkFormat.ADJLIST:
+                    return nx.from_pandas_adjacency(df_net)
+                else:
+                    raise ValueError(f"Unsupported format for CSV/TXT file: {self.csv_network_format}")
+            
+            # Return the NetworkX graph object created from the specified network file
+            G = file_extension_map[file_extension](self.file_path)
+            G = self._add_size_attribute(G)
+            return G
+        except Exception as e:
+            raise RuntimeError(f"An error occurred while reading the network file: {str(e)}")
     
     def save_netwrok_image(self, G: nx.Graph, output_file: str, format: str, dpi: int=300) -> None:
         """
@@ -157,10 +169,22 @@ class Plot(Component):
         dpi : int, optional
             The resolution of the image in dots per inch (default is 300).
         """
-        # Draw the graph and save it as an image file
-        nx.draw(G, with_labels=True) 
-        plt.savefig(output_file, format=format, dpi=dpi)
-        plt.clf()
+        # Check if the output file path is valid
+        if not os.path.isdir(os.path.dirname(output_file)):
+            raise FileNotFoundError(f"The directory for saving the file does not exist: {os.path.dirname(output_file)}.")
+        
+        # Validate image format
+        valid_formats = ['png', 'jpg', 'jpeg', 'svg']
+        if format.lower() not in valid_formats:
+            raise ValueError(f"Invalid format: {format}. Supported formats are: {', '.join(valid_formats)}.")
+        
+        try:
+            # Draw the graph and save it as an image file
+            nx.draw(G, with_labels=True)
+            plt.savefig(output_file, format=format, dpi=dpi)
+            plt.clf()
+        except Exception as e:
+            raise RuntimeError(f"Failed to save the network image: {str(e)}")
 
     def create_and_save_pyvis_network(self, G: nx.Graph, output_file: str) -> Network:
         """
@@ -178,27 +202,36 @@ class Plot(Component):
         net : pyvis.network.Network
             A PyVis network object.
         """
-        # Create a PyVis network object
-        net = Network(height='600px', width='100%', bgcolor='white', font_color='black')
-        net.from_nx(G)
+        # Check if the network object and output file path are valid
+        if not isinstance(G, nx.Graph):
+            raise TypeError(f"The provided object is not a valid NetworkX graph: {type(G)}.")
+        if not os.path.isdir(os.path.dirname(output_file)):
+            raise FileNotFoundError(f"The directory for saving the file does not exist: {os.path.dirname(output_file)}.")
+        
+        try:
+            # Create a PyVis network object
+            net = Network(height='600px', width='100%', bgcolor='white', font_color='black')
+            net.from_nx(G)
 
-        # Customize the network visualization of nodes
-        for node in net.nodes:
-            node_id = node['id']
-            node_data = G.nodes[node_id]
-            node['font'] = {'size': 12}
-            node_data.get('name', node_id)
-            node['borderWidth'] = 2
-            node['borderWidthSelected'] = 2.5
+            # Customize the network visualization of nodes
+            for node in net.nodes:
+                node_id = node['id']
+                node_data = G.nodes[node_id]
+                node['font'] = {'size': 12}
+                node_data.get('name', node_id)
+                node['borderWidth'] = 2
+                node['borderWidthSelected'] = 2.5
 
-        # Apply the force_atlas_2based layout and show panel to control layout
-        net.force_atlas_2based(gravity=-30, central_gravity=0.005, spring_length=100, spring_strength=0.1, damping=0.4)
-        net.show_buttons(filter_=['physics'])
-            
-        # Save the network as an HTML file
-        net.save_graph(output_file)
-
-        return net
+            # Apply the force_atlas_2based layout and show panel to control layout
+            net.force_atlas_2based(gravity=-30, central_gravity=0.005, spring_length=100, spring_strength=0.1, damping=0.4)
+            net.show_buttons(filter_=['physics'])
+                
+            # Save the network as an HTML file
+            net.save_graph(output_file)
+            return net
+        
+        except Exception as e:
+            raise RuntimeError(f"Failed to create and save the PyVis network: {str(e)}")
     
     def _add_size_attribute(self, G: nx.Graph) -> nx.Graph:
         """
@@ -221,14 +254,14 @@ class Plot(Component):
 
         # Assign node labels as their IDs
         for node in G.nodes(data=True):
-            G.nodes[node[0]]['label'] = G.nodes[node[0]].get('name', node[0])  # Set node label to its name or ID
+            G.nodes[node[0]]['label'] = G.nodes[node[0]].get('name', node[0]) 
 
             # Obtain and set degree values for nodes
             degrees = {node: G.degree(node) for node in G.nodes()}
             
             # Assign sizes based on degrees
-            min_size = 5  # Define minimum node size
-            max_size = 30  # Define maximum node size
+            min_size = 5  
+            max_size = 30 
             min_degree = min(degrees.values())
             max_degree = max(degrees.values())
 
@@ -241,10 +274,10 @@ class Plot(Component):
                 else:
                     size = min_size + (max_size - min_size) * ((degree - min_degree) / (max_degree - min_degree))
                 
-                G.nodes[node]['size'] = size  # Assign size based on degree
+                G.nodes[node]['size'] = size 
 
         return G
-    
+
 class DataFrame(Component):
     """
     A DataFrame within a subsection of a report.
@@ -256,21 +289,20 @@ class DataFrame(Component):
     delimiter : Optional[str]
         The delimiter to use if the file is a delimited text format (e.g., ';', '\t', etc).
     """
-    def __init__(self, identifier: int, name: str, file_path: str, file_format: DataFrameFormat, 
+    def __init__(self, id: int, name: str, file_path: str, file_format: DataFrameFormat, 
                  delimiter: Optional[str]=None, title: str=None, caption: str=None):
         """
         Initializes a DataFrame object.
         """
-        super().__init__(identifier, name, file_path, component_type=ComponentType.DATAFRAME, title=title, caption=caption)
+        super().__init__(id, name, file_path, component_type=ComponentType.DATAFRAME, title=title, caption=caption)
         self.file_format = file_format
         self.delimiter = delimiter
 
-@dataclass
 class Markdown(Component):
-    component_type = ComponentType.MARKDOWN
     """
     A Markdown text component within a subsection of a report.
     """
+    component_type = ComponentType.MARKDOWN
     
 @dataclass
 class Subsection:
@@ -279,7 +311,7 @@ class Subsection:
 
     Attributes
     ----------
-    identifier : int
+    id : int
         A unique identifier for the subsection.
     name : str
         The name of the subsection.
@@ -290,7 +322,7 @@ class Subsection:
     components : List[Component]
         A list of components within this subsection.
     """
-    identifier: int
+    id: int
     name: str
     title: Optional[str] = None
     description: Optional[str] = None
@@ -303,7 +335,7 @@ class Section:
 
     Attributes
     ----------
-    identifier : int
+    id : int
         A unique identifier for the section.
     name : str
         The name of the section.
@@ -314,7 +346,7 @@ class Section:
     subsections : List[Subsection]
         A list of subsections within this section.
     """
-    identifier: int
+    id: int
     name: str
     title: Optional[str] = None
     description: Optional[str] = None
@@ -327,7 +359,7 @@ class Report:
 
     Attributes
     ----------
-    identifier : int
+    id : int
         A unique identifier for the report.
     name : str
         The name of the report.
@@ -342,7 +374,7 @@ class Report:
     sections : List[Section]
         A list of sections that belong to the report.
     """
-    identifier: int
+    id: int
     name: str
     title: Optional[str] = None
     description: Optional[str] = None
@@ -350,14 +382,13 @@ class Report:
     logo: Optional[str] = None
     sections: List['Section'] = field(default_factory=list)
 
-@dataclass
 class ReportView(ABC):
     """
     An abstract base class for report view implementations.
 
     Attributes
     ----------
-    identifier : int
+    id : int
         A unique identifier for the report view ABC.
     name : str
         The name of the view.
@@ -367,11 +398,12 @@ class ReportView(ABC):
         Column names used in the report view ABC (default is None).
     
     """
-    identifier: int
-    name: str
-    report: Report
-    report_type: ReportType
-    columns: Optional[List[str]] = None
+    def __init__(self, id: int, name: str, report: 'Report', report_type: 'ReportType', columns: Optional[List[str]] = None):
+        self.id = id
+        self.name = name
+        self.report = report
+        self.report_type = report_type
+        self.columns = columns or []
 
     @abstractmethod
     def generate_report(self, output_dir: str = 'sections') -> None:
@@ -417,15 +449,9 @@ class ReportView(ABC):
         """
         pass 
 
-@dataclass
 class WebAppReportView(ReportView):
     """
     An abstract class for web application report views.
-
-    Attributes
-    ----------
-    report_framework : str
-        The web app framework used to generate the report (e.g., 'Streamlit').
     """
 
     @abstractmethod
@@ -468,22 +494,20 @@ class WebAppReportView(ReportView):
         pass
 
     @abstractmethod
-    def _generate_subsection(self, subsection: Subsection, imports_written: set, content: list) -> List[str]:
+    def _generate_subsection(self, subsection: Subsection) -> List[str]:
         """
-        Creates components (plots, dataframes, markdown, etc) for a given subsection. 
-        
+        Generate code to render components (plots, dataframes, markdown) in the given subsection, 
+        creating imports and content for the subsection based on the component type.
+
         Parameters
         ----------
         subsection : Subsection
-            The subsection containing the plots.
-        imports_written : set
-            A set of already written imports.
-        content : list
-            A list to which the generated content will be appended.
+            The subsection containing the components.
 
         Returns
         -------
-        list
-            A list of imports for the subsection.
+        tuple : (List[str], List[str])
+            - list of subsection content lines (List[str])
+            - list of imports for the subsection (List[str])
         """
         pass
