@@ -1,28 +1,47 @@
+import os
 import yaml
 import report as r
+from enum import StrEnum
+from typing import Type
 
-class MetadataManager():
+class MetadataManager:
     """
-    Class for handling metadata of reports from YAML files.
+    Class for handling metadata of reports from YAML files and creating report objects.
     """
-    def load_report_metadata(self, file_path: str) -> r.Report:
+
+    def load_report_metadata(self, file_path: str) -> tuple[r.Report, dict]:
         """
-        Load and parse the metadata from a YAML file and return a Report object.
+        Loads metadata from a YAML file, parses it, and returns a Report object and the raw metadata.
 
         Parameters
         ----------
         file_path : str
             The path to the YAML file containing the report metadata.
-        
+
         Returns
         -------
-        Report
-            A Report object created from the metadata in the YAML file.
+        report, metadata : tuple[Report, dict]
+            A tuple containing the Report object created from the YAML metadata and the raw metadata dictionary.
+
+        Raises
+        ------
+        FileNotFoundError
+            If the specified file does not exist.
+        ValueError
+            If the YAML file is corrupted or contains missing/invalid values.
         """
+        # Check the existence of the file_path
+        if not os.path.exists(file_path):
+            raise FileNotFoundError(f"The config file at {file_path} was not found.")
+
+        # Load the YAML configuration file
         with open(file_path, 'r') as file:
-            metadata = yaml.safe_load(file)
-        
-        # Create a Report object
+            try:
+                metadata = yaml.safe_load(file)
+            except yaml.YAMLError as exc:
+                raise ValueError(f"Error parsing YAML file: {exc}")
+
+        # Create a Report object from metadata
         report = r.Report(
             id=metadata['report']['id'],
             name=metadata['report']['name'],
@@ -33,83 +52,201 @@ class MetadataManager():
             sections=[]
         )
 
-        # Create Sections
-        for section_data in metadata['sections']:
-            section = r.Section(
-                id=section_data['id'],
-                name=section_data['name'],
-                title=section_data.get('title'),
-                description=section_data.get('description'),
-                subsections=[]
-            )
-            
-            # Create Subsections
-            for subsection_data in section_data['subsections']:
-                subsection = r.Subsection(
-                    id=subsection_data['id'],
-                    name=subsection_data['name'],
-                    title=subsection_data.get('title'),
-                    description=subsection_data.get('description'),
-                    components=[]
-                )
-                
-                # Create Components
-                for component_data in subsection_data['components']:
-                    component_type = r.ComponentType[component_data['component_type'].upper()]
-                    file_path = component_data['file_path']
-                    id = component_data['id']
-                    name = component_data['name']
-                    title = component_data.get('title')
-                    caption = component_data.get('caption')
-
-                    # Define a component based on its type
-                    if component_type == r.ComponentType.PLOT:
-                        plot_type = r.PlotType[component_data['plot_type'].upper()]
-                        int_visualization_tool = (r.IntVisualizationTool[component_data['int_visualization_tool'].upper()]
-                                              if component_data.get('int_visualization_tool') else None)
-                        csv_network_format = (r.CSVNetworkFormat[component_data['csv_network_format'].upper()]
-                                              if component_data.get('csv_network_format') else None)
-                        # Create a Plot component
-                        component = r.Plot(
-                            id=id,
-                            name=name,
-                            file_path=file_path,
-                            plot_type=plot_type,
-                            int_visualization_tool=int_visualization_tool,
-                            title=title,
-                            caption=caption,
-                            csv_network_format=csv_network_format
-                        )
-
-                    elif component_type == r.ComponentType.DATAFRAME:
-                        file_format = r.DataFrameFormat[component_data['file_format'].upper()]
-                        delimiter = component_data.get('delimiter')
-                        # Create a DataFrame component
-                        component = r.DataFrame(
-                            id=id,
-                            name=name,
-                            file_path=file_path,
-                            file_format=file_format,
-                            delimiter=delimiter,
-                            title=title,
-                            caption=caption
-                        )
-
-                    elif component_type == r.ComponentType.MARKDOWN:
-                        # Create a Markdown component
-                        component = r.Markdown(
-                            id=id,
-                            name=name,
-                            file_path=file_path,
-                            component_type=component_type,
-                            title=title,
-                            caption=caption
-                        )
-
-                    subsection.components.append(component)
-                
-                section.subsections.append(subsection)
-            
+        # Create sections and subsections
+        for section_data in metadata.get('sections', []):
+            section = self._create_section(section_data)
             report.sections.append(section)
 
         return report, metadata
+
+    def _create_section(self, section_data: dict) -> r.Section:
+        """
+        Creates a Section object from a dictionary of section data.
+
+        Parameters
+        ----------
+        section_data : dict
+            A dictionary containing section metadata.
+
+        Returns
+        -------
+        section : Section
+            A Section object populated with the provided metadata.
+        """
+        # Initialize the Section object
+        section = r.Section(
+            id=section_data['id'],
+            name=section_data['name'],
+            title=section_data.get('title'),
+            description=section_data.get('description'),
+            subsections=[]
+        )
+
+        # Create subsections
+        for subsection_data in section_data.get('subsections', []):
+            subsection = self._create_subsection(subsection_data)
+            section.subsections.append(subsection)
+
+        return section
+
+    def _create_subsection(self, subsection_data: dict) -> r.Subsection:
+        """
+        Creates a Subsection object from a dictionary of subsection data.
+
+        Parameters
+        ----------
+        subsection_data : dict
+            A dictionary containing subsection metadata.
+
+        Returns
+        -------
+        subsection : Subsection
+            A Subsection object populated with the provided metadata.
+        """
+        # Initialize the Subsection object
+        subsection = r.Subsection(
+            id=subsection_data['id'],
+            name=subsection_data['name'],
+            title=subsection_data.get('title'),
+            description=subsection_data.get('description'),
+            components=[]
+        )
+
+        # Create components
+        for component_data in subsection_data.get('components', []):
+            component = self._create_component(component_data)
+            subsection.components.append(component)
+
+        return subsection
+
+    def _create_component(self, component_data: dict) -> r.Component:
+        """
+        Creates a Component object from a dictionary of component data.
+
+        Parameters
+        ----------
+        component_data : dict
+            A dictionary containing component metadata.
+
+        Returns
+        -------
+        Component
+            A Component object (Plot, DataFrame, or Markdown) populated with the provided metadata.
+        """
+        # Determine the component type
+        component_type = self._validate_enum_value(r.ComponentType, component_data['component_type'])
+
+        # Dispatch to the corresponding creation method
+        if component_type == r.ComponentType.PLOT:
+            return self._create_plot_component(component_data)
+        elif component_type == r.ComponentType.DATAFRAME:
+            return self._create_dataframe_component(component_data)
+        elif component_type == r.ComponentType.MARKDOWN:
+            return self._create_markdown_component(component_data)
+
+    def _create_plot_component(self, component_data: dict) -> r.Plot:
+        """
+        Creates a Plot component.
+
+        Parameters
+        ----------
+        component_data : dict
+            A dictionary containing plot component metadata.
+
+        Returns
+        -------
+        Plot
+            A Plot object populated with the provided metadata.
+        """
+        # Validate enum fields
+        plot_type = self._validate_enum_value(r.PlotType, component_data['plot_type'])
+        int_visualization_tool = (self._validate_enum_value(r.IntVisualizationTool, component_data.get('int_visualization_tool', '')) 
+                                  if component_data.get('int_visualization_tool') else None)
+        csv_network_format = (self._validate_enum_value(r.CSVNetworkFormat, component_data.get('csv_network_format', '')) 
+                              if component_data.get('csv_network_format') else None)
+
+        # Return the constructed Plot object
+        return r.Plot(
+            id=component_data['id'],
+            name=component_data['name'],
+            file_path=component_data['file_path'],
+            plot_type=plot_type,
+            int_visualization_tool=int_visualization_tool,
+            title=component_data.get('title'),
+            caption=component_data.get('caption'),
+            csv_network_format=csv_network_format
+        )
+
+    def _create_dataframe_component(self, component_data: dict) -> r.DataFrame:
+        """
+        Creates a DataFrame component.
+
+        Parameters
+        ----------
+        component_data : dict
+            A dictionary containing dataframe component metadata.
+
+        Returns
+        -------
+        DataFrame
+            A DataFrame object populated with the provided metadata.
+        """
+        # Validate enum field and return dataframe
+        file_format = self._validate_enum_value(r.DataFrameFormat, component_data['file_format'])
+        return r.DataFrame(
+            id=component_data['id'],
+            name=component_data['name'],
+            file_path=component_data['file_path'],
+            file_format=file_format,
+            delimiter=component_data.get('delimiter'),
+            title=component_data.get('title'),
+            caption=component_data.get('caption')
+        )
+
+    def _create_markdown_component(self, component_data: dict) -> r.Markdown:
+        """
+        Creates a Markdown component.
+
+        Parameters
+        ----------
+        component_data : dict
+            A dictionary containing markdown component metadata.
+
+        Returns
+        -------
+        Markdown
+            A Markdown object populated with the provided metadata.
+        """
+        return r.Markdown(
+            id=component_data['id'],
+            name=component_data['name'],
+            file_path=component_data['file_path'],
+            title=component_data.get('title'),
+            caption=component_data.get('caption')
+        )
+
+    def _validate_enum_value(self, enum_class: Type[StrEnum], value: str) -> StrEnum:
+        """
+        Validate that the given value is a valid member of the specified enumeration class.
+
+        Parameters
+        ----------
+        enum_class : Type[StrEnum]
+            The enumeration class to validate against.
+        value : str
+            The value to be validated.
+
+        Returns
+        -------
+        StrEnum
+            The corresponding member of the enumeration if valid.
+
+        Raises
+        ------
+        ValueError
+            If the value is not a valid member of the enumeration class.
+        """
+        try:
+            return enum_class[value.upper()]
+        except KeyError:
+            raise ValueError(f"Invalid {enum_class.__name__}: {value}")

@@ -187,7 +187,7 @@ report_nav.run()""")
                         # Write the subsection content (descriptions, plots)
                         subsection_file.write("\n".join(subsection_content))
 
-    def _generate_subsection(self, subsection) -> List[str]:
+    def _generate_subsection(self, subsection) -> tuple[List[str], List[str]]:
         """
         Generate code to render components (plots, dataframes, markdown) in the given subsection, 
         creating imports and content for the subsection based on the component type.

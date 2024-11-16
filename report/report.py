@@ -1,8 +1,8 @@
 import os
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from enum import StrEnum, Enum, auto
-from typing import List, Optional, NamedTuple
+from enum import StrEnum, auto
+from typing import List, Optional
 import networkx as nx
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -315,7 +315,11 @@ class Markdown(Component):
     """
     A Markdown text component within a subsection of a report.
     """
-    component_type = ComponentType.MARKDOWN
+    def __init__(self, id: int, name: str, file_path: str, title: str=None, caption: str=None):
+        """
+        Initializes a DataFrame object.
+        """
+        super().__init__(id, name, file_path, component_type=ComponentType.MARKDOWN, title=title, caption=caption)
     
 @dataclass
 class Subsection:
@@ -507,7 +511,7 @@ class WebAppReportView(ReportView):
         pass
 
     @abstractmethod
-    def _generate_subsection(self, subsection: Subsection) -> List[str]:
+    def _generate_subsection(self, subsection: Subsection) -> tuple[List[str], List[str]]:
         """
         Generate code to render components (plots, dataframes, markdown) in the given subsection, 
         creating imports and content for the subsection based on the component type.

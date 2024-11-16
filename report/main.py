@@ -18,8 +18,8 @@ if __name__ == '__main__':
     doc_report.generate_report(output_dir="quarto_report/")
     doc_report.run_report(output_dir="quarto_report/")
 
-    # st_report = st_reportview.StreamlitReportView(report_metadata['report']['id'], report_metadata['report']['name'], 
-    #                                              report=report, report_type = ReportType[report_metadata['report']['report_type'].upper()], columns=None)
-    # st_report.generate_report(output_dir="streamlit_report/sections")
-    # st_report.run_report(output_dir="streamlit_report/sections")
+    st_report = st_reportview.StreamlitReportView(report_metadata['report']['id'], report_metadata['report']['name'], 
+                                                 report=report, report_type = ReportType[report_metadata['report']['report_type'].upper()], columns=None)
+    st_report.generate_report(output_dir="streamlit_report/sections")
+    st_report.run_report(output_dir="streamlit_report/sections")
 

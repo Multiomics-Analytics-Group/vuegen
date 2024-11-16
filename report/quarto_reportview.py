@@ -169,7 +169,7 @@ format:"""
 
         return yaml_header
 
-    def _generate_subsection(self, subsection, is_report_static, is_report_revealjs) -> List[str]:
+    def _generate_subsection(self, subsection, is_report_static, is_report_revealjs) -> tuple[List[str], List[str]]:
         """
         Generate code to render components (plots, dataframes, markdown) in the given subsection, 
         creating imports and content for the subsection based on the component type.
