@@ -16,28 +16,24 @@ class ReportFormat(StrEnum):
 class QuartoReportView(r.ReportView):
     """
     A ReportView subclass for generating Quarto reports.
-
-    Methods
-    -------
-    generate_report(output_dir)
-        Generates the qmd file of the quarto report. It creates code for rendering each section and its subsections with all components.
-    run_report(output_dir)
-        Runs the generated quarto report.
     """
 
-    def __init__(self, identifier: int, name: str, report: r.Report, report_type: r.ReportType, 
+    BASE_DIR = 'quarto_report'
+    STATIC_FILES_DIR = os.path.join(BASE_DIR, 'static')
+
+    def __init__(self, id: int, name: str, report: r.Report, report_type: r.ReportType, 
                 columns: Optional[List[str]], report_format: ReportFormat):
-        super().__init__(identifier, name=name, report=report, report_type = report_type, columns=columns)
+        super().__init__(id, name=name, report=report, report_type = report_type, columns=columns)
         self.report_format = report_format
 
-    def generate_report(self, output_dir: str = 'quarto_report/') -> None:
+    def generate_report(self, output_dir: str = BASE_DIR) -> None:
         """
         Generates the qmd file of the quarto report. It creates code for rendering each section and its subsections with all components.
 
         Parameters
         ----------
         output_dir : str, optional
-            The folder where the generated report files will be saved (default is 'quarto_report/').
+            The folder where the generated report files will be saved (default is BASE_DIR).
         """
         # Create the output folder if it does not exist
         if not os.path.exists(output_dir):
@@ -93,7 +89,7 @@ class QuartoReportView(r.ReportView):
 ```\n\n""")
             quarto_report.write("\n".join(qmd_content))
 
-    def run_report(self, output_dir: str = 'quarto_report') -> None:
+    def run_report(self, output_dir: str = BASE_DIR) -> None:
         """
         Runs the generated quarto report.
 
@@ -216,7 +212,7 @@ format:"""
         
         return subsection_content, subsection_imports
 
-    def _generate_plot_content(self, plot, is_report_static) -> List[str]:
+    def _generate_plot_content(self, plot, is_report_static, output_dir: str = STATIC_FILES_DIR) -> List[str]:
         """
         Generate content for a plot component based on the report type.
 
@@ -231,15 +227,23 @@ format:"""
         -------
         list : List[str]
             The list of content lines for the plot.
+        output_dir : str, optional
+            The folder where the static files will be saved (default is STATIC_FILES_DIR).
         """
+        # Create the output folder if it does not exist
+        if not os.path.exists(output_dir):
+            os.mkdir(output_dir)
+
         plot_content = []
         plot_content.append(f'### {plot.title}')
         if plot.plot_type == r.PlotType.INTERACTIVE:
             # Define plot path
             if is_report_static:
-                static_plot_path = f"quarto_report/{plot.name.replace(' ', '_')}.png"
+                #static_plot_path = f"{output_dir}/{plot.name.replace(' ', '_')}.png"
+                static_plot_path  = os.path.join(output_dir, f"{plot.name.replace(' ', '_')}.png")
             else:
-                html_plot_file = f"quarto_report/{plot.name.replace(' ', '_')}.html"
+                #html_plot_file = f"{output_dir}/{plot.name.replace(' ', '_')}.html"
+                html_plot_file  = os.path.join(output_dir, f"{plot.name.replace(' ', '_')}.html")
 
             if plot.int_visualization_tool == r.IntVisualizationTool.PLOTLY:
                 plot_content.append(self._generate_plot_code(plot))
@@ -402,7 +406,7 @@ display.Markdown(markdown_content)
         return f"""
 ![{alt_text}]({os.path.join('..', image_path)}){{ width={width}px height={height}px fig-align="center"}}\n"""
     
-    def _show_dataframe(self, dataframe, is_report_static) -> List[str]:
+    def _show_dataframe(self, dataframe, is_report_static, output_dir: str = STATIC_FILES_DIR) -> List[str]:
         """
         Appends either a static image or an interactive representation of a DataFrame to the content list.
 
@@ -417,11 +421,14 @@ display.Markdown(markdown_content)
         -------
         list : List[str]
             The list of content lines for the DataFrame.
+        output_dir : str, optional
+            The folder where the static files will be saved (default is STATIC_FILES_DIR).
         """
         dataframe_content = []
         if is_report_static:
             # Generate path for the DataFrame image
-            df_image = f"quarto_report/{dataframe.name.replace(' ', '_')}.png"
+            #df_image = f"quarto_report/{dataframe.name.replace(' ', '_')}.png"
+            df_image = os.path.join(output_dir, f"{dataframe.name.replace(' ', '_')}.png")
             dataframe_content.append(f"dfi.export(df, '{os.path.join('..', df_image)}', max_rows=10, max_cols=5)\n```\n")
             # Use helper method to add centered image content
             dataframe_content.append(self._generate_image_content(df_image, dataframe.name))

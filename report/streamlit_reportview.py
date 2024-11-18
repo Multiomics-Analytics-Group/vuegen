@@ -6,35 +6,24 @@ from streamlit.web import cli as stcli
 
 class StreamlitReportView(r.WebAppReportView):
     """
-    A Streamlit-based implementation of a report view interface.
-
-    Methods
-    -------
-    generate_report(output_dir)
-        Generates the Streamlit report and saves the report files to the specified folder.
-    run_report(output_dir)
-        Runs the generated Streamlit report.
-    _fornat_text(text, type, level, color)
-        Generates a Streamlit markdown text string with the specified type (header, paragraph), level and color.
-    _generate_home_section(output_dir, report_manag_content)
-        Generates the homepage for the report and updates the report manager content.
-    _generate_sections(output_dir)
-        Generates Python files for each section in the report, including subsections and its components (plots, dataframes, markdown).
-    _generate_subsection(subsection, imports_written, content)
-        Creates components (plots, dataframes, markdown, etc) for a given subsection. 
+    A Streamlit-based implementation of the WebAppReportView abstract base class.
     """
 
-    def __init__(self, identifier: int, name: str, report: r.Report, report_type: r.ReportType, columns: Optional[List[str]]):
-        super().__init__(identifier, name=name, report=report, report_type = r.ReportType.STREAMLIT, columns=columns)
+    BASE_DIR = 'streamlit_report'
+    SECTIONS_DIR = os.path.join(BASE_DIR, 'sections')
+    STATIC_FILES_DIR = os.path.join(BASE_DIR, 'static')
 
-    def generate_report(self, output_dir: str = 'streamlit_report/sections') -> None:
+    def __init__(self, id: int, name: str, report: r.Report, report_type: r.ReportType, columns: Optional[List[str]]):
+        super().__init__(id, name=name, report=report, report_type = report_type, columns=columns)
+
+    def generate_report(self, output_dir: str = SECTIONS_DIR) -> None:
         """
         Generates the Streamlit report and creates Python files for each section and its subsections and plots.
 
         Parameters
         ----------
         output_dir : str, optional
-            The folder where the generated report files will be saved (default is 'streamlit_report/sections').
+            The folder where the generated report files will be saved (default is SECTIONS_DIR).
         """
         # Create the output folder if it does not exist
         if not os.path.exists(output_dir):
@@ -82,14 +71,14 @@ report_nav.run()""")
         # Create Python files for each section and its subsections and plots
         self._generate_sections(output_dir=output_dir)
 
-    def run_report(self, output_dir: str = 'sections') -> None:
+    def run_report(self, output_dir: str = SECTIONS_DIR) -> None:
         """
         Runs the generated Streamlit report.
 
         Parameters
         ----------
         output_dir : str, optional
-            The folder where the report was generated (default is 'sections').
+            The folder where the report was generated (default is SECTIONS_DIR).
         """
         sys.argv = ["streamlit", "run", os.path.join(output_dir, "report_manager.py")]
         sys.exit(stcli.main())
@@ -224,7 +213,7 @@ report_nav.run()""")
                 subsection_content.extend(self._generate_markdown_content(component))
         return subsection_content, subsection_imports
     
-    def _generate_plot_content(self, plot) -> List[str]:
+    def _generate_plot_content(self, plot, output_dir: str = STATIC_FILES_DIR) -> List[str]:
         """
         Generate content for a plot component based on the plot type (static or interactive).
         
@@ -237,7 +226,13 @@ report_nav.run()""")
         -------
         list : List[str]
             The list of content lines for the plot.
+        output_dir : str, optional
+            The folder where the static files will be saved (default is STATIC_FILES_DIR).
         """
+        # Create the output folder if it does not exist
+        if not os.path.exists(output_dir):
+            os.mkdir(output_dir)
+        
         plot_content = []
         plot_content.append(self._format_text(text=plot.title, type='header', level=4, color='#2b8cbe'))
 
@@ -250,7 +245,8 @@ report_nav.run()""")
             elif plot.int_visualization_tool == r.IntVisualizationTool.PYVIS:
                 # For PyVis, handle the network visualization
                 G = plot.read_network()
-                html_plot_file = f"streamlit_report/{plot.name.replace(' ', '_')}.html"
+                #html_plot_file = f"{output_dir}/{plot.name.replace(' ', '_')}.html"
+                html_plot_file = os.path.join(output_dir, f"{plot.name.replace(' ', '_')}.html")
                 net = plot.create_and_save_pyvis_network(G, html_plot_file)
                 num_nodes = len(net.nodes)
                 num_edges = len(net.edges)
