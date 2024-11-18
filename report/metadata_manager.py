@@ -1,13 +1,26 @@
 import os
 import yaml
 import report as r
+import logging
 from enum import StrEnum
-from typing import Type
+from typing import Type, Optional
+from helpers.utils import get_logger
 
 class MetadataManager:
     """
     Class for handling metadata of reports from YAML files and creating report objects.
     """
+    def __init__(self, logger: Optional[logging.Logger] = None):
+        """
+        Initializes the MetadataManager with an optional logger.
+
+        Parameters
+        ----------
+        logger : logging.Logger, optional
+            A logger object to track warnings, errors, and info messages. If not provided,
+            a default logger will be used.
+        """
+        self.logger = logger or get_logger()
 
     def load_report_metadata(self, file_path: str) -> tuple[r.Report, dict]:
         """
@@ -30,8 +43,10 @@ class MetadataManager:
         ValueError
             If the YAML file is corrupted or contains missing/invalid values.
         """
+        self.logger.info(f"Loading report metadata from {file_path}")
         # Check the existence of the file_path
         if not os.path.exists(file_path):
+            self.logger.error(f"Config file not found: {file_path}")
             raise FileNotFoundError(f"The config file at {file_path} was not found.")
 
         # Load the YAML configuration file
@@ -39,17 +54,20 @@ class MetadataManager:
             try:
                 metadata = yaml.safe_load(file)
             except yaml.YAMLError as exc:
+                self.logger.error(f"Error parsing YAML file at {file_path}: {exc}")
                 raise ValueError(f"Error parsing YAML file: {exc}")
 
+        self.logger.info("Successfully loaded metadata. Creating report object.")
         # Create a Report object from metadata
         report = r.Report(
             id=metadata['report']['id'],
             name=metadata['report']['name'],
+            sections=[],
             title=metadata['report'].get('title'),
             description=metadata['report'].get('description'),
             graphical_abstract=metadata['report'].get('graphical_abstract'),
             logo=metadata['report'].get('logo'),
-            sections=[]
+            logger = self.logger
         )
 
         # Create sections and subsections
@@ -57,6 +75,7 @@ class MetadataManager:
             section = self._create_section(section_data)
             report.sections.append(section)
 
+        self.logger.info(f"Report '{report.name}' initialized with {len(report.sections)} sections.")
         return report, metadata
 
     def _create_section(self, section_data: dict) -> r.Section:
@@ -86,7 +105,7 @@ class MetadataManager:
         for subsection_data in section_data.get('subsections', []):
             subsection = self._create_subsection(subsection_data)
             section.subsections.append(subsection)
-
+        
         return section
 
     def _create_subsection(self, subsection_data: dict) -> r.Subsection:
@@ -174,7 +193,8 @@ class MetadataManager:
             int_visualization_tool=int_visualization_tool,
             title=component_data.get('title'),
             caption=component_data.get('caption'),
-            csv_network_format=csv_network_format
+            csv_network_format=csv_network_format,
+            logger = self.logger
         )
 
     def _create_dataframe_component(self, component_data: dict) -> r.DataFrame:
@@ -190,7 +210,7 @@ class MetadataManager:
         -------
         DataFrame
             A DataFrame object populated with the provided metadata.
-        """
+        """        
         # Validate enum field and return dataframe
         file_format = self._validate_enum_value(r.DataFrameFormat, component_data['file_format'])
         return r.DataFrame(
@@ -200,7 +220,8 @@ class MetadataManager:
             file_format=file_format,
             delimiter=component_data.get('delimiter'),
             title=component_data.get('title'),
-            caption=component_data.get('caption')
+            caption=component_data.get('caption'),
+            logger = self.logger
         )
 
     def _create_markdown_component(self, component_data: dict) -> r.Markdown:
@@ -222,7 +243,8 @@ class MetadataManager:
             name=component_data['name'],
             file_path=component_data['file_path'],
             title=component_data.get('title'),
-            caption=component_data.get('caption')
+            caption=component_data.get('caption'),
+            logger = self.logger
         )
 
     def _validate_enum_value(self, enum_class: Type[StrEnum], value: str) -> StrEnum:
@@ -249,4 +271,5 @@ class MetadataManager:
         try:
             return enum_class[value.upper()]
         except KeyError:
+            self.logger.error(f"Invalid value for {enum_class.__name__}: {value}")
             raise ValueError(f"Invalid {enum_class.__name__}: {value}")

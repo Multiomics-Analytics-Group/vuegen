@@ -5,6 +5,7 @@ from enum import StrEnum, auto
 from typing import List, Optional
 import networkx as nx
 import pandas as pd
+import logging
 import matplotlib.pyplot as plt
 from pyvis.network import Network
 
@@ -70,6 +71,8 @@ class Component():
         The title of the component (default is None). 
     caption : Optional[str]
         A caption for the component (default is None).
+    logger : Optional[logging.Logger]
+        A logger object to track warnings, error, and info messages (default is None).
     """
     id: int
     name: str
@@ -77,6 +80,7 @@ class Component():
     component_type: ComponentType
     title: Optional[str] = None
     caption: Optional[str] = None
+    logger: Optional[logging.Logger] = None
 
 class Plot(Component):
     """
@@ -94,12 +98,12 @@ class Plot(Component):
     """
     def __init__(self, id: int, name: str, file_path: str, plot_type: PlotType, 
                 int_visualization_tool: Optional[IntVisualizationTool]=None, title: str=None, 
-                caption: str=None, csv_network_format: Optional[CSVNetworkFormat]=None):
+                caption: str=None, logger: Optional[logging.Logger]=None, csv_network_format: Optional[CSVNetworkFormat]=None):
         """
         Initializes a Plot object.
         """
         # Call the constructor of the parent class (Component) to set common attributes
-        super().__init__(id, name, file_path, component_type = ComponentType.PLOT, title=title, caption=caption)
+        super().__init__(id, name, file_path, component_type = ComponentType.PLOT, title=title, caption=caption, logger=logger)
 
         # Set specific attributes for the Plot class
         self.plot_type = plot_type
@@ -124,6 +128,7 @@ class Plot(Component):
 
         # Check if the file exists
         if not os.path.isfile(self.file_path):
+            self.logger.error(f"File not found or cannot be accessed: {self.file_path}.")
             raise FileNotFoundError(f"The file at {self.file_path} was not found or cannot be accessed.")
 
         # Determine the file extension and check if it is supported
@@ -131,6 +136,7 @@ class Plot(Component):
 
         # Check if the file extension matches any Enum value
         if not any(file_extension == fmt.value_with_dot for fmt in NetworkFormat):
+            self.logger.error(f"Unsupported file extension: {file_extension}.")
             raise ValueError(
                 f"Unsupported file extension: {file_extension}. Supported extensions are: "
                 f"{', '.join(fmt.value for fmt in NetworkFormat)}."
@@ -143,28 +149,37 @@ class Plot(Component):
                 try:
                     df_net = pd.read_csv(self.file_path, delimiter=delimiter)
                 except pd.errors.ParserError:
+                    self.logger.error(f"Error parsing CSV/TXT file {self.file_path}. Please check the file format or delimiter.")
                     raise ValueError(f"Error parsing the file {self.file_path}. Please check the file format or delimiter.")
 
                 if self.csv_network_format == CSVNetworkFormat.EDGELIST:
                     # Assert that "source" and "target" columns are present in the DataFrame
                     required_columns = {"source", "target"}
-                    assert required_columns.issubset(df_net.columns), f"CSV must contain columns named {required_columns} to name the source and target nodes."
+                    if not required_columns.issubset(df_net.columns):
+                        self.logger.warning(f"CSV network file must contain columns named 'source' and 'target'. Missing columns: {', '.join(required_columns.difference(df_net.columns))}.")
                     
                     # Use additional columns as edge attributes, excluding "source" and "target"
                     edge_attributes = [col for col in df_net.columns if col not in required_columns]
                     
                     # Return a NetworkX graph object from the edgelist
-                    return nx.from_pandas_edgelist(df_net, source="source", target="target", edge_attr=edge_attributes)
+                    G = nx.from_pandas_edgelist(df_net, source="source", target="target", edge_attr=edge_attributes)
+                    self.logger.info(f"Successfully read network from file: {self.file_path}.")
+                    return G
                 elif self.csv_network_format == CSVNetworkFormat.ADJLIST:
-                    return nx.from_pandas_adjacency(df_net)
+                    G = nx.from_pandas_adjacency(df_net)
+                    self.logger.info(f"Successfully read network from file: {self.file_path}.")
+                    return G
                 else:
+                    self.logger.error(f"Unsupported format for CSV/TXT file: {self.csv_network_format}.")
                     raise ValueError(f"Unsupported format for CSV/TXT file: {self.csv_network_format}")
             
             # Return the NetworkX graph object created from the specified network file
             G = file_extension_map[file_extension](self.file_path)
             G = self._add_size_attribute(G)
+            self.logger.info(f"Successfully read network from file: {self.file_path}.")
             return G
         except Exception as e:
+            self.logger.error(f"Error occurred while reading network file: {str(e)}.")
             raise RuntimeError(f"An error occurred while reading the network file: {str(e)}")
     
     def save_netwrok_image(self, G: nx.Graph, output_file: str, format: str, dpi: int=300) -> None:
@@ -184,11 +199,13 @@ class Plot(Component):
         """
         # Check if the output file path is valid
         if not os.path.isdir(os.path.dirname(output_file)):
+            self.logger.error(f"Directory for saving image does not exist: {os.path.dirname(output_file)}.")
             raise FileNotFoundError(f"The directory for saving the file does not exist: {os.path.dirname(output_file)}.")
         
         # Validate image format
         valid_formats = ['png', 'jpg', 'jpeg', 'svg']
         if format.lower() not in valid_formats:
+            self.logger.error(f"Invalid image format: {format}. Supported formats are: {', '.join(valid_formats)}.")
             raise ValueError(f"Invalid format: {format}. Supported formats are: {', '.join(valid_formats)}.")
         
         try:
@@ -196,7 +213,9 @@ class Plot(Component):
             nx.draw(G, with_labels=True)
             plt.savefig(output_file, format=format, dpi=dpi)
             plt.clf()
+            self.logger.info(f"Network image saved successfully at: {output_file}.")
         except Exception as e:
+            self.logger.error(f"Failed to save the network image: {str(e)}.")
             raise RuntimeError(f"Failed to save the network image: {str(e)}")
 
     def create_and_save_pyvis_network(self, G: nx.Graph, output_file: str) -> Network:
@@ -217,8 +236,10 @@ class Plot(Component):
         """
         # Check if the network object and output file path are valid
         if not isinstance(G, nx.Graph):
+            self.logger.error(f"Provided object is not a valid NetworkX graph: {type(G)}.")
             raise TypeError(f"The provided object is not a valid NetworkX graph: {type(G)}.")
         if not os.path.isdir(os.path.dirname(output_file)):
+            self.logger.error(f"Directory for saving PyVis network does not exist: {os.path.dirname(output_file)}.")
             raise FileNotFoundError(f"The directory for saving the file does not exist: {os.path.dirname(output_file)}.")
         
         try:
@@ -241,9 +262,11 @@ class Plot(Component):
                 
             # Save the network as an HTML file
             net.save_graph(output_file)
+            self.logger.info(f"PyVis network created and saved as: {output_file}.")
             return net
         
         except Exception as e:
+            self.logger.error(f"Failed to create and save PyVis network: {str(e)}.")
             raise RuntimeError(f"Failed to create and save the PyVis network: {str(e)}")
     
     def _add_size_attribute(self, G: nx.Graph) -> nx.Graph:
@@ -303,11 +326,11 @@ class DataFrame(Component):
         The delimiter to use if the file is a delimited text format (e.g., ';', '\t', etc).
     """
     def __init__(self, id: int, name: str, file_path: str, file_format: DataFrameFormat, 
-                 delimiter: Optional[str]=None, title: str=None, caption: str=None):
+                 title: str=None, caption: str=None, logger: Optional[logging.Logger]=None, delimiter: Optional[str]=None):
         """
         Initializes a DataFrame object.
         """
-        super().__init__(id, name, file_path, component_type=ComponentType.DATAFRAME, title=title, caption=caption)
+        super().__init__(id, name, file_path, component_type=ComponentType.DATAFRAME, title=title, caption=caption, logger=logger)
         self.file_format = file_format
         self.delimiter = delimiter
 
@@ -315,11 +338,11 @@ class Markdown(Component):
     """
     A Markdown text component within a subsection of a report.
     """
-    def __init__(self, id: int, name: str, file_path: str, title: str=None, caption: str=None):
+    def __init__(self, id: int, name: str, file_path: str, title: str=None, caption: str=None, logger: Optional[logging.Logger]=None):
         """
         Initializes a DataFrame object.
         """
-        super().__init__(id, name, file_path, component_type=ComponentType.MARKDOWN, title=title, caption=caption)
+        super().__init__(id, name, file_path, component_type=ComponentType.MARKDOWN, title=title, caption=caption, logger=logger)
     
 @dataclass
 class Subsection:
@@ -380,6 +403,8 @@ class Report:
         A unique identifier for the report.
     name : str
         The name of the report.
+    sections : List[Section]
+        A list of sections that belong to the report.
     title : str, optional
         The title of the report (default is None).
     description : str, optional
@@ -388,16 +413,17 @@ class Report:
         The file path to the graphical abstract image (default is None).
     logo : str, optional
         The file path to the logo image (default is None).
-    sections : List[Section]
-        A list of sections that belong to the report.
+    logger : Optional[logging.Logger]
+        A logger object to track warnings, error, and info messages (default is None).
     """
     id: int
     name: str
+    sections: List['Section'] = field(default_factory=list)
     title: Optional[str] = None
     description: Optional[str] = None
     graphical_abstract: Optional[str] = None
     logo: Optional[str] = None
-    sections: List['Section'] = field(default_factory=list)
+    logger: Optional[logging.Logger] = None
 
 class ReportView(ABC):
     """

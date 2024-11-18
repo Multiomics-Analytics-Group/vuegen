@@ -239,10 +239,8 @@ format:"""
         if plot.plot_type == r.PlotType.INTERACTIVE:
             # Define plot path
             if is_report_static:
-                #static_plot_path = f"{output_dir}/{plot.name.replace(' ', '_')}.png"
                 static_plot_path  = os.path.join(output_dir, f"{plot.name.replace(' ', '_')}.png")
             else:
-                #html_plot_file = f"{output_dir}/{plot.name.replace(' ', '_')}.html"
                 html_plot_file  = os.path.join(output_dir, f"{plot.name.replace(' ', '_')}.html")
 
             if plot.int_visualization_tool == r.IntVisualizationTool.PLOTLY:
@@ -427,7 +425,6 @@ display.Markdown(markdown_content)
         dataframe_content = []
         if is_report_static:
             # Generate path for the DataFrame image
-            #df_image = f"quarto_report/{dataframe.name.replace(' ', '_')}.png"
             df_image = os.path.join(output_dir, f"{dataframe.name.replace(' ', '_')}.png")
             dataframe_content.append(f"dfi.export(df, '{os.path.join('..', df_image)}', max_rows=10, max_cols=5)\n```\n")
             # Use helper method to add centered image content

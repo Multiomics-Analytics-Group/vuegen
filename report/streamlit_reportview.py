@@ -1,8 +1,7 @@
 import report as r
 import os
-import sys
+import subprocess
 from typing import List, Optional
-from streamlit.web import cli as stcli
 
 class StreamlitReportView(r.WebAppReportView):
     """
@@ -25,51 +24,62 @@ class StreamlitReportView(r.WebAppReportView):
         output_dir : str, optional
             The folder where the generated report files will be saved (default is SECTIONS_DIR).
         """
+        self.report.logger.info(f"Generating report in directory: {output_dir}")
+
         # Create the output folder if it does not exist
         if not os.path.exists(output_dir):
             os.makedirs(output_dir, exist_ok=True)
-
-        # Define the Streamlit imports and report manager content
-        report_manag_content = []
-        report_manag_content.append(f"""import streamlit as st\n
+            self.report.logger.debug(f"Created output directory: {output_dir}")
+        
+        try:
+            self.report.logger.debug("Processing app navigation.")
+            # Define the Streamlit imports and report manager content
+            report_manag_content = []
+            report_manag_content.append(f"""import streamlit as st\n
 st.set_page_config(layout="wide", page_title="{self.report.name}", page_icon="{self.report.logo}")
 st.logo("{self.report.logo}")""")
-        report_manag_content.append(self._format_text(text=self.report.title, type = 'header', level=1, color='#023858'))
+            report_manag_content.append(self._format_text(text=self.report.title, type = 'header', level=1, color='#023858'))
 
-        # Initialize a dictionary to store the navigation structure
-        report_manag_content.append("\nsections_pages = {}")
+            # Initialize a dictionary to store the navigation structure
+            report_manag_content.append("\nsections_pages = {}")
 
-        # Generate the home page and update the report manager content
-        self._generate_home_section(output_dir=output_dir, report_manag_content=report_manag_content)
+            # Generate the home page and update the report manager content
+            self._generate_home_section(output_dir=output_dir, report_manag_content=report_manag_content)
 
-        for section in self.report.sections:
-            # Create a folder for each section
-            subsection_page_vars = []
-            section_name_var = section.name.replace(" ", "_")
-            if not os.path.exists(os.path.join(output_dir, section_name_var)):
-                os.mkdir(os.path.join(output_dir, section_name_var))
-            
-            for subsection in section.subsections:
-                subsection_name_var = subsection.name.replace(" ", "_")
-                subsection_file_path = os.path.join(section_name_var, section_name_var + "_" + subsection_name_var + ".py")
+            for section in self.report.sections:
+                # Create a folder for each section
+                subsection_page_vars = []
+                section_name_var = section.name.replace(" ", "_")
+                if not os.path.exists(os.path.join(output_dir, section_name_var)):
+                    os.mkdir(os.path.join(output_dir, section_name_var))
+                    self.report.logger.debug(f"Created section directory: {section_name_var}")
+                
+                for subsection in section.subsections:
+                    subsection_name_var = subsection.name.replace(" ", "_")
+                    subsection_file_path = os.path.join(section_name_var, section_name_var + "_" + subsection_name_var + ".py")
 
-                # Create a Page object for each subsection and add it to the home page content
-                report_manag_content.append(f"{subsection_name_var} = st.Page('{subsection_file_path}', title='{subsection.name}')")
-                subsection_page_vars.append(subsection_name_var)
-            
-            # Add all subsection Page objects to the corresponding section
-            report_manag_content.append(f"sections_pages['{section.name}'] = [{', '.join(subsection_page_vars)}]\n")
+                    # Create a Page object for each subsection and add it to the home page content
+                    report_manag_content.append(f"{subsection_name_var} = st.Page('{subsection_file_path}', title='{subsection.name}')")
+                    subsection_page_vars.append(subsection_name_var)
+                
+                # Add all subsection Page objects to the corresponding section
+                report_manag_content.append(f"sections_pages['{section.name}'] = [{', '.join(subsection_page_vars)}]\n")
 
-        # Add navigation object to the home page content
-        report_manag_content.append(f"""report_nav = st.navigation(sections_pages)
+            # Add navigation object to the home page content
+            report_manag_content.append(f"""report_nav = st.navigation(sections_pages)
 report_nav.run()""")
-        
-        # Write the navigation and general content to a Python file
-        with open(os.path.join(output_dir, "report_manager.py"), 'w') as nav_manager:
-            nav_manager.write("\n".join(report_manag_content))
+            
+            # Write the navigation and general content to a Python file
+            with open(os.path.join(output_dir, "report_manager.py"), 'w') as nav_manager:
+                nav_manager.write("\n".join(report_manag_content))
+                self.report.logger.info(f"Created app navigation script: report_manager.py")
 
-        # Create Python files for each section and its subsections and plots
-        self._generate_sections(output_dir=output_dir)
+            # Create Python files for each section and its subsections and plots
+            self._generate_sections(output_dir=output_dir)
+            self.report.logger.info("Report generation completed successfully.")
+        except Exception as e:
+            self.report.logger.error(f"An error occurred while generating the report: {str(e)}")
+            raise
 
     def run_report(self, output_dir: str = SECTIONS_DIR) -> None:
         """
@@ -80,8 +90,17 @@ report_nav.run()""")
         output_dir : str, optional
             The folder where the report was generated (default is SECTIONS_DIR).
         """
-        sys.argv = ["streamlit", "run", os.path.join(output_dir, "report_manager.py")]
-        sys.exit(stcli.main())
+        self.report.logger.info("Running Streamlit report.")
+        try:
+            subprocess.run(
+                ["streamlit", "run", os.path.join(output_dir, "report_manager.py")],
+                check=True,
+            )
+        except KeyboardInterrupt:
+            print("Streamlit process interrupted.")
+        except subprocess.CalledProcessError as e:
+            self.report.logger.error(f"Error running Streamlit report: {str(e)}")
+            raise
 
     def _format_text(self, text: str, type: str, level: int = 1, color: str = '#000000') -> str:
         """
@@ -121,25 +140,38 @@ report_nav.run()""")
         report_manag_content : list
             A list to store the content that will be written to the report manager file.
         """
-        # Create folder for the home page
-        if not os.path.exists(os.path.join(output_dir, "Home")):
-            os.mkdir(os.path.join(output_dir, "Home"))
+        self.report.logger.debug("Processing home section.")
 
-        # Create the home page content
-        home_content = []
-        home_content.append(f"import streamlit as st")
-        home_desc = self._format_text(text=self.report.description, type='paragraph')
-        home_content.append(home_desc)
-        if self.report.graphical_abstract:
-            home_content.append(f"\nst.image('{self.report.graphical_abstract}', use_column_width=True)")
+        try:
+            # Create folder for the home page
+            home_dir = os.path.join(output_dir, "Home")
+            if not os.path.exists(home_dir):
+                os.mkdir(home_dir)
+                self.report.logger.debug(f"Created home directory: {home_dir}")
+            else:
+                self.report.logger.debug(f"Home directory already exists: {home_dir}")
+            
+            # Create the home page content
+            home_content = []
+            home_content.append(f"import streamlit as st")
+            home_desc = self._format_text(text=self.report.description, type='paragraph')
+            home_content.append(home_desc)
+            if self.report.graphical_abstract:
+                home_content.append(f"\nst.image('{self.report.graphical_abstract}', use_column_width=True)")
 
-        # Write the home page content to a Python file
-        with open(os.path.join(output_dir, "Home", "Homepage.py"), 'w') as home_page:
-            home_page.write("\n".join(home_content))
+            # Write the home page content to a Python file
+            home_page_path = os.path.join(home_dir, "Homepage.py")
+            with open(home_page_path, 'w') as home_page:
+                home_page.write("\n".join(home_content))
+            self.report.logger.info(f"Home page content written to {home_page_path}.")
 
-        # Add the home page to the report manager content
-        report_manag_content.append(f"homepage = st.Page('Home/Homepage.py', title='Homepage')")
-        report_manag_content.append(f"sections_pages['Home'] = [homepage]\n")
+            # Add the home page to the report manager content
+            report_manag_content.append(f"homepage = st.Page('Home/Homepage.py', title='Homepage')")
+            report_manag_content.append(f"sections_pages['Home'] = [homepage]\n")
+            self.report.logger.info("Home page added to the report manager content.")
+        except Exception as e:
+            self.report.logger.error(f"Error generating the home section: {str(e)}")
+            raise
 
     def _generate_sections(self, output_dir: str) -> None:
         """
@@ -150,31 +182,47 @@ report_nav.run()""")
         output_dir : str
             The folder where section files will be saved.
         """
-        for section in self.report.sections:
-            section_name_var = section.name.replace(" ", "_")
+        self.report.logger.info("Starting to generate sections for the report.")
 
-            if section.subsections:
-                # Iterate through subsections and integrate them into the section file
-                for subsection in section.subsections:
-                    # Create subsection file
-                    subsection_file_path = os.path.join(output_dir, section_name_var, section_name_var + "_" + subsection.name.replace(" ", "_") + ".py")
-                    
-                    # Generate content and imports for the subsection
-                    subsection_content, subsection_imports = self._generate_subsection(subsection)
+        try:
+            for section in self.report.sections:
+                section_name_var = section.name.replace(" ", "_")
+                self.report.logger.debug(f"Processing section: '{section.name}' - {len(section.subsections)} subsections")
 
-                    # Flatten the subsection_imports into a single list
-                    flattened_subsection_imports = [imp for sublist in subsection_imports for imp in sublist]
-                    
-                    # Remove duplicated imports
-                    unique_imports = list(set(flattened_subsection_imports))
+                if section.subsections:
+                    # Iterate through subsections and integrate them into the section file
+                    for subsection in section.subsections:
+                        self.report.logger.debug(f"Processing subsection: '{subsection.name}'")
+                        try:
+                            # Create subsection file
+                            subsection_file_path = os.path.join(output_dir, section_name_var, section_name_var + "_" + subsection.name.replace(" ", "_") + ".py")
+                            
+                            # Generate content and imports for the subsection
+                            subsection_content, subsection_imports = self._generate_subsection(subsection)
 
-                    # Write everything to the subsection file
-                    with open(subsection_file_path, 'w') as subsection_file:
-                        # Write imports at the top of the file
-                        subsection_file.write("\n".join(unique_imports) + "\n\n")
+                            # Flatten the subsection_imports into a single list
+                            flattened_subsection_imports = [imp for sublist in subsection_imports for imp in sublist]
+                            
+                            # Remove duplicated imports
+                            unique_imports = list(set(flattened_subsection_imports))
 
-                        # Write the subsection content (descriptions, plots)
-                        subsection_file.write("\n".join(subsection_content))
+                            # Write everything to the subsection file
+                            with open(subsection_file_path, 'w') as subsection_file:
+                                # Write imports at the top of the file
+                                subsection_file.write("\n".join(unique_imports) + "\n\n")
+
+                                # Write the subsection content (descriptions, plots)
+                                subsection_file.write("\n".join(subsection_content))
+
+                            self.report.logger.info(f"Subsection file created: {subsection_file_path}")
+                        except Exception as subsection_error:
+                            self.report.logger.error(
+                                f"Error processing subsection '{subsection.name}' in section '{section.name}': {str(subsection_error)}"
+                            )
+                            raise
+        except Exception as e:
+            self.report.logger.error(f"Error generating sections: {str(e)}")
+            raise
 
     def _generate_subsection(self, subsection) -> tuple[List[str], List[str]]:
         """
@@ -211,6 +259,10 @@ report_nav.run()""")
                 subsection_content.extend(self._generate_dataframe_content(component))
             elif component.component_type == r.ComponentType.MARKDOWN:
                 subsection_content.extend(self._generate_markdown_content(component))
+            else:
+                self.report.logger.warning(f"Unsupported component type '{component.component_type}' in subsection: {subsection.name}")
+        
+        self.report.logger.debug(f"Generated content and imports for subsection: '{subsection.name}' - {len(subsection.components)} components")
         return subsection_content, subsection_imports
     
     def _generate_plot_content(self, plot, output_dir: str = STATIC_FILES_DIR) -> List[str]:
@@ -232,32 +284,44 @@ report_nav.run()""")
         # Create the output folder if it does not exist
         if not os.path.exists(output_dir):
             os.mkdir(output_dir)
+            self.report.logger.debug(f"Created output directory for static content: {output_dir}")
         
         plot_content = []
         plot_content.append(self._format_text(text=plot.title, type='header', level=4, color='#2b8cbe'))
 
         if plot.plot_type == r.PlotType.INTERACTIVE:
-            # Handle interactive plot
-            if plot.int_visualization_tool == r.IntVisualizationTool.PLOTLY:
-                plot_content.append(self._generate_plot_code(plot))
-            elif plot.int_visualization_tool == r.IntVisualizationTool.ALTAIR:
-                plot_content.append(self._generate_plot_code(plot))
-            elif plot.int_visualization_tool == r.IntVisualizationTool.PYVIS:
-                # For PyVis, handle the network visualization
-                G = plot.read_network()
-                #html_plot_file = f"{output_dir}/{plot.name.replace(' ', '_')}.html"
-                html_plot_file = os.path.join(output_dir, f"{plot.name.replace(' ', '_')}.html")
-                net = plot.create_and_save_pyvis_network(G, html_plot_file)
-                num_nodes = len(net.nodes)
-                num_edges = len(net.edges)
-                plot_content.append(f"""with open('{html_plot_file}', 'r') as f:
+            try:
+                # Handle interactive plot
+                if plot.int_visualization_tool == r.IntVisualizationTool.PLOTLY:
+                    plot_content.append(self._generate_plot_code(plot))
+                elif plot.int_visualization_tool == r.IntVisualizationTool.ALTAIR:
+                    plot_content.append(self._generate_plot_code(plot))
+                elif plot.int_visualization_tool == r.IntVisualizationTool.PYVIS:
+                    # For PyVis, handle the network visualization
+                    G = plot.read_network()
+                    html_plot_file = os.path.join(output_dir, f"{plot.name.replace(' ', '_')}.html")
+                    net = plot.create_and_save_pyvis_network(G, html_plot_file)
+                    num_nodes = len(net.nodes)
+                    num_edges = len(net.edges)
+                    plot_content.append(f"""with open('{html_plot_file}', 'r') as f:
     html_data = f.read()
 st.markdown(f"<p style='text-align: center; color: black;'> <b>Number of nodes:</b> {num_nodes} </p>", unsafe_allow_html=True)
 st.markdown(f"<p style='text-align: center; color: black;'> <b>Number of relationships:</b> {num_edges} </p>", unsafe_allow_html=True)""")
-                plot_content.append(self._generate_plot_code(plot))
+                    plot_content.append(self._generate_plot_code(plot))
+                else:
+                    self.report.logger.warning(f"Unsupported interactive plot tool: {plot.int_visualization_tool}")
+            except Exception as e:
+                self.report.logger.error(f"Error generating interactive plot content for {plot.name}: {str(e)}")
+                raise
+        
         elif plot.plot_type == r.PlotType.STATIC:
-            # Handle static plot
-            plot_content.append(f"\nst.image('{plot.file_path}', caption='{plot.caption}', use_column_width=True)\n")
+            try:
+                # Handle static plot
+                plot_content.append(f"\nst.image('{plot.file_path}', caption='{plot.caption}', use_column_width=True)\n")
+            except Exception as e:
+                self.report.logger.error(f"Error generating static plot content for {plot.name}: {str(e)}")
+                raise
+        self.report.logger.info(f"Successfully generated content for plot: '{plot.name}'")
 
         return plot_content
     
@@ -313,19 +377,26 @@ st.components.v1.html(html_data, height=net_html_height)\n"""
         dataframe_content = []
         dataframe_content.append(self._format_text(text=dataframe.title, type='header', level=4, color='#2b8cbe'))
         
-        if dataframe.file_format == r.DataFrameFormat.CSV:
-            dataframe_content.append(f"df = pd.read_csv('{dataframe.file_path}')")
-        elif dataframe.file_format == r.DataFrameFormat.PARQUET:
-            dataframe_content.append(f"df = pd.read_parquet('{dataframe.file_path}')")
-        elif dataframe.file_format == r.DataFrameFormat.TXT:
-            dataframe_content.append(f"df = pd.read_csv('{dataframe.file_path}', sep='\\t')")
-        elif dataframe.file_format == r.DataFrameFormat.EXCEL:
-            dataframe_content.append(f"df = pd.read_excel('{dataframe.file_path}')")
-        else:
-            raise ValueError(f"Unsupported DataFrame file format: {dataframe.file_format}")
+        try:
+            if dataframe.file_format == r.DataFrameFormat.CSV:
+                dataframe_content.append(f"df = pd.read_csv('{dataframe.file_path}')")
+            elif dataframe.file_format == r.DataFrameFormat.PARQUET:
+                dataframe_content.append(f"df = pd.read_parquet('{dataframe.file_path}')")
+            elif dataframe.file_format == r.DataFrameFormat.TXT:
+                dataframe_content.append(f"df = pd.read_csv('{dataframe.file_path}', sep='\\t')")
+            elif dataframe.file_format == r.DataFrameFormat.EXCEL:
+                dataframe_content.append(f"df = pd.read_excel('{dataframe.file_path}')")
+            else:
+                self.report.logger.error(f"Unsupported DataFrame file format: {dataframe.file_format}")
+                raise ValueError(f"Unsupported DataFrame file format: {dataframe.file_format}")
+            
+            dataframe_content.append("st.dataframe(df, use_container_width=True)")
+            self.report.logger.info(f"Successfully generated content for DataFrame: '{dataframe.title}'")
         
-        dataframe_content.append("st.dataframe(df, use_container_width=True)")
-        
+        except Exception as e:
+            self.report.logger.error(f"Error generating content for DataFrame: {dataframe.title}. Error: {str(e)}")
+            raise
+
         return dataframe_content
     
     def _generate_markdown_content(self, markdown) -> List[str]:
@@ -342,12 +413,17 @@ st.components.v1.html(html_data, height=net_html_height)\n"""
         list : List[str]
             The list of content lines for the markdown.
         """
-        markdown_content = []
-        markdown_content.append(self._format_text(text=markdown.title, type='header', level=4, color='#2b8cbe'))
-        markdown_content.append(f"""with open('{markdown.file_path}', 'r') as markdown_file:
+        try:
+            markdown_content = []
+            markdown_content.append(self._format_text(text=markdown.title, type='header', level=4, color='#2b8cbe'))
+            markdown_content.append(f"""with open('{markdown.file_path}', 'r') as markdown_file:
     markdown_content = markdown_file.read()
 st.markdown(markdown_content, unsafe_allow_html=True)\n""")
-        
+        except Exception as e:
+            self.report.logger.error(f"Error generating content for Markdown: {markdown.title}. Error: {str(e)}")
+            raise
+
+        self.report.logger.info(f"Successfully generated content for Markdown: '{markdown.title}'")
         return markdown_content
     
     def _generate_component_imports(self, component: r.Component) -> List[str]:
