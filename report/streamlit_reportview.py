@@ -17,7 +17,7 @@ class StreamlitReportView(r.WebAppReportView):
     def __init__(self, id: int, name: str, report: r.Report, report_type: r.ReportType, columns: Optional[List[str]]):
         super().__init__(id, name=name, report=report, report_type = report_type, columns=columns)
 
-    def generate_report(self, output_dir: str = SECTIONS_DIR) -> None:
+    def generate_report(self, output_dir: str = SECTIONS_DIR, static_dir: str = STATIC_FILES_DIR) -> None:
         """
         Generates the Streamlit report and creates Python files for each section and its subsections and plots.
 
@@ -25,16 +25,22 @@ class StreamlitReportView(r.WebAppReportView):
         ----------
         output_dir : str, optional
             The folder where the generated report files will be saved (default is SECTIONS_DIR).
+        static_dir : str, optional
+            The folder where the static files will be saved (default is STATIC_FILES_DIR).
         """
         self.report.logger.debug(f"Generating '{self.report_type}' report in directory: '{output_dir}'")
 
-        # Create the output folder if it does not exist
-        #if not os.path.exists(output_dir):
-        #    os.makedirs(output_dir, exist_ok=True)
+        # Create the output folder 
         if create_folder(output_dir, is_nested=True):
-            self.report.logger.debug(f"Created output directory: '{output_dir}'")
+            self.report.logger.info(f"Created output directory: '{output_dir}'")
         else:
-            self.report.logger.debug(f"Output directory already existed: '{output_dir}'")
+            self.report.logger.info(f"Output directory already existed: '{output_dir}'")
+
+        # Create the static folder
+        if create_folder(static_dir):
+            self.report.logger.info(f"Created output directory for static content: '{static_dir}'")
+        else:
+            self.report.logger.info(f"Output directory for static content already existed: '{static_dir}'")
         
         try:
             self.report.logger.debug("Processing app navigation code.")
@@ -56,8 +62,7 @@ st.logo("{self.report.logo}")""")
                 subsection_page_vars = []
                 section_name_var = section.name.replace(" ", "_")
                 section_dir_path = os.path.join(output_dir, section_name_var)
-                #if not os.path.exists(os.path.join(output_dir, section_name_var)):
-                # os.mkdir(os.path.join(output_dir, section_name_var))
+
                 if create_folder(section_dir_path):
                     self.report.logger.debug(f"Created section directory: {section_dir_path}")
                 else:
@@ -150,8 +155,6 @@ report_nav.run()""")
         try:
             # Create folder for the home page
             home_dir_path = os.path.join(output_dir, "Home")
-            #if not os.path.exists(home_dir_path):
-            #os.mkdir(home_dir_path)
             if create_folder(home_dir_path): 
                 self.report.logger.debug(f"Created home directory: {home_dir_path}")
             else:
@@ -271,7 +274,7 @@ report_nav.run()""")
         self.report.logger.info(f"Generated content and imports for subsection: '{subsection.name}'")
         return subsection_content, subsection_imports
     
-    def _generate_plot_content(self, plot, output_dir: str = STATIC_FILES_DIR) -> List[str]:
+    def _generate_plot_content(self, plot, static_dir: str = STATIC_FILES_DIR) -> List[str]:
         """
         Generate content for a plot component based on the plot type (static or interactive).
         
@@ -284,17 +287,9 @@ report_nav.run()""")
         -------
         list : List[str]
             The list of content lines for the plot.
-        output_dir : str, optional
+        static_dir : str, optional
             The folder where the static files will be saved (default is STATIC_FILES_DIR).
         """
-        # Create the output folder if it does not exist
-        #if not os.path.exists(output_dir):
-        #    os.mkdir(output_dir)
-        if create_folder(output_dir):
-            self.report.logger.debug(f"Created output directory for static content: {output_dir}")
-        else:
-            self.report.logger.debug(f"Output directory for static content already existed: {output_dir}")
-        
         plot_content = []
         plot_content.append(self._format_text(text=plot.title, type='header', level=4, color='#2b8cbe'))
 
@@ -308,7 +303,7 @@ report_nav.run()""")
                 elif plot.int_visualization_tool == r.IntVisualizationTool.PYVIS:
                     # For PyVis, handle the network visualization
                     G = plot.read_network()
-                    html_plot_file = os.path.join(output_dir, f"{plot.name.replace(' ', '_')}.html")
+                    html_plot_file = os.path.join(static_dir, f"{plot.name.replace(' ', '_')}.html")
                     net = plot.create_and_save_pyvis_network(G, html_plot_file)
                     num_nodes = len(net.nodes)
                     num_edges = len(net.edges)

@@ -106,6 +106,7 @@ class QuartoReportView(r.ReportView):
 ```\n\n""")
                 quarto_report.write("\n".join(qmd_content))
                 self.report.logger.info(f"Created qmd script to render the app: {self.BASE_DIR}.qmd")
+        
         except Exception as e:
             self.report.logger.error(f"An error occurred while generating the report: {str(e)}")
             raise
