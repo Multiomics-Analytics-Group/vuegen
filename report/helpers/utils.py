@@ -6,23 +6,30 @@ from enum import StrEnum
 from typing import Type
 
 ## CHECKS
-def assert_path(filepath: str):
+def check_path(filepath: str) -> bool:
     """
-    Checks that fpath is a string and that it exists
+    Checks if the given file or folder path exists.
 
-    PARAMS
-    -----
-    - filepath (str): the filepath or folderpath
+    PARAMETERS
+    ---------
+    filepath : str
+        The file or folder path to check.
 
-    OUTPUTS
-    -----
-    - raises assertion error if filepath is not a string or doesn't exist
+    RETURNS
+    -------
+    bool
+        True if the path exists, False otherwise.
+
+    RAISES
+    ------
+    AssertionError
+        If the filepath is not a valid string.
     """
-
+    # Assert that the filepath is a string
     assert isinstance(filepath, str), f"Filepath must be a string: {filepath}"
-    assert os.path.exists(
-        os.path.abspath(filepath)
-    ), f"Filepath does not exist: {os.path.abspath(filepath)}"
+
+    # Check if the path exists
+    return os.path.exists(os.path.abspath(filepath))
 
 
 def assert_enum_value(enum_class: Type[StrEnum], value: str, logger: logging.Logger) -> StrEnum:
@@ -55,6 +62,43 @@ def assert_enum_value(enum_class: Type[StrEnum], value: str, logger: logging.Log
         logger.error(f"Invalid value for {enum_class.__name__}: '{value}'. Expected values are: {expected_values}")
         raise ValueError(f"Invalid {enum_class.__name__}: {value}. Expected values are: {expected_values}")
 
+## FILE_SYSTEM
+def create_folder(directory_path: str, is_nested: bool = False) -> bool:
+    """
+    Create a folder. Optionally create nested directories if the specified path includes subdirectories.
+
+    Parameters
+    ----------
+    directory_path : str
+        The path of the directory to create.
+    is_nested : bool
+        A flag indicating whether to create nested directories (True uses os.makedirs, False uses os.mkdir).
+
+    Returns
+    -------
+    bool
+        True if the folder was created or False if it already existed.
+
+    Raises
+    ------
+    OSError
+        If there is an error creating the directory.
+    """
+    try:
+        if not check_path(directory_path):
+            if is_nested:
+                # Create the directory and any necessary parent directories
+                os.makedirs(directory_path, exist_ok=True)
+                return True
+            else:
+                # Create only the final directory (not nested)
+                os.mkdir(directory_path)
+                return True
+        else:
+            return False
+    except OSError as e:
+        raise OSError(f"Error creating directory '{directory_path}': {e}")
+
 ## LOGGING
 def get_basename(fname: None | str = None) -> str:
     """
@@ -81,7 +125,8 @@ def get_basename(fname: None | str = None) -> str:
     """
     if fname is not None:
         # PRECONDITION
-        assert_path(fname)
+        if not check_path(fname):
+            raise FileNotFoundError(f"The specified path does not exist: {fname}")
         # MAIN FUNCTIONS
         return os.path.splitext(os.path.basename(fname))[0]
     else:
@@ -165,7 +210,7 @@ def generate_log_filename(folder: str = "logs", suffix: str = "") -> str:
     log_filepath (str): the file path to the log file
     """
     # PRECONDITIONS
-    assert_path(folder)
+    create_folder(folder)
 
     # MAIN FUNCTION
     log_filename = get_time(incl_timezone=False) + "_" + suffix + ".log"

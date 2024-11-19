@@ -3,6 +3,7 @@ import subprocess
 import report as r
 from enum import StrEnum, auto
 from typing import List, Optional
+from helpers.utils import create_folder
 
 class ReportFormat(StrEnum):
     HTML = auto()
@@ -26,7 +27,7 @@ class QuartoReportView(r.ReportView):
         super().__init__(id, name=name, report=report, report_type = report_type, columns=columns)
         self.report_format = report_format
 
-    def generate_report(self, output_dir: str = BASE_DIR) -> None:
+    def generate_report(self, output_dir: str = BASE_DIR, static_dir: str = STATIC_FILES_DIR) -> None:
         """
         Generates the qmd file of the quarto report. It creates code for rendering each section and its subsections with all components.
 
@@ -34,13 +35,23 @@ class QuartoReportView(r.ReportView):
         ----------
         output_dir : str, optional
             The folder where the generated report files will be saved (default is BASE_DIR).
+        static_dir : str, optional
+            The folder where the static files will be saved (default is STATIC_FILES_DIR).
         """
         self.report.logger.debug(f"Generating '{self.report_type}' report with '{self.report_format}' format in directory: '{output_dir}'")
 
-        # Create the output folder if it does not exist
-        if not os.path.exists(output_dir):
-            os.mkdir(output_dir)
-            self.report.logger.debug(f"Created output directory: {output_dir}")
+        # Create the output folder
+        if create_folder(output_dir):
+            self.report.logger.debug(f"Created output directory: '{output_dir}'")
+        else:
+            self.report.logger.debug(f"Output directory already existed: '{output_dir}'")
+
+        # Create the static folder
+        if create_folder(static_dir):
+            self.report.logger.info(f"Created output directory for static content: '{static_dir}'")
+        else:
+            self.report.logger.info(f"Output directory for static content already existed: '{static_dir}'")
+        
         try:
             # Create variable to check if the report is static or revealjs
             is_report_static = self.report_format in {ReportFormat.PDF, ReportFormat.DOCX, ReportFormat.ODT, ReportFormat.PPTX}
@@ -230,7 +241,7 @@ format:"""
         self.report.logger.info(f"Generated content and imports for subsection: '{subsection.name}'")
         return subsection_content, subsection_imports
 
-    def _generate_plot_content(self, plot, is_report_static, output_dir: str = STATIC_FILES_DIR) -> List[str]:
+    def _generate_plot_content(self, plot, is_report_static, static_dir: str = STATIC_FILES_DIR) -> List[str]:
         """
         Generate content for a plot component based on the report type.
 
@@ -238,29 +249,23 @@ format:"""
         ----------
         plot : Plot
             The plot component to generate content for.
-        is_report_static : bool
-            A boolean indicating whether the report is static or interactive.
+        static_dir : str, optional
+            The folder where the static files will be saved (default is STATIC_FILES_DIR).
         
         Returns
         -------
         list : List[str]
             The list of content lines for the plot.
-        output_dir : str, optional
-            The folder where the static files will be saved (default is STATIC_FILES_DIR).
         """
-        # Create the output folder if it does not exist
-        if not os.path.exists(output_dir):
-            os.mkdir(output_dir)
-
         plot_content = []
         plot_content.append(f'### {plot.title}')
         if plot.plot_type == r.PlotType.INTERACTIVE:
             try:
                 # Define plot path
                 if is_report_static:
-                    static_plot_path  = os.path.join(output_dir, f"{plot.name.replace(' ', '_')}.png")
+                    static_plot_path  = os.path.join(static_dir, f"{plot.name.replace(' ', '_')}.png")
                 else:
-                    html_plot_file  = os.path.join(output_dir, f"{plot.name.replace(' ', '_')}.html")
+                    html_plot_file  = os.path.join(static_dir, f"{plot.name.replace(' ', '_')}.html")
 
                 if plot.int_visualization_tool == r.IntVisualizationTool.PLOTLY:
                     plot_content.append(self._generate_plot_code(plot))
@@ -447,7 +452,7 @@ display.Markdown(markdown_content)
         return f"""
 ![{alt_text}]({os.path.join('..', image_path)}){{ width={width}px height={height}px fig-align="center"}}\n"""
     
-    def _show_dataframe(self, dataframe, is_report_static, output_dir: str = STATIC_FILES_DIR) -> List[str]:
+    def _show_dataframe(self, dataframe, is_report_static, static_dir: str = STATIC_FILES_DIR) -> List[str]:
         """
         Appends either a static image or an interactive representation of a DataFrame to the content list.
 
@@ -457,18 +462,18 @@ display.Markdown(markdown_content)
             The DataFrame object containing the data to display.
         is_report_static : bool
             Determines if the report is in a static format (e.g., PDF) or interactive (e.g., HTML).
+        static_dir : str, optional
+            The folder where the static files will be saved (default is STATIC_FILES_DIR).
         
         Returns
         -------
         list : List[str]
             The list of content lines for the DataFrame.
-        output_dir : str, optional
-            The folder where the static files will be saved (default is STATIC_FILES_DIR).
         """
         dataframe_content = []
         if is_report_static:
             # Generate path for the DataFrame image
-            df_image = os.path.join(output_dir, f"{dataframe.name.replace(' ', '_')}.png")
+            df_image = os.path.join(static_dir, f"{dataframe.name.replace(' ', '_')}.png")
             dataframe_content.append(f"dfi.export(df, '{os.path.join('..', df_image)}', max_rows=10, max_cols=5)\n```\n")
             # Use helper method to add centered image content
             dataframe_content.append(self._generate_image_content(df_image, dataframe.name))

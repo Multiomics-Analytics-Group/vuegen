@@ -2,6 +2,7 @@ import report as r
 import os
 import subprocess
 from typing import List, Optional
+from helpers.utils import create_folder
 
 class StreamlitReportView(r.WebAppReportView):
     """
@@ -28,9 +29,12 @@ class StreamlitReportView(r.WebAppReportView):
         self.report.logger.debug(f"Generating '{self.report_type}' report in directory: '{output_dir}'")
 
         # Create the output folder if it does not exist
-        if not os.path.exists(output_dir):
-            os.makedirs(output_dir, exist_ok=True)
+        #if not os.path.exists(output_dir):
+        #    os.makedirs(output_dir, exist_ok=True)
+        if create_folder(output_dir, is_nested=True):
             self.report.logger.debug(f"Created output directory: '{output_dir}'")
+        else:
+            self.report.logger.debug(f"Output directory already existed: '{output_dir}'")
         
         try:
             self.report.logger.debug("Processing app navigation code.")
@@ -51,13 +55,17 @@ st.logo("{self.report.logo}")""")
                 # Create a folder for each section
                 subsection_page_vars = []
                 section_name_var = section.name.replace(" ", "_")
-                if not os.path.exists(os.path.join(output_dir, section_name_var)):
-                    os.mkdir(os.path.join(output_dir, section_name_var))
-                    self.report.logger.debug(f"Created section directory: {section_name_var}")
+                section_dir_path = os.path.join(output_dir, section_name_var)
+                #if not os.path.exists(os.path.join(output_dir, section_name_var)):
+                # os.mkdir(os.path.join(output_dir, section_name_var))
+                if create_folder(section_dir_path):
+                    self.report.logger.debug(f"Created section directory: {section_dir_path}")
+                else:
+                    self.report.logger.debug(f"Section directory already existed: {section_dir_path}")
                 
                 for subsection in section.subsections:
                     subsection_name_var = subsection.name.replace(" ", "_")
-                    subsection_file_path = os.path.join(section_name_var, section_name_var + "_" + subsection_name_var + ".py")
+                    subsection_file_path = os.path.join(section_name_var, subsection_name_var + ".py")
 
                     # Create a Page object for each subsection and add it to the home page content
                     report_manag_content.append(f"{subsection_name_var} = st.Page('{subsection_file_path}', title='{subsection.name}')")
@@ -142,11 +150,12 @@ report_nav.run()""")
         try:
             # Create folder for the home page
             home_dir_path = os.path.join(output_dir, "Home")
-            if not os.path.exists(home_dir_path):
-                os.mkdir(home_dir_path)
+            #if not os.path.exists(home_dir_path):
+            #os.mkdir(home_dir_path)
+            if create_folder(home_dir_path): 
                 self.report.logger.debug(f"Created home directory: {home_dir_path}")
             else:
-                self.report.logger.debug(f"Home directory already exists: {home_dir_path}")
+                self.report.logger.debug(f"Home directory already existed: {home_dir_path}")
             
             # Create the home page content
             home_content = []
@@ -192,7 +201,7 @@ report_nav.run()""")
                         self.report.logger.debug(f"Processing subsection: '{subsection.name} - {len(subsection.components)} component(s)'")
                         try:
                             # Create subsection file
-                            subsection_file_path = os.path.join(output_dir, section_name_var, section_name_var + "_" + subsection.name.replace(" ", "_") + ".py")
+                            subsection_file_path = os.path.join(output_dir, section_name_var, subsection.name.replace(" ", "_") + ".py")
                             
                             # Generate content and imports for the subsection
                             subsection_content, subsection_imports = self._generate_subsection(subsection)
@@ -279,9 +288,12 @@ report_nav.run()""")
             The folder where the static files will be saved (default is STATIC_FILES_DIR).
         """
         # Create the output folder if it does not exist
-        if not os.path.exists(output_dir):
-            os.mkdir(output_dir)
+        #if not os.path.exists(output_dir):
+        #    os.mkdir(output_dir)
+        if create_folder(output_dir):
             self.report.logger.debug(f"Created output directory for static content: {output_dir}")
+        else:
+            self.report.logger.debug(f"Output directory for static content already existed: {output_dir}")
         
         plot_content = []
         plot_content.append(self._format_text(text=plot.title, type='header', level=4, color='#2b8cbe'))
