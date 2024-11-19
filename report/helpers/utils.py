@@ -2,6 +2,8 @@ import os
 import sys
 from datetime import datetime
 import logging
+from enum import StrEnum
+from typing import Type
 
 ## CHECKS
 def assert_path(filepath: str):
@@ -17,11 +19,41 @@ def assert_path(filepath: str):
     - raises assertion error if filepath is not a string or doesn't exist
     """
 
-    assert isinstance(filepath, str), f"filepath must be a string: {filepath}"
+    assert isinstance(filepath, str), f"Filepath must be a string: {filepath}"
     assert os.path.exists(
         os.path.abspath(filepath)
-    ), f"filepath does not exist: {os.path.abspath(filepath)}"
+    ), f"Filepath does not exist: {os.path.abspath(filepath)}"
 
+
+def assert_enum_value(enum_class: Type[StrEnum], value: str, logger: logging.Logger) -> StrEnum:
+    """
+    Validate that the given value is a valid member of the specified enumeration class.
+
+    Parameters
+    ----------
+    enum_class : Type[StrEnum]
+        The enumeration class to validate against.
+    value : str
+        The value to be validated.
+    logger : logging.Logger
+        A logger object to track warnings, errors, and info messages.
+
+    Returns
+    -------
+    StrEnum
+        The corresponding member of the enumeration if valid.
+
+    Raises
+    ------
+    ValueError
+        If the value is not a valid member of the enumeration class.
+    """
+    try:
+        return enum_class[value.upper()]
+    except KeyError:
+        expected_values = ", ".join([str(e.value) for e in enum_class])
+        logger.error(f"Invalid value for {enum_class.__name__}: '{value}'. Expected values are: {expected_values}")
+        raise ValueError(f"Invalid {enum_class.__name__}: {value}. Expected values are: {expected_values}")
 
 ## LOGGING
 def get_basename(fname: None | str = None) -> str:
@@ -168,7 +200,7 @@ def init_log(filename: str, display: bool = False, logger_id: str | None = None)
     [2023-10-20 10:38:03,074] root: INFO - Loading things
     """
     # PRECONDITIONALS
-    assert isinstance(filename, str), "filename must be a string"
+    assert isinstance(filename, str), "Filename must be a string"
     assert (
         isinstance(logger_id, str) or logger_id is None
     ), "logger_id must be a string or None"
@@ -197,17 +229,27 @@ def init_log(filename: str, display: bool = False, logger_id: str | None = None)
     return logger
 
 
-def get_logger():
+def get_logger(log_suffix):
     """
-    Putting at all together to init the log file.
+    Initialize the logger with a log file name that includes an optional suffix.
+
+    Parameters
+    ----------
+    log_suffix : str
+        A string to append to the log file name.
+
+    Returns
+    -------
+    logging.Logger
+        An initialized logger instance.
     """
-    # get log suffix, which will be the current script's base file name
-    log_suffix = get_basename()
-    # generate log file name
+    # Generate log file name
     log_file = generate_log_filename(suffix=log_suffix)
-    # init logger
+    
+    # Initialize logger
     logger = init_log(log_file, display=True)
-    # log it
+    
+    # Log the path to the log file
     logger.info(f"Path to log file: {log_file}")
 
     return logger

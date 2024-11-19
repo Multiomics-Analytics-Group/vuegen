@@ -3,24 +3,13 @@ import yaml
 import report as r
 import logging
 from enum import StrEnum
-from typing import Type, Optional
-from helpers.utils import get_logger
+from typing import Type
+from helpers.utils import get_logger, assert_enum_value
 
 class MetadataManager:
     """
     Class for handling metadata of reports from YAML files and creating report objects.
     """
-    def __init__(self, logger: Optional[logging.Logger] = None):
-        """
-        Initializes the MetadataManager with an optional logger.
-
-        Parameters
-        ----------
-        logger : logging.Logger, optional
-            A logger object to track warnings, errors, and info messages. If not provided,
-            a default logger will be used.
-        """
-        self.logger = logger or get_logger()
 
     def load_report_metadata(self, file_path: str) -> tuple[r.Report, dict]:
         """
@@ -43,10 +32,8 @@ class MetadataManager:
         ValueError
             If the YAML file is corrupted or contains missing/invalid values.
         """
-        self.logger.info(f"Loading report metadata from {file_path}")
         # Check the existence of the file_path
         if not os.path.exists(file_path):
-            self.logger.error(f"Config file not found: {file_path}")
             raise FileNotFoundError(f"The config file at {file_path} was not found.")
 
         # Load the YAML configuration file
@@ -54,10 +41,11 @@ class MetadataManager:
             try:
                 metadata = yaml.safe_load(file)
             except yaml.YAMLError as exc:
-                self.logger.error(f"Error parsing YAML file at {file_path}: {exc}")
                 raise ValueError(f"Error parsing YAML file: {exc}")
+        
+        # Define suffix f"or logger object based on report type and report name
+        logger_suffix = f"{metadata['report'].get('report_type')}_report_{metadata['report'].get('name')}"
 
-        self.logger.info("Successfully loaded metadata. Creating report object.")
         # Create a Report object from metadata
         report = r.Report(
             id=metadata['report']['id'],
@@ -67,18 +55,18 @@ class MetadataManager:
             description=metadata['report'].get('description'),
             graphical_abstract=metadata['report'].get('graphical_abstract'),
             logo=metadata['report'].get('logo'),
-            logger = self.logger
+            logger = get_logger(logger_suffix)
         )
 
         # Create sections and subsections
         for section_data in metadata.get('sections', []):
-            section = self._create_section(section_data)
+            section = self._create_section(section_data, report.logger)
             report.sections.append(section)
 
-        self.logger.info(f"Report '{report.name}' initialized with {len(report.sections)} sections.")
+        report.logger.info(f"Report '{report.name}' initialized with {len(report.sections)} sections.")
         return report, metadata
 
-    def _create_section(self, section_data: dict) -> r.Section:
+    def _create_section(self, section_data: dict, logger: logging.Logger) -> r.Section:
         """
         Creates a Section object from a dictionary of section data.
 
@@ -86,6 +74,8 @@ class MetadataManager:
         ----------
         section_data : dict
             A dictionary containing section metadata.
+        logger : logging.Logger
+            A logger object to track warnings, errors, and info messages.
 
         Returns
         -------
@@ -103,12 +93,12 @@ class MetadataManager:
 
         # Create subsections
         for subsection_data in section_data.get('subsections', []):
-            subsection = self._create_subsection(subsection_data)
+            subsection = self._create_subsection(subsection_data, logger)
             section.subsections.append(subsection)
         
         return section
 
-    def _create_subsection(self, subsection_data: dict) -> r.Subsection:
+    def _create_subsection(self, subsection_data: dict, logger: logging.Logger) -> r.Subsection:
         """
         Creates a Subsection object from a dictionary of subsection data.
 
@@ -116,6 +106,8 @@ class MetadataManager:
         ----------
         subsection_data : dict
             A dictionary containing subsection metadata.
+        logger : logging.Logger
+            A logger object to track warnings, errors, and info messages.
 
         Returns
         -------
@@ -133,12 +125,12 @@ class MetadataManager:
 
         # Create components
         for component_data in subsection_data.get('components', []):
-            component = self._create_component(component_data)
+            component = self._create_component(component_data, logger)
             subsection.components.append(component)
 
         return subsection
 
-    def _create_component(self, component_data: dict) -> r.Component:
+    def _create_component(self, component_data: dict, logger: logging.Logger) -> r.Component:
         """
         Creates a Component object from a dictionary of component data.
 
@@ -146,6 +138,8 @@ class MetadataManager:
         ----------
         component_data : dict
             A dictionary containing component metadata.
+        logger : logging.Logger
+            A logger object to track warnings, errors, and info messages.
 
         Returns
         -------
@@ -153,17 +147,17 @@ class MetadataManager:
             A Component object (Plot, DataFrame, or Markdown) populated with the provided metadata.
         """
         # Determine the component type
-        component_type = self._validate_enum_value(r.ComponentType, component_data['component_type'])
+        component_type = assert_enum_value(r.ComponentType, component_data['component_type'], logger)
 
         # Dispatch to the corresponding creation method
         if component_type == r.ComponentType.PLOT:
-            return self._create_plot_component(component_data)
+            return self._create_plot_component(component_data, logger)
         elif component_type == r.ComponentType.DATAFRAME:
-            return self._create_dataframe_component(component_data)
+            return self._create_dataframe_component(component_data, logger)
         elif component_type == r.ComponentType.MARKDOWN:
-            return self._create_markdown_component(component_data)
+            return self._create_markdown_component(component_data, logger)
 
-    def _create_plot_component(self, component_data: dict) -> r.Plot:
+    def _create_plot_component(self, component_data: dict, logger: logging.Logger) -> r.Plot:
         """
         Creates a Plot component.
 
@@ -171,6 +165,8 @@ class MetadataManager:
         ----------
         component_data : dict
             A dictionary containing plot component metadata.
+        logger : logging.Logger
+            A logger object to track warnings, errors, and info messages.
 
         Returns
         -------
@@ -178,10 +174,10 @@ class MetadataManager:
             A Plot object populated with the provided metadata.
         """
         # Validate enum fields
-        plot_type = self._validate_enum_value(r.PlotType, component_data['plot_type'])
-        int_visualization_tool = (self._validate_enum_value(r.IntVisualizationTool, component_data.get('int_visualization_tool', '')) 
+        plot_type = assert_enum_value(r.PlotType, component_data['plot_type'], logger)
+        int_visualization_tool = (assert_enum_value(r.IntVisualizationTool, component_data.get('int_visualization_tool', ''), logger) 
                                   if component_data.get('int_visualization_tool') else None)
-        csv_network_format = (self._validate_enum_value(r.CSVNetworkFormat, component_data.get('csv_network_format', '')) 
+        csv_network_format = (assert_enum_value(r.CSVNetworkFormat, component_data.get('csv_network_format', ''), logger) 
                               if component_data.get('csv_network_format') else None)
 
         # Return the constructed Plot object
@@ -194,10 +190,10 @@ class MetadataManager:
             title=component_data.get('title'),
             caption=component_data.get('caption'),
             csv_network_format=csv_network_format,
-            logger = self.logger
+            logger = logger
         )
 
-    def _create_dataframe_component(self, component_data: dict) -> r.DataFrame:
+    def _create_dataframe_component(self, component_data: dict, logger: logging.Logger) -> r.DataFrame:
         """
         Creates a DataFrame component.
 
@@ -205,6 +201,8 @@ class MetadataManager:
         ----------
         component_data : dict
             A dictionary containing dataframe component metadata.
+        logger : logging.Logger
+            A logger object to track warnings, errors, and info messages.
 
         Returns
         -------
@@ -212,7 +210,7 @@ class MetadataManager:
             A DataFrame object populated with the provided metadata.
         """        
         # Validate enum field and return dataframe
-        file_format = self._validate_enum_value(r.DataFrameFormat, component_data['file_format'])
+        file_format = assert_enum_value(r.DataFrameFormat, component_data['file_format'], logger)
         return r.DataFrame(
             id=component_data['id'],
             name=component_data['name'],
@@ -221,10 +219,10 @@ class MetadataManager:
             delimiter=component_data.get('delimiter'),
             title=component_data.get('title'),
             caption=component_data.get('caption'),
-            logger = self.logger
+            logger = logger
         )
 
-    def _create_markdown_component(self, component_data: dict) -> r.Markdown:
+    def _create_markdown_component(self, component_data: dict, logger: logging.Logger) -> r.Markdown:
         """
         Creates a Markdown component.
 
@@ -232,6 +230,8 @@ class MetadataManager:
         ----------
         component_data : dict
             A dictionary containing markdown component metadata.
+        logger : logging.Logger
+            A logger object to track warnings, errors, and info messages.
 
         Returns
         -------
@@ -244,32 +244,5 @@ class MetadataManager:
             file_path=component_data['file_path'],
             title=component_data.get('title'),
             caption=component_data.get('caption'),
-            logger = self.logger
+            logger = logger
         )
-
-    def _validate_enum_value(self, enum_class: Type[StrEnum], value: str) -> StrEnum:
-        """
-        Validate that the given value is a valid member of the specified enumeration class.
-
-        Parameters
-        ----------
-        enum_class : Type[StrEnum]
-            The enumeration class to validate against.
-        value : str
-            The value to be validated.
-
-        Returns
-        -------
-        StrEnum
-            The corresponding member of the enumeration if valid.
-
-        Raises
-        ------
-        ValueError
-            If the value is not a valid member of the enumeration class.
-        """
-        try:
-            return enum_class[value.upper()]
-        except KeyError:
-            self.logger.error(f"Invalid value for {enum_class.__name__}: {value}")
-            raise ValueError(f"Invalid {enum_class.__name__}: {value}")
