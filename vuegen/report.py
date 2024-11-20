@@ -6,6 +6,7 @@ from typing import List, Optional
 import networkx as nx
 import pandas as pd
 import logging
+import requests
 import matplotlib.pyplot as plt
 from pyvis.network import Network
 
@@ -343,6 +344,147 @@ class Markdown(Component):
         Initializes a DataFrame object.
         """
         super().__init__(id, name, file_path, component_type=ComponentType.MARKDOWN, title=title, caption=caption, logger=logger)
+
+class APICall(Component):
+    """
+    A component for interacting with APIs in a report.
+
+    Attributes
+    ----------
+    api_url : str
+        The URL of the API to interact with.
+    headers : Optional[dict]
+        Headers to include in the API request (default is None).
+    params : Optional[dict]
+        Query parameters to include in the API request (default is None).
+    """
+    def __init__(self, id: int, name: str, file_path: str, api_url: str,
+                 title: str = None, caption: str = None, logger: Optional[logging.Logger] = None,
+                 headers: Optional[dict] = None, params: Optional[dict] = None):
+        super().__init__(id, name, file_path, component_type=ComponentType.MARKDOWN,
+                         title=title, caption=caption, logger=logger)
+        self.api_url = api_url
+        self.headers = headers or {}
+        self.params = params or {}
+
+    def make_api_request(self, method: str = "GET", payload: Optional[dict] = None) -> Optional[dict]:
+        """
+        Initiates an API request.
+
+        Parameters
+        ----------
+        method : str, optional
+            HTTP method to use for the request (default is "GET").
+        payload : Optional[dict], optional
+            The request payload for POST or PUT methods (default is None).
+
+        Returns
+        -------
+        response : Optional[dict]
+            The JSON response from the API, or None if the request fails.
+        """
+        try:
+            self.logger.info(f"Making {method} request to API: {self.api_url}")
+            response = requests.request(method, self.api_url, headers=self.headers, params=self.params, json=payload)
+            response.raise_for_status()
+            self.logger.info(f"Request successful with status code {response.status_code}.")
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            self.logger.error(f"API request failed: {e}")
+            return None
+
+    def parse_api_response(self, response: Optional[dict], key: Optional[str] = None) -> Optional[any]:
+        """
+        Extracts and processes data from the API response.
+
+        Parameters
+        ----------
+        response : Optional[dict]
+            The response from the API.
+        key : Optional[str], optional
+            A specific key to retrieve from the response (default is None).
+
+        Returns
+        -------
+        result : Optional[any]
+            The extracted data from the response, or None if the key is not found.
+        """
+        if not response:
+            self.logger.error("No response to parse.")
+            return None
+
+        try:
+            if key:
+                self.logger.info(f"Parsing response for key: {key}")
+                return response.get(key, None)
+            self.logger.info("Returning full API response.")
+            return response
+        except Exception as e:
+            self.logger.error(f"Failed to parse API response: {e}")
+            return None
+        
+class RAG(APICall):
+    """
+    A specialized component for interacting with Retrieval-Augmented Generation APIs.
+
+    Attributes
+    ----------
+    model_id : str
+        The ID of the language model to use for retrieval.
+    top_k : int
+        The number of results to retrieve (default is 5).
+    """
+    def __init__(self, id: int, name: str, file_path: str, api_url: str, model_id: str,
+                 top_k: int = 5, title: str = None, caption: str = None, logger: Optional[logging.Logger] = None,
+                 headers: Optional[dict] = None, params: Optional[dict] = None):
+        super().__init__(id, name, file_path, api_url, title=title, caption=caption,
+                         logger=logger, headers=headers, params=params)
+        self.model_id = model_id
+        self.top_k = top_k
+
+    def generate_query(self, user_input: str) -> dict:
+        """
+        Constructs the payload for a RAG query.
+
+        Parameters
+        ----------
+        user_input : str
+            The input query for retrieval.
+
+        Returns
+        -------
+        payload : dict
+            The payload for the RAG API request.
+        """
+        self.logger.info(f"Generating query payload for input: {user_input}")
+        return {
+            "model_id": self.model_id,
+            "input": user_input,
+            "top_k": self.top_k
+        }
+
+    def get_retrieved_documents(self, user_input: str) -> Optional[list]:
+        """
+        Sends a RAG query and retrieves the resulting documents.
+
+        Parameters
+        ----------
+        user_input : str
+            The input query for retrieval.
+
+        Returns
+        -------
+        documents : Optional[list]
+            A list of retrieved documents, or None if the request fails.
+        """
+        payload = self.generate_query(user_input)
+        response = self.make_api_request(method="POST", payload=payload)
+        documents = self.parse_api_response(response, key="retrieved_documents")
+        if documents:
+            self.logger.info(f"Retrieved {len(documents)} documents.")
+        else:
+            self.logger.warning("No documents retrieved.")
+        return documents
     
 @dataclass
 class Subsection:
