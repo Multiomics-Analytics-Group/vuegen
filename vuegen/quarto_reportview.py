@@ -122,7 +122,7 @@ class QuartoReportView(r.ReportView):
         """
         try:
             subprocess.run(["quarto", "render", os.path.join(output_dir, f"{self.BASE_DIR}.qmd")], check=True)
-            self.report.logger.info(f"'{self.name}' {self.report_type} report rendered with the {self.report_format} format")
+            self.report.logger.info(f"'{self.name}' '{self.report_type}' report rendered with the '{self.report_format}' format")
         except subprocess.CalledProcessError as e:
             self.report.logger.error(f"Error running '{self.name}' {self.report_type} report: {str(e)}")
             raise

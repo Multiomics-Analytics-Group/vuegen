@@ -1,5 +1,6 @@
 import os
 import sys
+import yaml
 from datetime import datetime
 import logging
 from enum import StrEnum
@@ -98,6 +99,41 @@ def create_folder(directory_path: str, is_nested: bool = False) -> bool:
             return False
     except OSError as e:
         raise OSError(f"Error creating directory '{directory_path}': {e}")
+
+## CONFIG
+def load_yaml_config(file_path: str) -> dict:
+    """
+    Load a YAML configuration file and return its contents as a dictionary.
+
+    PARAMETERS
+    ----------
+    file_path : str
+        The path to the YAML configuration file.
+
+    RETURNS
+    -------
+    config : dict
+        The contents of the YAML file as a dictionary.
+
+    RAISES
+    ------
+    FileNotFoundError
+        If the file does not exist at the specified path.
+    ValueError
+        If there is an error parsing the YAML file.
+    """
+    # Check the existence of the file_path
+    if not os.path.exists(file_path):
+        raise FileNotFoundError(f"The config file at {file_path} was not found.")
+
+    # Load the YAML configuration file
+    with open(file_path, 'r') as file:
+        try:
+            config = yaml.safe_load(file)
+        except yaml.YAMLError as exc:
+            raise ValueError(f"Error parsing YAML file: {exc}")
+
+    return config
 
 ## LOGGING
 def get_basename(fname: None | str = None) -> str:

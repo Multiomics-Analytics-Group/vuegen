@@ -1,29 +1,24 @@
-from streamlit_reportview import StreamlitReportView
-from quarto_reportview import QuartoReportView, ReportFormat
-from metadata_manager import MetadataManager
-from report import ReportType
-from utils import assert_enum_value
+import report_generator
+from utils import get_logger, load_yaml_config
 
 if __name__ == '__main__':
-    # Load report object and  metadata from YAML file
-    yaml_manager = MetadataManager()
-    report, report_metadata = yaml_manager.load_report_metadata('./report_metadata_micw2graph.yaml')
+    # Load the YAML configuration file with the report metadata
+    config_path = "report_metadata_micw2graph.yaml"
+    report_metadata = load_yaml_config(config_path)
 
-    # Create report view
-    doc_report = QuartoReportView(report_metadata['report']['id'], 
-                                                report_metadata['report']['name'], 
-                                                report=report, 
-                                                report_type = assert_enum_value(ReportType, report_metadata['report']['report_type'], report.logger),
-                                                report_format = assert_enum_value(ReportFormat, report_metadata['report']['report_format'], report.logger),
-                                                columns=None)
-    doc_report.generate_report()
-    doc_report.run_report()
+    # Define logger suffix based on report engine, type and name
+    report_engine = "streamlit" 
+    report_type = report_metadata['report'].get('report_type')
+    report_format = report_metadata['report'].get('report_format')
+    report_name = report_metadata['report'].get('name')
+    if report_engine == "streamlit": 
+        logger_suffix = f"{report_engine}_report_{report_name}"
+    else:
+        logger_suffix = f"{report_type}_{report_format}_report_{report_name}"
 
-    # st_report = StreamlitReportView(report_metadata['report']['id'], 
-    #                                              report_metadata['report']['name'], 
-    #                                              report=report, 
-    #                                              report_type = assert_enum_value(ReportType, report_metadata['report']['report_type'], report.logger),
-    #                                              columns=None)
-    # st_report.generate_report()
-    # st_report.run_report()
+    # Initialize logger
+    logger = get_logger(f"{logger_suffix}")
+
+    # Generate the report
+    report_generator.get_report(metadata=report_metadata, report_engine=report_engine, logger=logger)
 
