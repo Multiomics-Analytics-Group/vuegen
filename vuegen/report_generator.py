@@ -1,4 +1,3 @@
-# Vuegen imports
 from streamlit_reportview import StreamlitReportView
 from quarto_reportview import QuartoReportView, ReportFormat
 from metadata_manager import MetadataManager
@@ -6,7 +5,6 @@ from report import ReportType
 from utils import assert_enum_value
 from enum import StrEnum, auto
 import logging
-
 
 class ReportEngine(StrEnum):
     STREAMLIT = auto()
