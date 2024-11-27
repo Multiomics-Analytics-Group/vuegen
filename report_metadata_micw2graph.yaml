@@ -148,3 +148,19 @@ sections:
             delimiter: ","
             title: "Edge list (csv)"
             caption: "This is the edge list of the network"
+  - id: 2436
+    name: "APICall test"
+    title: "APICall test"
+    description: ""
+    subsections:
+      - id: 5031
+        name: "Simple test"
+        title: "Simple test"
+        description: ""
+        components:
+          - id: 2987
+            name: "APIcall_test"
+            component_type: "apicall"
+            api_url: "https://jsonplaceholder.typicode.com/todos/1"
+            title: "APICall test"
+            caption: ""

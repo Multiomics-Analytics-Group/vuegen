@@ -7,6 +7,7 @@ import networkx as nx
 import pandas as pd
 import logging
 import requests
+import json
 import matplotlib.pyplot as plt
 from pyvis.network import Network
 
@@ -20,6 +21,8 @@ class ComponentType(StrEnum):
     PLOT = auto()
     DATAFRAME = auto()
     MARKDOWN = auto()
+    APICALL = auto()
+    CHATBOT = auto()
 
 class PlotType(StrEnum):
     INTERACTIVE = auto()
@@ -64,10 +67,10 @@ class Component():
         A unique identifier for the component.
     name : str
         The name of the component.
-    file_path : str
-        The file path for the component (e.g., plot JSON file, image file, csv file, etc.).
     component_type : ComponentType
         The type of the component (PLOT, DATAFRAME, MARKDOWN).
+    file_path : Optional[str]
+        The file path for the component (e.g., plot JSON file, image file, csv file, etc.).
     title : Optional[str]
         The title of the component (default is None). 
     caption : Optional[str]
@@ -77,8 +80,8 @@ class Component():
     """
     id: int
     name: str
-    file_path: str 
     component_type: ComponentType
+    file_path: Optional[str] = None
     title: Optional[str] = None
     caption: Optional[str] = None
     logger: Optional[logging.Logger] = None
@@ -97,14 +100,14 @@ class Plot(Component):
     csv_network_format : CSVNetworkFormat, optional
         The format of the CSV file for network plots (EDGELIST or ADJLIST) (default is None).
     """
-    def __init__(self, id: int, name: str, file_path: str, plot_type: PlotType, 
+    def __init__(self, id: int, name: str, plot_type: PlotType, file_path: str=None,
                 int_visualization_tool: Optional[IntVisualizationTool]=None, title: str=None, 
                 caption: str=None, logger: Optional[logging.Logger]=None, csv_network_format: Optional[CSVNetworkFormat]=None):
         """
         Initializes a Plot object.
         """
         # Call the constructor of the parent class (Component) to set common attributes
-        super().__init__(id, name, file_path, component_type = ComponentType.PLOT, title=title, caption=caption, logger=logger)
+        super().__init__(id, name, component_type = ComponentType.PLOT, file_path=file_path, title=title, caption=caption, logger=logger)
 
         # Set specific attributes for the Plot class
         self.plot_type = plot_type
@@ -312,7 +315,6 @@ class Plot(Component):
                     size = min_size + (max_size - min_size) * ((degree - min_degree) / (max_degree - min_degree))
                 
                 G.nodes[node]['size'] = size 
-
         return G
 
 class DataFrame(Component):
@@ -326,12 +328,12 @@ class DataFrame(Component):
     delimiter : Optional[str]
         The delimiter to use if the file is a delimited text format (e.g., ';', '\t', etc).
     """
-    def __init__(self, id: int, name: str, file_path: str, file_format: DataFrameFormat, 
+    def __init__(self, id: int, name: str, file_format: DataFrameFormat, file_path: str=None,
                  title: str=None, caption: str=None, logger: Optional[logging.Logger]=None, delimiter: Optional[str]=None):
         """
         Initializes a DataFrame object.
         """
-        super().__init__(id, name, file_path, component_type=ComponentType.DATAFRAME, title=title, caption=caption, logger=logger)
+        super().__init__(id, name, component_type=ComponentType.DATAFRAME, file_path=file_path, title=title, caption=caption, logger=logger)
         self.file_format = file_format
         self.delimiter = delimiter
 
@@ -339,11 +341,11 @@ class Markdown(Component):
     """
     A Markdown text component within a subsection of a report.
     """
-    def __init__(self, id: int, name: str, file_path: str, title: str=None, caption: str=None, logger: Optional[logging.Logger]=None):
+    def __init__(self, id: int, name: str, file_path: str=None, title: str=None, caption: str=None, logger: Optional[logging.Logger]=None):
         """
         Initializes a DataFrame object.
         """
-        super().__init__(id, name, file_path, component_type=ComponentType.MARKDOWN, title=title, caption=caption, logger=logger)
+        super().__init__(id, name, component_type=ComponentType.MARKDOWN, file_path=file_path, title=title, caption=caption, logger=logger)
 
 class APICall(Component):
     """
@@ -358,25 +360,23 @@ class APICall(Component):
     params : Optional[dict]
         Query parameters to include in the API request (default is None).
     """
-    def __init__(self, id: int, name: str, file_path: str, api_url: str,
-                 title: str = None, caption: str = None, logger: Optional[logging.Logger] = None,
-                 headers: Optional[dict] = None, params: Optional[dict] = None):
-        super().__init__(id, name, file_path, component_type=ComponentType.MARKDOWN,
-                         title=title, caption=caption, logger=logger)
+    def __init__(self, id: int, name: str,  api_url: str, title: str = None, caption: str = None, 
+                 logger: Optional[logging.Logger] = None, headers: Optional[dict] = None, params: Optional[dict] = None):
+        super().__init__(id, name, component_type=ComponentType.APICALL, title=title, caption=caption, logger=logger)
         self.api_url = api_url
         self.headers = headers or {}
         self.params = params or {}
 
-    def make_api_request(self, method: str = "GET", payload: Optional[dict] = None) -> Optional[dict]:
+    def make_api_request(self, method: str, request_body: Optional[dict] = None) -> Optional[dict]:
         """
-        Initiates an API request.
+        Sends an HTTP request to the specified API and returns the JSON response.
 
         Parameters
         ----------
-        method : str, optional
-            HTTP method to use for the request (default is "GET").
-        payload : Optional[dict], optional
-            The request payload for POST or PUT methods (default is None).
+        method : str
+            HTTP method to use for the request.
+        request_body : Optional[dict], optional
+            The request body for POST or PUT methods (default is None).
 
         Returns
         -------
@@ -385,106 +385,96 @@ class APICall(Component):
         """
         try:
             self.logger.info(f"Making {method} request to API: {self.api_url}")
-            response = requests.request(method, self.api_url, headers=self.headers, params=self.params, json=payload)
+            response = requests.request(method, self.api_url, headers=self.headers, params=self.params, json=request_body)
             response.raise_for_status()
             self.logger.info(f"Request successful with status code {response.status_code}.")
             return response.json()
         except requests.exceptions.RequestException as e:
             self.logger.error(f"API request failed: {e}")
             return None
-
-    def parse_api_response(self, response: Optional[dict], key: Optional[str] = None) -> Optional[any]:
-        """
-        Extracts and processes data from the API response.
-
-        Parameters
-        ----------
-        response : Optional[dict]
-            The response from the API.
-        key : Optional[str], optional
-            A specific key to retrieve from the response (default is None).
-
-        Returns
-        -------
-        result : Optional[any]
-            The extracted data from the response, or None if the key is not found.
-        """
-        if not response:
-            self.logger.error("No response to parse.")
-            return None
-
-        try:
-            if key:
-                self.logger.info(f"Parsing response for key: {key}")
-                return response.get(key, None)
-            self.logger.info("Returning full API response.")
-            return response
-        except Exception as e:
-            self.logger.error(f"Failed to parse API response: {e}")
-            return None
         
-class RAG(APICall):
+class ChatBot(APICall):
     """
-    A specialized component for interacting with Retrieval-Augmented Generation APIs.
+    A specialized component for creating a ChatBot.
 
     Attributes
     ----------
-    model_id : str
-        The ID of the language model to use for retrieval.
-    top_k : int
-        The number of results to retrieve (default is 5).
+    model : str
+        The language model to use.
     """
-    def __init__(self, id: int, name: str, file_path: str, api_url: str, model_id: str,
-                 top_k: int = 5, title: str = None, caption: str = None, logger: Optional[logging.Logger] = None,
+    def __init__(self, id: int, name: str, api_url: str, model: str, title: str = None, 
+                 caption: str = None, logger: Optional[logging.Logger] = None,
                  headers: Optional[dict] = None, params: Optional[dict] = None):
-        super().__init__(id, name, file_path, api_url, title=title, caption=caption,
+        super().__init__(id, name, api_url, title=title, caption=caption,
                          logger=logger, headers=headers, params=params)
-        self.model_id = model_id
-        self.top_k = top_k
+        self.model = model
 
-    def generate_query(self, user_input: str) -> dict:
-        """
-        Constructs the payload for a RAG query.
-
-        Parameters
-        ----------
-        user_input : str
-            The input query for retrieval.
-
-        Returns
-        -------
-        payload : dict
-            The payload for the RAG API request.
-        """
-        self.logger.info(f"Generating query payload for input: {user_input}")
-        return {
-            "model_id": self.model_id,
-            "input": user_input,
-            "top_k": self.top_k
-        }
-
-    def get_retrieved_documents(self, user_input: str) -> Optional[list]:
+    def get_chatbot_answer(self, prompt: str) -> dict:
         """
         Sends a RAG query and retrieves the resulting documents.
 
         Parameters
         ----------
-        user_input : str
-            The input query for retrieval.
+        prompt : str
+            The prompt for asking the chatbot.
 
         Returns
         -------
-        documents : Optional[list]
-            A list of retrieved documents, or None if the request fails.
+        parsed_response : dict
+            The chabtbot answer.
         """
-        payload = self.generate_query(user_input)
-        response = self.make_api_request(method="POST", payload=payload)
-        documents = self.parse_api_response(response, key="retrieved_documents")
-        if documents:
-            self.logger.info(f"Retrieved {len(documents)} documents.")
+        request_body = self._generate_query(prompt)
+        response = self.make_api_request(method="POST", request_body=request_body)
+        if response:
+            self.logger.info(f"Request successful")
         else:
-            self.logger.warning("No documents retrieved.")
-        return documents
+            self.logger.warning("Nothing retreived.")
+        parsed_response = self._parse_api_response(response)
+        return parsed_response
+
+    def _generate_query(self, messages: str) -> dict:
+        """
+        Constructs the request body for a question to the chatbot.
+
+        Parameters
+        ----------
+        messages : str
+            The messages for retrieval.
+
+        Returns
+        -------
+        request_body : dict
+            The request body for the question to the chatbot.
+        """
+        self.logger.info(f"Generating request body for message: {messages}")
+        return {
+            "model": self.model,
+            "messages": messages,
+            "stream": True
+        }
+    
+    def _parse_api_response(self, response: dict) -> dict:
+        """
+        Extracts and processes data from the API response.
+
+        Parameters
+        ----------
+        response : dict
+            The response from the API.
+
+        Returns
+        -------
+        output : dict
+            The extracted data from the response.
+        """
+        output = ""
+        for line in response.iter_lines():
+            body = json.loads(line)
+            if "error" in body:
+                raise Exception(body["error"])
+            if body.get("done", False):
+                return {"role": "assistant", "content": output}
+            output += body.get("message", {}).get("content", "")
     
 @dataclass
 class Subsection:

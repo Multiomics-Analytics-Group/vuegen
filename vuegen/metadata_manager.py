@@ -141,6 +141,8 @@ class MetadataManager:
             return self._create_dataframe_component(component_data)
         elif component_type == r.ComponentType.MARKDOWN:
             return self._create_markdown_component(component_data)
+        elif component_type == r.ComponentType.APICALL:
+            return self._create_apicall_component(component_data)
 
     def _create_plot_component(self, component_data: dict) -> r.Plot:
         """
@@ -221,6 +223,29 @@ class MetadataManager:
             id=component_data['id'],
             name=component_data['name'],
             file_path=component_data['file_path'],
+            title=component_data.get('title'),
+            caption=component_data.get('caption'),
+            logger = self.logger
+        )
+    
+    def _create_apicall_component(self, component_data: dict) -> r.APICall:
+        """
+        Creates a APICall component.
+
+        Parameters
+        ----------
+        component_data : dict
+            A dictionary containing apicall component metadata.
+
+        Returns
+        -------
+        APICall
+            An APICall object populated with the provided metadata.
+        """
+        return r.APICall(
+            id=component_data['id'],
+            name=component_data['name'],
+            api_url=component_data['api_url'],
             title=component_data.get('title'),
             caption=component_data.get('caption'),
             logger = self.logger
