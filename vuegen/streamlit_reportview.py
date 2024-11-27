@@ -270,6 +270,8 @@ report_nav.run()""")
                 subsection_content.extend(self._generate_markdown_content(component))
             elif component.component_type == r.ComponentType.APICALL:
                 subsection_content.extend(self._generate_apicall_content(component))
+            elif component.component_type == r.ComponentType.CHATBOT:
+                subsection_content.extend(self._generate_chatbot_content(component))
             else:
                 self.report.logger.warning(f"Unsupported component type '{component.component_type}' in subsection: {subsection.name}")
         
@@ -448,13 +450,39 @@ st.markdown(markdown_content, unsafe_allow_html=True)\n""")
         try:
             apicall_content = []
             apicall_content.append(self._format_text(text=apicall.title, type='header', level=4, color='#2b8cbe'))
-            apicall_response = apicall.make_api_request()
+            apicall_response = apicall.make_api_request(method='GET')
             apicall_content.append(f"""st.write({apicall_response})\n""")
         except Exception as e:
             self.report.logger.error(f"Error generating content for APICall: {apicall.title}. Error: {str(e)}")
             raise
 
         self.report.logger.info(f"Successfully generated content for APICall: '{apicall.title}'")
+        return apicall_content
+    
+    def _generate_chatbot_content(self, chatbot) -> List[str]:
+        """
+        Generate content for a Markdown component.
+
+        Parameters
+        ----------
+        chatbot : ChatBot
+            The chatbot component to generate content for.
+
+        Returns
+        -------
+        list : List[str]
+            The list of content lines for the chatbot.
+        """
+        try:
+            apicall_content = []
+            apicall_content.append(self._format_text(text=chatbot.title, type='header', level=4, color='#2b8cbe'))
+            apicall_response = chatbot.get_chatbot_answer()
+            apicall_content.append(f"""st.write({apicall_response})\n""")
+        except Exception as e:
+            self.report.logger.error(f"Error generating content for APICall: {chatbot.title}. Error: {str(e)}")
+            raise
+
+        self.report.logger.info(f"Successfully generated content for APICall: '{chatbot.title}'")
         return apicall_content
     
     def _generate_component_imports(self, component: r.Component) -> List[str]:

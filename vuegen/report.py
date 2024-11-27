@@ -7,6 +7,7 @@ import networkx as nx
 import pandas as pd
 import logging
 import requests
+import json
 import matplotlib.pyplot as plt
 from pyvis.network import Network
 
@@ -21,6 +22,7 @@ class ComponentType(StrEnum):
     DATAFRAME = auto()
     MARKDOWN = auto()
     APICALL = auto()
+    CHATBOT = auto()
 
 class PlotType(StrEnum):
     INTERACTIVE = auto()
@@ -313,7 +315,6 @@ class Plot(Component):
                     size = min_size + (max_size - min_size) * ((degree - min_degree) / (max_degree - min_degree))
                 
                 G.nodes[node]['size'] = size 
-
         return G
 
 class DataFrame(Component):
@@ -392,14 +393,14 @@ class APICall(Component):
             self.logger.error(f"API request failed: {e}")
             return None
         
-class RAG(APICall):
+class ChatBot(APICall):
     """
-    A specialized component for interacting with Retrieval-Augmented Generation APIs.
+    A specialized component for creating a ChatBot.
 
     Attributes
     ----------
     model : str
-        The language model to use for retrieval.
+        The language model to use.
     """
     def __init__(self, id: int, name: str, api_url: str, model: str, title: str = None, 
                  caption: str = None, logger: Optional[logging.Logger] = None,
@@ -408,19 +409,19 @@ class RAG(APICall):
                          logger=logger, headers=headers, params=params)
         self.model = model
 
-    def get_retrieved_documents(self, prompt: str) -> Optional[list]:
+    def get_chatbot_answer(self, prompt: str) -> dict:
         """
         Sends a RAG query and retrieves the resulting documents.
 
         Parameters
         ----------
         prompt : str
-            The prompt for retrieval.
+            The prompt for asking the chatbot.
 
         Returns
         -------
-        documents : Optional[list]
-            A list of retrieved documents, or None if the request fails.
+        parsed_response : dict
+            The chabtbot answer.
         """
         request_body = self._generate_query(prompt)
         response = self.make_api_request(method="POST", request_body=request_body)
@@ -428,46 +429,52 @@ class RAG(APICall):
             self.logger.info(f"Request successful")
         else:
             self.logger.warning("Nothing retreived.")
-        return response
+        parsed_response = self._parse_api_response(response)
+        return parsed_response
 
-    def _generate_query(self, prompt: str) -> dict:
+    def _generate_query(self, messages: str) -> dict:
         """
-        Constructs the payload for a RAG query.
+        Constructs the request body for a question to the chatbot.
 
         Parameters
         ----------
-        prompt : str
-            The prompt for retrieval.
+        messages : str
+            The messages for retrieval.
 
         Returns
         -------
-        payload : dict
-            The payload for the RAG API request.
+        request_body : dict
+            The request body for the question to the chatbot.
         """
-        self.logger.info(f"Generating request body for prompt: {prompt}")
+        self.logger.info(f"Generating request body for message: {messages}")
         return {
             "model": self.model,
-            "prompt": prompt,
-            "stream": False
+            "messages": messages,
+            "stream": True
         }
     
-    def _parse_api_response(self, response: Optional[dict], key: Optional[str] = None) -> Optional[any]:
+    def _parse_api_response(self, response: dict) -> dict:
         """
         Extracts and processes data from the API response.
 
         Parameters
         ----------
-        response : Optional[dict]
+        response : dict
             The response from the API.
-        key : Optional[str], optional
-            A specific key to retrieve from the response (default is None).
 
         Returns
         -------
-        result : Optional[any]
-            The extracted data from the response, or None if the key is not found.
+        output : dict
+            The extracted data from the response.
         """
-        pass
+        output = ""
+        for line in response.iter_lines():
+            body = json.loads(line)
+            if "error" in body:
+                raise Exception(body["error"])
+            if body.get("done", False):
+                return {"role": "assistant", "content": output}
+            output += body.get("message", {}).get("content", "")
     
 @dataclass
 class Subsection:
