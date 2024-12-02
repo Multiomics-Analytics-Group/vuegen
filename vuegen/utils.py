@@ -3,6 +3,7 @@ import sys
 import yaml
 from datetime import datetime
 import logging
+import argparse
 from enum import StrEnum
 from typing import Type
 
@@ -16,12 +17,12 @@ def check_path(filepath: str) -> bool:
     filepath : str
         The file or folder path to check.
 
-    RETURNS
+    Returns
     -------
     bool
         True if the path exists, False otherwise.
 
-    RAISES
+    Raises
     ------
     AssertionError
         If the filepath is not a valid string.
@@ -99,6 +100,55 @@ def create_folder(directory_path: str, is_nested: bool = False) -> bool:
             return False
     except OSError as e:
         raise OSError(f"Error creating directory '{directory_path}': {e}")
+
+def get_args(prog_name: str, others: dict = {}) -> argparse.Namespace:
+    """
+    Initiates argparse.ArgumentParser() and adds common arguments.
+
+    Parameters
+    ----------
+    prog_name : str
+        The name of the program.
+
+    others : dict, optional
+        Additional keyword arguments for ArgumentParser initialization.
+
+    Returns
+    -------
+    argparse.Namespace
+        Parsed command-line arguments.
+
+    Raises
+    ------
+    AssertionError
+        If prog_name is not a string or others is not a dictionary.
+    """
+    # Preconditions
+    assert isinstance(prog_name, str), f"prog_name should be a string: {prog_name}"
+    assert isinstance(others, dict), f"others must be a dict: {others}"
+
+    # Initialize argument parser
+    parser = argparse.ArgumentParser(prog=prog_name, **others)
+
+    # Add arguments
+    parser.add_argument(
+        "-c",
+        "--config",
+        type=str,
+        default="report_config_micw2graph.yaml",
+        help="Path to the YAML configuration file."
+    )
+    parser.add_argument(
+        "-rt",
+        "--report_type",
+        type=str,
+        default=None,
+        help="Type of the report to generate (streamlit, html, pdf, docx, odt, revealjs, pptx, or jupyter)."
+    )
+
+    # Parse arguments
+    return parser.parse_args()
+
 
 ## CONFIG
 def load_yaml_config(file_path: str) -> dict:

@@ -14,9 +14,13 @@ from pyvis.network import Network
 
 class ReportType(StrEnum):
     STREAMLIT = auto()
-    DOCUMENT = auto()
-    PRESENTATION = auto()
-    NOTEBOOK = auto()
+    HTML = auto()
+    PDF = auto()
+    DOCX = auto()
+    ODT = auto()
+    REVEALJS = auto()
+    PPTX = auto()
+    JUPYTER = auto()  
 
 class ComponentType(StrEnum):
     PLOT = auto()

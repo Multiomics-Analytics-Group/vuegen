@@ -1,18 +1,8 @@
 import os
 import subprocess
 import report as r
-from enum import StrEnum, auto
 from typing import List
 from utils import create_folder
-
-class ReportFormat(StrEnum):
-    HTML = auto()
-    PDF = auto()
-    DOCX = auto()
-    ODT = auto()
-    REVEALJS = auto()
-    PPTX = auto()
-    JUPYTER = auto()  
 
 class QuartoReportView(r.ReportView):
     """
@@ -22,9 +12,8 @@ class QuartoReportView(r.ReportView):
     BASE_DIR = 'quarto_report'
     STATIC_FILES_DIR = os.path.join(BASE_DIR, 'static')
 
-    def __init__(self, report: r.Report, report_type: r.ReportType, report_format: ReportFormat):
-        super().__init__(report=report, report_type = report_type)
-        self.report_format = report_format
+    def __init__(self, report: r.Report, report_type: r.ReportType):
+        super().__init__(report = report, report_type = report_type)
 
     def generate_report(self, output_dir: str = BASE_DIR, static_dir: str = STATIC_FILES_DIR) -> None:
         """
@@ -37,7 +26,7 @@ class QuartoReportView(r.ReportView):
         static_dir : str, optional
             The folder where the static files will be saved (default is STATIC_FILES_DIR).
         """
-        self.report.logger.debug(f"Generating '{self.report_type}' report with '{self.report_format}' format in directory: '{output_dir}'")
+        self.report.logger.debug(f"Generating '{self.report_type}' report in directory: '{output_dir}'")
 
         # Create the output folder
         if create_folder(output_dir):
@@ -53,8 +42,8 @@ class QuartoReportView(r.ReportView):
         
         try:
             # Create variable to check if the report is static or revealjs
-            is_report_static = self.report_format in {ReportFormat.PDF, ReportFormat.DOCX, ReportFormat.ODT, ReportFormat.PPTX}
-            is_report_revealjs = self.report_format == ReportFormat.REVEALJS
+            is_report_static = self.report_type in {r.ReportType.PDF, r.ReportType.DOCX, r.ReportType.ODT, r.ReportType.PPTX}
+            is_report_revealjs = self.report_type == r.ReportType.REVEALJS
             
             # Define the YAML header for the quarto report
             yaml_header = self._create_yaml_header()
@@ -122,7 +111,7 @@ class QuartoReportView(r.ReportView):
         """
         try:
             subprocess.run(["quarto", "render", os.path.join(output_dir, f"{self.BASE_DIR}.qmd")], check=True)
-            self.report.logger.info(f"'{self.report.title}' '{self.report_type}' report rendered with the '{self.report_format}' format")
+            self.report.logger.info(f"'{self.report.title}' '{self.report_type}' report rendered")
         except subprocess.CalledProcessError as e:
             self.report.logger.error(f"Error running '{self.report.title}' {self.report_type} report: {str(e)}")
             raise
@@ -147,23 +136,23 @@ format:"""
 
         # Define format-specific YAML configurations
         format_configs = {
-            (r.ReportType.DOCUMENT, ReportFormat.HTML): """
+            r.ReportType.HTML: """
   html:
     toc: true
     toc-location: left
     toc-depth: 3
     page-layout: full
     self-contained: true""",
-            (r.ReportType.DOCUMENT, ReportFormat.PDF): """
+            r.ReportType.PDF: """
   pdf:
     toc: false""",
-            (r.ReportType.DOCUMENT, ReportFormat.DOCX): """
+            r.ReportType.DOCX: """
   docx:
     toc: false""",
-            (r.ReportType.DOCUMENT, ReportFormat.ODT): """
+            r.ReportType.ODT: """
   odt:
     toc: false""",
-            (r.ReportType.PRESENTATION, ReportFormat.REVEALJS): """
+            r.ReportType.REVEALJS: """
   revealjs:
     toc: false
     smaller: true
@@ -171,23 +160,23 @@ format:"""
     navigation-mode: vertical
     controls-layout: bottom-right
     output-file: quarto_report_revealjs.html""",
-            (r.ReportType.PRESENTATION, ReportFormat.PPTX): """
+            r.ReportType.PPTX: """
   pptx:
     toc: false
     output: true""",
-            (r.ReportType.NOTEBOOK, ReportFormat.JUPYTER): """
+r.ReportType.JUPYTER: """
   jupyter:
     kernel: python3"""
         }
 
         # Create a key based on the report type and format
-        key = (self.report_type, self.report_format)
+        key = self.report_type
 
         # Retrieve the configuration if it exists, or raise an error
         if key in format_configs:
             config = format_configs[key]
         else:
-            raise ValueError(f"Unsupported report type or format: {self.report_type}, {self.report_format}")
+            raise ValueError(f"Unsupported report type: {self.report_type}")
 
         # Add the specific configuration to the YAML header
         yaml_header += config

@@ -300,7 +300,6 @@ report_nav.run()""")
             The folder where the static files will be saved (default is STATIC_FILES_DIR).
         """
         plot_content = []
-
         # Add title
         plot_content.append(self._format_text(text=plot.title, type='header', level=4, color='#2b8cbe'))
         
@@ -313,7 +312,6 @@ report_nav.run()""")
             elif plot.plot_type == r.PlotType.ALTAIR:
                 plot_content.append(self._generate_plot_code(plot))
             elif plot.plot_type == r.PlotType.INTERACTIVE_NETWORK:
-                # Handle the network visualization
                 G = plot.read_network()
                 html_plot_file = os.path.join(static_dir, f"{plot.title.replace(' ', '_')}.html")
                 net = plot.create_and_save_pyvis_network(G, html_plot_file)
