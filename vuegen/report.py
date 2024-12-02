@@ -1,6 +1,7 @@
 import os
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
+from typing import ClassVar
 from enum import StrEnum, auto
 from typing import List, Optional
 import networkx as nx
@@ -58,33 +59,41 @@ class DataFrameFormat(StrEnum):
 @dataclass
 class Component():
     """
-    Base class for different components in a report subsection. The attributes are inmutable 
-    because they are loaded from a config file and should not be changed after initialization.
+    Base class for different components in a report subsection. It encapsulates elements like 
+    plots, dataframes, markdown, or apicalls, providing a consistent structure for report generation.
 
     Attributes
     ----------
+    _id_counter : ClassVar[int]
+        Class-level counter for unique IDs.
     id : int
-        A unique identifier for the component.
-    name : str
-        The name of the component.
+        Unique identifier for the component, assigned automatically when an object is created.
+    title : str
+        Title of the component.
     component_type : ComponentType
-        The type of the component (PLOT, DATAFRAME, MARKDOWN).
+        Type of the component (e.g., PLOT, DATAFRAME, MARKDOWN, APICALL).
+    logger : logging.Logger
+        Logger object for tracking warnings, errors, and info messages.
     file_path : Optional[str]
-        The file path for the component (e.g., plot JSON file, image file, csv file, etc.).
-    title : Optional[str]
-        The title of the component (default is None). 
+        Path to the file associated with the component (e.g., plot JSON file, image file, csv file, etc.).
     caption : Optional[str]
-        A caption for the component (default is None).
-    logger : Optional[logging.Logger]
-        A logger object to track warnings, error, and info messages (default is None).
+        Caption providing additional context about the component (default: None).
     """
-    id: int
-    name: str
+    _id_counter: ClassVar[int] = 0  
+    id: int = field(init=False)
+    title: str
     component_type: ComponentType
+    logger: logging.Logger
     file_path: Optional[str] = None
-    title: Optional[str] = None
     caption: Optional[str] = None
-    logger: Optional[logging.Logger] = None
+
+    def __post_init__(self):
+        self.id = self._generate_id()
+
+    @classmethod
+    def _generate_id(cls) -> int:
+        cls._id_counter += 1
+        return cls._id_counter
 
 class Plot(Component):
     """
@@ -100,14 +109,15 @@ class Plot(Component):
     csv_network_format : CSVNetworkFormat, optional
         The format of the CSV file for network plots (EDGELIST or ADJLIST) (default is None).
     """
-    def __init__(self, id: int, name: str, plot_type: PlotType, file_path: str=None,
-                int_visualization_tool: Optional[IntVisualizationTool]=None, title: str=None, 
-                caption: str=None, logger: Optional[logging.Logger]=None, csv_network_format: Optional[CSVNetworkFormat]=None):
+    def __init__(self, title: str, logger: logging.Logger, plot_type: PlotType, file_path: str=None,
+                caption: str=None, int_visualization_tool: Optional[IntVisualizationTool]=None,
+                csv_network_format: Optional[CSVNetworkFormat]=None):
         """
         Initializes a Plot object.
         """
         # Call the constructor of the parent class (Component) to set common attributes
-        super().__init__(id, name, component_type = ComponentType.PLOT, file_path=file_path, title=title, caption=caption, logger=logger)
+        super().__init__(title = title, logger = logger, component_type = ComponentType.PLOT, 
+                         file_path = file_path, caption = caption)
 
         # Set specific attributes for the Plot class
         self.plot_type = plot_type
@@ -328,12 +338,13 @@ class DataFrame(Component):
     delimiter : Optional[str]
         The delimiter to use if the file is a delimited text format (e.g., ';', '\t', etc).
     """
-    def __init__(self, id: int, name: str, file_format: DataFrameFormat, file_path: str=None,
-                 title: str=None, caption: str=None, logger: Optional[logging.Logger]=None, delimiter: Optional[str]=None):
+    def __init__(self, title: str, logger: logging.Logger, file_format: DataFrameFormat, file_path: str=None,
+                 caption: str=None, delimiter: Optional[str]=None):
         """
         Initializes a DataFrame object.
         """
-        super().__init__(id, name, component_type=ComponentType.DATAFRAME, file_path=file_path, title=title, caption=caption, logger=logger)
+        super().__init__(title = title, logger = logger, component_type=ComponentType.DATAFRAME, 
+                         file_path=file_path, caption=caption)
         self.file_format = file_format
         self.delimiter = delimiter
 
@@ -341,11 +352,12 @@ class Markdown(Component):
     """
     A Markdown text component within a subsection of a report.
     """
-    def __init__(self, id: int, name: str, file_path: str=None, title: str=None, caption: str=None, logger: Optional[logging.Logger]=None):
+    def __init__(self, title: str, logger: logging.Logger, file_path: str=None, caption: str=None):
         """
         Initializes a DataFrame object.
         """
-        super().__init__(id, name, component_type=ComponentType.MARKDOWN, file_path=file_path, title=title, caption=caption, logger=logger)
+        super().__init__(title = title, logger = logger, component_type=ComponentType.MARKDOWN, 
+                         file_path=file_path, caption=caption)
 
 class APICall(Component):
     """
@@ -360,9 +372,9 @@ class APICall(Component):
     params : Optional[dict]
         Query parameters to include in the API request (default is None).
     """
-    def __init__(self, id: int, name: str,  api_url: str, title: str = None, caption: str = None, 
-                 logger: Optional[logging.Logger] = None, headers: Optional[dict] = None, params: Optional[dict] = None):
-        super().__init__(id, name, component_type=ComponentType.APICALL, title=title, caption=caption, logger=logger)
+    def __init__(self, title: str, logger: logging.Logger,  api_url: str, caption: str = None, 
+                 headers: Optional[dict] = None, params: Optional[dict] = None):
+        super().__init__(title = title, logger = logger, component_type=ComponentType.APICALL, caption=caption)
         self.api_url = api_url
         self.headers = headers or {}
         self.params = params or {}
@@ -402,11 +414,10 @@ class ChatBot(APICall):
     model : str
         The language model to use.
     """
-    def __init__(self, id: int, name: str, api_url: str, model: str, title: str = None, 
-                 caption: str = None, logger: Optional[logging.Logger] = None,
-                 headers: Optional[dict] = None, params: Optional[dict] = None):
-        super().__init__(id, name, api_url, title=title, caption=caption,
-                         logger=logger, headers=headers, params=params)
+    def __init__(self, title: str, logger: logging.Logger, api_url: str, model: str,
+                 caption: str = None, headers: Optional[dict] = None, params: Optional[dict] = None):
+        super().__init__(title = title, logger = logger, api_url = api_url, 
+                         caption=caption, headers=headers, params=params)
         self.model = model
 
     def get_chatbot_answer(self, prompt: str) -> dict:
@@ -479,26 +490,35 @@ class ChatBot(APICall):
 @dataclass
 class Subsection:
     """
-    A subsection within a section, containing multiple components (plots, DataFrames, Markdown text, etc).
+    A subsection within a section, containing multiple components (plots, dataFrames, 
+    markdown text, apicals, etc).
 
     Attributes
     ----------
+    _id_counter : ClassVar[int]
+        Class-level counter for unique IDs.
     id : int
-        A unique identifier for the subsection.
-    name : str
-        The name of the subsection.
-    title : str, optional
-        The title of the subsection (default is None).
+        Unique identifier for the subsection, assigned automatically when an object is created.
+    title : str
+        Title of the subsection.
+    components : List[Component]
+        A list of components within the subsection.
     description : str, optional
         A description of the subsection (default is None).
-    components : List[Component]
-        A list of components within this subsection.
     """
-    id: int
-    name: str
-    title: Optional[str] = None
-    description: Optional[str] = None
+    _id_counter: ClassVar[int] = 0  
+    id: int = field(init=False)
+    title: str
     components: List['Component'] = field(default_factory=list)
+    description: Optional[str] = None
+
+    def __post_init__(self):
+        self.id = self._generate_id()
+
+    @classmethod
+    def _generate_id(cls) -> int:
+        cls._id_counter += 1
+        return cls._id_counter
 
 @dataclass
 class Section:
@@ -507,22 +527,30 @@ class Section:
 
     Attributes
     ----------
+    _id_counter : ClassVar[int]
+        Class-level counter for unique IDs.
     id : int
-        A unique identifier for the section.
-    name : str
-        The name of the section.
-    title : str, optional
-        The title of the section (default is None).
+        Unique identifier for the section, assigned automatically when an object is created.
+    title : str
+        Title of the section.
+    subsections : List[Subsection]
+        A list of subsections within the section.
     description : str, optional
         A description of the section (default is None).
-    subsections : List[Subsection]
-        A list of subsections within this section.
     """
-    id: int
-    name: str
-    title: Optional[str] = None
-    description: Optional[str] = None
+    _id_counter: ClassVar[int] = 0  
+    id: int = field(init=False)
+    title: str
     subsections: List['Subsection'] = field(default_factory=list)
+    description: Optional[str] = None
+
+    def __post_init__(self):
+        self.id = self._generate_id()
+
+    @classmethod
+    def _generate_id(cls) -> int:
+        cls._id_counter += 1
+        return cls._id_counter
 
 @dataclass
 class Report:
@@ -531,31 +559,25 @@ class Report:
 
     Attributes
     ----------
-    id : int
-        A unique identifier for the report.
-    name : str
-        The name of the report.
+    title : str
+        Title of the report.
+    logger : logging.Logger
+        Logger object for tracking warnings, errors, and info messages.
     sections : List[Section]
         A list of sections that belong to the report.
-    title : str, optional
-        The title of the report (default is None).
     description : str, optional
-        A description of the report (default is None).
+        Description of the report (default is None).
     graphical_abstract : str, optional
-        The file path to the graphical abstract image (default is None).
+        Path to the graphical abstract image (default is None).
     logo : str, optional
         The file path to the logo image (default is None).
-    logger : Optional[logging.Logger]
-        A logger object to track warnings, error, and info messages (default is None).
     """
-    id: int
-    name: str
+    title: str
+    logger: logging.Logger
     sections: List['Section'] = field(default_factory=list)
-    title: Optional[str] = None
     description: Optional[str] = None
     graphical_abstract: Optional[str] = None
     logo: Optional[str] = None
-    logger: Optional[logging.Logger] = None
 
 class ReportView(ABC):
     """
@@ -573,12 +595,9 @@ class ReportView(ABC):
         Column names used in the report view ABC (default is None).
     
     """
-    def __init__(self, id: int, name: str, report: 'Report', report_type: 'ReportType', columns: Optional[List[str]] = None):
-        self.id = id
-        self.name = name
+    def __init__(self, report: 'Report', report_type: 'ReportType'):
         self.report = report
         self.report_type = report_type
-        self.columns = columns or []
 
     @abstractmethod
     def generate_report(self, output_dir: str = 'sections') -> None:

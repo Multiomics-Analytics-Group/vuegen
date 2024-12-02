@@ -2,7 +2,7 @@ import os
 import subprocess
 import report as r
 from enum import StrEnum, auto
-from typing import List, Optional
+from typing import List
 from utils import create_folder
 
 class ReportFormat(StrEnum):
@@ -22,9 +22,8 @@ class QuartoReportView(r.ReportView):
     BASE_DIR = 'quarto_report'
     STATIC_FILES_DIR = os.path.join(BASE_DIR, 'static')
 
-    def __init__(self, id: int, name: str, report: r.Report, report_type: r.ReportType, 
-                columns: Optional[List[str]], report_format: ReportFormat):
-        super().__init__(id, name=name, report=report, report_type = report_type, columns=columns)
+    def __init__(self, report: r.Report, report_type: r.ReportType, report_format: ReportFormat):
+        super().__init__(report=report, report_type = report_type)
         self.report_format = report_format
 
     def generate_report(self, output_dir: str = BASE_DIR, static_dir: str = STATIC_FILES_DIR) -> None:
@@ -64,24 +63,26 @@ class QuartoReportView(r.ReportView):
             qmd_content = []
             report_imports = []
 
-            # Add the title and description of the report
-            qmd_content.append(f'''{self.report.description}\n''')
+            # Add description of the report
+            if self.report.description:
+                qmd_content.append(f'''{self.report.description}''')
 
             # If available add the graphical abstract
             if self.report.graphical_abstract:
-                qmd_content.append(self._generate_image_content(self.report.graphical_abstract, f"Graphical abstract for the {self.report.title} report"))
+                qmd_content.append(self._generate_image_content(self.report.graphical_abstract))
             # Add the sections and subsections to the report
             self.report.logger.info("Starting to generate sections for the report.")
             for section in self.report.sections:
-                self.report.logger.debug(f"Processing section: '{section.name}' - {len(section.subsections)} subsection(s)")
+                self.report.logger.debug(f"Processing section: '{section.title}' - {len(section.subsections)} subsection(s)")
                 # Add section header and description
                 qmd_content.append(f'# {section.title}')
-                qmd_content.append(f'''{section.description}''')
+                if section.description:
+                    qmd_content.append(f'''{section.description}\n''')
                 
                 if section.subsections:
                     # Iterate through subsections and integrate them into the section file
                     for subsection in section.subsections:
-                        self.report.logger.debug(f"Processing subsection: '{subsection.name}' - {len(subsection.components)} component(s)")                    
+                        self.report.logger.debug(f"Processing subsection: '{subsection.title}' - {len(subsection.components)} component(s)")                    
                         # Generate content for the subsection
                         subsection_content, subsection_imports = self._generate_subsection(subsection, is_report_static, is_report_revealjs)
                         qmd_content.extend(subsection_content)
@@ -101,7 +102,6 @@ class QuartoReportView(r.ReportView):
                 quarto_report.write(yaml_header)
                 quarto_report.write(f"""\n```{{python}}
 #| label: 'Imports'
-#| echo: false
 {report_formatted_imports}
 ```\n\n""")
                 quarto_report.write("\n".join(qmd_content))
@@ -122,9 +122,9 @@ class QuartoReportView(r.ReportView):
         """
         try:
             subprocess.run(["quarto", "render", os.path.join(output_dir, f"{self.BASE_DIR}.qmd")], check=True)
-            self.report.logger.info(f"'{self.name}' '{self.report_type}' report rendered with the '{self.report_format}' format")
+            self.report.logger.info(f"'{self.report.title}' '{self.report_type}' report rendered with the '{self.report_format}' format")
         except subprocess.CalledProcessError as e:
-            self.report.logger.error(f"Error running '{self.name}' {self.report_type} report: {str(e)}")
+            self.report.logger.error(f"Error running '{self.report.title}' {self.report_type} report: {str(e)}")
             raise
 
     def _create_yaml_header(self) -> str:
@@ -140,6 +140,9 @@ class QuartoReportView(r.ReportView):
         yaml_header = f"""---
 title: {self.report.title}
 fig-align: center
+execute:
+  echo: false
+  output: asis
 format:"""
 
         # Define format-specific YAML configurations
@@ -216,7 +219,8 @@ format:"""
 
         # Add subsection header and description
         subsection_content.append(f'## {subsection.title}')
-        subsection_content.append(f'''{subsection.description}''')
+        if subsection.description: 
+            subsection_content.append(f'''{subsection.description}\n''')
 
         if is_report_revealjs:
             subsection_content.append(f'::: {{.panel-tabset}}\n')
@@ -234,12 +238,12 @@ format:"""
             elif component.component_type == r.ComponentType.MARKDOWN:
                 subsection_content.extend(self._generate_markdown_content(component))
             else:
-                self.report.logger.warning(f"Unsupported component type '{component.component_type}' in subsection: {subsection.name}")
+                self.report.logger.warning(f"Unsupported component type '{component.component_type}' in subsection: {subsection.title}")
         
         if is_report_revealjs:
             subsection_content.append(':::\n')
 
-        self.report.logger.info(f"Generated content and imports for subsection: '{subsection.name}'")
+        self.report.logger.info(f"Generated content and imports for subsection: '{subsection.title}'")
         return subsection_content, subsection_imports
 
     def _generate_plot_content(self, plot, is_report_static, static_dir: str = STATIC_FILES_DIR) -> List[str]:
@@ -259,27 +263,29 @@ format:"""
             The list of content lines for the plot.
         """
         plot_content = []
+        # Add title
         plot_content.append(f'### {plot.title}')
+
         if plot.plot_type == r.PlotType.INTERACTIVE:
             try:
                 # Define plot path
                 if is_report_static:
-                    static_plot_path  = os.path.join(static_dir, f"{plot.name.replace(' ', '_')}.png")
+                    static_plot_path  = os.path.join(static_dir, f"{plot.title.replace(' ', '_')}.png")
                 else:
-                    html_plot_file  = os.path.join(static_dir, f"{plot.name.replace(' ', '_')}.html")
+                    html_plot_file  = os.path.join(static_dir, f"{plot.title.replace(' ', '_')}.html")
 
                 if plot.int_visualization_tool == r.IntVisualizationTool.PLOTLY:
                     plot_content.append(self._generate_plot_code(plot))
                     if is_report_static:
                         plot_content.append(f"""fig_plotly.write_image("{os.path.join("..", static_plot_path)}")\n```\n""")
-                        plot_content.append(self._generate_image_content(static_plot_path, plot.name))
+                        plot_content.append(self._generate_image_content(static_plot_path))
                     else:
                         plot_content.append(f"""fig_plotly.show()\n```\n""")
                 elif plot.int_visualization_tool == r.IntVisualizationTool.ALTAIR:
                     plot_content.append(self._generate_plot_code(plot))
                     if is_report_static:
                         plot_content.append(f"""fig_altair.save("{os.path.join("..", static_plot_path)}")\n```\n""")
-                        plot_content.append(self._generate_image_content(static_plot_path, plot.name))
+                        plot_content.append(self._generate_image_content(static_plot_path))
                     else:
                         plot_content.append(f"""fig_altair\n```\n""")
                 elif plot.int_visualization_tool == r.IntVisualizationTool.PYVIS:
@@ -290,7 +296,7 @@ format:"""
                     plot_content.append(f'**Number of edges:** {num_edges}\n')
                     if is_report_static:
                         plot.save_netwrok_image(G, static_plot_path, "png")
-                        plot_content.append(self._generate_image_content(static_plot_path, plot.name))
+                        plot_content.append(self._generate_image_content(static_plot_path))
                     else:
                         # Get the Network object
                         net = plot.create_and_save_pyvis_network(G, html_plot_file)
@@ -298,17 +304,21 @@ format:"""
                 else:
                         self.report.logger.warning(f"Unsupported interactive plot tool: {plot.int_visualization_tool}")
             except Exception as e:
-                self.report.logger.error(f"Error generating interactive plot content for {plot.name}: {str(e)}")
+                self.report.logger.error(f"Error generating interactive plot content for {plot.title}: {str(e)}")
                 raise
         
         elif plot.plot_type == r.PlotType.STATIC:
             try:
                 plot_content.append(self._generate_image_content(plot.file_path, width=950))
             except Exception as e:
-                self.report.logger.error(f"Error generating static plot content for {plot.name}: {str(e)}")
+                self.report.logger.error(f"Error generating static plot content for {plot.title}: {str(e)}")
                 raise
         
-        self.report.logger.info(f"Successfully generated content for plot: '{plot.name}'")
+        # Add caption if available
+        if plot.caption:
+            plot_content.append(f'>{plot.caption}\n')
+
+        self.report.logger.info(f"Successfully generated content for plot: '{plot.title}'")
         return plot_content
 
     def _generate_plot_code(self, plot, output_file = "") -> str:
@@ -328,8 +338,8 @@ format:"""
         """
         # Start with the common data loading code
         plot_code = f"""```{{python}}
-#| label: {plot.name}
-#| echo: false
+#| label: '{plot.title}'
+#| fig-cap: ""
 with open('{os.path.join("..", plot.file_path)}', 'r') as plot_file:
     plot_data = plot_file.read()
     """
@@ -342,7 +352,7 @@ fig_plotly.update_layout(width=950, height=500)
             plot_code += """fig_altair = alt.Chart.from_json(plot_data).properties(width=900, height=400)"""
         elif plot.int_visualization_tool == r.IntVisualizationTool.PYVIS:
             plot_code = f"""<div style="text-align: center;">
-<iframe src="{os.path.join("..", output_file)}" alt="{plot.name} plot" width="800px" height="630px"></iframe>
+<iframe src="{os.path.join("..", output_file)}" alt="{plot.title} plot" width="800px" height="630px"></iframe>
 </div>\n"""
         return plot_code
 
@@ -363,11 +373,13 @@ fig_plotly.update_layout(width=950, height=500)
             The list of content lines for the DataFrame.
         """
         datframe_content = []
+        # Add title
         datframe_content.append(f'### {dataframe.title}')
+
         # Append header for DataFrame loading
         datframe_content.append(f"""```{{python}}
-#| label: {dataframe.name}
-#| echo: false
+#| label: '{dataframe.title}'
+#| fig-cap: ""
 """)
         try:
             if dataframe.file_format == r.DataFrameFormat.CSV:
@@ -393,7 +405,11 @@ fig_plotly.update_layout(width=950, height=500)
         except Exception as e:
             self.report.logger.error(f"Error generating content for DataFrame: {dataframe.title}. Error: {str(e)}")
             raise
-        
+
+        # Add caption if available
+        if dataframe.caption:
+            datframe_content.append(f'>{dataframe.caption}\n')
+
         self.report.logger.info(f"Successfully generated content for DataFrame: '{dataframe.title}'")
         return datframe_content
 
@@ -410,15 +426,15 @@ fig_plotly.update_layout(width=950, height=500)
         -------
         list : List[str]
             The list of content lines for the markdown.
-        """
+        """            
+        markdown_content = []
+        # Add title
+        markdown_content.append(f'### {markdown.title}')
+        
         try:
-            markdown_content = []
-            markdown_content.append(f'### {markdown.title}')
             markdown_content.append(f"""```{{python}}
-#| label: {markdown.name}
-#| table-cap: "MD file"
-#| table-type: "md"
-#| echo: false
+#| label: '{markdown.title}'
+#| fig-cap: ""
 with open('{os.path.join("..", markdown.file_path)}', 'r') as markdown_file:
     markdown_content = markdown_file.read()
 display.Markdown(markdown_content)
@@ -426,6 +442,10 @@ display.Markdown(markdown_content)
         except Exception as e:
             self.report.logger.error(f"Error generating content for Markdown: {markdown.title}. Error: {str(e)}")
             raise
+        
+        # Add caption if available
+        if markdown.caption:
+            markdown_content.append(f'>{markdown.caption}\n')
         
         self.report.logger.info(f"Successfully generated content for Markdown: '{markdown.title}'")
         return markdown_content
@@ -474,10 +494,10 @@ display.Markdown(markdown_content)
         dataframe_content = []
         if is_report_static:
             # Generate path for the DataFrame image
-            df_image = os.path.join(static_dir, f"{dataframe.name.replace(' ', '_')}.png")
+            df_image = os.path.join(static_dir, f"{dataframe.title.replace(' ', '_')}.png")
             dataframe_content.append(f"dfi.export(df, '{os.path.join('..', df_image)}', max_rows=10, max_cols=5)\n```\n")
             # Use helper method to add centered image content
-            dataframe_content.append(self._generate_image_content(df_image, dataframe.name))
+            dataframe_content.append(self._generate_image_content(df_image))
         else:
             # Append code to display the DataFrame interactively
             dataframe_content.append(f"""show(df, classes="display nowrap compact", lengthMenu=[3, 5, 10])\n```\n""")

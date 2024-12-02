@@ -1,6 +1,4 @@
 report:
-  id: 1213412
-  name: "MicW2Graph"
   title: "MicW2Graph"
   description: >
     Wastewater treatment (WWT) is the process of removing contaminants from used water before it is discharged back 
@@ -13,154 +11,88 @@ report:
     and potential ecological functions.
   graphical_abstract: "example_data/MicW2Graph/Methods_MicW2Graph.png"
   logo: "example_data/mona_logo.png"
-  report_type: "streamlit"
-  report_format: ""
+  report_type: "document"
+  report_format: "html"
 sections:
-  - id: 21324
-    name: "Exploratory Data analysis"
-    title: "Exploratory Data analysis"
-    description: ""
+  - title: "Exploratory Data Analysis"
     subsections:
-      - id: 5001
-        name: "Abundance data"
-        title: "Abundance data"
-        description: ""
+      - title: "Abundance data"
+        description: "Optional description"
         components:
-          - id: 3423
-            name: "plotly_plot1"
+          - title: "Top 5 species by biome (plotly)"
             component_type: "plot"
             plot_type: "interactive"
             file_path: "example_data/MicW2Graph/top_species_plot_biome.json"
             int_visualization_tool: "plotly"
-            title: "Top 5 species by biome (plotly)"
-            caption: ""
-          - id: 3350
-            name: "altair_plot1"
+            caption: "Optional caption"
+          - title: "Multiline plot (altair)"
             component_type: "plot"
             plot_type: "interactive"
             file_path: "example_data/altair_multilineplot.json"
             int_visualization_tool: "altair"
-            title: "Multiline plot (altair)"
-            caption: ""
-          - id: 3358
-            name: "df1"
+          - title: "Abundance data for all studies (csv)"
             component_type: "dataframe"
             file_path: "example_data/MicW2Graph/abundance_data_allbiomes.csv"
             file_format: "csv"
             delimiter: ","
-            title: "Abundance data for all studies (csv)"
-            caption: ""
-          - id: 3358
-            name: "df2"
+          - title: "Abundance data for all studies (excel)"
             component_type: "dataframe"
             file_path: "example_data/MicW2Graph/abundance_data_allbiomes.xls"
             file_format: "excel"
             delimiter: ","
-            title: "Abundance data for all studies (excel)"
-            caption: ""
-      - id: 5002
-        name: "Sample data"
-        title: "Sample data"
-        description: ""
+      - title: "Sample data"
         components:
-          - id: 3324
-            name: "png_plot1"
+          - title: "Number of samples per study (png)"
             component_type: "plot"
             plot_type: "static"
             file_path: "example_data/MicW2Graph/number_samples_per_study.png"
-            title: "Number of samples per study (png)"
-            caption: ""
-          - id: 3323
-            name: "plotly_plot2"
+          - title: "Sampling countries for all studies (plotly)"
             component_type: "plot"
             plot_type: "interactive"
             file_path: "example_data/MicW2Graph/pie_plot_countries.json"
             int_visualization_tool: "plotly"
-            title: "Sampling countries for all studies (plotly)"
-            caption: ""
-          - id: 24324
-            name: "df3"
+          - title: "Sample data for all studies (txt)"
             component_type: "dataframe"
             file_path: "example_data/MicW2Graph/sample_info_allbiomes.txt"
             file_format: "txt"
-            title: "Sample data for all studies (txt)"
-            caption: ""
-          - id: 24324
-            name: "df4"
+          - title: "Sample data for all studies (parquet)"
             component_type: "dataframe"
             file_path: "example_data/MicW2Graph/sample_info_allbiomes.parquet"
             file_format: "parquet"
-            title: "Sample data for all studies (parquet)"
-            caption: ""
-      - id: 5003
-        name: "Extra information"
-        title: "Extra information"
-        description: ""
+      - title: "Extra information"
         components:
-          - id: 3358
-            name: "md1"
+          - title: "Markdown example"
             component_type: "markdown"
             file_path: "example_data/test_md.md"
-            title: "Markdown example"
-            caption: "This is a markdown example"
-  - id: 24324
-    name: "Microbial Association Networks"
-    title: "Microbial Association Networks"
-    description: ""
+  - title: "Microbial Association Networks"
     subsections:
-      - id: 5003
-        name: "Network Visualization1"
-        title: "Network Visualization1"
-        description: ""
+      - title: "Network Visualization1"
         components:
-          - id: 2247
-            name: "network1"
+          - title: "Network1 (graphml)"
             component_type: "plot"
             plot_type: "interactive"
             int_visualization_tool: "pyvis"
             file_path: "example_data/MicW2Graph/man_example.graphml"
-            title: "Network1 (graphml)"
-            caption: ""
-      - id: 5003
-        name: "Network Visualization2"
-        title: "Network Visualization2"
-        description: ""
+      - title: "Network Visualization2"
         components:
-          - id: 2240
-            name: "network2"
+          - title: "Network2 (edge list csv)"
             component_type: "plot"
             plot_type: "interactive"
             int_visualization_tool: "pyvis"
             csv_network_format: "edgelist"
             file_path: "example_data/MicW2Graph/man_example.csv"
-            title: "Network2 (edge list csv)"
-            caption: ""
-      - id: 5004
-        name: "Edge list"
-        title: "Edge list"
-        description: ""
+      - title: "Edge list"
         components:
-          - id: 3358
-            name: "df5"
+          - title: "Edge list (csv)"
             component_type: "dataframe"
             file_path: "example_data/MicW2Graph/man_example.csv"
             file_format: "csv"
             delimiter: ","
-            title: "Edge list (csv)"
             caption: "This is the edge list of the network"
-  - id: 2436
-    name: "APICall test"
-    title: "APICall test"
-    description: ""
+  - title: "APICall test"
     subsections:
-      - id: 5031
-        name: "Simple test"
-        title: "Simple test"
-        description: ""
+      - title: "Simple test"
         components:
-          - id: 2987
-            name: "APIcall_test"
+          - title: "APICall test"
             component_type: "apicall"
             api_url: "https://jsonplaceholder.typicode.com/todos/1"
-            title: "APICall test"
-            caption: ""
