@@ -156,8 +156,6 @@ class MetadataManager:
         """
         # Validate enum fields
         plot_type = assert_enum_value(r.PlotType, component_data['plot_type'], self.logger)
-        int_visualization_tool = (assert_enum_value(r.IntVisualizationTool, component_data.get('int_visualization_tool', ''), self.logger) 
-                                  if component_data.get('int_visualization_tool') else None)
         csv_network_format = (assert_enum_value(r.CSVNetworkFormat, component_data.get('csv_network_format', ''), self.logger) 
                               if component_data.get('csv_network_format') else None)
 
@@ -166,7 +164,6 @@ class MetadataManager:
             logger = self.logger,
             file_path = component_data['file_path'],
             plot_type = plot_type,
-            int_visualization_tool = int_visualization_tool,
             csv_network_format = csv_network_format,
             caption = component_data.get('caption')
         )

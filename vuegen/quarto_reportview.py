@@ -265,54 +265,50 @@ format:"""
         plot_content = []
         # Add title
         plot_content.append(f'### {plot.title}')
-
-        if plot.plot_type == r.PlotType.INTERACTIVE:
-            try:
-                # Define plot path
-                if is_report_static:
-                    static_plot_path  = os.path.join(static_dir, f"{plot.title.replace(' ', '_')}.png")
-                else:
-                    html_plot_file  = os.path.join(static_dir, f"{plot.title.replace(' ', '_')}.html")
-
-                if plot.int_visualization_tool == r.IntVisualizationTool.PLOTLY:
-                    plot_content.append(self._generate_plot_code(plot))
-                    if is_report_static:
-                        plot_content.append(f"""fig_plotly.write_image("{os.path.join("..", static_plot_path)}")\n```\n""")
-                        plot_content.append(self._generate_image_content(static_plot_path))
-                    else:
-                        plot_content.append(f"""fig_plotly.show()\n```\n""")
-                elif plot.int_visualization_tool == r.IntVisualizationTool.ALTAIR:
-                    plot_content.append(self._generate_plot_code(plot))
-                    if is_report_static:
-                        plot_content.append(f"""fig_altair.save("{os.path.join("..", static_plot_path)}")\n```\n""")
-                        plot_content.append(self._generate_image_content(static_plot_path))
-                    else:
-                        plot_content.append(f"""fig_altair\n```\n""")
-                elif plot.int_visualization_tool == r.IntVisualizationTool.PYVIS:
-                    G = plot.read_network()
-                    num_nodes = G.number_of_nodes()
-                    num_edges = G.number_of_edges()
-                    plot_content.append(f'**Number of nodes:** {num_nodes}\n')
-                    plot_content.append(f'**Number of edges:** {num_edges}\n')
-                    if is_report_static:
-                        plot.save_netwrok_image(G, static_plot_path, "png")
-                        plot_content.append(self._generate_image_content(static_plot_path))
-                    else:
-                        # Get the Network object
-                        net = plot.create_and_save_pyvis_network(G, html_plot_file)
-                        plot_content.append(self._generate_plot_code(plot, html_plot_file))
-                else:
-                        self.report.logger.warning(f"Unsupported interactive plot tool: {plot.int_visualization_tool}")
-            except Exception as e:
-                self.report.logger.error(f"Error generating interactive plot content for {plot.title}: {str(e)}")
-                raise
         
-        elif plot.plot_type == r.PlotType.STATIC:
-            try:
+        # Define plot path
+        if is_report_static:
+            static_plot_path  = os.path.join(static_dir, f"{plot.title.replace(' ', '_')}.png")
+        else:
+            html_plot_file  = os.path.join(static_dir, f"{plot.title.replace(' ', '_')}.html")
+
+        # Add content for the different plot types
+        try:
+            if plot.plot_type == r.PlotType.STATIC:
                 plot_content.append(self._generate_image_content(plot.file_path, width=950))
-            except Exception as e:
-                self.report.logger.error(f"Error generating static plot content for {plot.title}: {str(e)}")
-                raise
+            elif plot.plot_type == r.PlotType.PLOTLY:
+                plot_content.append(self._generate_plot_code(plot))
+                if is_report_static:
+                    plot_content.append(f"""fig_plotly.write_image("{os.path.join("..", static_plot_path)}")\n```\n""")
+                    plot_content.append(self._generate_image_content(static_plot_path))
+                else:
+                    plot_content.append(f"""fig_plotly.show()\n```\n""")
+            elif plot.plot_type == r.PlotType.ALTAIR:
+                plot_content.append(self._generate_plot_code(plot))
+                if is_report_static:
+                    plot_content.append(f"""fig_altair.save("{os.path.join("..", static_plot_path)}")\n```\n""")
+                    plot_content.append(self._generate_image_content(static_plot_path))
+                else:
+                    plot_content.append(f"""fig_altair\n```\n""")
+            elif plot.plot_type == r.PlotType.INTERACTIVE_NETWORK:
+                G = plot.read_network()
+                num_nodes = G.number_of_nodes()
+                num_edges = G.number_of_edges()
+                plot_content.append(f'**Number of nodes:** {num_nodes}\n')
+                plot_content.append(f'**Number of edges:** {num_edges}\n')
+                
+                if is_report_static:
+                    plot.save_netwrok_image(G, static_plot_path, "png")
+                    plot_content.append(self._generate_image_content(static_plot_path))
+                else:
+                    # Get the Network object
+                    net = plot.create_and_save_pyvis_network(G, html_plot_file)
+                    plot_content.append(self._generate_plot_code(plot, html_plot_file))
+            else:
+                    self.report.logger.warning(f"Unsupported plot type: {plot.plot_type}")
+        except Exception as e:
+            self.report.logger.error(f"Error generating content for '{plot.plot_type}' plot '{plot.id}' '{plot.title}': {str(e)}")
+            raise
         
         # Add caption if available
         if plot.caption:
@@ -344,13 +340,13 @@ with open('{os.path.join("..", plot.file_path)}', 'r') as plot_file:
     plot_data = plot_file.read()
     """
         # Add specific code for each visualization tool
-        if plot.int_visualization_tool == r.IntVisualizationTool.PLOTLY:
+        if plot.plot_type == r.PlotType.PLOTLY:
             plot_code += """fig_plotly = pio.from_json(plot_data)
 fig_plotly.update_layout(width=950, height=500)
     """
-        elif plot.int_visualization_tool == r.IntVisualizationTool.ALTAIR:
+        elif plot.plot_type == r.PlotType.ALTAIR:
             plot_code += """fig_altair = alt.Chart.from_json(plot_data).properties(width=900, height=400)"""
-        elif plot.int_visualization_tool == r.IntVisualizationTool.PYVIS:
+        elif plot.plot_type == r.PlotType.INTERACTIVE_NETWORK:
             plot_code = f"""<div style="text-align: center;">
 <iframe src="{os.path.join("..", output_file)}" alt="{plot.title} plot" width="800px" height="630px"></iframe>
 </div>\n"""
@@ -524,8 +520,8 @@ display.Markdown(markdown_content)
         # Dictionary to hold the imports for each component type
         components_imports = {
             'plot': {
-                r.IntVisualizationTool.ALTAIR: ['import altair as alt'],
-                r.IntVisualizationTool.PLOTLY: ['import plotly.io as pio']
+                r.PlotType.ALTAIR: ['import altair as alt'],
+                r.PlotType.PLOTLY: ['import plotly.io as pio']
             },
             'dataframe': ['import pandas as pd', 'from itables import show', 'import dataframe_image as dfi'],
             'markdown': ['import IPython.display as display']
@@ -537,9 +533,9 @@ display.Markdown(markdown_content)
 
         # Add relevant imports based on component type and visualization tool
         if component_type == r.ComponentType.PLOT:
-            int_visualization_tool = getattr(component, 'int_visualization_tool', None)
-            if int_visualization_tool in components_imports['plot']:
-                component_imports.extend(components_imports['plot'][int_visualization_tool])
+            plot_type = getattr(component, 'plot_type', None)
+            if plot_type in components_imports['plot']:
+                component_imports.extend(components_imports['plot'][plot_type])
         elif component_type == r.ComponentType.DATAFRAME:
             component_imports.extend(components_imports['dataframe'])
         elif component_type == r.ComponentType.MARKDOWN:

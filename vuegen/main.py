@@ -7,7 +7,7 @@ if __name__ == '__main__':
     report_config = load_yaml_config(config_path)
 
     # Define logger suffix based on report engine, type and name
-    report_engine = "streamlit" 
+    report_engine = "quarto" 
     report_type = report_config['report'].get('report_type')
     report_format = report_config['report'].get('report_format')
     report_name = report_config['report'].get('name')

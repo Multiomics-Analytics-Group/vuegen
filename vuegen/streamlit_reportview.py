@@ -303,39 +303,33 @@ report_nav.run()""")
 
         # Add title
         plot_content.append(self._format_text(text=plot.title, type='header', level=4, color='#2b8cbe'))
-
-        if plot.plot_type == r.PlotType.INTERACTIVE:
-            try:
-                # Handle interactive plot
-                if plot.int_visualization_tool == r.IntVisualizationTool.PLOTLY:
-                    plot_content.append(self._generate_plot_code(plot))
-                elif plot.int_visualization_tool == r.IntVisualizationTool.ALTAIR:
-                    plot_content.append(self._generate_plot_code(plot))
-                elif plot.int_visualization_tool == r.IntVisualizationTool.PYVIS:
-                    # For PyVis, handle the network visualization
-                    G = plot.read_network()
-                    html_plot_file = os.path.join(static_dir, f"{plot.title.replace(' ', '_')}.html")
-                    net = plot.create_and_save_pyvis_network(G, html_plot_file)
-                    num_nodes = len(net.nodes)
-                    num_edges = len(net.edges)
-                    plot_content.append(f"""with open('{html_plot_file}', 'r') as f:
+        
+        # Add content for the different plot types
+        try:
+            if plot.plot_type == r.PlotType.STATIC:
+                plot_content.append(f"\nst.image('{plot.file_path}', caption='{plot.caption}', use_column_width=True)\n")  
+            elif plot.plot_type == r.PlotType.PLOTLY:
+                plot_content.append(self._generate_plot_code(plot))
+            elif plot.plot_type == r.PlotType.ALTAIR:
+                plot_content.append(self._generate_plot_code(plot))
+            elif plot.plot_type == r.PlotType.INTERACTIVE_NETWORK:
+                # Handle the network visualization
+                G = plot.read_network()
+                html_plot_file = os.path.join(static_dir, f"{plot.title.replace(' ', '_')}.html")
+                net = plot.create_and_save_pyvis_network(G, html_plot_file)
+                num_nodes = len(net.nodes)
+                num_edges = len(net.edges)
+                plot_content.append(f"""with open('{html_plot_file}', 'r') as f:
     html_data = f.read()
 st.markdown(f"<p style='text-align: center; color: black;'> <b>Number of nodes:</b> {num_nodes} </p>", unsafe_allow_html=True)
 st.markdown(f"<p style='text-align: center; color: black;'> <b>Number of relationships:</b> {num_edges} </p>", unsafe_allow_html=True)""")
-                    plot_content.append(self._generate_plot_code(plot))
-                else:
-                    self.report.logger.warning(f"Unsupported interactive plot tool: {plot.int_visualization_tool}")
-            except Exception as e:
-                self.report.logger.error(f"Error generating interactive content for plot '{plot.id}' '{plot.title}': {str(e)}")
-                raise
+                plot_content.append(self._generate_plot_code(plot))
+            else:
+                self.report.logger.warning(f"Unsupported plot type: {plot.plot_type}")
+        except Exception as e:
+            self.report.logger.error(f"Error generating content for '{plot.plot_type}' plot '{plot.id}' '{plot.title}': {str(e)}")
+            raise      
         
-        elif plot.plot_type == r.PlotType.STATIC:
-            try:
-                # Handle static plot
-                plot_content.append(f"\nst.image('{plot.file_path}', caption='{plot.caption}', use_column_width=True)\n")
-            except Exception as e:
-                self.report.logger.error(f"Error generating content for static plot  '{plot.id}' '{plot.title}': {str(e)}")
-                raise        
         # Add caption if available
         if plot.caption:
             plot_content.append(self._format_text(text=plot.caption, type='caption', text_align="left"))
@@ -362,20 +356,19 @@ st.markdown(f"<p style='text-align: center; color: black;'> <b>Number of relatio
         plot_code = f"""with open('{plot.file_path}', 'r') as plot_file:
     plot_json = json.load(plot_file)\n"""
         # Add specific code for each visualization tool
-        if plot.int_visualization_tool == r.IntVisualizationTool.PLOTLY:
+        if plot.plot_type == r.PlotType.PLOTLY:
             plot_code += "st.plotly_chart(plot_json, use_container_width=True)\n"
 
-        elif plot.int_visualization_tool == r.IntVisualizationTool.ALTAIR:
+        elif plot.plot_type == r.PlotType.ALTAIR:
             plot_code += """altair_plot = alt.Chart.from_dict(plot_json)
 st.vega_lite_chart(json.loads(altair_plot.to_json()), use_container_width=True)\n"""
         
-        elif plot.int_visualization_tool == r.IntVisualizationTool.PYVIS:
+        elif plot.plot_type == r.PlotType.INTERACTIVE_NETWORK:
             plot_code = """# Streamlit checkbox for controlling the layout
 control_layout = st.checkbox('Add panel to control layout', value=True)
 net_html_height = 1200 if control_layout else 630
 # Load HTML into HTML component for display on Streamlit
 st.components.v1.html(html_data, height=net_html_height)\n"""
-
         return plot_code
     
     def _generate_dataframe_content(self, dataframe) -> List[str]:
@@ -537,8 +530,8 @@ st.markdown(markdown_content, unsafe_allow_html=True)\n""")
         # Dictionary to hold the imports for each component type
         components_imports = {
             'plot': {
-                r.IntVisualizationTool.ALTAIR: ['import json', 'import altair as alt'],
-                r.IntVisualizationTool.PLOTLY: ['import json']
+                r.PlotType.ALTAIR: ['import json', 'import altair as alt'],
+                r.PlotType.PLOTLY: ['import json']
             },
             'dataframe': ['import pandas as pd']
         }
@@ -548,9 +541,9 @@ st.markdown(markdown_content, unsafe_allow_html=True)\n""")
 
         # Add relevant imports based on component type and visualization tool
         if component_type == r.ComponentType.PLOT:
-            int_visualization_tool = getattr(component, 'int_visualization_tool', None)
-            if int_visualization_tool in components_imports['plot']:
-                component_imports.extend(components_imports['plot'][int_visualization_tool])
+            plot_type = getattr(component, 'plot_type', None)
+            if plot_type in components_imports['plot']:
+                component_imports.extend(components_imports['plot'][plot_type])
         elif component_type == r.ComponentType.DATAFRAME:
             component_imports.extend(components_imports['dataframe'])
 

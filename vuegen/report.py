@@ -26,13 +26,10 @@ class ComponentType(StrEnum):
     CHATBOT = auto()
 
 class PlotType(StrEnum):
-    INTERACTIVE = auto()
     STATIC = auto()
-
-class IntVisualizationTool(StrEnum):
     PLOTLY = auto()
     ALTAIR = auto()
-    PYVIS = auto()
+    INTERACTIVE_NETWORK = auto()
 
 class NetworkFormat(StrEnum):
     GML = auto()
@@ -110,8 +107,7 @@ class Plot(Component):
         The format of the CSV file for network plots (EDGELIST or ADJLIST) (default is None).
     """
     def __init__(self, title: str, logger: logging.Logger, plot_type: PlotType, file_path: str=None,
-                caption: str=None, int_visualization_tool: Optional[IntVisualizationTool]=None,
-                csv_network_format: Optional[CSVNetworkFormat]=None):
+                caption: str=None, csv_network_format: Optional[CSVNetworkFormat]=None):
         """
         Initializes a Plot object.
         """
@@ -121,7 +117,6 @@ class Plot(Component):
 
         # Set specific attributes for the Plot class
         self.plot_type = plot_type
-        self.int_visualization_tool = int_visualization_tool
         self.csv_network_format = csv_network_format
     
     def read_network(self) -> nx.Graph:
