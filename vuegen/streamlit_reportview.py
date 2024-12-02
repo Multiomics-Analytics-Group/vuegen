@@ -138,6 +138,8 @@ report_nav.run()""")
             tag = f"h{level}"
         elif type == 'paragraph':
             tag = 'p'
+        elif type == 'caption':
+            tag = 'figcaption'
 
         return f"""st.markdown('''<{tag} style='text-align: {text_align}; color: {color};'>{text}</{tag}>''', unsafe_allow_html=True)"""
 
@@ -336,7 +338,7 @@ st.markdown(f"<p style='text-align: center; color: black;'> <b>Number of relatio
                 raise        
         # Add caption if available
         if plot.caption:
-            plot_content.append(self._format_text(text=plot.caption, type='paragraph', text_align="left"))
+            plot_content.append(self._format_text(text=plot.caption, type='caption', text_align="left"))
 
         self.report.logger.info(f"Successfully generated content for plot '{plot.id}': '{plot.title}'")
         return plot_content
@@ -414,7 +416,7 @@ st.components.v1.html(html_data, height=net_html_height)\n"""
         
         # Add caption if available
         if dataframe.caption:
-            dataframe_content.append(self._format_text(text=dataframe.caption, type='paragraph', text_align="left"))
+            dataframe_content.append(self._format_text(text=dataframe.caption, type='caption', text_align="left"))
         
         self.report.logger.info(f"Successfully generated content for DataFrame: '{dataframe.title}'")
         return dataframe_content
@@ -447,7 +449,7 @@ st.markdown(markdown_content, unsafe_allow_html=True)\n""")
         
         # Add caption if available
         if markdown.caption:
-            markdown_content.append(self._format_text(text=markdown.caption, type='paragraph', text_align="left"))
+            markdown_content.append(self._format_text(text=markdown.caption, type='caption', text_align="left"))
         
         self.report.logger.info(f"Successfully generated content for Markdown: '{markdown.title}'")
         return markdown_content
@@ -479,7 +481,7 @@ st.markdown(markdown_content, unsafe_allow_html=True)\n""")
 
         # Add caption if available
         if apicall.caption:
-            apicall_content.append(self._format_text(text=apicall.caption, type='paragraph', text_align="left"))
+            apicall_content.append(self._format_text(text=apicall.caption, type='caption', text_align="left"))
         
         self.report.logger.info(f"Successfully generated content for APICall: '{apicall.title}'")
         return apicall_content
@@ -511,7 +513,7 @@ st.markdown(markdown_content, unsafe_allow_html=True)\n""")
         
         # Add caption if available
         if chatbot.caption:
-            chatbot_content.append(self._format_text(text=chatbot.caption, type='paragraph', text_align="left")) 
+            chatbot_content.append(self._format_text(text=chatbot.caption, type='caption', text_align="left")) 
 
         self.report.logger.info(f"Successfully generated content for APICall: '{chatbot.title}'")
         return chatbot_content
