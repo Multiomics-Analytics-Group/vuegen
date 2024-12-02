@@ -1,8 +1,8 @@
 from streamlit_reportview import StreamlitReportView
 from quarto_reportview import QuartoReportView
 from metadata_manager import MetadataManager
-from report import ReportType
 from utils import assert_enum_value
+from report import ReportType
 import logging
 
 def get_report(config: dict, report_type: str, logger: logging.Logger) -> None:

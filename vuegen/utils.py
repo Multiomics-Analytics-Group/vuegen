@@ -12,7 +12,7 @@ def check_path(filepath: str) -> bool:
     """
     Checks if the given file or folder path exists.
 
-    PARAMETERS
+    Parameters
     ---------
     filepath : str
         The file or folder path to check.
@@ -155,12 +155,12 @@ def load_yaml_config(file_path: str) -> dict:
     """
     Load a YAML configuration file and return its contents as a dictionary.
 
-    PARAMETERS
+    Parameters
     ----------
     file_path : str
         The path to the YAML configuration file.
 
-    RETURNS
+    Returns
     -------
     config : dict
         The contents of the YAML file as a dictionary.
@@ -199,7 +199,7 @@ def get_basename(fname: None | str = None) -> str:
     -----
     - basename of given filepath or the current file the function is executed
 
-    EXAMPLES
+    Examples
     -----
     1)
     >>> get_basename()
@@ -223,17 +223,17 @@ def get_time(incl_time: bool = True, incl_timezone: bool = True) -> str:
     """
     Gets current date, time (optional) and timezone (optional) for file naming
 
-    PARAMETERS
+    Parameters
     -----
     - incl_time (bool): whether to include timestamp in the string
     - incl_timezone (bool): whether to include the timezone in the string
 
-    RETURNS
+    Returns
     -----
     - fname (str): includes date, timestamp and/or timezone
         connected by '_' in one string e.g. yyyyMMdd_hhmm_timezone
 
-    EXAMPLES
+    Examples
     -----
     1)
     >>> get_time()
@@ -286,12 +286,12 @@ def generate_log_filename(folder: str = "logs", suffix: str = "") -> str:
     """
     Creates log file name and path
 
-    PARAMETERS
+    Parameters
     -----
     folder (str): name of the folder to put the log file in
     suffix (str): anything else you want to add to the log file name
 
-    RETURNS
+    Returns
     -----
     log_filepath (str): the file path to the log file
     """
@@ -313,18 +313,18 @@ def init_log(filename: str, display: bool = False, logger_id: str | None = None)
     - Keeps a log record file of the python application, with option to
         display in stdout
 
-    PARAMETERS
+    Parameters
     -----
     - filename (str): filepath to log record file
     - display (bool): whether to print the logs to whatever standard output
     - logger_id (str): an optional identifier for yourself,
         if None then defaults to 'root'
 
-    RETURNS
+    Returns
     -----
     - logger object
 
-    EXAMPLE
+    Examples
     -----
     >>> logger = init_log('logs/tmp.log', display=True)
     >>> logger.info('Loading things')

@@ -82,10 +82,11 @@ sections:
             file_format: "csv"
             delimiter: ","
             caption: "This is the edge list of the network"
-  - title: "APICall test"
+  - title: "ChatBot test"
     subsections:
       - title: "Simple test"
         components:
-          - title: "APICall test"
-            component_type: "apicall"
-            api_url: "https://jsonplaceholder.typicode.com/todos/1"
+          - title: "ChatBot test"
+            component_type: "chatbot"
+            api_url: "http://localhost:11434/api/chat"
+            model: "llama3.2"

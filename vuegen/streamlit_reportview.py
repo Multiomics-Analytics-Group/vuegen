@@ -15,7 +15,7 @@ class StreamlitReportView(r.WebAppReportView):
     REPORT_MANAG_SCRIPT = 'report_manager.py'
 
     def __init__(self, report: r.Report, report_type: r.ReportType):
-        super().__init__(report=report, report_type = report_type)
+        super().__init__(report = report, report_type = report_type)
 
     def generate_report(self, output_dir: str = SECTIONS_DIR, static_dir: str = STATIC_FILES_DIR) -> None:
         """
@@ -479,34 +479,86 @@ st.markdown(markdown_content, unsafe_allow_html=True)\n""")
     
     def _generate_chatbot_content(self, chatbot) -> List[str]:
         """
-        Generate content for a Markdown component.
+        Generate content for a ChatBot component.
 
         Parameters
         ----------
         chatbot : ChatBot
-            The chatbot component to generate content for.
+            The ChatBot component to generate content for.
 
         Returns
         -------
         list : List[str]
-            The list of content lines for the chatbot.
+            The list of content lines for the ChatBot.
         """
         chatbot_content = []
 
         # Add title
         chatbot_content.append(self._format_text(text=chatbot.title, type='header', level=4, color='#2b8cbe'))
-        try:
-            apicall_response = chatbot.get_chatbot_answer()
-            chatbot_content.append(f"""st.write({apicall_response})\n""")
-        except Exception as e:
-            self.report.logger.error(f"Error generating content for APICall: {chatbot.title}. Error: {str(e)}")
-            raise
-        
+
+        # Chatbot logic for embedding in the web application
+        chatbot_content.append(f"""
+def generate_query(messages):
+    response = requests.post(
+        "{chatbot.api_call.api_url}",
+        json={{"model": "{chatbot.model}", "messages": messages, "stream": True}},
+    )
+    response.raise_for_status()
+    return response               
+
+def parse_api_response(response):
+    try:
+        output = ""
+        for line in response.iter_lines():
+            body = json.loads(line)
+            if "error" in body:
+                raise Exception(f"API error: {{body['error']}}")
+            if body.get("done", False):
+                return {{"role": "assistant", "content": output}}
+            output += body.get("message", {{}}).get("content", "")
+    except Exception as e:
+        return {{"role": "assistant", "content": f"Error while processing API response: {{str(e)}}"}}
+
+def response_generator(msg_content):
+    for word in msg_content.split():
+        yield word + " "
+        time.sleep(0.1)
+    yield "\\n"
+
+# Chatbot interaction in the app
+if 'messages' not in st.session_state:
+    st.session_state['messages'] = []
+
+# Display chat history
+for message in st.session_state['messages']:
+    with st.chat_message(message['role']):
+        st.write(message['content'])
+
+# Handle new input from the user
+if prompt := st.chat_input("Enter your prompt here:"):
+    # Add user's question to the session state                           
+    st.session_state.messages.append({{"role": "user", "content": prompt}})
+    with st.chat_message("user"):
+        st.write(prompt)
+    
+    # Retrieve question and generate answer
+    combined = "\\n".join(msg["content"] for msg in st.session_state.messages if msg["role"] == "user")
+    messages = [{{"role": "user", "content": combined}}]
+    with st.spinner('Generating answer...'):                       
+        response = generate_query(messages)
+        parsed_response = parse_api_response(response)
+                               
+    # Add the assistant's response to the session state and display it
+    st.session_state.messages.append(parsed_response)
+    with st.chat_message("assistant"):
+        st.write_stream(response_generator(parsed_response["content"]))
+    """)
+
         # Add caption if available
         if chatbot.caption:
-            chatbot_content.append(self._format_text(text=chatbot.caption, type='caption', text_align="left")) 
+            chatbot_content.append(self._format_text(text=chatbot.caption, type='caption', text_align="left"))
 
-        self.report.logger.info(f"Successfully generated content for APICall: '{chatbot.title}'")
+        self.report.logger.info(f"Successfully generated content for ChatBot: '{chatbot.title}'")
         return chatbot_content
     
     def _generate_component_imports(self, component: r.Component) -> List[str]:
@@ -531,7 +583,8 @@ st.markdown(markdown_content, unsafe_allow_html=True)\n""")
                 r.PlotType.ALTAIR: ['import json', 'import altair as alt'],
                 r.PlotType.PLOTLY: ['import json']
             },
-            'dataframe': ['import pandas as pd']
+            'dataframe': ['import pandas as pd'],
+            'chatbot': ['import time', 'import json', 'import requests']
         }
 
         component_type = component.component_type
@@ -544,6 +597,8 @@ st.markdown(markdown_content, unsafe_allow_html=True)\n""")
                 component_imports.extend(components_imports['plot'][plot_type])
         elif component_type == r.ComponentType.DATAFRAME:
             component_imports.extend(components_imports['dataframe'])
+        elif component_type == r.ComponentType.CHATBOT:
+            component_imports.extend(components_imports['chatbot'])
 
         # Return the list of import statements
         return component_imports     

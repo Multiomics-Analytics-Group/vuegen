@@ -404,57 +404,73 @@ class APICall(Component):
             self.logger.error(f"API request failed: {e}")
             return None
         
-class ChatBot(APICall):
+class ChatBot(Component):
     """
-    A specialized component for creating a ChatBot.
+    A component for creating a ChatBot that interacts with an API.
+    This component uses an APICall instance to send requests to the chatbot API and receive responses.
 
     Attributes
     ----------
     model : str
-        The language model to use.
+        The language model to use for the chatbot.
+    api_call : APICall
+        An instance of the APICall class used to interact with the API for fetching chatbot responses.
+    headers : Optional[dict]
+        Headers to include in the API request (default is None).
+    params : Optional[dict]
+        Query parameters to include in the API request (default is None).
     """
     def __init__(self, title: str, logger: logging.Logger, api_url: str, model: str,
                  caption: str = None, headers: Optional[dict] = None, params: Optional[dict] = None):
-        super().__init__(title = title, logger = logger, api_url = api_url, 
-                         caption=caption, headers=headers, params=params)
+        super().__init__(title=title, logger=logger, component_type=ComponentType.CHATBOT, caption=caption)
         self.model = model
+        self.api_call = APICall(
+            title=title, 
+            logger=logger, 
+            api_url=api_url, 
+            caption=caption,
+            headers=headers, 
+            params=params 
+        )
 
     def get_chatbot_answer(self, prompt: str) -> dict:
         """
-        Sends a RAG query and retrieves the resulting documents.
+        Sends a query to the chatbot API and retrieves the resulting response. This method constructs 
+        the request body for the chatbot, sends the request to the API, and parses the response.
 
         Parameters
         ----------
         prompt : str
-            The prompt for asking the chatbot.
+            The prompt or message to send to the chatbot for a response.
 
         Returns
         -------
-        parsed_response : dict
-            The chabtbot answer.
+        dict
+            The parsed response from the chatbot API, containing the chatbot's answer.
         """
         request_body = self._generate_query(prompt)
-        response = self.make_api_request(method="POST", request_body=request_body)
+        response = self.api_call.make_api_request(method="POST", request_body=request_body)  # Delegate API call
         if response:
-            self.logger.info(f"Request successful")
+            self.logger.info("Request successful")
         else:
-            self.logger.warning("Nothing retreived.")
+            self.logger.warning("No response retrieved.")
         parsed_response = self._parse_api_response(response)
         return parsed_response
 
+
     def _generate_query(self, messages: str) -> dict:
         """
-        Constructs the request body for a question to the chatbot.
+        Constructs the request body for the chatbot query.
 
         Parameters
         ----------
         messages : str
-            The messages for retrieval.
+            The messages to send to the chatbot.
 
         Returns
         -------
-        request_body : dict
-            The request body for the question to the chatbot.
+        dict
+            The constructed request body for the chatbot query.
         """
         self.logger.info(f"Generating request body for message: {messages}")
         return {
@@ -462,10 +478,10 @@ class ChatBot(APICall):
             "messages": messages,
             "stream": True
         }
-    
+
     def _parse_api_response(self, response: dict) -> dict:
         """
-        Extracts and processes data from the API response.
+        Processes and extracts relevant data from the API response.
 
         Parameters
         ----------
@@ -474,8 +490,8 @@ class ChatBot(APICall):
 
         Returns
         -------
-        output : dict
-            The extracted data from the response.
+        dict
+            The processed response, including the role and content of the assistant's reply.
         """
         output = ""
         for line in response.iter_lines():
@@ -590,8 +606,8 @@ class ReportView(ABC):
         The name of the view.
     report : Report
         The report that this ABC is associated with.
-    columns : List[str], optional
-        Column names used in the report view ABC (default is None).
+    report_type : ReportType
+        The report type. It should be one of the values of the ReportType Enum.
     
     """
     def __init__(self, report: 'Report', report_type: 'ReportType'):

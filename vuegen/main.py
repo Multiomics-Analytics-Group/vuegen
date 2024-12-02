@@ -11,8 +11,8 @@ if __name__ == '__main__':
     report_config = load_yaml_config(config_path)
 
     # Define logger suffix based on report type and name
-    report_name = report_config['report'].get('name')
-    logger_suffix = f"{report_type}_report_{report_name}"
+    report_title = report_config['report'].get('title')
+    logger_suffix = f"{report_type}_report_{report_title}"
 
     # Initialize logger
     logger = get_logger(f"{logger_suffix}")
