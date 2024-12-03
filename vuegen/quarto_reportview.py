@@ -280,18 +280,22 @@ r.ReportType.JUPYTER: """
                 else:
                     plot_content.append(f"""fig_altair\n```\n""")
             elif plot.plot_type == r.PlotType.INTERACTIVE_NETWORK:
-                G = plot.read_network()
-                num_nodes = G.number_of_nodes()
-                num_edges = G.number_of_edges()
-                plot_content.append(f'**Number of nodes:** {num_nodes}\n')
-                plot_content.append(f'**Number of edges:** {num_edges}\n')
-                
+                network_data = plot.read_network()
                 if is_report_static:
                     plot.save_netwrok_image(G, static_plot_path, "png")
                     plot_content.append(self._generate_image_content(static_plot_path))
                 else:
-                    # Get the Network object
-                    net = plot.create_and_save_pyvis_network(G, html_plot_file)
+                    if isinstance(network_data, str) and network_data.endswith('.html'):
+                        # If network_data is the path to an HTML file, just visualize it
+                        html_plot_file = network_data
+                    else:
+                        num_nodes = network_data.number_of_nodes()
+                        num_edges = network_data.number_of_edges()
+                        plot_content.append(f'**Number of nodes:** {num_nodes}\n')
+                        plot_content.append(f'**Number of edges:** {num_edges}\n')
+                        # Get the Network object
+                        net = plot.create_and_save_pyvis_network(network_data, html_plot_file)
+
                     plot_content.append(self._generate_plot_code(plot, html_plot_file))
             else:
                     self.report.logger.warning(f"Unsupported plot type: {plot.plot_type}")
