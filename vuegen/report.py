@@ -11,6 +11,7 @@ import requests
 import json
 import matplotlib.pyplot as plt
 from pyvis.network import Network
+from utils import cyjs2graph
 
 class ReportType(StrEnum):
     STREAMLIT = auto()
@@ -41,6 +42,8 @@ class NetworkFormat(StrEnum):
     GEXF = auto()
     CSV = auto()
     TXT = auto()
+    CYJS = auto()
+    HTML = auto()
 
     @property
     def value_with_dot(self):
@@ -136,7 +139,8 @@ class Plot(Component):
         file_extension_map = {
             NetworkFormat.GML.value_with_dot: nx.read_gml,
             NetworkFormat.GRAPHML.value_with_dot: nx.read_graphml,
-            NetworkFormat.GEXF.value_with_dot: nx.read_gexf
+            NetworkFormat.GEXF.value_with_dot: nx.read_gexf,
+            NetworkFormat.CYJS.value_with_dot: cyjs2graph
         }
 
         # Check if the file exists
@@ -157,6 +161,11 @@ class Plot(Component):
 
         # Handle .csv and .txt files with custom delimiters based on the text format (edgelist or adjlist)
         try:
+            # Handle HTML files (for pyvis interactive networks)
+            if file_extension == NetworkFormat.HTML.value_with_dot:
+                return self.file_path
+            
+            # Handle .csv and .txt files with custom delimiters based on the text format (edgelist or adjlist)
             if file_extension in [NetworkFormat.CSV.value_with_dot, NetworkFormat.TXT.value_with_dot] and self.csv_network_format:
                 delimiter = ',' if file_extension == '.csv' else '\\t'
                 try:
@@ -186,7 +195,7 @@ class Plot(Component):
                     self.logger.error(f"Unsupported format for CSV/TXT file: {self.csv_network_format}.")
                     raise ValueError(f"Unsupported format for CSV/TXT file: {self.csv_network_format}")
             
-            # Return the NetworkX graph object created from the specified network file
+            # Handle other formats using the mapping and return the NetworkX graph object from the specified network file
             G = file_extension_map[file_extension](self.file_path)
             G = self._add_size_attribute(G)
             self.logger.info(f"Successfully read network from file: {self.file_path}.")
@@ -264,8 +273,9 @@ class Plot(Component):
             for node in net.nodes:
                 node_id = node['id']
                 node_data = G.nodes[node_id]
+                node['label'] = node_data.get('name', node_id)
                 node['font'] = {'size': 12}
-                node_data.get('name', node_id)
+                # node_data.get('name', node_id)
                 node['borderWidth'] = 2
                 node['borderWidthSelected'] = 2.5
 

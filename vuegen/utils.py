@@ -4,6 +4,8 @@ import yaml
 from datetime import datetime
 import logging
 import argparse
+import networkx as nx
+import json
 from enum import StrEnum
 from typing import Type
 
@@ -148,6 +150,91 @@ def get_args(prog_name: str, others: dict = {}) -> argparse.Namespace:
 
     # Parse arguments
     return parser.parse_args()
+
+
+def cyjs2graph(file_path: str, name: str = "name", ident: str = "id") -> nx.Graph:
+    """
+    Create a NetworkX graph from a `.cyjs` file in Cytoscape format, including all attributes present in the JSON data.
+    This function is modified from the `cytoscape_graph` networkx function to handle the 'value' key explicitly and to include
+    all additional attributes found in the JSON data for both nodes and edges.
+
+    Parameters
+    ----------
+    file_path : str
+        The path to a `.cyjs` file (Cytoscape JSON format) containing the network data.
+    name : str, optional
+        A string which is mapped to the 'name' node element in Cytoscape JSON format.
+    ident : str, optional
+        A string which is mapped to the 'id' node element in Cytoscape JSON format.
+        Must not have the same value as `name`. Default is "id".
+
+    Returns
+    -------
+    G : networkx.Graph
+        The graph created from the Cytoscape JSON data, including all node and edge attributes.
+
+    Raises
+    ------
+    NetworkXError
+        If the `name` and `ident` attributes are identical.
+    ValueError
+        If the data format is invalid or missing required elements, such as 'id' or 'name' for nodes.
+    """
+    try:
+        # Load data from the provided .cyjs file path
+        with open(file_path, 'r') as json_file:
+            data = json.load(json_file)
+
+        if name == ident:
+            raise nx.NetworkXError("name and ident must be different.")
+        
+        multigraph = data.get("multigraph", False)
+        directed = data.get("directed", False)
+        
+        if multigraph:
+            graph = nx.MultiGraph()
+        else:
+            graph = nx.Graph()
+        
+        if directed:
+            graph = graph.to_directed()
+        
+        graph.graph = dict(data.get("data", {}))
+        
+        # Add nodes with all attributes from the 'data' field of the JSON
+        for d in data["elements"]["nodes"]:
+            node_data = d["data"].copy()
+            node = d["data"].get(ident)  # Use 'id' (or other unique identifier)
+            
+            if node is None:
+                raise ValueError("Each node must contain an 'id' key.")
+            
+            # Optionally include 'name' and 'id' attributes if present
+            if name in d["data"]:
+                node_data[name] = d["data"].get(name)
+            
+            graph.add_node(node)
+            graph.nodes[node].update(node_data)
+        
+        # Add edges with all attributes from the 'data' field of the JSON
+        for d in data["elements"]["edges"]:
+            edge_data = d["data"].copy()
+            sour = d["data"].get("source")
+            targ = d["data"].get("target")
+            if sour is None or targ is None:
+                raise ValueError("Each edge must contain 'source' and 'target' keys.")
+            
+            if multigraph:
+                key = d["data"].get("key", 0)
+                graph.add_edge(sour, targ, key=key)
+                graph.edges[sour, targ, key].update(edge_data)
+            else:
+                graph.add_edge(sour, targ)
+                graph.edges[sour, targ].update(edge_data)
+        return graph
+    
+    except KeyError as e:
+        raise ValueError(f"Missing required key in data: {e}")
 
 
 ## CONFIG

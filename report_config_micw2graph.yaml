@@ -74,6 +74,18 @@ sections:
             plot_type: "interactive_network"
             csv_network_format: "edgelist"
             file_path: "example_data/MicW2Graph/man_example.csv"
+      - title: "Network Visualization3"
+        components:
+          - title: "Network3 (cyjs)"
+            component_type: "plot"
+            plot_type: "interactive_network"
+            file_path: "example_data/MicW2Graph/man_example.cyjs"
+      - title: "Network Visualization4"
+        components:
+          - title: "Network4 (html)"
+            component_type: "plot"
+            plot_type: "interactive_network"
+            file_path: "example_data/MicW2Graph/ckg_network.html"
       - title: "Edge list"
         components:
           - title: "Edge list (csv)"

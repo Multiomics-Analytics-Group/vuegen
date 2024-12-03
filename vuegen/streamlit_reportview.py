@@ -312,12 +312,23 @@ report_nav.run()""")
             elif plot.plot_type == r.PlotType.ALTAIR:
                 plot_content.append(self._generate_plot_code(plot))
             elif plot.plot_type == r.PlotType.INTERACTIVE_NETWORK:
-                G = plot.read_network()
-                html_plot_file = os.path.join(static_dir, f"{plot.title.replace(' ', '_')}.html")
-                net = plot.create_and_save_pyvis_network(G, html_plot_file)
-                num_nodes = len(net.nodes)
-                num_edges = len(net.edges)
-                plot_content.append(f"""with open('{html_plot_file}', 'r') as f:
+                network_data = plot.read_network()
+                
+                if isinstance(network_data, str) and network_data.endswith('.html'):
+                    # If network_data is the path to an HTML file, just visualize the existing HTML file
+                    html_plot_file = network_data
+                    plot_content.append(f"""with open('{html_plot_file}', 'r') as f:
+    html_data = f.read()""")
+                else:
+                    # Otherwise, create and save a new pyvis network from the graph
+                    html_plot_file = os.path.join(static_dir, f"{plot.title.replace(' ', '_')}.html")
+                    net = plot.create_and_save_pyvis_network(network_data, html_plot_file)
+
+                    # Now you can use the existing or newly created HTML file
+                    num_nodes = len(net.nodes)
+                    num_edges = len(net.edges)
+                    
+                    plot_content.append(f"""with open('{html_plot_file}', 'r') as f:
     html_data = f.read()
 st.markdown(f"<p style='text-align: center; color: black;'> <b>Number of nodes:</b> {num_nodes} </p>", unsafe_allow_html=True)
 st.markdown(f"<p style='text-align: center; color: black;'> <b>Number of relationships:</b> {num_edges} </p>", unsafe_allow_html=True)""")
