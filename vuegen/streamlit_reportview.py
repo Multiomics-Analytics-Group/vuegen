@@ -2,7 +2,8 @@ import report as r
 import os
 import subprocess
 from typing import List
-from utils import create_folder
+import pandas as pd
+from utils import create_folder, is_url
 
 class StreamlitReportView(r.WebAppReportView):
     """
@@ -321,13 +322,27 @@ report_nav.run()""")
                     html_plot_file = os.path.join(static_dir, f"{plot.title.replace(' ', '_')}.html")
                     pyvis_graph = plot.create_and_save_pyvis_network(networkx_graph, html_plot_file)
                 
-                # Generate network code for visualization 
+                # Add number of nodes and edges to the plor conetnt
                 num_nodes = networkx_graph.number_of_nodes()
                 num_edges = networkx_graph.number_of_edges()
-                plot_content.append(f"""with open('{html_plot_file}', 'r') as f:
-    html_data = f.read()
+                
+                # Determine whether the file path is a URL or a local file
+                if is_url(html_plot_file):
+                    plot_content.append(f"""
+response = requests.get('{html_plot_file}')
+response.raise_for_status()
+html_data = response.text\n""")
+                else:
+                    plot_content.append(f"""
+with open('{html_plot_file}', 'r') as f:
+    html_data = f.read()\n""")
+
+                # Append the code for additional information (nodes and edges count)
+                plot_content.append(f"""
 st.markdown(f"<p style='text-align: center; color: black;'> <b>Number of nodes:</b> {num_nodes} </p>", unsafe_allow_html=True)
-st.markdown(f"<p style='text-align: center; color: black;'> <b>Number of relationships:</b> {num_edges} </p>", unsafe_allow_html=True)""")
+st.markdown(f"<p style='text-align: center; color: black;'> <b>Number of relationships:</b> {num_edges} </p>", unsafe_allow_html=True)\n""")
+                
+                # Add the specific code for visualization
                 plot_content.append(self._generate_plot_code(plot))
             else:
                 self.report.logger.warning(f"Unsupported plot type: {plot.plot_type}")
@@ -357,15 +372,24 @@ st.markdown(f"<p style='text-align: center; color: black;'> <b>Number of relatio
         str
             The generated plot code as a string.
         """
-        # Start with the common data loading code
-        plot_code = f"""with open('{plot.file_path}', 'r') as plot_file:
-    plot_json = json.load(plot_file)\n"""
+        # If the file path is a URL, generate code to fetch content via requests
+        if is_url(plot.file_path): 
+            plot_code = f"""
+response = requests.get('{plot.file_path}')
+response.raise_for_status()
+plot_json = json.loads(response.text)\n"""
+        else:  # If it's a local file
+            plot_code = f"""
+with open('{os.path.join(plot.file_path)}', 'r') as plot_file:
+    plot_json = json.load(plot_file)\n""" 
+        
         # Add specific code for each visualization tool
         if plot.plot_type == r.PlotType.PLOTLY:
             plot_code += "st.plotly_chart(plot_json, use_container_width=True)\n"
 
         elif plot.plot_type == r.PlotType.ALTAIR:
-            plot_code += """altair_plot = alt.Chart.from_dict(plot_json)
+            plot_code += """
+altair_plot = alt.Chart.from_dict(plot_json)
 st.vega_lite_chart(json.loads(altair_plot.to_json()), use_container_width=True)\n"""
         
         elif plot.plot_type == r.PlotType.INTERACTIVE_NETWORK:
@@ -394,18 +418,25 @@ st.components.v1.html(html_data, height=net_html_height)\n"""
         # Add title
         dataframe_content.append(self._format_text(text=dataframe.title, type='header', level=4, color='#2b8cbe'))
         
+        # Mapping of file extensions to read functions
+        read_function_mapping = {
+            r.DataFrameFormat.CSV.value_with_dot: pd.read_csv,
+            r.DataFrameFormat.PARQUET.value_with_dot: pd.read_parquet,
+            r.DataFrameFormat.TXT.value_with_dot: pd.read_table,
+            r.DataFrameFormat.XLS.value_with_dot: pd.read_excel
+        }
+
         try:
-            if dataframe.file_format == r.DataFrameFormat.CSV:
-                dataframe_content.append(f"df = pd.read_csv('{dataframe.file_path}')")
-            elif dataframe.file_format == r.DataFrameFormat.PARQUET:
-                dataframe_content.append(f"df = pd.read_parquet('{dataframe.file_path}')")
-            elif dataframe.file_format == r.DataFrameFormat.TXT:
-                dataframe_content.append(f"df = pd.read_csv('{dataframe.file_path}', sep='\\t')")
-            elif dataframe.file_format == r.DataFrameFormat.EXCEL:
-                dataframe_content.append(f"df = pd.read_excel('{dataframe.file_path}')")
-            else:
-                self.report.logger.error(f"Unsupported DataFrame file format: {dataframe.file_format}")
-                raise ValueError(f"Unsupported DataFrame file format: {dataframe.file_format}")
+            # Check if the file extension matches any DataFrameFormat value
+            file_extension = os.path.splitext(dataframe.file_path)[1].lower()
+            if not any(file_extension == fmt.value_with_dot for fmt in r.DataFrameFormat):
+                self.report.logger.error(f"Unsupported file extension: {file_extension}. Supported extensions are: {', '.join(fmt.value for fmt in r.DataFrameFormat)}.")
+
+            # Load the DataFrame using the correct function
+            read_function = read_function_mapping[file_extension]
+            dataframe_content.append(f"""df = pd.{read_function.__name__}('{dataframe.file_path}')""")
+            
+            # Display the dataframe
             dataframe_content.append("st.dataframe(df, use_container_width=True)")
         
         except Exception as e:
@@ -438,9 +469,18 @@ st.components.v1.html(html_data, height=net_html_height)\n"""
         # Add title
         markdown_content.append(self._format_text(text=markdown.title, type='header', level=4, color='#2b8cbe'))
         try:
-            markdown_content.append(f"""with open('{markdown.file_path}', 'r') as markdown_file:
-    markdown_content = markdown_file.read()
-st.markdown(markdown_content, unsafe_allow_html=True)\n""")
+            # If the file path is a URL, generate code to fetch content via requests
+            if is_url(markdown.file_path): 
+                markdown_content.append(f"""
+response = requests.get('{markdown.file_path}')
+response.raise_for_status()
+markdown_content = response.text\n""")
+            else: #If it's a local file
+                markdown_content.append(f"""
+with open('{os.path.join("..", markdown.file_path)}', 'r') as markdown_file:
+    markdown_content = markdown_file.read()\n""")
+            # Code to display md content
+            markdown_content.append("st.markdown(markdown_content, unsafe_allow_html=True)\n")
         except Exception as e:
             self.report.logger.error(f"Error generating content for Markdown: {markdown.title}. Error: {str(e)}")
             raise
@@ -587,10 +627,12 @@ if prompt := st.chat_input("Enter your prompt here:"):
         # Dictionary to hold the imports for each component type
         components_imports = {
             'plot': {
-                r.PlotType.ALTAIR: ['import json', 'import altair as alt'],
-                r.PlotType.PLOTLY: ['import json']
+                r.PlotType.ALTAIR: ['import json', 'import altair as alt', 'import requests'],
+                r.PlotType.PLOTLY: ['import json', 'import requests'],
+                r.PlotType.INTERACTIVE_NETWORK: ['import requests']
             },
             'dataframe': ['import pandas as pd'],
+            'markdown': ['import requests'],
             'chatbot': ['import time', 'import json', 'import requests']
         }
 
@@ -604,6 +646,8 @@ if prompt := st.chat_input("Enter your prompt here:"):
                 component_imports.extend(components_imports['plot'][plot_type])
         elif component_type == r.ComponentType.DATAFRAME:
             component_imports.extend(components_imports['dataframe'])
+        elif component_type == r.ComponentType.MARKDOWN:
+            component_imports.extend(components_imports['markdown'])
         elif component_type == r.ComponentType.CHATBOT:
             component_imports.extend(components_imports['chatbot'])
 

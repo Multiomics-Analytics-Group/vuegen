@@ -20,7 +20,7 @@ sections:
           - title: "Top 5 species by biome (plotly)"
             component_type: "plot"
             plot_type: "plotly"
-            file_path: "example_data/MicW2Graph/top_species_plot_biome.json"
+            file_path: "https://raw.githubusercontent.com/JosefineTM/DemProt_report/main/example_data/MicW2Graph/top_species_plot_biome.json"
             caption: "Optional caption"
           - title: "Multiline plot (altair)"
             component_type: "plot"
@@ -28,13 +28,13 @@ sections:
             file_path: "example_data/altair_multilineplot.json"
           - title: "Abundance data for all studies (csv)"
             component_type: "dataframe"
-            file_path: "example_data/MicW2Graph/abundance_data_allbiomes.csv"
+            file_path: "https://raw.githubusercontent.com/JosefineTM/DemProt_report/main/example_data/MicW2Graph/abundance_data_allbiomes.csv"
             file_format: "csv"
             delimiter: ","
-          - title: "Abundance data for all studies (excel)"
+          - title: "Abundance data for all studies (xls)"
             component_type: "dataframe"
             file_path: "example_data/MicW2Graph/abundance_data_allbiomes.xls"
-            file_format: "excel"
+            file_format: "xls"
             delimiter: ","
       - title: "Sample data"
         components:
@@ -58,7 +58,7 @@ sections:
         components:
           - title: "Markdown example"
             component_type: "markdown"
-            file_path: "example_data/test_md.md"
+            file_path: "https://raw.githubusercontent.com/JosefineTM/DemProt_report/main/example_data/test_md.md"
   - title: "Microbial Association Networks"
     subsections:
       - title: "Network Visualization1"
@@ -76,10 +76,10 @@ sections:
             file_path: "example_data/MicW2Graph/man_example.csv"
       - title: "Network Visualization3"
         components:
-          - title: "Network3 (cyjs)"
+          - title: "Network3 (remote html)"
             component_type: "plot"
             plot_type: "interactive_network"
-            file_path: "example_data/MicW2Graph/man_example.cyjs"
+            file_path: "https://rawcdn.githack.com/JosefineTM/DemProt_report/3fca83b18e8b0666dff8b03fcdcf3d05d0d2541a/example_data/network1.html"
       - title: "Network Visualization4"
         components:
           - title: "Network4 (html)"

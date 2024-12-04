@@ -3,7 +3,8 @@ import subprocess
 import report as r
 from typing import List
 import networkx as nx
-from utils import create_folder
+import pandas as pd
+from utils import create_folder, is_url
 
 class QuartoReportView(r.ReportView):
     """
@@ -329,23 +330,39 @@ r.ReportType.JUPYTER: """
         str
             The generated plot code as a string.
         """
-        # Start with the common data loading code
+        # Initialize plot code with common structure
         plot_code = f"""```{{python}}
 #| label: '{plot.title}'
 #| fig-cap: ""
+"""
+        # If the file path is a URL, generate code to fetch content via requests
+        if is_url(plot.file_path): 
+            plot_code += f"""
+response = requests.get('{plot.file_path}')
+response.raise_for_status()
+plot_json = response.text\n"""
+        else:  # If it's a local file
+            plot_code += f"""
 with open('{os.path.join("..", plot.file_path)}', 'r') as plot_file:
-    plot_data = plot_file.read()
-    """
+    plot_json = plot_file.read()\n""" 
         # Add specific code for each visualization tool
         if plot.plot_type == r.PlotType.PLOTLY:
-            plot_code += """fig_plotly = pio.from_json(plot_data)
-fig_plotly.update_layout(width=950, height=500)
-    """
+            plot_code += """
+fig_plotly = pio.from_json(plot_json)
+fig_plotly.update_layout(width=950, height=500)\n"""
         elif plot.plot_type == r.PlotType.ALTAIR:
-            plot_code += """fig_altair = alt.Chart.from_json(plot_data).properties(width=900, height=400)"""
+            plot_code += """fig_altair = alt.Chart.from_json(plot_json).properties(width=900, height=400)"""
         elif plot.plot_type == r.PlotType.INTERACTIVE_NETWORK:
-            plot_code = f"""<div style="text-align: center;">
-<iframe src="{os.path.join("..", output_file)}" alt="{plot.title} plot" width="800px" height="630px"></iframe>
+            # Generate the HTML embedding for interactive networks
+            if is_url(plot.file_path) and plot.file_path.endswith('.html'):
+                iframe_src = output_file
+            else:
+                iframe_src = os.path.join("..", output_file)
+
+            # Embed the HTML file in an iframe
+            plot_code = f"""
+<div style="text-align: center;">
+<iframe src="{iframe_src}" alt="{plot.title} plot" width="800px" height="630px"></iframe>
 </div>\n"""
         return plot_code
 
@@ -365,46 +382,47 @@ fig_plotly.update_layout(width=950, height=500)
         list : List[str]
             The list of content lines for the DataFrame.
         """
-        datframe_content = []
+        dataframe_content = []
         # Add title
-        datframe_content.append(f'### {dataframe.title}')
+        dataframe_content.append(f'### {dataframe.title}')
 
         # Append header for DataFrame loading
-        datframe_content.append(f"""```{{python}}
+        dataframe_content.append(f"""```{{python}}
 #| label: '{dataframe.title}'
 #| fig-cap: ""
 """)
+        # Mapping of file extensions to read functions
+        read_function_mapping = {
+            r.DataFrameFormat.CSV.value_with_dot: pd.read_csv,
+            r.DataFrameFormat.PARQUET.value_with_dot: pd.read_parquet,
+            r.DataFrameFormat.TXT.value_with_dot: pd.read_table,
+            r.DataFrameFormat.XLS.value_with_dot: pd.read_excel
+        }
         try:
-            if dataframe.file_format == r.DataFrameFormat.CSV:
-                if dataframe.delimiter:
-                    datframe_content.append(f"""df = pd.read_csv('{os.path.join("..", dataframe.file_path)}', delimiter='{dataframe.delimiter}')""")
-                    datframe_content.extend(self._show_dataframe(dataframe, is_report_static))
-                else:
-                    datframe_content.append(f"""df = pd.read_csv('{os.path.join("..", dataframe.file_path)}')""")
-                    datframe_content.extend(self._show_dataframe(dataframe, is_report_static))
-            elif dataframe.file_format == r.DataFrameFormat.PARQUET:
-                datframe_content.append(f"""df = pd.read_parquet('{os.path.join("..", dataframe.file_path)}')""")
-                datframe_content.extend(self._show_dataframe(dataframe, is_report_static))
-            elif dataframe.file_format == r.DataFrameFormat.TXT:
-                datframe_content.append(f"""df = pd.read_csv('{os.path.join("..", dataframe.file_path)}', sep='\\t')""")
-                datframe_content.extend(self._show_dataframe(dataframe, is_report_static))
-            elif dataframe.file_format == r.DataFrameFormat.EXCEL:
-                datframe_content.append(f"""df = pd.read_excel('{os.path.join("..", dataframe.file_path)}')""")
-                datframe_content.extend(self._show_dataframe(dataframe, is_report_static))
-            else:
-                self.report.logger.error(f"Unsupported DataFrame file format: {dataframe.file_format}")
-                raise ValueError(f"Unsupported DataFrame file format: {dataframe.file_format}")
+            # Check if the file extension matches any DataFrameFormat value
+            file_extension = os.path.splitext(dataframe.file_path)[1].lower()
+            if not any(file_extension == fmt.value_with_dot for fmt in r.DataFrameFormat):
+                self.report.logger.error(f"Unsupported file extension: {file_extension}. Supported extensions are: {', '.join(fmt.value for fmt in r.DataFrameFormat)}.")
+            
+            # Build the file path (URL or local file)
+            file_path = dataframe.file_path if is_url(dataframe.file_path) else os.path.join("..", dataframe.file_path)
+
+            # Load the DataFrame using the correct function
+            read_function = read_function_mapping[file_extension]
+            dataframe_content.append(f"""df = pd.{read_function.__name__}('{file_path}')""")
+
+            # Display the dataframe
+            dataframe_content.extend(self._show_dataframe(dataframe, is_report_static))
         
         except Exception as e:
             self.report.logger.error(f"Error generating content for DataFrame: {dataframe.title}. Error: {str(e)}")
             raise
-
         # Add caption if available
         if dataframe.caption:
-            datframe_content.append(f'>{dataframe.caption}\n')
+            dataframe_content.append(f'>{dataframe.caption}\n')
 
         self.report.logger.info(f"Successfully generated content for DataFrame: '{dataframe.title}'")
-        return datframe_content
+        return dataframe_content
 
     def _generate_markdown_content(self, markdown) -> List[str]:
         """
@@ -425,13 +443,25 @@ fig_plotly.update_layout(width=950, height=500)
         markdown_content.append(f'### {markdown.title}')
         
         try:
-            markdown_content.append(f"""```{{python}}
+            # Initialize md code with common structure
+            markdown_content.append(f"""
+```{{python}}
 #| label: '{markdown.title}'
-#| fig-cap: ""
+#| fig-cap: ""\n""")
+            # If the file path is a URL, generate code to fetch content via requests
+            if is_url(markdown.file_path): 
+                markdown_content.append(f"""
+response = requests.get('{markdown.file_path}')
+response.raise_for_status()
+markdown_content = response.text\n""")
+            else: #If it's a local file
+                markdown_content.append(f"""
 with open('{os.path.join("..", markdown.file_path)}', 'r') as markdown_file:
-    markdown_content = markdown_file.read()
-display.Markdown(markdown_content)
-```\n""")
+    markdown_content = markdown_file.read()\n""")
+                
+            # Code to display md content
+            markdown_content.append(f"""display.Markdown(markdown_content)\n```\n""")
+
         except Exception as e:
             self.report.logger.error(f"Error generating content for Markdown: {markdown.title}. Error: {str(e)}")
             raise
@@ -450,7 +480,7 @@ display.Markdown(markdown_content)
         Parameters
         ----------
         image_path : str
-            Path to the image file.
+            Path to the image file or a URL to the image.
         width : int, optional
             Width of the image in pixels (default is 650).
         height : int, optional
@@ -463,8 +493,11 @@ display.Markdown(markdown_content)
         str
             The formatted image content.
         """
-        return f"""
-![{alt_text}]({os.path.join('..', image_path)}){{ width={width}px height={height}px fig-align="center"}}\n"""
+        # Check if the image path is a URL or a local file path
+        if is_url(image_path):
+            return f"""![{alt_text}]({image_path}){{ width={width}px height={height}px fig-align="center"}}\n"""
+        else:
+            return f"""![{alt_text}]({os.path.join('..', image_path)}){{ width={width}px height={height}px fig-align="center"}}\n"""
     
     def _show_dataframe(self, dataframe, is_report_static, static_dir: str = STATIC_FILES_DIR) -> List[str]:
         """
@@ -517,11 +550,11 @@ display.Markdown(markdown_content)
         # Dictionary to hold the imports for each component type
         components_imports = {
             'plot': {
-                r.PlotType.ALTAIR: ['import altair as alt'],
-                r.PlotType.PLOTLY: ['import plotly.io as pio']
+                r.PlotType.ALTAIR: ['import altair as alt', 'import requests'],
+                r.PlotType.PLOTLY: ['import plotly.io as pio', 'import requests']
             },
             'dataframe': ['import pandas as pd', 'from itables import show', 'import dataframe_image as dfi'],
-            'markdown': ['import IPython.display as display']
+            'markdown': ['import IPython.display as display', 'import requests']
         }
 
         # Iterate over sections and subsections to determine needed imports 

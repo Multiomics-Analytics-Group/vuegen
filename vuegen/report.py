@@ -11,7 +11,7 @@ import requests
 import json
 import matplotlib.pyplot as plt
 from pyvis.network import Network
-from utils import cyjs_to_networkx, pyvishtml_to_networkx
+from utils import cyjs_to_networkx, pyvishtml_to_networkx, fetch_file_stream
 
 class ReportType(StrEnum):
     STREAMLIT = auto()
@@ -58,7 +58,12 @@ class DataFrameFormat(StrEnum):
     CSV = auto()
     TXT = auto()
     PARQUET = auto()
-    EXCEL = auto()
+    XLS = auto()
+
+    @property
+    def value_with_dot(self):
+        """Return the file extension with the dot."""
+        return f".{self.name.lower()}"
 
 @dataclass
 class Component():
@@ -134,8 +139,17 @@ class Plot(Component):
         -------
         G : networkx.Graph
             A NetworkX graph object created from the specified network file.
+
+        Raises
+        ------
+        ValueError
+            If the file format is unsupported.
+        FileNotFoundError
+            If the file cannot be accessed or is missing.
+        RuntimeError
+            If there is an error while reading the network file.
         """
-        # Mapping of file extensions to NetworkX loading functions
+        # Mapping of file extensions to NetworkX and custom loading functions
         file_extension_map = {
             NetworkFormat.GML.value_with_dot: nx.read_gml,
             NetworkFormat.GRAPHML.value_with_dot: nx.read_graphml,
@@ -143,43 +157,37 @@ class Plot(Component):
             NetworkFormat.CYJS.value_with_dot: cyjs_to_networkx
         }
 
-        # Check if the file exists
-        if not os.path.isfile(self.file_path):
-            self.logger.error(f"File not found or cannot be accessed: {self.file_path}.")
-            raise FileNotFoundError(f"The file at {self.file_path} was not found or cannot be accessed.")
-
-        # Determine the file extension and check if it is supported
-        file_extension = os.path.splitext(self.file_path)[-1].lower()
-
-        # Check if the file extension matches any Enum value
-        if not any(file_extension == fmt.value_with_dot for fmt in NetworkFormat):
-            self.logger.error(f"Unsupported file extension: {file_extension}.")
-            raise ValueError(
-                f"Unsupported file extension: {file_extension}. Supported extensions are: "
-                f"{', '.join(fmt.value for fmt in NetworkFormat)}."
-            )
-
         # Handle .csv and .txt files with custom delimiters based on the text format (edgelist or adjlist)
         try:
-            # Handle HTML files (for pyvis interactive networks)
+            # Fetch the file stream (local or URL) using fetch_file_stream
+            file_stream = fetch_file_stream(self.file_path)
+            
+            # Determine the file extension and check if it is supported
+            file_extension = os.path.splitext(self.file_path)[-1].lower()
+
+            # Check if the file extension matches any Enum value
+            if not any(file_extension == fmt.value_with_dot for fmt in NetworkFormat):
+                self.logger.error(f"Unsupported file extension: {file_extension}. Supported extensions are: {', '.join(fmt.value for fmt in NetworkFormat)}.")
+            
+            # Handle HTML files for pyvis interactive networks
             if file_extension == NetworkFormat.HTML.value_with_dot:
-                G = pyvishtml_to_networkx(self.file_path)
+                G = pyvishtml_to_networkx(file_stream)
                 return (G, self.file_path)
             
-            # Handle .csv and .txt files with custom delimiters based on the text format (edgelist or adjlist)
+            # Handle CSV and TXT files with custom delimiters based on the text format (edgelist or adjlist)
             if file_extension in [NetworkFormat.CSV.value_with_dot, NetworkFormat.TXT.value_with_dot] and self.csv_network_format:
                 delimiter = ',' if file_extension == '.csv' else '\\t'
                 try:
-                    df_net = pd.read_csv(self.file_path, delimiter=delimiter)
+                    df_net = pd.read_csv(file_stream, delimiter=delimiter)
                 except pd.errors.ParserError:
                     self.logger.error(f"Error parsing CSV/TXT file {self.file_path}. Please check the file format or delimiter.")
-                    raise ValueError(f"Error parsing the file {self.file_path}. Please check the file format or delimiter.")
 
                 if self.csv_network_format == CSVNetworkFormat.EDGELIST:
                     # Assert that "source" and "target" columns are present in the DataFrame
                     required_columns = {"source", "target"}
                     if not required_columns.issubset(df_net.columns):
-                        self.logger.warning(f"CSV network file must contain columns named 'source' and 'target'. Missing columns: {', '.join(required_columns.difference(df_net.columns))}.")
+                        missing_cols = ", ".join(required_columns.difference(df_net.columns))
+                        self.logger.error(f"CSV network file must contain 'source' and 'target' columns. Missing columns: {missing_cols}.")
                     
                     # Use additional columns as edge attributes, excluding "source" and "target"
                     edge_attributes = [col for col in df_net.columns if col not in required_columns]
@@ -194,10 +202,9 @@ class Plot(Component):
                     return G
                 else:
                     self.logger.error(f"Unsupported format for CSV/TXT file: {self.csv_network_format}.")
-                    raise ValueError(f"Unsupported format for CSV/TXT file: {self.csv_network_format}")
             
             # Handle other formats using the mapping and return the NetworkX graph object from the specified network file
-            G = file_extension_map[file_extension](self.file_path)
+            G = file_extension_map[file_extension](file_stream)
             G = self._add_size_attribute(G)
             self.logger.info(f"Successfully read network from file: {self.file_path}.")
             return G

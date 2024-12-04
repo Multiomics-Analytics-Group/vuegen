@@ -4,11 +4,14 @@ import yaml
 from datetime import datetime
 import logging
 import argparse
+import requests
 import networkx as nx
 import json
+from io import StringIO
 from enum import StrEnum
 from typing import Type
 from bs4 import BeautifulSoup
+from urllib.parse import urlparse
 
 ## CHECKS
 def check_path(filepath: str) -> bool:
@@ -35,7 +38,6 @@ def check_path(filepath: str) -> bool:
 
     # Check if the path exists
     return os.path.exists(os.path.abspath(filepath))
-
 
 def assert_enum_value(enum_class: Type[StrEnum], value: str, logger: logging.Logger) -> StrEnum:
     """
@@ -66,6 +68,35 @@ def assert_enum_value(enum_class: Type[StrEnum], value: str, logger: logging.Log
         expected_values = ", ".join([str(e.value) for e in enum_class])
         logger.error(f"Invalid value for {enum_class.__name__}: '{value}'. Expected values are: {expected_values}")
         raise ValueError(f"Invalid {enum_class.__name__}: {value}. Expected values are: {expected_values}")
+
+def is_url(filepath: str) -> bool:
+    """
+    Check if the provided path is a valid URL.
+
+    Parameters
+    ----------
+    filepath : str
+        The filepath to check.
+    
+    Returns
+    -------
+    bool
+        True if the input path is a valid URL, meaning it contains both a scheme 
+        (e.g., http, https, ftp) and a network location (e.g., example.com). 
+        Returns False if either the scheme or the network location is missing or invalid.
+
+    Raises
+    ------
+    AssertionError
+        If the filepath is not a valid string.
+    """
+    # Assert that the filepath is a string
+    assert isinstance(filepath, str), f"Filepath must be a string: {filepath}"
+
+    # Parse the url and return validation
+    parsed_url = urlparse(filepath)
+    return bool(parsed_url.scheme and parsed_url.netloc)
+
 
 ## FILE_SYSTEM
 def create_folder(directory_path: str, is_nested: bool = False) -> bool:
@@ -152,6 +183,48 @@ def get_args(prog_name: str, others: dict = {}) -> argparse.Namespace:
     # Parse arguments
     return parser.parse_args()
 
+def fetch_file_stream(file_path: str) -> StringIO:
+    """
+    Fetches a file-like stream from a given file path or URL.
+
+    Parameters
+    ----------
+    file_path : str
+        The path to a local file or a URL to fetch content from.
+
+    Returns
+    -------
+    StringIO
+        A file-like object containing the content of the file or URL.
+
+    Raises
+    ------
+    AssertionError
+        If the file_path is not a valid string.
+    FileNotFoundError
+        If the file path does not exist for a local file.
+    ValueError
+        If an error occurs while fetching content from a URL.
+    """
+    # Assert that the file_path is a string
+    assert isinstance(file_path, str), f"File path must be a string: {file_path}"
+
+    if is_url(file_path):
+        # Handle URL input
+        try:
+            response = requests.get(file_path)
+            response.raise_for_status()  # Raise an exception for HTTP errors
+            return StringIO(response.text)
+        except requests.exceptions.RequestException as e:
+            raise ValueError(f"Error fetching content from URL: {file_path}. Error: {str(e)}")
+    else:
+        # Handle local file input
+        if not os.path.exists(file_path):
+            raise FileNotFoundError(f"The file at {file_path} was not found or cannot be accessed.")
+        with open(file_path, 'r') as file:
+            return StringIO(file.read())
+
+## FILE_CONVERSION
 def cyjs_to_networkx(file_path: str, name: str = "name", ident: str = "id") -> nx.Graph:
     """
     Create a NetworkX graph from a `.cyjs` file in Cytoscape format, including all attributes present in the JSON data.
@@ -181,9 +254,13 @@ def cyjs_to_networkx(file_path: str, name: str = "name", ident: str = "id") -> n
         If the data format is invalid or missing required elements, such as 'id' or 'name' for nodes.
     """
     try:
-        # Load data from the provided .cyjs file path
-        with open(file_path, 'r') as json_file:
-            data = json.load(json_file)
+        # If file_path is a file-like object (e.g., StringIO), read from it
+        if hasattr(file_path, 'read'):
+            data = json.load(file_path)
+        else:
+            # Otherwise, assume it's a file path and open the file
+            with open(file_path, 'r') as json_file:
+                data = json.load(json_file)
 
         if name == ident:
             raise nx.NetworkXError("name and ident must be different.")
@@ -256,8 +333,15 @@ def pyvishtml_to_networkx(html_file: str) -> nx.Graph:
         If the HTML file does not contain the expected network data, or if nodes lack 'id' attribute.
     """
     # Load the HTML file
-    with open(html_file, 'r', encoding='utf-8') as f:
-        soup = BeautifulSoup(f, 'html.parser')
+    if isinstance(html_file, StringIO):
+        # If the input is a StringIO, read its content
+        html_content = html_file.getvalue()
+    else:
+        # Otherwise, treat it as a file path
+        with open(html_file, 'r', encoding='utf-8') as f:
+            html_content = f.read()
+
+    soup = BeautifulSoup(html_content, 'html.parser')
 
     # Extract the network data from the JavaScript objects
     script_tag = soup.find('script', text=lambda x: x and 'nodes = new vis.DataSet' in x)
