@@ -38,8 +38,9 @@ Also, the class diagram for the project is presented below to illustrate the arc
 
 ## Execution
 ``` shell
-python vuegen/main.py
+python vuegen/main.py --config report_config_micw2graph.yaml --report_type streamlit 
 ```
+The current report types are streamlit, html, pdf, docx, odt, revealjs, pptx, and jupyter.
 
 ## Contact
 If you have comments or suggestions about this project, you can [open an issue][issues] in this repository.
