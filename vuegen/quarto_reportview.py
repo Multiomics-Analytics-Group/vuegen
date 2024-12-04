@@ -2,6 +2,7 @@ import os
 import subprocess
 import report as r
 from typing import List
+import networkx as nx
 from utils import create_folder
 
 class QuartoReportView(r.ReportView):
@@ -280,22 +281,25 @@ r.ReportType.JUPYTER: """
                 else:
                     plot_content.append(f"""fig_altair\n```\n""")
             elif plot.plot_type == r.PlotType.INTERACTIVE_NETWORK:
-                network_data = plot.read_network()
+                networkx_graph = plot.read_network()
+                if isinstance(networkx_graph, tuple):
+                    # If network_data is a tuple, separate the network and html file path
+                    networkx_graph, html_plot_file = networkx_graph
+                elif isinstance(networkx_graph, nx.Graph) and not is_report_static:
+                    # Get the pyvis object and create html
+                    pyvis_graph = plot.create_and_save_pyvis_network(networkx_graph, html_plot_file)
+                
+                # Add number of nodes and edges to the plor conetnt
+                num_nodes = networkx_graph.number_of_nodes()
+                num_edges = networkx_graph.number_of_edges()
+                plot_content.append(f'**Number of nodes:** {num_nodes}\n')
+                plot_content.append(f'**Number of edges:** {num_edges}\n')
+                
+                # Add code to generate network depending on the report type
                 if is_report_static:
-                    plot.save_netwrok_image(G, static_plot_path, "png")
+                    plot.save_netwrok_image(networkx_graph, static_plot_path, "png")
                     plot_content.append(self._generate_image_content(static_plot_path))
                 else:
-                    if isinstance(network_data, str) and network_data.endswith('.html'):
-                        # If network_data is the path to an HTML file, just visualize it
-                        html_plot_file = network_data
-                    else:
-                        num_nodes = network_data.number_of_nodes()
-                        num_edges = network_data.number_of_edges()
-                        plot_content.append(f'**Number of nodes:** {num_nodes}\n')
-                        plot_content.append(f'**Number of edges:** {num_edges}\n')
-                        # Get the Network object
-                        net = plot.create_and_save_pyvis_network(network_data, html_plot_file)
-
                     plot_content.append(self._generate_plot_code(plot, html_plot_file))
             else:
                     self.report.logger.warning(f"Unsupported plot type: {plot.plot_type}")

@@ -312,19 +312,19 @@ report_nav.run()""")
             elif plot.plot_type == r.PlotType.ALTAIR:
                 plot_content.append(self._generate_plot_code(plot))
             elif plot.plot_type == r.PlotType.INTERACTIVE_NETWORK:
-                network_data = plot.read_network()
-                if isinstance(network_data, str) and network_data.endswith('.html'):
-                    # If network_data is the path to an HTML file, just visualize it
-                    html_plot_file = network_data
-                    plot_content.append(f"""with open('{html_plot_file}', 'r') as f:
-    html_data = f.read()""")
+                networkx_graph = plot.read_network()
+                if isinstance(networkx_graph, tuple):
+                    # If network_data is a tuple, separate the network and html file path
+                    networkx_graph, html_plot_file = networkx_graph
                 else:
-                    # Otherwise, create and save a new pyvis network from the graph
+                    # Otherwise, create and save a new pyvis network from the netowrkx graph
                     html_plot_file = os.path.join(static_dir, f"{plot.title.replace(' ', '_')}.html")
-                    net = plot.create_and_save_pyvis_network(network_data, html_plot_file)
-                    num_nodes = len(net.nodes)
-                    num_edges = len(net.edges)
-                    plot_content.append(f"""with open('{html_plot_file}', 'r') as f:
+                    pyvis_graph = plot.create_and_save_pyvis_network(networkx_graph, html_plot_file)
+                
+                # Generate network code for visualization 
+                num_nodes = networkx_graph.number_of_nodes()
+                num_edges = networkx_graph.number_of_edges()
+                plot_content.append(f"""with open('{html_plot_file}', 'r') as f:
     html_data = f.read()
 st.markdown(f"<p style='text-align: center; color: black;'> <b>Number of nodes:</b> {num_nodes} </p>", unsafe_allow_html=True)
 st.markdown(f"<p style='text-align: center; color: black;'> <b>Number of relationships:</b> {num_edges} </p>", unsafe_allow_html=True)""")

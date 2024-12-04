@@ -8,6 +8,7 @@ import networkx as nx
 import json
 from enum import StrEnum
 from typing import Type
+from bs4 import BeautifulSoup
 
 ## CHECKS
 def check_path(filepath: str) -> bool:
@@ -151,8 +152,7 @@ def get_args(prog_name: str, others: dict = {}) -> argparse.Namespace:
     # Parse arguments
     return parser.parse_args()
 
-
-def cyjs2graph(file_path: str, name: str = "name", ident: str = "id") -> nx.Graph:
+def cyjs_to_networkx(file_path: str, name: str = "name", ident: str = "id") -> nx.Graph:
     """
     Create a NetworkX graph from a `.cyjs` file in Cytoscape format, including all attributes present in the JSON data.
     This function is modified from the `cytoscape_graph` networkx function to handle the 'value' key explicitly and to include
@@ -170,7 +170,7 @@ def cyjs2graph(file_path: str, name: str = "name", ident: str = "id") -> nx.Grap
 
     Returns
     -------
-    G : networkx.Graph
+    graph : networkx.Graph
         The graph created from the Cytoscape JSON data, including all node and edge attributes.
 
     Raises
@@ -236,6 +236,69 @@ def cyjs2graph(file_path: str, name: str = "name", ident: str = "id") -> nx.Grap
     except KeyError as e:
         raise ValueError(f"Missing required key in data: {e}")
 
+def pyvishtml_to_networkx(html_file: str) -> nx.Graph:
+    """
+    Converts a PyVis HTML file to a NetworkX graph.
+
+    Parameters
+    ----------
+    html_file : str
+        Path to the PyVis HTML file.
+
+    Returns
+    -------
+    graph : nx.Graph
+        NetworkX graph object reconstructed from the PyVis network data.
+
+    Raises
+    ------
+    ValueError
+        If the HTML file does not contain the expected network data, or if nodes lack 'id' attribute.
+    """
+    # Load the HTML file
+    with open(html_file, 'r', encoding='utf-8') as f:
+        soup = BeautifulSoup(f, 'html.parser')
+
+    # Extract the network data from the JavaScript objects
+    script_tag = soup.find('script', text=lambda x: x and 'nodes = new vis.DataSet' in x)
+    if not script_tag:
+        raise ValueError("Could not find network data in the provided HTML file.")
+    
+    # Parse the nodes and edges
+    script_text = script_tag.string
+    nodes_json = json.loads(script_text.split('nodes = new vis.DataSet(')[1].split(');')[0])
+    edges_json = json.loads(script_text.split('edges = new vis.DataSet(')[1].split(');')[0])
+
+    # Create a NetworkX graph
+    graph = nx.Graph()
+
+    # Add nodes
+    for node in nodes_json:
+        node_id = node.pop('id', None)
+        if node_id is None:
+            raise ValueError("Node is missing an 'id' attribute.")
+        
+        graph.add_node(node_id, **node)
+
+    # Add edges
+    for edge in edges_json:
+        source = edge.pop('from')
+        target = edge.pop('to')
+        graph.add_edge(source, target, **edge)
+
+    # Relabel nodes to use 'name' as the identifier, or 'id' if 'name' is unavailable
+    mapping = {}
+    for node_id, data in graph.nodes(data=True):
+        name = data.get('name')
+        if name:
+            mapping[node_id] = name
+        else:
+            # Fallback to the original ID if no 'name' exists
+            mapping[node_id] = node_id
+    
+    graph = nx.relabel_nodes(graph, mapping)
+
+    return graph
 
 ## CONFIG
 def load_yaml_config(file_path: str) -> dict:

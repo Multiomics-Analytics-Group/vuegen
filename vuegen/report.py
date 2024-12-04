@@ -11,7 +11,7 @@ import requests
 import json
 import matplotlib.pyplot as plt
 from pyvis.network import Network
-from utils import cyjs2graph
+from utils import cyjs_to_networkx, pyvishtml_to_networkx
 
 class ReportType(StrEnum):
     STREAMLIT = auto()
@@ -140,7 +140,7 @@ class Plot(Component):
             NetworkFormat.GML.value_with_dot: nx.read_gml,
             NetworkFormat.GRAPHML.value_with_dot: nx.read_graphml,
             NetworkFormat.GEXF.value_with_dot: nx.read_gexf,
-            NetworkFormat.CYJS.value_with_dot: cyjs2graph
+            NetworkFormat.CYJS.value_with_dot: cyjs_to_networkx
         }
 
         # Check if the file exists
@@ -163,7 +163,8 @@ class Plot(Component):
         try:
             # Handle HTML files (for pyvis interactive networks)
             if file_extension == NetworkFormat.HTML.value_with_dot:
-                return self.file_path
+                G = pyvishtml_to_networkx(self.file_path)
+                return (G, self.file_path)
             
             # Handle .csv and .txt files with custom delimiters based on the text format (edgelist or adjlist)
             if file_extension in [NetworkFormat.CSV.value_with_dot, NetworkFormat.TXT.value_with_dot] and self.csv_network_format:
@@ -232,7 +233,7 @@ class Plot(Component):
         
         try:
             # Draw the graph and save it as an image file
-            nx.draw(G, with_labels=True)
+            nx.draw(G, with_labels=False)
             plt.savefig(output_file, format=format, dpi=dpi)
             plt.clf()
             self.logger.info(f"Network image saved successfully at: {output_file}.")
@@ -275,7 +276,6 @@ class Plot(Component):
                 node_data = G.nodes[node_id]
                 node['label'] = node_data.get('name', node_id)
                 node['font'] = {'size': 12}
-                # node_data.get('name', node_id)
                 node['borderWidth'] = 2
                 node['borderWidthSelected'] = 2.5
 
