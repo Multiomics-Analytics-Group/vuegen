@@ -1,6 +1,6 @@
 from streamlit_reportview import StreamlitReportView
 from quarto_reportview import QuartoReportView
-from metadata_manager import MetadataManager
+from config_manager import ConfigManager
 from utils import assert_enum_value
 from report import ReportType
 import logging
@@ -23,8 +23,8 @@ def get_report(config: dict, report_type: str, logger: logging.Logger) -> None:
     ValueError
         If an unsupported report engine, report type, or report format are provided.
     """
-    # Load report object and metadata from the YAML file
-    yaml_manager = MetadataManager(logger)
+    # Load report object and metadata from the YAML config file
+    yaml_manager = ConfigManager(logger)
     report, report_metadata = yaml_manager.initialize_report(config)
 
     # Validate and convert the report type to its enum value

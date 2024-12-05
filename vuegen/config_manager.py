@@ -1,13 +1,13 @@
 import report as r
 from utils import get_logger, assert_enum_value
 
-class MetadataManager:
+class ConfigManager:
     """
-    Class for handling metadata of reports from YAML files and creating report objects.
+    Class for handling metadata of reports from YAML config file and creating report objects.
     """
     def __init__(self, logger=None):
         """
-        Initializes the MetadataManager with a logger.
+        Initializes the ConfigManager with a logger.
 
         Parameters
         ----------

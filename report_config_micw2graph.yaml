@@ -20,7 +20,7 @@ sections:
           - title: "Top 5 species by biome (plotly)"
             component_type: "plot"
             plot_type: "plotly"
-            file_path: "https://raw.githubusercontent.com/JosefineTM/DemProt_report/main/example_data/MicW2Graph/top_species_plot_biome.json"
+            file_path: "https://raw.githubusercontent.com/sayalaruano/report_generator_st_cloud_test/main/example_data/MicW2Graph/top_species_plot_biome.json"
             caption: "Optional caption"
           - title: "Multiline plot (altair)"
             component_type: "plot"
@@ -28,7 +28,7 @@ sections:
             file_path: "example_data/altair_multilineplot.json"
           - title: "Abundance data for all studies (csv)"
             component_type: "dataframe"
-            file_path: "https://raw.githubusercontent.com/JosefineTM/DemProt_report/main/example_data/MicW2Graph/abundance_data_allbiomes.csv"
+            file_path: "https://raw.githubusercontent.com/sayalaruano/report_generator_st_cloud_test/main/example_data/MicW2Graph/abundance_data_allbiomes.csv"
             file_format: "csv"
             delimiter: ","
           - title: "Abundance data for all studies (xls)"
@@ -58,7 +58,7 @@ sections:
         components:
           - title: "Markdown example"
             component_type: "markdown"
-            file_path: "https://raw.githubusercontent.com/JosefineTM/DemProt_report/main/example_data/test_md.md"
+            file_path: "https://raw.githubusercontent.com/sayalaruano/report_generator_st_cloud_test/main/example_data/test_md.md"
   - title: "Microbial Association Networks"
     subsections:
       - title: "Network Visualization1"
@@ -79,7 +79,7 @@ sections:
           - title: "Network3 (remote html)"
             component_type: "plot"
             plot_type: "interactive_network"
-            file_path: "https://rawcdn.githack.com/JosefineTM/DemProt_report/3fca83b18e8b0666dff8b03fcdcf3d05d0d2541a/example_data/network1.html"
+            file_path: "https://rawcdn.githack.com/sayalaruano/report_generator_st_cloud_test/62a9ceec2281c54b55e99017f2bddc954e7db311/example_data/network1.html"
       - title: "Network Visualization4"
         components:
           - title: "Network4 (html)"
