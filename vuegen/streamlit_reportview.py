@@ -47,9 +47,15 @@ class StreamlitReportView(r.WebAppReportView):
             self.report.logger.debug("Processing app navigation code.")
             # Define the Streamlit imports and report manager content
             report_manag_content = []
-            report_manag_content.append(f"""import streamlit as st\n
+            if self.report.logo: 
+                report_manag_content.append(
+                    f"""import streamlit as st\n
 st.set_page_config(layout="wide", page_title="{self.report.title}", page_icon="{self.report.logo}")
 st.logo("{self.report.logo}")""")
+            else:
+                report_manag_content.append(
+                    f"""import streamlit as st\n
+st.set_page_config(layout="wide", page_title="{self.report.title}")""")
             report_manag_content.append(self._format_text(text=self.report.title, type = 'header', level=1, color='#023858'))
 
             # Initialize a dictionary to store the navigation structure

@@ -3,7 +3,7 @@ from utils import get_logger, load_yaml_config, get_args
 
 if __name__ == '__main__':
     # Parse command-line arguments
-    args = get_args(prog_name="Vuegen")
+    args = get_args(prog_name="VueGen")
     config_path = args.config
     report_type = args.report_type
     
