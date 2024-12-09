@@ -1,5 +1,4 @@
 import os
-import yaml
 from pathlib import Path
 import report as r
 from typing import Dict, List, Union, Tuple
@@ -195,7 +194,7 @@ def generate_section_data(section_folder: Path, base_folder: Path) -> Dict[str, 
 
     for subsection_folder in sorted_subsections:
         if subsection_folder.is_dir():
-            section_data["subsections"].append(generate_subsection_data(subsection_folder, base_folder))
+            section_data["subsections"].append(generate_subsection_data(subsection_folder))
 
     return section_data
 
@@ -262,33 +261,3 @@ def generate_yaml_structure(folder: str) -> Tuple[Dict[str, Union[str, List[Dict
             yaml_structure["sections"].append(generate_section_data(section_folder, folder_path))
 
     return yaml_structure, folder_path
-
-def write_yaml_to_file(yaml_data: Dict, folder_path: Path) -> None:
-    """
-    Writes the generated YAML structure to a file.
-
-    Parameters
-    ----------
-    yaml_data : Dict
-        The YAML data to write.
-    folder_path : Path
-        The path where the YAML file should be saved.
-
-    Returns
-    -------
-    None
-    """
-    assert isinstance(yaml_data, dict), "YAML data must be a dictionary."
-    
-    # Generate the output YAML file path based on the folder name
-    output_yaml = folder_path / (folder_path.name + "_config.yaml")
-
-    # Ensure the directory exists (but don't create a new folder)
-    if not folder_path.exists():
-        raise FileNotFoundError(f"The directory {folder_path} does not exist.")
-
-    # Now write the YAML file
-    with open(output_yaml, "w") as yaml_file:
-        yaml.dump(yaml_data, yaml_file, default_flow_style=False, sort_keys=False)
-
-    print(f"YAML file has been written to {output_yaml}")

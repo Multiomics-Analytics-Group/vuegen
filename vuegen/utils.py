@@ -11,6 +11,7 @@ from io import StringIO
 from enum import StrEnum
 from typing import Type
 from bs4 import BeautifulSoup
+from pathlib import Path
 from urllib.parse import urlparse
 
 ## CHECKS
@@ -418,6 +419,34 @@ def load_yaml_config(file_path: str) -> dict:
             raise ValueError(f"Error parsing YAML file: {exc}")
 
     return config
+
+def write_yaml_config(yaml_data: dict, directory_path: Path) -> None:
+    """
+    Writes the generated YAML structure to a file.
+
+    Parameters
+    ----------
+    yaml_data : dict
+        The YAML data to write.
+    directory_path : Path
+        The path where the YAML file should be saved.
+
+    Returns
+    -------
+    None
+    """
+    assert isinstance(yaml_data, dict), "YAML data must be a dictionary."
+    
+    # Generate the output YAML file path based on the folder name
+    output_yaml = directory_path / (directory_path.name + "_config.yaml")
+
+    # Ensure the directory exists (but don't create a new folder)
+    if not directory_path.exists():
+        raise FileNotFoundError(f"The directory {directory_path} does not exist.")
+
+    # Now write the YAML file
+    with open(output_yaml, "w") as yaml_file:
+        yaml.dump(yaml_data, yaml_file, default_flow_style=False, sort_keys=False)
 
 ## LOGGING
 def get_basename(fname: None | str = None) -> str:
