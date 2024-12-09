@@ -1,6 +1,7 @@
 import os
 import yaml
 from pathlib import Path
+import report as r
 from typing import Dict, List, Union, Tuple
 
 
@@ -25,7 +26,7 @@ def infer_title_from_file_dir_name(filename: str) -> str:
     return title.replace("_", " ").title()
 
 
-def infer_component_metadata(file: Path) -> Dict[str, Union[str, None]]:
+def infer_component_metadata(file: Path, logger=None) -> Dict[str, Union[str, None]]:
     """
     Infers metadata for a file, including component type, plot type, and additional fields.
 
@@ -33,6 +34,8 @@ def infer_component_metadata(file: Path) -> Dict[str, Union[str, None]]:
     ----------
     file : Path
         The file to analyze.
+    logger : optional
+        Logger to record errors and warnings.
 
     Returns
     -------
@@ -42,42 +45,56 @@ def infer_component_metadata(file: Path) -> Dict[str, Union[str, None]]:
     ext = file.suffix.lower()
     metadata = {}
 
-    # Infer component type
-    if ext in [".png", ".jpg", ".jpeg", ".gif", ".html", ".graphml", ".gml", ".gexf", ".cyjs"]:
-        metadata["component_type"] = "plot"
-        if ext in [".png", ".jpg", ".jpeg", ".gif"]:
-            metadata["plot_type"] = "static"
-        else:
-            metadata["plot_type"] = "interactive_network"
-    elif ext == ".json":
-        metadata["component_type"] = "plot"
-        if "plotly" in file.stem.lower():
-            metadata["plot_type"] = "plotly"
-        elif "altair" in file.stem.lower():
-            metadata["plot_type"] = "altair"
-        else:
-            metadata["plot_type"] = "unknown"
-    elif ext in [".csv", ".txt"]:
+    # Infer component type and metadata
+    if ext in [r.DataFrameFormat.CSV.value_with_dot, r.DataFrameFormat.TXT.value_with_dot]:
         # Check for network-related keywords
         if "edgelist" in file.stem.lower():
-            metadata["component_type"] = "plot"
-            metadata["plot_type"] = "interactive_network"
-            metadata["csv_network_format"] = "edgelist"
+            metadata["component_type"] = r.ComponentType.PLOT.value
+            metadata["plot_type"] = r.PlotType.INTERACTIVE_NETWORK.value
+            metadata["csv_network_format"] = r.CSVNetworkFormat.EDGELIST.value
         elif "adjlist" in file.stem.lower():
-            metadata["component_type"] = "plot"
-            metadata["plot_type"] = "interactive_network"
-            metadata["csv_network_format"] = "adjlist"
+            metadata["component_type"] = r.ComponentType.PLOT.value
+            metadata["plot_type"] = r.PlotType.INTERACTIVE_NETWORK.value
+            metadata["csv_network_format"] = r.CSVNetworkFormat.ADJLIST.value
         else:
-            metadata["component_type"] = "dataframe"
-            metadata["file_format"] = ext.lstrip(".")
-            metadata["delimiter"] = "," if ext == ".csv" else "\\t"
-    elif ext in [".xls", ".xlsx", ".parquet"]:
-        metadata["component_type"] = "dataframe"
-        metadata["file_format"] = ext.lstrip(".")
+            metadata["component_type"] = r.ComponentType.DATAFRAME.value
+            metadata["file_format"] = r.DataFrameFormat.CSV.value if ext == r.DataFrameFormat.CSV.value_with_dot else r.DataFrameFormat.TXT.value
+            metadata["delimiter"] = "," if ext == r.DataFrameFormat.CSV.value_with_dot else "\\t"
+    elif ext in [fmt.value_with_dot for fmt in r.DataFrameFormat if fmt not in [r.DataFrameFormat.CSV, r.DataFrameFormat.TXT]]:
+        metadata["component_type"] = r.ComponentType.DATAFRAME.value
+        metadata["file_format"] = next(fmt.value for fmt in r.DataFrameFormat if fmt.value_with_dot == ext)
+    elif ext in [fmt.value_with_dot for fmt in r.NetworkFormat]:
+        metadata["component_type"] = r.ComponentType.PLOT.value
+        if ext in [
+            r.NetworkFormat.PNG.value_with_dot,
+            r.NetworkFormat.JPG.value_with_dot,
+            r.NetworkFormat.JPEG.value_with_dot,
+            r.NetworkFormat.SVG.value_with_dot,
+        ]:
+            metadata["plot_type"] = r.PlotType.STATIC.value
+        else:
+            metadata["plot_type"] = r.PlotType.INTERACTIVE_NETWORK.value
+    elif ext == ".json":
+        metadata["component_type"] = r.ComponentType.PLOT.value
+        if "plotly" in file.stem.lower():
+            metadata["plot_type"] = r.PlotType.PLOTLY.value
+        elif "altair" in file.stem.lower():
+            metadata["plot_type"] = r.PlotType.ALTAIR.value
+        else:
+            metadata["plot_type"] = "unknown"
     elif ext == ".md":
-        metadata["component_type"] = "markdown"
+        metadata["component_type"] = r.ComponentType.MARKDOWN.value
     else:
-        metadata["component_type"] = "unknown"
+        # Unified error for unsupported extensions
+        error_msg = (
+            f"Unsupported file extension: {ext}. "
+            f"Supported extensions include:\n"
+            f"  - Network formats: {', '.join(fmt.value_with_dot for fmt in r.NetworkFormat)}\n"
+            f"  - DataFrame formats: {', '.join(fmt.value_with_dot for fmt in r.DataFrameFormat)}"
+        )
+        if logger:
+            logger.error(error_msg)
+        raise ValueError(error_msg)
 
     return metadata
 

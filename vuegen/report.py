@@ -44,6 +44,10 @@ class NetworkFormat(StrEnum):
     TXT = auto()
     CYJS = auto()
     HTML = auto()
+    PNG = auto()
+    JPG = auto()
+    JPEG = auto()
+    SVG = auto()
 
     @property
     def value_with_dot(self):
