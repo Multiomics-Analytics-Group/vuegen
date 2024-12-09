@@ -127,5 +127,5 @@ UML_diagrams/
 Graphical_abstract/
 docs/presentations/
 test.py
-vuegen/yaml_generator.py
-MicW2Graph_config.yaml
+vuegen/config_generator.py
+example_data/MicW2Graph/MicW2Graph_config.yaml

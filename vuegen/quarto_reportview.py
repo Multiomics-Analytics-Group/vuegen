@@ -475,7 +475,7 @@ with open('{os.path.join("..", markdown.file_path)}', 'r') as markdown_file:
 
     def _generate_image_content(self, image_path: str, alt_text: str = "", width: int = 650, height: int = 400) -> str:
         """
-        Adds an image to the content list in a centered format with a specified width.
+        Adds an image to the content list in an HTML format with a specified width and height.
 
         Parameters
         ----------
@@ -484,20 +484,25 @@ with open('{os.path.join("..", markdown.file_path)}', 'r') as markdown_file:
         width : int, optional
             Width of the image in pixels (default is 650).
         height : int, optional
-            Height of the image in pixels (default is 500).
+            Height of the image in pixels (default is 400).
         alt_text : str, optional
             Alternative text for the image (default is an empty string).
         
         Returns
         -------
         str
-            The formatted image content.
+            The formatted HTML image content.
         """
-        # Check if the image path is a URL or a local file path
         if is_url(image_path):
-            return f"""![{alt_text}]({image_path}){{ width={width}px height={height}px fig-align="center"}}\n"""
+            src = image_path
         else:
-            return f"""![{alt_text}]({os.path.join('..', image_path)}){{ width={width}px height={height}px fig-align="center"}}\n"""
+            src = os.path.abspath(image_path)
+
+        # Return the HTML content
+        return f"""
+<div style="text-align: center;">
+<img src="{src}" alt="{alt_text}" width="{width}" height="{height}" />
+</div>\n"""
     
     def _show_dataframe(self, dataframe, is_report_static, static_dir: str = STATIC_FILES_DIR) -> List[str]:
         """
