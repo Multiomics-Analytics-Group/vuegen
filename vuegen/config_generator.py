@@ -57,13 +57,23 @@ def infer_component_metadata(file: Path) -> Dict[str, Union[str, None]]:
             metadata["plot_type"] = "altair"
         else:
             metadata["plot_type"] = "unknown"
-    elif ext in [".csv", ".txt", ".xls", ".xlsx", ".parquet"]:
+    elif ext in [".csv", ".txt"]:
+        # Check for network-related keywords
+        if "edgelist" in file.stem.lower():
+            metadata["component_type"] = "plot"
+            metadata["plot_type"] = "interactive_network"
+            metadata["csv_network_format"] = "edgelist"
+        elif "adjlist" in file.stem.lower():
+            metadata["component_type"] = "plot"
+            metadata["plot_type"] = "interactive_network"
+            metadata["csv_network_format"] = "adjlist"
+        else:
+            metadata["component_type"] = "dataframe"
+            metadata["file_format"] = ext.lstrip(".")
+            metadata["delimiter"] = "," if ext == ".csv" else "\\t"
+    elif ext in [".xls", ".xlsx", ".parquet"]:
         metadata["component_type"] = "dataframe"
         metadata["file_format"] = ext.lstrip(".")
-        if ext == ".csv":
-            metadata["delimiter"] = ","
-        elif ext == ".txt":
-            metadata["delimiter"] = "\\t"
     elif ext == ".md":
         metadata["component_type"] = "markdown"
     else:
@@ -90,8 +100,9 @@ def sort_items_by_number_prefix(items: List[Path]) -> List[Path]:
         if parts[0].isdigit():
             numeric_prefix = int(parts[0])
         else:
-            numeric_prefix = float('inf')  # Non-numeric prefixes go to the end
-        return numeric_prefix, item.name.lower()  # Use `.lower()` for consistent sorting
+            # Non-numeric prefixes go to the end
+            numeric_prefix = float('inf')  
+        return numeric_prefix, item.name.lower()  
 
     return sorted(items, key=get_sort_key)
 

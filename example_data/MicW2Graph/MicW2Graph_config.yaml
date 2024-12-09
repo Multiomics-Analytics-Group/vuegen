@@ -26,7 +26,7 @@ sections:
       component_type: dataframe
       file_format: csv
       delimiter: ','
-    - title: Abundance Data Allbiomes xls
+    - title: Abundance Data Allbiomes
       file_path: /Users/asaru/Documents/DTU/MoNA/vuegen/example_data/MicW2Graph/1_Exploratory_Data_Analysis/1_Abundance_data/4_abundance_data_allbiomes.xls
       description: ''
       component_type: dataframe
@@ -54,7 +54,7 @@ sections:
       description: ''
       component_type: dataframe
       file_format: parquet
-    - title: Sample Info Allbiomes txt
+    - title: Sample Info Allbiomes
       file_path: /Users/asaru/Documents/DTU/MoNA/vuegen/example_data/MicW2Graph/1_Exploratory_Data_Analysis/2_Sample_data/5_sample_info_allbiomes.txt
       description: ''
       component_type: dataframe
@@ -81,12 +81,12 @@ sections:
   - title: Network Visualization2
     description: ''
     components:
-    - title: Man Example
-      file_path: /Users/asaru/Documents/DTU/MoNA/vuegen/example_data/MicW2Graph/2_Microbial_Association_Networks/2_Network_visualization2/1_man_example.csv
+    - title: Man Example Edgelist
+      file_path: /Users/asaru/Documents/DTU/MoNA/vuegen/example_data/MicW2Graph/2_Microbial_Association_Networks/2_Network_visualization2/1_man_example_edgelist.csv
       description: ''
-      component_type: dataframe
-      file_format: csv
-      delimiter: ','
+      component_type: plot
+      plot_type: interactive_network
+      csv_network_format: edgelist
   - title: Network Visualization3
     description: ''
     components:
