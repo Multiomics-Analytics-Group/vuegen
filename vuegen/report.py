@@ -63,6 +63,7 @@ class DataFrameFormat(StrEnum):
     TXT = auto()
     PARQUET = auto()
     XLS = auto()
+    XLSX = auto()
 
     @property
     def value_with_dot(self):

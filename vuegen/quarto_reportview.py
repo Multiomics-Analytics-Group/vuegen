@@ -396,7 +396,8 @@ fig_plotly.update_layout(width=950, height=500)\n"""
             r.DataFrameFormat.CSV.value_with_dot: pd.read_csv,
             r.DataFrameFormat.PARQUET.value_with_dot: pd.read_parquet,
             r.DataFrameFormat.TXT.value_with_dot: pd.read_table,
-            r.DataFrameFormat.XLS.value_with_dot: pd.read_excel
+            r.DataFrameFormat.XLS.value_with_dot: pd.read_excel,
+            r.DataFrameFormat.XLSX.value_with_dot: pd.read_excel
         }
         try:
             # Check if the file extension matches any DataFrameFormat value

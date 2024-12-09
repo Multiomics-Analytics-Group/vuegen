@@ -429,7 +429,8 @@ st.components.v1.html(html_data, height=net_html_height)\n"""
             r.DataFrameFormat.CSV.value_with_dot: pd.read_csv,
             r.DataFrameFormat.PARQUET.value_with_dot: pd.read_parquet,
             r.DataFrameFormat.TXT.value_with_dot: pd.read_table,
-            r.DataFrameFormat.XLS.value_with_dot: pd.read_excel
+            r.DataFrameFormat.XLS.value_with_dot: pd.read_excel,
+            r.DataFrameFormat.XLSX.value_with_dot: pd.read_excel
         }
 
         try:

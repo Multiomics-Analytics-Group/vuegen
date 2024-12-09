@@ -26,7 +26,7 @@ def infer_title_from_file_dir_name(filename: str) -> str:
     return title.replace("_", " ").title()
 
 
-def infer_component_metadata(file: Path, logger=None) -> Dict[str, Union[str, None]]:
+def infer_component_metadata(file: Path, logger=None) -> Dict[str, str]:
     """
     Infers metadata for a file, including component type, plot type, and additional fields.
 
@@ -39,7 +39,7 @@ def infer_component_metadata(file: Path, logger=None) -> Dict[str, Union[str, No
 
     Returns
     -------
-    Dict[str, Union[str, None]]
+    Dict[str,str]
         A dictionary containing inferred metadata.
     """
     ext = file.suffix.lower()
@@ -123,7 +123,7 @@ def sort_items_by_number_prefix(items: List[Path]) -> List[Path]:
 
     return sorted(items, key=get_sort_key)
 
-def generate_subsection_data(subsection_folder: Path, base_folder: Path) -> Dict[str, Union[str, List[Dict]]]:
+def generate_subsection_data(subsection_folder: Path) -> Dict[str, Union[str, List[Dict]]]:
     """
     Generates data for a single subsection.
 
@@ -131,8 +131,6 @@ def generate_subsection_data(subsection_folder: Path, base_folder: Path) -> Dict
     ----------
     subsection_folder : Path
         Path to the subsection folder.
-    base_folder : Path
-        The base folder path to ensure proper path calculation.
 
     Returns
     -------
