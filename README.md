@@ -45,7 +45,7 @@ pip install -e . # in case you pwd is in the vuegen directory
 ## Execution
 
 ```bash
-python vuegen/main.py --config report_config_micw2graph.yaml --report_type streamlit 
+python vuegen/main.py --config example_data/MicW2Graph/report_config_micw2graph.yaml --report_type streamlit
 ```
 
 The current report types are streamlit, html, pdf, docx, odt, revealjs, pptx, and jupyter.

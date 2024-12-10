@@ -34,3 +34,10 @@ ipykernel = "^6.29.5"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+# https://stackoverflow.com/a/60990574/9684872
+[tool.poetry.extras]
+streamlit = ["streamlit"]
+
+# [project.scripts]
+# my-script = "vuegen.main:main"
