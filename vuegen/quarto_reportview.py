@@ -332,7 +332,7 @@ r.ReportType.JUPYTER: """
         """
         # Initialize plot code with common structure
         plot_code = f"""```{{python}}
-#| label: '{plot.title}'
+#| label: '{plot.title} {plot.id}'
 #| fig-cap: ""
 """
         # If the file path is a URL, generate code to fetch content via requests
@@ -388,7 +388,7 @@ fig_plotly.update_layout(width=950, height=500)\n"""
 
         # Append header for DataFrame loading
         dataframe_content.append(f"""```{{python}}
-#| label: '{dataframe.title}'
+#| label: '{dataframe.title} {dataframe.id}'
 #| fig-cap: ""
 """)
         # Mapping of file extensions to read functions
@@ -447,7 +447,7 @@ fig_plotly.update_layout(width=950, height=500)\n"""
             # Initialize md code with common structure
             markdown_content.append(f"""
 ```{{python}}
-#| label: '{markdown.title}'
+#| label: '{markdown.title} {markdown.id}'
 #| fig-cap: ""\n""")
             # If the file path is a URL, generate code to fetch content via requests
             if is_url(markdown.file_path): 
