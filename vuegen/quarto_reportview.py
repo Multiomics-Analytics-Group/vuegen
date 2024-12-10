@@ -120,6 +120,9 @@ class QuartoReportView(r.ReportView):
         except subprocess.CalledProcessError as e:
             self.report.logger.error(f"Error running '{self.report.title}' {self.report_type} report: {str(e)}")
             raise
+        except FileNotFoundError as e:
+            self.report.logger.error(f"Quarto is not installed. Please install Quarto to run the report: {str(e)}")
+            raise
 
     def _create_yaml_header(self) -> str:
         """
