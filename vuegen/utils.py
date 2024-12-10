@@ -1,17 +1,26 @@
+from __future__ import annotations
+
+import argparse
+import json
+import logging
 import os
 import sys
-import yaml
 from datetime import datetime
-import logging
-import argparse
-import requests
-import networkx as nx
-import json
+
+try:
+    from enum import StrEnum
+except ImportError:
+    from strenum import StrEnum
+
 from io import StringIO
-from enum import StrEnum
 from typing import Type
-from bs4 import BeautifulSoup
 from urllib.parse import urlparse
+
+import networkx as nx
+import requests
+import yaml
+from bs4 import BeautifulSoup
+
 
 ## CHECKS
 def check_path(filepath: str) -> bool:

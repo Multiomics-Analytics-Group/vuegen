@@ -3,7 +3,13 @@ import logging
 import os
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from enum import StrEnum, auto
+from enum import auto
+
+try:
+    from enum import StrEnum
+except ImportError:
+    from strenum import StrEnum
+
 from typing import ClassVar, List, Optional
 
 import matplotlib.pyplot as plt
