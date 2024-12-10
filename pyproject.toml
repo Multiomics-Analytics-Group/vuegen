@@ -1,10 +1,11 @@
 [tool.poetry]
-name = "report-generator"
+name = "vuegen"
 version = "0.1.0"
 description = "Module to generate automatic web interface reports with visualizations"
 authors = ["MoNA group"]
 license = "MIT"
 readme = "README.md"
+repository = "https://github.com/Multiomics-Analytics-Group/vuegen"
 
 [tool.poetry.dependencies]
 python = ">=3.9,<3.9.7 || >3.9.7,<4.0"

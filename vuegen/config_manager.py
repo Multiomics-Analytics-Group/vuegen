@@ -1,5 +1,6 @@
-import report as r
-from utils import get_logger, assert_enum_value
+from . import report as r
+from .utils import assert_enum_value, get_logger
+
 
 class ConfigManager:
     """

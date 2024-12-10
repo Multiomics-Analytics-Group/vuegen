@@ -1,10 +1,13 @@
 import os
 import subprocess
-import report as r
 from typing import List
+
 import networkx as nx
 import pandas as pd
-from utils import create_folder, is_url
+
+from . import report as r
+from .utils import create_folder, is_url
+
 
 class QuartoReportView(r.ReportView):
     """

@@ -34,12 +34,20 @@ Also, the class diagram for the project is presented below to illustrate the arc
 </p>
 
 ## Installation
-......
+
+You can install the package for development from this repository by running the following command:
+
+```bash
+pip install -e path/to/vuegen # specify location 
+pip install -e . # in case you pwd is in the vuegen directory
+```
 
 ## Execution
-``` shell
+
+```bash
 python vuegen/main.py --config report_config_micw2graph.yaml --report_type streamlit 
 ```
+
 The current report types are streamlit, html, pdf, docx, odt, revealjs, pptx, and jupyter.
 
 ## Contact
