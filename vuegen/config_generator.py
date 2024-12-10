@@ -3,107 +3,105 @@ from pathlib import Path
 import report as r
 from typing import Dict, List, Union, Tuple
 
-
-def infer_title_from_file_dir_name(filename: str) -> str:
+def _create_title_fromdir(file_dirname: str) -> str:
     """
-    Infers a human-readable title from a filename, removing leading numeric prefixes.
+    Infers title from a file or directory, removing leading numeric prefixes.
 
     Parameters
     ----------
-    filename : str
-        The filename to infer the title from.
+    file_dirname : str
+        The file or directory name to infer the title from.
 
     Returns
     -------
     str
-        A human-readable title generated from the filename.
+        A title generated from the file or directory name.
     """
     # Remove leading numbers and underscores if they exist
-    name = os.path.splitext(filename)[0]
+    name = os.path.splitext(file_dirname)[0]
     parts = name.split("_", 1)
     title = parts[1] if parts[0].isdigit() and len(parts) > 1 else name
     return title.replace("_", " ").title()
 
-
-def infer_component_metadata(file: Path, logger=None) -> Dict[str, str]:
+def _create_component_config_fromfile(file_path: Path) -> Dict[str, str]:
     """
-    Infers metadata for a file, including component type, plot type, and additional fields.
+    Infers a component config from a file, including component type, plot type, and additional fields.
 
     Parameters
     ----------
-    file : Path
-        The file to analyze.
-    logger : optional
-        Logger to record errors and warnings.
+    file_path : Path
+        The file path to analyze.
 
     Returns
     -------
-    Dict[str,str]
-        A dictionary containing inferred metadata.
+    component_config : Dict[str, str]
+        A dictionary containing inferred component configuration.
     """
-    ext = file.suffix.lower()
-    metadata = {}
+    file_ext = file_path.suffix.lower()
+    component_config = {}
 
-    # Infer component type and metadata
-    if ext in [r.DataFrameFormat.CSV.value_with_dot, r.DataFrameFormat.TXT.value_with_dot]:
-        # Check for network-related keywords
-        if "edgelist" in file.stem.lower():
-            metadata["component_type"] = r.ComponentType.PLOT.value
-            metadata["plot_type"] = r.PlotType.INTERACTIVE_NETWORK.value
-            metadata["csv_network_format"] = r.CSVNetworkFormat.EDGELIST.value
-        elif "adjlist" in file.stem.lower():
-            metadata["component_type"] = r.ComponentType.PLOT.value
-            metadata["plot_type"] = r.PlotType.INTERACTIVE_NETWORK.value
-            metadata["csv_network_format"] = r.CSVNetworkFormat.ADJLIST.value
+    # Infer component config
+    if file_ext in [r.DataFrameFormat.CSV.value_with_dot, r.DataFrameFormat.TXT.value_with_dot]:
+        # Check for CSVNetworkFormat keywords
+        if "edgelist" in file_path.stem.lower():
+            component_config["component_type"] = r.ComponentType.PLOT.value
+            component_config["plot_type"] = r.PlotType.INTERACTIVE_NETWORK.value
+            component_config ["csv_network_format"] = r.CSVNetworkFormat.EDGELIST.value
+        elif "adjlist" in file_path.stem.lower():
+            component_config ["component_type"] = r.ComponentType.PLOT.value
+            component_config ["plot_type"] = r.PlotType.INTERACTIVE_NETWORK.value
+            component_config ["csv_network_format"] = r.CSVNetworkFormat.ADJLIST.value
+        # Fill the config with dataframe content
         else:
-            metadata["component_type"] = r.ComponentType.DATAFRAME.value
-            metadata["file_format"] = r.DataFrameFormat.CSV.value if ext == r.DataFrameFormat.CSV.value_with_dot else r.DataFrameFormat.TXT.value
-            metadata["delimiter"] = "," if ext == r.DataFrameFormat.CSV.value_with_dot else "\\t"
-    elif ext in [fmt.value_with_dot for fmt in r.DataFrameFormat if fmt not in [r.DataFrameFormat.CSV, r.DataFrameFormat.TXT]]:
-        metadata["component_type"] = r.ComponentType.DATAFRAME.value
-        metadata["file_format"] = next(fmt.value for fmt in r.DataFrameFormat if fmt.value_with_dot == ext)
-    elif ext in [fmt.value_with_dot for fmt in r.NetworkFormat]:
-        metadata["component_type"] = r.ComponentType.PLOT.value
-        if ext in [
+            component_config ["component_type"] = r.ComponentType.DATAFRAME.value
+            component_config ["file_format"] = r.DataFrameFormat.CSV.value if file_ext == r.DataFrameFormat.CSV.value_with_dot else r.DataFrameFormat.TXT.value
+            component_config ["delimiter"] = "," if file_ext == r.DataFrameFormat.CSV.value_with_dot else "\\t"
+    # Check other DataframeFormats than csv and txt
+    elif file_ext in [fmt.value_with_dot for fmt in r.DataFrameFormat if fmt not in [r.DataFrameFormat.CSV, r.DataFrameFormat.TXT]]:
+        component_config ["component_type"] = r.ComponentType.DATAFRAME.value
+        component_config ["file_format"] = next(fmt.value for fmt in r.DataFrameFormat if fmt.value_with_dot == file_ext)
+    # Check for network formats
+    elif file_ext in [fmt.value_with_dot for fmt in r.NetworkFormat]:
+        component_config ["component_type"] = r.ComponentType.PLOT.value
+        if file_ext in [
             r.NetworkFormat.PNG.value_with_dot,
             r.NetworkFormat.JPG.value_with_dot,
             r.NetworkFormat.JPEG.value_with_dot,
             r.NetworkFormat.SVG.value_with_dot,
         ]:
-            metadata["plot_type"] = r.PlotType.STATIC.value
+            component_config ["plot_type"] = r.PlotType.STATIC.value
         else:
-            metadata["plot_type"] = r.PlotType.INTERACTIVE_NETWORK.value
-    elif ext == ".json":
-        metadata["component_type"] = r.ComponentType.PLOT.value
-        if "plotly" in file.stem.lower():
-            metadata["plot_type"] = r.PlotType.PLOTLY.value
-        elif "altair" in file.stem.lower():
-            metadata["plot_type"] = r.PlotType.ALTAIR.value
+            component_config ["plot_type"] = r.PlotType.INTERACTIVE_NETWORK.value
+    # Check for interactive plots 
+    elif file_ext == ".json":
+        component_config ["component_type"] = r.ComponentType.PLOT.value
+        if "plotly" in file_path.stem.lower():
+            component_config ["plot_type"] = r.PlotType.PLOTLY.value
+        elif "altair" in file_path.stem.lower():
+            component_config ["plot_type"] = r.PlotType.ALTAIR.value
         else:
-            metadata["plot_type"] = "unknown"
-    elif ext == ".md":
-        metadata["component_type"] = r.ComponentType.MARKDOWN.value
+            component_config ["plot_type"] = "unknown"
+    elif file_ext == ".md":
+        component_config ["component_type"] = r.ComponentType.MARKDOWN.value
     else:
-        # Unified error for unsupported extensions
         error_msg = (
-            f"Unsupported file extension: {ext}. "
+            f"Unsupported file extension: {file_ext}. "
             f"Supported extensions include:\n"
             f"  - Network formats: {', '.join(fmt.value_with_dot for fmt in r.NetworkFormat)}\n"
             f"  - DataFrame formats: {', '.join(fmt.value_with_dot for fmt in r.DataFrameFormat)}"
         )
-        if logger:
-            logger.error(error_msg)
+        #self.logger.error(error_msg)
         raise ValueError(error_msg)
 
-    return metadata
+    return component_config 
 
-def sort_items_by_number_prefix(items: List[Path]) -> List[Path]:
+def _sort_paths_by_numprefix(paths: List[Path]) -> List[Path]:
     """
     Sorts a list of Paths by numeric prefixes in their names, placing non-numeric items at the end.
 
     Parameters
     ----------
-    items : List[Path]
+    paths : List[Path]
         The list of Path objects to sort.
 
     Returns
@@ -111,141 +109,138 @@ def sort_items_by_number_prefix(items: List[Path]) -> List[Path]:
     List[Path]
         The sorted list of Path objects.
     """
-    def get_sort_key(item: Path) -> tuple:
-        parts = item.name.split("_", 1)
+    def get_sort_key(path: Path) -> tuple:
+        parts = path.name.split("_", 1)
         if parts[0].isdigit():
             numeric_prefix = int(parts[0])
         else:
             # Non-numeric prefixes go to the end
             numeric_prefix = float('inf')  
-        return numeric_prefix, item.name.lower()  
+        return numeric_prefix, path.name.lower()  
 
-    return sorted(items, key=get_sort_key)
+    return sorted(paths, key=get_sort_key)
 
-def generate_subsection_data(subsection_folder: Path) -> Dict[str, Union[str, List[Dict]]]:
+def _create_subsect_config_fromdir(subsection_dir_path: Path) -> Dict[str, Union[str, List[Dict]]]:
     """
-    Generates data for a single subsection.
+    Creates subsection config from a directory.
 
     Parameters
     ----------
-    subsection_folder : Path
-        Path to the subsection folder.
+    subsection_dir_path : Path
+        Path to the subsection directory.
 
     Returns
     -------
     Dict[str, Union[str, List[Dict]]]
-        The subsection data.
+        The subsection config.
     """
-    subsection_data = {
-        "title": infer_title_from_file_dir_name(subsection_folder.name),
+    subsection_config = {
+        "title": _create_title_fromdir(subsection_dir_path.name),
         "description": "",
         "components": [],
     }
 
     # Sort files by number prefix
-    sorted_files = sort_items_by_number_prefix(list(subsection_folder.iterdir()))
+    sorted_files = _sort_paths_by_numprefix(list(subsection_dir_path.iterdir()))
 
     for file in sorted_files:
         if file.is_file():
-            metadata = infer_component_metadata(file)
+            component_config = _create_component_config_fromfile(file)
 
-            # Ensure the file path is absolute and relative to base_folder
-            file_path = file.resolve()  # Get the absolute path
+            # Ensure the file path is absolute
+            file_path = file.resolve()  
 
-            # The relative path from base_folder is now absolute to the folder structure
-            component_data = {
-                "title": infer_title_from_file_dir_name(file.name),
-                "file_path": str(file_path),  # Use the absolute file path here
+            component_config_updt = {
+                "title": _create_title_fromdir(file.name),
+                "file_path": str(file_path), 
                 "description": "",
             }
 
-            # Merge inferred metadata into component data
-            component_data.update(metadata)
+            # Update inferred config information
+            component_config.update(component_config_updt)
 
-            subsection_data["components"].append(component_data)
+            subsection_config["components"].append(component_config)
 
-    return subsection_data
+    return subsection_config
 
-
-def generate_section_data(section_folder: Path, base_folder: Path) -> Dict[str, Union[str, List[Dict]]]:
+def _create_sect_config_fromdir(section_dir_path: Path) -> Dict[str, Union[str, List[Dict]]]:
     """
-    Generates data for a single section.
+    Creates section config from a directory.
 
     Parameters
     ----------
-    section_folder : Path
-        Path to the section folder.
-    base_folder : Path
-        The base folder path to ensure proper path calculation.
+    section_dir_path : Path
+        Path to the section directory.
 
     Returns
     -------
     Dict[str, Union[str, List[Dict]]]
-        The section data.
+        The section config.
     """
-    section_data = {
-        "title": infer_title_from_file_dir_name(section_folder.name),
+    section_config = {
+        "title": _create_title_fromdir(section_dir_path.name),
         "description": "",
         "subsections": [],
     }
 
     # Sort subsections by number prefix 
-    sorted_subsections = sort_items_by_number_prefix(list(section_folder.iterdir()))
+    sorted_subsections = _sort_paths_by_numprefix(list(section_dir_path.iterdir()))
 
-    for subsection_folder in sorted_subsections:
-        if subsection_folder.is_dir():
-            section_data["subsections"].append(generate_subsection_data(subsection_folder))
+    for subsection_dir in sorted_subsections:
+        if subsection_dir.is_dir():
+            section_config["subsections"].append(_create_subsect_config_fromdir(subsection_dir))
 
-    return section_data
+    return section_config
 
 
-def resolve_base_folder(base_folder: str) -> Path:
+def _resolve_base_dir(base_dir: str) -> Path:
     """
-    Resolves the provided base folder to an absolute path from the root, accounting for relative paths.
+    Resolves the provided base directory to an absolute path from the root, accounting for relative paths.
 
     Parameters
     ----------
-    base_folder : str
-        The relative or absolute path to the base folder.
+    base_dir : str
+        The relative or absolute path to the base directory.
 
     Returns
     -------
     Path
-        The absolute path to the base folder.
+        The absolute path to the base directory.
     """
     # Check if we are in a subdirectory and need to go up one level
     project_dir = Path(__file__).resolve().parents[1]
 
-    # If the base_folder is a relative path, resolve it from the project root
-    base_folder_path = project_dir / base_folder
+    # If the base_dir is a relative path, resolve it from the project root
+    base_dir_path = project_dir / base_dir
 
-    # Make sure the resolved base folder exists
-    if not base_folder_path.is_dir():
-        raise ValueError(f"Base folder '{base_folder}' does not exist or is not a directory.")
+    # Make sure the resolved base directory exists
+    if not base_dir_path.is_dir():
+        raise ValueError(f"Base directory '{base_dir}' does not exist or is not a directory.")
 
-    return base_folder_path
+    return base_dir_path
 
 
-def generate_yaml_structure(folder: str) -> Tuple[Dict[str, Union[str, List[Dict]]], Path]:
+def create_yamlconfig_fromdir(base_dir: str) -> Tuple[Dict[str, Union[str, List[Dict]]], Path]:
     """
-    Generates a YAML-compatible structure from a folder hierarchy and returns the resolved folder path.
+    Generates a YAML-compatible config file from a directory. It also returns the resolved folder path.
 
     Parameters
     ----------
-    folder : str
-        The base folder containing section and subsection folders.
+    base_dir : str
+        The base directory containing section and subsection folders.
 
     Returns
     -------
     Tuple[Dict[str, Union[str, List[Dict]]], Path]
-        The YAML-compatible structure and the resolved folder path.
+        The YAML config and the resolved directory path.
     """
-    folder_path = resolve_base_folder(folder)  # Resolve the base folder path
+    # Get absolute path from base directory
+    base_dir_path = _resolve_base_dir(base_dir)
 
-    # Generate the YAML structure
-    yaml_structure = {
+    # Generate the YAML config
+    yaml_config = {
         "report": {
-            "title": infer_title_from_file_dir_name(folder_path.name),
+            "title": _create_title_fromdir(base_dir_path.name),
             "description": "",
             "graphical_abstract": "",
             "logo": "",
@@ -254,10 +249,11 @@ def generate_yaml_structure(folder: str) -> Tuple[Dict[str, Union[str, List[Dict
     }
 
     # Sort sections by their number prefix
-    sorted_sections = sort_items_by_number_prefix(list(folder_path.iterdir()))
+    sorted_sections = _sort_paths_by_numprefix(list(base_dir_path.iterdir()))
 
-    for section_folder in sorted_sections:
-        if section_folder.is_dir():
-            yaml_structure["sections"].append(generate_section_data(section_folder, folder_path))
+    # Generate sections and subsections config 
+    for section_dir in sorted_sections:
+        if section_dir.is_dir():
+            yaml_config["sections"].append(_create_sect_config_fromdir(section_dir))
 
-    return yaml_structure, folder_path
+    return yaml_config, base_dir_path
