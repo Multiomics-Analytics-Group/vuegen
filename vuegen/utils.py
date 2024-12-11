@@ -185,7 +185,7 @@ def get_args(prog_name: str, others: dict = {}) -> argparse.Namespace:
         "-rt",
         "--report_type",
         type=str,
-        default=None,
+        default='streamlit', # this is not a valid default
         help="Type of the report to generate (streamlit, html, pdf, docx, odt, revealjs, pptx, or jupyter)."
     )
 
