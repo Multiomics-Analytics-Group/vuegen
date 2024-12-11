@@ -1,17 +1,25 @@
+import json
+import logging
 import os
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import ClassVar
-from enum import StrEnum, auto
-from typing import List, Optional
+from enum import auto
+
+try:
+    from enum import StrEnum
+except ImportError:
+    from strenum import StrEnum
+
+from typing import ClassVar, List, Optional
+
+import matplotlib.pyplot as plt
 import networkx as nx
 import pandas as pd
-import logging
 import requests
-import json
-import matplotlib.pyplot as plt
 from pyvis.network import Network
-from utils import cyjs_to_networkx, pyvishtml_to_networkx, fetch_file_stream
+
+from .utils import cyjs_to_networkx, fetch_file_stream, pyvishtml_to_networkx
+
 
 class ReportType(StrEnum):
     STREAMLIT = auto()

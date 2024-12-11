@@ -1,9 +1,11 @@
-from streamlit_reportview import StreamlitReportView
-from quarto_reportview import QuartoReportView
-from config_manager import ConfigManager
-from utils import assert_enum_value, load_yaml_config, write_yaml_config
-from report import ReportType
 import logging
+
+from .config_manager import ConfigManager
+from .quarto_reportview import QuartoReportView
+from .report import ReportType
+from .streamlit_reportview import StreamlitReportView
+from .utils import assert_enum_value, load_yaml_config, write_yaml_config
+
 
 def get_report(report_type: str, logger: logging.Logger, config_path: str = None, dir_path: str = None) -> None:
     """
@@ -15,7 +17,7 @@ def get_report(report_type: str, logger: logging.Logger, config_path: str = None
         The report type. It should be one of the values of the ReportType Enum.
     logger : logging.Logger
         A logger object to track warnings, errors, and info messages.
-    config : str, optional
+    config_path : str, optional
         Path to the YAML configuration file.
     dir_path : str, optional
         Path to the directory from which to generate the configuration file.

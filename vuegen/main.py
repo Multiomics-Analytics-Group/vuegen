@@ -1,6 +1,7 @@
-import report_generator
 from pathlib import Path
-from utils import get_logger, get_args
+
+from vuegen import report_generator
+from vuegen.utils import get_args, get_logger
 
 if __name__ == '__main__':
     # Parse command-line arguments

@@ -1,10 +1,11 @@
 [tool.poetry]
-name = "report-generator"
+name = "vuegen"
 version = "0.1.0"
 description = "Module to generate automatic web interface reports with visualizations"
 authors = ["MoNA group"]
 license = "MIT"
 readme = "README.md"
+repository = "https://github.com/Multiomics-Analytics-Group/vuegen"
 
 [tool.poetry.dependencies]
 python = ">=3.9,<3.9.7 || >3.9.7,<4.0"
@@ -25,11 +26,20 @@ itables = "^2.2.2"
 kaleido = "0.2.0"
 vl-convert-python = "^1.7.0"
 dataframe-image = "^0.2.6"
-
+strenum = { version = "^0.4.15", python = "<3.11" }
 
 [tool.poetry.group.dev.dependencies]
 ipykernel = "^6.29.5"
 
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+# https://stackoverflow.com/a/60990574/9684872
+[tool.poetry.extras]
+streamlit = ["streamlit"]
+quarto = ["quarto", "ipykernel"]
+
+# [project.scripts]
+# my-script = "vuegen.main:main"

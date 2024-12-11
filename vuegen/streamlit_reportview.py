@@ -1,9 +1,12 @@
-import report as r
 import os
 import subprocess
 from typing import List
+
 import pandas as pd
-from utils import create_folder, is_url
+
+from . import report as r
+from .utils import create_folder, is_url
+
 
 class StreamlitReportView(r.WebAppReportView):
     """

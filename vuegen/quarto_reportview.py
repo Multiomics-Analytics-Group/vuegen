@@ -1,10 +1,13 @@
 import os
 import subprocess
-import report as r
 from typing import List
+
 import networkx as nx
 import pandas as pd
-from utils import create_folder, is_url
+
+from . import report as r
+from .utils import create_folder, is_url
+
 
 class QuartoReportView(r.ReportView):
     """
@@ -116,6 +119,9 @@ class QuartoReportView(r.ReportView):
             self.report.logger.info(f"'{self.report.title}' '{self.report_type}' report rendered")
         except subprocess.CalledProcessError as e:
             self.report.logger.error(f"Error running '{self.report.title}' {self.report_type} report: {str(e)}")
+            raise
+        except FileNotFoundError as e:
+            self.report.logger.error(f"Quarto is not installed. Please install Quarto to run the report: {str(e)}")
             raise
 
     def _create_yaml_header(self) -> str:

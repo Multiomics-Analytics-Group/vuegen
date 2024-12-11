@@ -1,18 +1,27 @@
+from __future__ import annotations
+
+import argparse
+import json
+import logging
 import os
 import sys
-import yaml
 from datetime import datetime
-import logging
-import argparse
-import requests
-import networkx as nx
-import json
+
+try:
+    from enum import StrEnum
+except ImportError:
+    from strenum import StrEnum
+
 from io import StringIO
-from enum import StrEnum
 from typing import Type
-from bs4 import BeautifulSoup
-from pathlib import Path
 from urllib.parse import urlparse
+from pathlib import Path
+
+import networkx as nx
+import requests
+import yaml
+from bs4 import BeautifulSoup
+
 
 ## CHECKS
 def check_path(filepath: str) -> bool:
@@ -183,9 +192,9 @@ def get_args(prog_name: str, others: dict = {}) -> argparse.Namespace:
     parser.add_argument(
         "-rt",
         "--report_type",
-        type = str,
-        default = None,
-        help = "Type of the report to generate (streamlit, html, pdf, docx, odt, revealjs, pptx, or jupyter)."
+        type=str,
+        default='streamlit', # this is not a valid default
+        help="Type of the report to generate (streamlit, html, pdf, docx, odt, revealjs, pptx, or jupyter)."
     )
 
     # Parse arguments

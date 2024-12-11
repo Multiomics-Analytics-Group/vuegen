@@ -1,8 +1,10 @@
 import os
-import report as r
 from pathlib import Path
 from typing import Dict, List, Union, Tuple
-from utils import get_logger, assert_enum_value
+
+from . import report as r
+from .utils import assert_enum_value, get_logger
+
 
 class ConfigManager:
     """
