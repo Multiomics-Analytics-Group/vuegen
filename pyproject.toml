@@ -41,5 +41,15 @@ build-backend = "poetry.core.masonry.api"
 streamlit = ["streamlit"]
 quarto = ["quarto", "ipykernel"]
 
+[tool.poetry.group.docs]
+optional = true
+
+[tool.poetry.group.docs.dependencies]
+sphinx = "*"
+sphinx-book-theme = "*"
+myst-nb = "*"
+ipywidgets = "*"
+sphinx-new-tab-link = "!=0.2.2"
+jupytext = "*"
 # [project.scripts]
 # my-script = "vuegen.main:main"
