@@ -1,5 +1,5 @@
-import report_generator
-from utils import get_logger, load_yaml_config, get_args
+from vuegen import report_generator
+from vuegen.utils import get_args, get_logger, load_yaml_config
 
 if __name__ == '__main__':
     # Parse command-line arguments
