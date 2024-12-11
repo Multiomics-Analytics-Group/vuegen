@@ -31,6 +31,7 @@ strenum = { version = "^0.4.15", python = "<3.11" }
 [tool.poetry.group.dev.dependencies]
 ipykernel = "^6.29.5"
 
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
@@ -38,6 +39,7 @@ build-backend = "poetry.core.masonry.api"
 # https://stackoverflow.com/a/60990574/9684872
 [tool.poetry.extras]
 streamlit = ["streamlit"]
+quarto = ["quarto", "ipykernel"]
 
 # [project.scripts]
 # my-script = "vuegen.main:main"
