@@ -27,6 +27,14 @@ kaleido = "0.2.0"
 vl-convert-python = "^1.7.0"
 dataframe-image = "^0.2.6"
 strenum = { version = "^0.4.15", python = "<3.11" }
+# optional doc depencencies, follow approach as described here:
+# https://github.com/python-poetry/poetry/issues/2567#issuecomment-646766059
+sphinx = {version="*", optional=true}
+sphinx-book-theme = {version="*", optional=true}
+myst-nb = {version="*", optional=true}
+ipywidgets = {version="*", optional=true}
+sphinx-new-tab-link = {version = "!=0.2.2", optional=true}
+jupytext = {version="*", optional=true}
 
 [tool.poetry.group.dev.dependencies]
 ipykernel = "^6.29.5"
@@ -40,16 +48,7 @@ build-backend = "poetry.core.masonry.api"
 [tool.poetry.extras]
 streamlit = ["streamlit"]
 quarto = ["quarto", "ipykernel"]
+docs = ["sphinx", "sphinx-book-theme", "myst-nb", "ipywidgets", "sphinx-new-tab-link", "jupytext"]
 
-[tool.poetry.group.docs]
-optional = true
-
-[tool.poetry.group.docs.dependencies]
-sphinx = "*"
-sphinx-book-theme = "*"
-myst-nb = "*"
-ipywidgets = "*"
-sphinx-new-tab-link = "!=0.2.2"
-jupytext = "*"
 # [project.scripts]
 # my-script = "vuegen.main:main"
