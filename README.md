@@ -69,6 +69,7 @@ quarto check
 ## Execution
 
 ```bash
+cd docs
 python vuegen/main.py --config example_data/MicW2Graph/report_config_micw2graph.yaml --report_type streamlit
 ```
 

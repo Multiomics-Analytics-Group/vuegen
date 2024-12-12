@@ -73,10 +73,10 @@ sections:
             component_type: plot
             plot_type: interactive_network
             csv_network_format: edgelist
-            file_path: example_data/MicW2Graph/2_Microbial_Association_Networks/2_Network_visualization2/1_man_example.csv
+            file_path: example_data/MicW2Graph/2_Microbial_Association_Networks/2_Network_visualization2/1_man_example_edgelist.csv
           - title: Edge list (csv)
             component_type: dataframe
-            file_path: example_data/MicW2Graph/2_Microbial_Association_Networks/2_Network_visualization2/1_man_example.csv
+            file_path: example_data/MicW2Graph/2_Microbial_Association_Networks/2_Network_visualization2/1_man_example_edgelist.csv
             file_format: csv
             delimiter: ','
             caption: This is the edge list of the network

@@ -10,6 +10,12 @@
 
 ```{toctree}
 :maxdepth: 2
+
+vuegen_demo
+```
+
+```{toctree}
+:maxdepth: 2
 :caption: Modules
 :hidden:
 
