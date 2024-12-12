@@ -79,6 +79,8 @@ exclude_patterns = [
 # Intersphinx options
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
+    "networkx": ("https://networkx.org/documentation/stable/", None),
+    "pyvis": ("https://pyvis.readthedocs.io/en/stable/", None),
     # "pandas": ("https://pandas.pydata.org/pandas-docs/stable/", None),
     # "scikit-learn": ("https://scikit-learn.org/stable/", None),
     # "matplotlib": ("https://matplotlib.org/stable/", None),

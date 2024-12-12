@@ -1,3 +1,6 @@
+import logging
+from typing import Optional
+
 from . import report as r
 from .utils import assert_enum_value, get_logger
 
@@ -6,7 +9,7 @@ class ConfigManager:
     """
     Class for handling metadata of reports from YAML config file and creating report objects.
     """
-    def __init__(self, logger=None):
+    def __init__(self, logger: Optional[logging.Logger]=None):
         """
         Initializes the ConfigManager with a logger.
 
