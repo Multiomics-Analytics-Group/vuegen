@@ -36,10 +36,10 @@ ipywidgets = {version="*", optional=true}
 sphinx-new-tab-link = {version = "!=0.2.2", optional=true}
 jupytext = {version="*", optional=true}
 # quartro
-quatro-cli = {version="*", optional=true}
+quarto-cli = {version="*", optional=true}
 
 [tool.poetry.group.dev.dependencies]
-ipykernel = "^6.29.5"
+ipykernel = {version="^6.29.5", optional=true}
 
 
 [build-system]
