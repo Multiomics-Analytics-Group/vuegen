@@ -1,6 +1,7 @@
+import logging
 import os
 from pathlib import Path
-from typing import Dict, List, Union, Tuple
+from typing import Dict, List, Optional, Tuple, Union
 
 from . import report as r
 from .utils import assert_enum_value, get_logger
