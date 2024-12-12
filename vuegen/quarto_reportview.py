@@ -338,7 +338,7 @@ r.ReportType.JUPYTER: """
         """
         # Initialize plot code with common structure
         plot_code = f"""```{{python}}
-#| label: '{plot.title}'
+#| label: '{plot.title} {plot.id}'
 #| fig-cap: ""
 """
         # If the file path is a URL, generate code to fetch content via requests
@@ -394,7 +394,7 @@ fig_plotly.update_layout(width=950, height=500)\n"""
 
         # Append header for DataFrame loading
         dataframe_content.append(f"""```{{python}}
-#| label: '{dataframe.title}'
+#| label: '{dataframe.title} {dataframe.id}'
 #| fig-cap: ""
 """)
         # Mapping of file extensions to read functions
@@ -402,7 +402,8 @@ fig_plotly.update_layout(width=950, height=500)\n"""
             r.DataFrameFormat.CSV.value_with_dot: pd.read_csv,
             r.DataFrameFormat.PARQUET.value_with_dot: pd.read_parquet,
             r.DataFrameFormat.TXT.value_with_dot: pd.read_table,
-            r.DataFrameFormat.XLS.value_with_dot: pd.read_excel
+            r.DataFrameFormat.XLS.value_with_dot: pd.read_excel,
+            r.DataFrameFormat.XLSX.value_with_dot: pd.read_excel
         }
         try:
             # Check if the file extension matches any DataFrameFormat value
@@ -452,7 +453,7 @@ fig_plotly.update_layout(width=950, height=500)\n"""
             # Initialize md code with common structure
             markdown_content.append(f"""
 ```{{python}}
-#| label: '{markdown.title}'
+#| label: '{markdown.title} {markdown.id}'
 #| fig-cap: ""\n""")
             # If the file path is a URL, generate code to fetch content via requests
             if is_url(markdown.file_path): 
@@ -481,7 +482,7 @@ with open('{os.path.join("..", markdown.file_path)}', 'r') as markdown_file:
 
     def _generate_image_content(self, image_path: str, alt_text: str = "", width: int = 650, height: int = 400) -> str:
         """
-        Adds an image to the content list in a centered format with a specified width.
+        Adds an image to the content list in an HTML format with a specified width and height.
 
         Parameters
         ----------
@@ -490,20 +491,25 @@ with open('{os.path.join("..", markdown.file_path)}', 'r') as markdown_file:
         width : int, optional
             Width of the image in pixels (default is 650).
         height : int, optional
-            Height of the image in pixels (default is 500).
+            Height of the image in pixels (default is 400).
         alt_text : str, optional
             Alternative text for the image (default is an empty string).
         
         Returns
         -------
         str
-            The formatted image content.
+            The formatted HTML image content.
         """
-        # Check if the image path is a URL or a local file path
         if is_url(image_path):
-            return f"""![{alt_text}]({image_path}){{ width={width}px height={height}px fig-align="center"}}\n"""
+            src = image_path
         else:
-            return f"""![{alt_text}]({os.path.join('..', image_path)}){{ width={width}px height={height}px fig-align="center"}}\n"""
+            src = os.path.abspath(image_path)
+
+        # Return the HTML content
+        return f"""
+<div style="text-align: center;">
+<img src="{src}" alt="{alt_text}" width="{width}" height="{height}" />
+</div>\n"""
     
     def _show_dataframe(self, dataframe, is_report_static, static_dir: str = STATIC_FILES_DIR) -> List[str]:
         """

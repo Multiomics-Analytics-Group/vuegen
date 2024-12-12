@@ -15,6 +15,7 @@ except ImportError:
 from io import StringIO
 from typing import Type
 from urllib.parse import urlparse
+from pathlib import Path
 
 import networkx as nx
 import requests
@@ -177,9 +178,16 @@ def get_args(prog_name: str, others: dict = {}) -> argparse.Namespace:
     parser.add_argument(
         "-c",
         "--config",
+        type = str,
+        default = None,
+        help = "Path to the YAML configuration file."
+    )
+    parser.add_argument(
+        "-dir",
+        "--directory",
         type=str,
-        default="report_config_micw2graph.yaml",
-        help="Path to the YAML configuration file."
+        default=None,
+        help="Path to the directory from which the YAML config will be inferred."
     )
     parser.add_argument(
         "-rt",
@@ -427,6 +435,39 @@ def load_yaml_config(file_path: str) -> dict:
             raise ValueError(f"Error parsing YAML file: {exc}")
 
     return config
+
+def write_yaml_config(yaml_data: dict, directory_path: Path) -> Path:
+    """
+    Writes the generated YAML structure to a file.
+
+    Parameters
+    ----------
+    yaml_data : dict
+        The YAML data to write.
+    directory_path : Path
+        The path where the YAML file should be saved.
+
+    Returns
+    -------
+    output_yaml : Path
+        The path to the written YAML file.
+    """
+    assert isinstance(yaml_data, dict), "YAML data must be a dictionary."
+    assert isinstance(directory_path, Path), "directory_path must be a Path object."
+    
+    # Generate the output YAML file path based on the folder name
+    output_yaml = directory_path / (directory_path.name + "_config.yaml")
+
+    # Ensure the directory exists (but don't create a new folder)
+    if not directory_path.exists():
+        raise FileNotFoundError(f"The directory {directory_path} does not exist.")
+
+    # Now write the YAML file
+    with open(output_yaml, "w") as yaml_file:
+        yaml.dump(yaml_data, yaml_file, default_flow_style=False, sort_keys=False)
+
+    # Return the path to the written file
+    return output_yaml
 
 ## LOGGING
 def get_basename(fname: None | str = None) -> str:
