@@ -30,3 +30,10 @@ sphinx-apidoc --force --implicit-namespaces --module-first -o reference ../vuege
 # build docs
 sphinx-build -n -W --keep-going -b html ./ ./_build/
 ```
+
+## Include repo README.md into docs
+
+Relative links are used in the main README, which need to be resolved when building. It's
+possible to include the a `relative-docs` option if one uses `index.md` ([see docs](https://myst-parser.readthedocs.io/en/latest/faq/index.html#include-a-file-from-outside-the-docs-folder-like-readme-md)). This does not work
+with `href` links, only native markdown links.
+
