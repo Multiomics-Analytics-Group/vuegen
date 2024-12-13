@@ -21,7 +21,7 @@ if __name__ == '__main__':
         report_name = Path(dir_path).name
 
     # Define logger suffix based on report type and name
-    logger_suffix = f"{report_type}_report_{report_name}"
+    logger_suffix = f"{report_type}_report_{str(report_name)}"
 
     # Initialize logger
     logger = get_logger(f"{logger_suffix}")
