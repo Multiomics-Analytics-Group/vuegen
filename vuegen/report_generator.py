@@ -7,7 +7,7 @@ from .streamlit_reportview import StreamlitReportView
 from .utils import assert_enum_value, load_yaml_config, write_yaml_config
 
 
-def get_report(report_type: str, logger: logging.Logger, config_path: str = None, dir_path: str = None) -> None:
+def get_report(report_type: str, logger: logging.Logger, config_path: str = None, dir_path: str = None, streamlit_autorun: bool = False) -> None:
     """
     Generate and run a report based on the specified engine.
 
@@ -21,6 +21,8 @@ def get_report(report_type: str, logger: logging.Logger, config_path: str = None
         Path to the YAML configuration file.
     dir_path : str, optional
         Path to the directory from which to generate the configuration file.
+    streamlit_autorun : bool, optional
+        Whether to automatically run the Streamlit report after generation (default is False).
 
     Raises
     ------
@@ -47,16 +49,17 @@ def get_report(report_type: str, logger: logging.Logger, config_path: str = None
     # Create and run ReportView object based on its type
     if report_type == ReportType.STREAMLIT:
         st_report = StreamlitReportView(
-            report=report,
-            report_type=report_type
+            report = report,
+            report_type = report_type,
+            streamlit_autorun = streamlit_autorun
         )
         st_report.generate_report()
         st_report.run_report()
 
     else:
         quarto_report = QuartoReportView(
-            report=report,
-            report_type=report_type
+            report = report,
+            report_type = report_type
         )
         quarto_report.generate_report()
         quarto_report.run_report()

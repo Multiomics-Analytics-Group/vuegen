@@ -18,8 +18,9 @@ class StreamlitReportView(r.WebAppReportView):
     STATIC_FILES_DIR = os.path.join(BASE_DIR, 'static')
     REPORT_MANAG_SCRIPT = 'report_manager.py'
 
-    def __init__(self, report: r.Report, report_type: r.ReportType):
+    def __init__(self, report: r.Report, report_type: r.ReportType, streamlit_autorun: bool = False):
         super().__init__(report = report, report_type = report_type)
+        self.streamlit_autorun = streamlit_autorun
 
     def generate_report(self, output_dir: str = SECTIONS_DIR, static_dir: str = STATIC_FILES_DIR) -> None:
         """
@@ -113,14 +114,21 @@ report_nav.run()""")
         output_dir : str, optional
             The folder where the report was generated (default is SECTIONS_DIR).
         """
-        self.report.logger.info(f"Running '{self.report.title}' {self.report_type} report.")
-        try:
-            subprocess.run(["streamlit", "run", os.path.join(output_dir, self.REPORT_MANAG_SCRIPT)], check=True)
-        except KeyboardInterrupt:
-            print("Streamlit process interrupted.")
-        except subprocess.CalledProcessError as e:
-            self.report.logger.error(f"Error running Streamlit report: {str(e)}")
-            raise
+        if self.streamlit_autorun:
+            self.report.logger.info(f"Running '{self.report.title}' {self.report_type} report. TEST TEXT....")
+            try:
+                subprocess.run(["streamlit", "run", os.path.join(output_dir, self.REPORT_MANAG_SCRIPT)], check=True)
+            except KeyboardInterrupt:
+                print("Streamlit process interrupted.")
+            except subprocess.CalledProcessError as e:
+                self.report.logger.error(f"Error running Streamlit report: {str(e)}")
+                raise
+        else:
+            # If autorun is False, print instructions for manual execution
+            self.report.logger.info(f"To manually run the Streamlit app, use the following command:")
+            self.report.logger.info(f"streamlit run {os.path.join(output_dir, self.REPORT_MANAG_SCRIPT)}")
+            print(f"To manually run the Streamlit app, use the following command:")
+            print(f"streamlit run {os.path.join(output_dir, self.REPORT_MANAG_SCRIPT)}")           
 
     def _format_text(self, text: str, type: str, level: int = 1, color: str = '#000000', text_align: str = 'center') -> str:
         """

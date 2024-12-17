@@ -211,7 +211,6 @@ class ConfigManager:
 
         return section_config
 
-
     def _resolve_base_dir(self, base_dir: str) -> Path:
         """
         Resolves the provided base directory to an absolute path from the root, accounting for relative paths.
@@ -234,10 +233,9 @@ class ConfigManager:
 
         # Make sure the resolved base directory exists
         if not base_dir_path.is_dir():
-            raise ValueError(f"Base directory '{base_dir}' does not exist or is not a directory.")
+            raise ValueError(f"Base directory '{base_dir}' does not exist or is not a directory. {project_dir} {base_dir_path}")
 
         return base_dir_path
-
 
     def create_yamlconfig_fromdir(self, base_dir: str) -> Tuple[Dict[str, Union[str, List[Dict]]], Path]:
         """
