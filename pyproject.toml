@@ -15,7 +15,7 @@ plotly = "5.15.0"
 watchdog = "3.0.0"
 bokeh = "2.4.3"
 pyvis = "^0.3.2"
-pandas = "^2.2.3"
+pandas = {extras = ["parquet"], version = "^2.2.3"}
 openpyxl = "^3.1.5"
 xlrd = "^2.0.1"
 nbformat = "^5.10.4"
@@ -27,9 +27,19 @@ kaleido = "0.2.0"
 vl-convert-python = "^1.7.0"
 dataframe-image = "^0.2.6"
 strenum = { version = "^0.4.15", python = "<3.11" }
+# optional doc depencencies, follow approach as described here:
+# https://github.com/python-poetry/poetry/issues/2567#issuecomment-646766059
+sphinx = {version="*", optional=true}
+sphinx-book-theme = {version="*", optional=true}
+myst-nb = {version="*", optional=true}
+ipywidgets = {version="*", optional=true}
+sphinx-new-tab-link = {version = "!=0.2.2", optional=true}
+jupytext = {version="*", optional=true}
+# quartro
+quarto-cli = {version="*", optional=true}
 
 [tool.poetry.group.dev.dependencies]
-ipykernel = "^6.29.5"
+ipykernel = {version="^6.29.5", optional=true}
 
 
 [build-system]
@@ -39,7 +49,8 @@ build-backend = "poetry.core.masonry.api"
 # https://stackoverflow.com/a/60990574/9684872
 [tool.poetry.extras]
 streamlit = ["streamlit"]
-quarto = ["quarto", "ipykernel"]
+quarto = ["quarto-cli", "ipykernel"]
+docs = ["sphinx", "sphinx-book-theme", "myst-nb", "ipywidgets", "sphinx-new-tab-link", "jupytext"]
 
 # [project.scripts]
 # my-script = "vuegen.main:main"

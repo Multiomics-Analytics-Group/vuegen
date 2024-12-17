@@ -125,9 +125,6 @@ class Plot(Component):
     ----------
     plot_type : PlotType
         The type of the plot (INTERACTIVE or STATIC).
-    int_visualization_tool : IntVisualizationTool, optional
-        The tool for rendering interactive plots (PLOTLY, ALTAIR, or PYVIS) (default is None).
-        It is not required for STATIC plots (default is None).
     csv_network_format : CSVNetworkFormat, optional
         The format of the CSV file for network plots (EDGELIST or ADJLIST) (default is None).
     """

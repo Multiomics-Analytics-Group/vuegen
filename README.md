@@ -1,9 +1,8 @@
-<div align="center">
-  <img width="300px" src="docs/images/vuegen_logo.svg">
-</div>
-
+<!-- <div align="center">
+  <img width="300px" src="images/vuegen_logo.svg">
+</div> -->
+![VueGen Logo](docs/images/vuegen_logo.svg)
 -----------------
-
 <p align="center">
    VueGen is a Python library that automates the creation of scientific reports.
 </p>
@@ -19,19 +18,22 @@ VueGen automates the creation of scientific reports based on a YAML configuratio
 
 An overview of the VueGen workflow is shown in the figure below:
 
-<p align="center">
+<!-- <p align="center">
 <figure>
-  <img width="650px" src="docs/images/vuegen_graph_abstract.png" alt="VueGen overview"/>
+  <img width="650px" src="images/vuegen_graph_abstract.png" alt="VueGen overview"/>
 </figure>
-</p>
+</p> -->
+![VueGen Abstract](docs/images/vuegen_graph_abstract.png)
 
 Also, the class diagram for the project is presented below to illustrate the architecture and relationships between classes:
 
-<p align="center">
+<!-- <p align="center">
 <figure>
-  <img width="650px" src="docs/images/vuegen_classdiagram_noattmeth.png" alt="VueGen class diagram"/>
+  <img width="650px" src="images/vuegen_classdiagram_noattmeth.png" alt="VueGen class diagram"/>
 </figure>
-</p>
+</p> -->
+
+![VueGen Class Diagram](docs/images/vuegen_classdiagram_noattmeth.png)
 
 ## Installation
 
@@ -67,6 +69,7 @@ quarto check
 ## Execution
 
 ```bash
+cd docs
 python vuegen/main.py --config example_data/MicW2Graph/report_config_micw2graph.yaml --report_type streamlit
 ```
 

@@ -1,0 +1,7 @@
+# apidocs
+reference
+# builds
+_build
+quarto_report
+logs
+jupyter_execute

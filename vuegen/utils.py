@@ -475,16 +475,18 @@ def get_basename(fname: None | str = None) -> str:
     - For a given filename, returns basename WITHOUT file extension
     - If no fname given (i.e., None) then return basename that the function is called in
 
-    PARAMS
-    -----
-    - fname (None or str): the filename to get basename of, or None
+    Parameters
+    ----------
+    fname: str, optional
+        The filename to get basename from. Default is None.
 
-    OUTPUTS
-    -----
-    - basename of given filepath or the current file the function is executed
+    Returns
+    -------
+    str
+        basename of given filepath or the current file the function is executed
 
     Examples
-    -----
+    ---------
     1)
     >>> get_basename()
     utils
@@ -508,17 +510,18 @@ def get_time(incl_time: bool = True, incl_timezone: bool = True) -> str:
     Gets current date, time (optional) and timezone (optional) for file naming
 
     Parameters
-    -----
+    ----------
     - incl_time (bool): whether to include timestamp in the string
     - incl_timezone (bool): whether to include the timezone in the string
 
     Returns
-    -----
-    - fname (str): includes date, timestamp and/or timezone
+    -------
+    str
+        fname that includes date, timestamp and/or timezone
         connected by '_' in one string e.g. yyyyMMdd_hhmm_timezone
 
     Examples
-    -----
+    --------
     1)
     >>> get_time()
     '20231019_101758_CEST'
@@ -571,13 +574,14 @@ def generate_log_filename(folder: str = "logs", suffix: str = "") -> str:
     Creates log file name and path
 
     Parameters
-    -----
+    ----------
     folder (str): name of the folder to put the log file in
     suffix (str): anything else you want to add to the log file name
 
     Returns
-    -----
-    log_filepath (str): the file path to the log file
+    -------
+    str
+        The file path to the log file
     """
     # PRECONDITIONS
     create_folder(folder)
@@ -589,7 +593,7 @@ def generate_log_filename(folder: str = "logs", suffix: str = "") -> str:
     return log_filepath
 
 
-def init_log(filename: str, display: bool = False, logger_id: str | None = None):
+def init_log(filename: str, display: bool = False, logger_id: str | None = None) -> logging.Logger:
     """
     - Custom python logger configuration (basicConfig())
         with two handlers (for stdout and for file)
@@ -598,15 +602,16 @@ def init_log(filename: str, display: bool = False, logger_id: str | None = None)
         display in stdout
 
     Parameters
-    -----
-    - filename (str): filepath to log record file
+    ----------
+    filename (str): filepath to log record file
     - display (bool): whether to print the logs to whatever standard output
     - logger_id (str): an optional identifier for yourself,
         if None then defaults to 'root'
 
     Returns
-    -----
-    - logger object
+    -------
+    logging.Logger
+        The logger object
 
     Examples
     -----
