@@ -115,7 +115,7 @@ report_nav.run()""")
             The folder where the report was generated (default is SECTIONS_DIR).
         """
         if self.streamlit_autorun:
-            self.report.logger.info(f"Running '{self.report.title}' {self.report_type} report. TEST TEXT....")
+            self.report.logger.info(f"Running '{self.report.title}' {self.report_type} report.")
             try:
                 subprocess.run(["streamlit", "run", os.path.join(output_dir, self.REPORT_MANAG_SCRIPT)], check=True)
             except KeyboardInterrupt:
@@ -125,10 +125,9 @@ report_nav.run()""")
                 raise
         else:
             # If autorun is False, print instructions for manual execution
-            self.report.logger.info(f"To manually run the Streamlit app, use the following command:")
-            self.report.logger.info(f"streamlit run {os.path.join(output_dir, self.REPORT_MANAG_SCRIPT)}")
-            print(f"To manually run the Streamlit app, use the following command:")
-            print(f"streamlit run {os.path.join(output_dir, self.REPORT_MANAG_SCRIPT)}")           
+            self.report.logger.info(f"All the scripts to build the Streamlit app are available at {output_dir}")
+            self.report.logger.info(f"To run the Streamlit app, use the following command:")
+            self.report.logger.info(f"streamlit run {os.path.join(output_dir, self.REPORT_MANAG_SCRIPT)}")             
 
     def _format_text(self, text: str, type: str, level: int = 1, color: str = '#000000', text_align: str = 'center') -> str:
         """

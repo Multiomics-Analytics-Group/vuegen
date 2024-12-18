@@ -6,17 +6,12 @@ from vuegen.utils import get_args, get_logger
 if __name__ == '__main__':
     # Parse command-line arguments
     args = get_args(prog_name="VueGen")
-    print(args)
 
-    # Ensure `streamlit_autorun` is set to False if not passed
-    streamlit_autorun = getattr(args, 'streamlit_autorun', False)
-
-    # Determine the configuration file path or directory
+    # Determine the vuegen arguments
     config_path = args.config
     dir_path = args.directory
-
-    # Report type
     report_type = args.report_type
+    streamlit_autorun = args.streamlit_autorun
 
     # Determine the report name for logger suffix
     if config_path:
