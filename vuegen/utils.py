@@ -185,16 +185,23 @@ def get_args(prog_name: str, others: dict = {}) -> argparse.Namespace:
     parser.add_argument(
         "-dir",
         "--directory",
-        type=str,
-        default=None,
-        help="Path to the directory from which the YAML config will be inferred."
+        type = str,
+        default = None,
+        help = "Path to the directory from which the YAML config will be inferred."
     )
     parser.add_argument(
         "-rt",
         "--report_type",
-        type=str,
-        default='streamlit', # this is not a valid default
-        help="Type of the report to generate (streamlit, html, pdf, docx, odt, revealjs, pptx, or jupyter)."
+        type = str,
+        default = None, 
+        help = "Type of the report to generate (streamlit, html, pdf, docx, odt, revealjs, pptx, or jupyter)."
+    )
+    parser.add_argument(
+        "-st_autorun", 
+        "--streamlit_autorun",
+        action = "store_true",  # Automatically sets True if the flag is passed
+        default = False,
+        help = "Automatically run the Streamlit app after report generation."
     )
 
     # Parse arguments

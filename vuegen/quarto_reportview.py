@@ -1,6 +1,7 @@
 import os
 import subprocess
 from typing import List
+from pathlib import Path
 
 import networkx as nx
 import pandas as pd
@@ -498,18 +499,15 @@ with open('{os.path.join("..", markdown.file_path)}', 'r') as markdown_file:
         Returns
         -------
         str
-            The formatted HTML image content.
+            The formatted image content.
         """
         if is_url(image_path):
             src = image_path
         else:
-            src = os.path.abspath(image_path)
+            src = Path(image_path).resolve()
 
-        # Return the HTML content
-        return f"""
-<div style="text-align: center;">
-<img src="{src}" alt="{alt_text}" width="{width}" height="{height}" />
-</div>\n"""
+        # Return the image content
+        return f"""![](/{src}){{fig-alt={alt_text} width={width} height={height}}}\n"""
     
     def _show_dataframe(self, dataframe, is_report_static, static_dir: str = STATIC_FILES_DIR) -> List[str]:
         """
