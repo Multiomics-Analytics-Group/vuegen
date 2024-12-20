@@ -117,6 +117,8 @@ class QuartoReportView(r.ReportView):
         """
         try:
             subprocess.run(["quarto", "render", os.path.join(output_dir, f"{self.BASE_DIR}.qmd")], check=True)
+            if self.report_type == r.ReportType.JUPYTER:
+                subprocess.run(["quarto", "convert", os.path.join(output_dir, f"{self.BASE_DIR}.qmd")], check=True)
             self.report.logger.info(f"'{self.report.title}' '{self.report_type}' report rendered")
         except subprocess.CalledProcessError as e:
             self.report.logger.error(f"Error running '{self.report.title}' {self.report_type} report: {str(e)}")
@@ -174,8 +176,12 @@ format:"""
     toc: false
     output: true""",
 r.ReportType.JUPYTER: """
-  jupyter:
-    kernel: python3"""
+  html:
+    toc: true
+    toc-location: left
+    toc-depth: 3
+    page-layout: full
+    self-contained: true"""
         }
 
         # Create a key based on the report type and format
