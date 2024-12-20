@@ -1,7 +1,7 @@
 
 def test_imports():
     import vuegen
-    import vuegen.main
+    import vuegen.__main__
     import vuegen.quarto_reportview
     import vuegen.report
     import vuegen.report_generator

@@ -30,4 +30,8 @@ jobs:
           pip install -e .
       - name: Run tests
         run: python -m pytest tests
+      - name: Execute streamlit report
+        run: |
+          cd docs
+          python -m vuegen --config example_data/MicW2Graph/report_config_micw2graph.yaml
   
