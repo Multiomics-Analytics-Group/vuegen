@@ -145,7 +145,7 @@ def create_folder(directory_path: str, is_nested: bool = False) -> bool:
     except OSError as e:
         raise OSError(f"Error creating directory '{directory_path}': {e}")
 
-def get_args(prog_name: str, others: dict = {}) -> argparse.Namespace:
+def get_parser(prog_name: str, others: dict = {}) -> argparse.Namespace:
     """
     Initiates argparse.ArgumentParser() and adds common arguments.
 
@@ -205,7 +205,7 @@ def get_args(prog_name: str, others: dict = {}) -> argparse.Namespace:
     )
 
     # Parse arguments
-    return parser.parse_args()
+    return parser
 
 def fetch_file_stream(file_path: str) -> StringIO:
     """

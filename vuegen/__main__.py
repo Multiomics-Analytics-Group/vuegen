@@ -1,12 +1,14 @@
+import sys
 from pathlib import Path
 
 from vuegen import report_generator
-from vuegen.utils import get_args, get_logger
+from vuegen.utils import get_logger, get_parser
 
 
 def main():
     # Parse command-line arguments
-    args = get_args(prog_name="VueGen")
+    parser = get_parser(prog_name="VueGen")
+    args = parser.parse_args()
 
     # Determine the vuegen arguments
     config_path = args.config
@@ -17,8 +19,18 @@ def main():
     # Determine the report name for logger suffix
     if config_path:
         report_name = Path(config_path).stem
-    else:
+    elif dir_path:
         report_name = Path(dir_path).name
+    else:
+        print("Please provide a configuration file or directory path:\n")
+        # https://docs.python.org/3/library/argparse.html#printing-help
+        parser.print_help()
+        sys.exit(1)
+        
+    if config_path and dir_path:
+        print("Please provide only one of configuration file or directory path:\n")
+        parser.print_help()
+        sys.exit(1) # otherwise could resort to either or ?
 
     # Define logger suffix based on report type and name
     logger_suffix = f"{report_type}_report_{str(report_name)}"
