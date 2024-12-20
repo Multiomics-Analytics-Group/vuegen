@@ -71,15 +71,17 @@ Run VueGen using a configuration file with the following command:
 
 ```bash
 cd docs
-python -m vuegen --config example_data/MicW2Graph/report_config_micw2graph.yaml --report_type streamlit
+vuegen --config example_data/MicW2Graph/report_config_micw2graph.yaml --report_type streamlit
 ```
+
+> 💡 If `vuegen` does not work, try `python -m vuegen` instead.
 
 By default, the `streamlit_autorun` argument is set to False, but you can use it in case you want to automatically run the streamlit app.
 
 It's also possible to provide a directory instead of a configuration file:
 
 ```bash
-python -m vuegen --directory docs/example_data/MicW2Graph/ --report_type streamlit
+vuegen --directory docs/example_data/MicW2Graph/ --report_type streamlit
 ```
 
 The current report types are streamlit, html, pdf, docx, odt, revealjs, pptx, and jupyter.

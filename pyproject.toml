@@ -52,5 +52,6 @@ streamlit = ["streamlit"]
 quarto = ["quarto-cli", "ipykernel"]
 docs = ["sphinx", "sphinx-book-theme", "myst-nb", "ipywidgets", "sphinx-new-tab-link", "jupytext"]
 
-# [project.scripts]
-# my-script = "vuegen.main:main"
+[tool.poetry.scripts]
+# https://python-poetry.org/docs/pyproject/#scripts
+vuegen = "vuegen.__main__:main"

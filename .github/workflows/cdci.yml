@@ -33,7 +33,7 @@ jobs:
       - name: Execute streamlit report
         run: |
           cd docs
-          python -m vuegen --config example_data/MicW2Graph/report_config_micw2graph.yaml
+          vuegen --config example_data/MicW2Graph/report_config_micw2graph.yaml
   
   other-reports:
     name: Integration tests
@@ -51,38 +51,38 @@ jobs:
           cache-dependency-path: '**/pyproject.toml'
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
+          pip install --upgrade pip
           pip install -e ".[quarto]"
       - name: Execute streamlit report (to check)
         run: |
           cd docs
-          python -m vuegen -c example_data/MicW2Graph/report_config_micw2graph.yaml
+          vuegen -c example_data/MicW2Graph/report_config_micw2graph.yaml
       # repeat for easier inspection on GitHub:
       - name: quatro html report
         run: |
           cd docs
-          python -m vuegen -c example_data/MicW2Graph/report_config_micw2graph.yaml -rt html
+          vuegen -c example_data/MicW2Graph/report_config_micw2graph.yaml -rt html
       - name: quatro pdf report
         run: |
           cd docs
-          python -m vuegen -c example_data/MicW2Graph/report_config_micw2graph.yaml -rt pdf
+          vuegen -c example_data/MicW2Graph/report_config_micw2graph.yaml -rt pdf
       - name: quatro docx report
         run: |
           cd docs
-          python -m vuegen -c example_data/MicW2Graph/report_config_micw2graph.yaml -rt docx
+          vuegen -c example_data/MicW2Graph/report_config_micw2graph.yaml -rt docx
       - name: quatro odt report
         run: |
           cd docs
-          python -m vuegen -c example_data/MicW2Graph/report_config_micw2graph.yaml -rt odt
+          vuegen -c example_data/MicW2Graph/report_config_micw2graph.yaml -rt odt
       - name: quatro revealjs report
         run: |
           cd docs
-          python -m vuegen -c example_data/MicW2Graph/report_config_micw2graph.yaml -rt revealjs
+          vuegen -c example_data/MicW2Graph/report_config_micw2graph.yaml -rt revealjs
       - name: quatro pptx report
         run: |
           cd docs
-          python -m vuegen -c example_data/MicW2Graph/report_config_micw2graph.yaml -rt pptx
+          vuegen -c example_data/MicW2Graph/report_config_micw2graph.yaml -rt pptx
       - name: quatro jupyter report
         run: |
           cd docs
-          python -m vuegen -c example_data/MicW2Graph/report_config_micw2graph.yaml -rt jupyter
+          vuegen -c example_data/MicW2Graph/report_config_micw2graph.yaml -rt jupyter
