@@ -70,7 +70,8 @@ quarto check
 Run VueGen using a configuration file with the following command:
 
 ```bash
-python vuegen/main.py --config docs/example_data/MicW2Graph/report_config_micw2graph.yaml --report_type streamlit
+cd docs
+python ../vuegen/main.py --config example_data/MicW2Graph/report_config_micw2graph.yaml --report_type streamlit
 ```
 
 By default, the `streamlit_autorun` argument is set to False, but you can use it in case you want to automatically run the streamlit app.
