@@ -35,3 +35,30 @@ jobs:
           cd docs
           python -m vuegen --config example_data/MicW2Graph/report_config_micw2graph.yaml
   
+  other-reports:
+    name: Test
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip' # caching pip dependencies
+          cache-dependency-path: '**/pyproject.toml'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[quarto]"
+      - name: Execute streamlit report (to check)
+        run: |
+          cd docs
+          python -m vuegen -c example_data/MicW2Graph/report_config_micw2graph.yaml
+      - name: Execute quatro report
+        run: |
+          cd docs
+          python -m vuegen -c example_data/MicW2Graph/report_config_micw2graph.yaml -rt html
+  
