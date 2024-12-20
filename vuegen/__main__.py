@@ -3,7 +3,8 @@ from pathlib import Path
 from vuegen import report_generator
 from vuegen.utils import get_args, get_logger
 
-if __name__ == '__main__':
+
+def main():
     # Parse command-line arguments
     args = get_args(prog_name="VueGen")
 
@@ -26,8 +27,11 @@ if __name__ == '__main__':
     logger = get_logger(f"{logger_suffix}")
 
     # Generate the report
-    report_generator.get_report(report_type = report_type, 
-                                logger = logger,
-                                config_path = config_path,
-                                dir_path = dir_path,
-                                streamlit_autorun = streamlit_autorun)
+    report_generator.get_report(report_type=report_type,
+                                logger=logger,
+                                config_path=config_path,
+                                dir_path=dir_path,
+                                streamlit_autorun=streamlit_autorun)
+
+if __name__ == '__main__':
+    main()
