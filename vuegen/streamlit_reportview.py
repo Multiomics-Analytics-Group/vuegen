@@ -127,7 +127,13 @@ report_nav.run()""")
             # If autorun is False, print instructions for manual execution
             self.report.logger.info(f"All the scripts to build the Streamlit app are available at {output_dir}")
             self.report.logger.info(f"To run the Streamlit app, use the following command:")
-            self.report.logger.info(f"streamlit run {os.path.join(output_dir, self.REPORT_MANAG_SCRIPT)}")             
+            self.report.logger.info(f"streamlit run {os.path.join(output_dir, self.REPORT_MANAG_SCRIPT)}")
+            msg = (
+                f"\nAll the scripts to build the Streamlit app are available at: {output_dir}\n\n"
+                f"To run the Streamlit app, use the following command:\n\n"
+                f"\tstreamlit run {os.path.join(output_dir, self.REPORT_MANAG_SCRIPT)}"
+                )
+            print(msg)
 
     def _format_text(self, text: str, type: str, level: int = 1, color: str = '#000000', text_align: str = 'center') -> str:
         """
