@@ -58,31 +58,31 @@ jobs:
           cd docs
           vuegen -c example_data/MicW2Graph/report_config_micw2graph.yaml
       # repeat for easier inspection on GitHub:
-      - name: quatro html report
+      - name: quarto html report
         run: |
           cd docs
           vuegen -c example_data/MicW2Graph/report_config_micw2graph.yaml -rt html
-      - name: quatro pdf report
+      - name: quarto pdf report
         run: |
           cd docs
           vuegen -c example_data/MicW2Graph/report_config_micw2graph.yaml -rt pdf
-      - name: quatro docx report
+      - name: quarto docx report
         run: |
           cd docs
           vuegen -c example_data/MicW2Graph/report_config_micw2graph.yaml -rt docx
-      - name: quatro odt report
+      - name: quarto odt report
         run: |
           cd docs
           vuegen -c example_data/MicW2Graph/report_config_micw2graph.yaml -rt odt
-      - name: quatro revealjs report
+      - name: quarto revealjs report
         run: |
           cd docs
           vuegen -c example_data/MicW2Graph/report_config_micw2graph.yaml -rt revealjs
-      - name: quatro pptx report
+      - name: quarto pptx report
         run: |
           cd docs
           vuegen -c example_data/MicW2Graph/report_config_micw2graph.yaml -rt pptx
-      - name: quatro jupyter report
+      - name: quarto jupyter report
         run: |
           cd docs
           vuegen -c example_data/MicW2Graph/report_config_micw2graph.yaml -rt jupyter
