@@ -123,7 +123,8 @@ quarto_report/
 .DS_Store
 
 # Extra info
-UML_diagrams/
-Graphical_abstract/
+docs/images/UML_diagrams/
+docs/images/Graphical_abstract/
+docs/images/Nfcore_module_figure
 docs/presentations/
 test.py

@@ -13,9 +13,9 @@ except ImportError:
     from strenum import StrEnum
 
 from io import StringIO
+from pathlib import Path
 from typing import Type
 from urllib.parse import urlparse
-from pathlib import Path
 
 import networkx as nx
 import requests
@@ -145,7 +145,7 @@ def create_folder(directory_path: str, is_nested: bool = False) -> bool:
     except OSError as e:
         raise OSError(f"Error creating directory '{directory_path}': {e}")
 
-def get_args(prog_name: str, others: dict = {}) -> argparse.Namespace:
+def get_parser(prog_name: str, others: dict = {}) -> argparse.Namespace:
     """
     Initiates argparse.ArgumentParser() and adds common arguments.
 
@@ -193,7 +193,7 @@ def get_args(prog_name: str, others: dict = {}) -> argparse.Namespace:
         "-rt",
         "--report_type",
         type = str,
-        default = None, 
+        default = 'streamlit', 
         help = "Type of the report to generate (streamlit, html, pdf, docx, odt, revealjs, pptx, or jupyter)."
     )
     parser.add_argument(
@@ -205,7 +205,7 @@ def get_args(prog_name: str, others: dict = {}) -> argparse.Namespace:
     )
 
     # Parse arguments
-    return parser.parse_args()
+    return parser
 
 def fetch_file_stream(file_path: str) -> StringIO:
     """

@@ -10,7 +10,7 @@ on:
     
 jobs:
   test:
-    name: Test
+    name: Unittests+streamlit
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -30,4 +30,59 @@ jobs:
           pip install -e .
       - name: Run tests
         run: python -m pytest tests
+      - name: Execute streamlit report
+        run: |
+          cd docs
+          vuegen --config example_data/MicW2Graph/report_config_micw2graph.yaml
   
+  other-reports:
+    name: Integration tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip' # caching pip dependencies
+          cache-dependency-path: '**/pyproject.toml'
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -e ".[quarto]"
+      - name: Execute streamlit report (to check)
+        run: |
+          cd docs
+          vuegen -c example_data/MicW2Graph/report_config_micw2graph.yaml
+      # repeat for easier inspection on GitHub:
+      - name: quarto html report
+        run: |
+          cd docs
+          vuegen -c example_data/MicW2Graph/report_config_micw2graph.yaml -rt html
+      - name: quarto pdf report
+        run: |
+          cd docs
+          vuegen -c example_data/MicW2Graph/report_config_micw2graph.yaml -rt pdf
+      - name: quarto docx report
+        run: |
+          cd docs
+          vuegen -c example_data/MicW2Graph/report_config_micw2graph.yaml -rt docx
+      - name: quarto odt report
+        run: |
+          cd docs
+          vuegen -c example_data/MicW2Graph/report_config_micw2graph.yaml -rt odt
+      - name: quarto revealjs report
+        run: |
+          cd docs
+          vuegen -c example_data/MicW2Graph/report_config_micw2graph.yaml -rt revealjs
+      - name: quarto pptx report
+        run: |
+          cd docs
+          vuegen -c example_data/MicW2Graph/report_config_micw2graph.yaml -rt pptx
+      - name: quarto jupyter report
+        run: |
+          cd docs
+          vuegen -c example_data/MicW2Graph/report_config_micw2graph.yaml -rt jupyter
