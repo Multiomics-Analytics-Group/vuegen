@@ -211,32 +211,6 @@ class ConfigManager:
 
         return section_config
 
-    def _resolve_base_dir(self, base_dir: str) -> Path:
-        """
-        Resolves the provided base directory to an absolute path from the root, accounting for relative paths.
-
-        Parameters
-        ----------
-        base_dir : str
-            The relative or absolute path to the base directory.
-
-        Returns
-        -------
-        Path
-            The absolute path to the base directory.
-        """
-        # Check if we are in a subdirectory and need to go up one level
-        project_dir = Path(__file__).resolve().parents[1]
-
-        # If the base_dir is a relative path, resolve it from the project root
-        base_dir_path = project_dir / base_dir
-
-        # Make sure the resolved base directory exists
-        if not base_dir_path.is_dir():
-            raise ValueError(f"Base directory '{base_dir}' does not exist or is not a directory. {project_dir} {base_dir_path}")
-
-        return base_dir_path
-
     def create_yamlconfig_fromdir(self, base_dir: str) -> Tuple[Dict[str, Union[str, List[Dict]]], Path]:
         """
         Generates a YAML-compatible config file from a directory. It also returns the resolved folder path.
@@ -252,7 +226,7 @@ class ConfigManager:
             The YAML config and the resolved directory path.
         """
         # Get absolute path from base directory
-        base_dir_path = self._resolve_base_dir(base_dir)
+        base_dir_path = Path(base_dir)
 
         # Generate the YAML config
         yaml_config = {

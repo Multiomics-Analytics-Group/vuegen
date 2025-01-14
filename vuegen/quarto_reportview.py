@@ -283,14 +283,14 @@ r.ReportType.JUPYTER: """
             elif plot.plot_type == r.PlotType.PLOTLY:
                 plot_content.append(self._generate_plot_code(plot))
                 if is_report_static:
-                    plot_content.append(f"""fig_plotly.write_image("{os.path.join("..", static_plot_path)}")\n```\n""")
+                    plot_content.append(f"""fig_plotly.write_image("{os.path.abspath(static_plot_path)}")\n```\n""")
                     plot_content.append(self._generate_image_content(static_plot_path))
                 else:
                     plot_content.append(f"""fig_plotly.show()\n```\n""")
             elif plot.plot_type == r.PlotType.ALTAIR:
                 plot_content.append(self._generate_plot_code(plot))
                 if is_report_static:
-                    plot_content.append(f"""fig_altair.save("{os.path.join("..", static_plot_path)}")\n```\n""")
+                    plot_content.append(f"""fig_altair.save("{os.path.abspath(static_plot_path)}")\n```\n""")
                     plot_content.append(self._generate_image_content(static_plot_path))
                 else:
                     plot_content.append(f"""fig_altair\n```\n""")
@@ -537,7 +537,7 @@ with open('{os.path.join("..", markdown.file_path)}', 'r') as markdown_file:
         if is_report_static:
             # Generate path for the DataFrame image
             df_image = os.path.join(static_dir, f"{dataframe.title.replace(' ', '_')}.png")
-            dataframe_content.append(f"dfi.export(df, '{os.path.join('..', df_image)}', max_rows=10, max_cols=5)\n```\n")
+            dataframe_content.append(f"dfi.export(df, '{os.path.abspath(df_image)}', max_rows=10, max_cols=5)\n```\n")
             # Use helper method to add centered image content
             dataframe_content.append(self._generate_image_content(df_image))
         else:
