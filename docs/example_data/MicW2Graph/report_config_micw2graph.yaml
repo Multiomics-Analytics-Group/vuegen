@@ -9,7 +9,7 @@ report:
     infer potential interactions among microorganisms through microbial association networks (MANs). MicW2Graph enables the 
     investigation of research questions related to WWT, focusing on aspects such as microbial connections, community memberships, 
     and potential ecological functions.
-  graphical_abstract: example_data/MicW2Graph/Methods_MicW2Graph.png
+  graphical_abstract: docs/example_data/MicW2Graph/Methods_MicW2Graph.png
   logo: docs/images/vuegen_logo.png
 sections:
   - title: Exploratory Data Analysis
@@ -25,7 +25,7 @@ sections:
           - title: Multiline plot (altair)
             component_type: plot
             plot_type: altair
-            file_path: example_data/MicW2Graph/1_Exploratory_Data_Analysis/1_Abundance_data/2_multilineplot_altair.json
+            file_path: docs/example_data/MicW2Graph/1_Exploratory_Data_Analysis/1_Abundance_data/2_multilineplot_altair.json
           - title: Abundance data for all studies (csv)
             component_type: dataframe
             file_path: https://raw.githubusercontent.com/sayalaruano/report_generator_st_cloud_test/main/example_data/MicW2Graph/abundance_data_allbiomes.csv
@@ -33,7 +33,7 @@ sections:
             delimiter: ','
           - title: Abundance data for all studies (xls)
             component_type: dataframe
-            file_path: example_data/MicW2Graph/1_Exploratory_Data_Analysis/1_Abundance_data/4_abundance_data_allbiomes.xls
+            file_path: docs/example_data/MicW2Graph/1_Exploratory_Data_Analysis/1_Abundance_data/4_abundance_data_allbiomes.xls
             file_format: xls
             delimiter: ','
       - title: Sample data
@@ -41,18 +41,18 @@ sections:
           - title: Number of samples per study (png)
             component_type: plot
             plot_type: static
-            file_path: example_data/MicW2Graph/1_Exploratory_Data_Analysis/2_Sample_data/3_number_samples_per_study.png
+            file_path: docs/example_data/MicW2Graph/1_Exploratory_Data_Analysis/2_Sample_data/3_number_samples_per_study.png
           - title: Sampling countries for all studies (plotly)
             component_type: plot
             plot_type: plotly
-            file_path: example_data/MicW2Graph/1_Exploratory_Data_Analysis/2_Sample_data/1_pie_plot_countries_plotly.json
+            file_path: docs/example_data/MicW2Graph/1_Exploratory_Data_Analysis/2_Sample_data/1_pie_plot_countries_plotly.json
           - title: Sample data for all studies (parquet)
             component_type: dataframe
-            file_path: example_data/MicW2Graph/1_Exploratory_Data_Analysis/2_Sample_data/4_sample_info_allbiomes.parquet
+            file_path: docs/example_data/MicW2Graph/1_Exploratory_Data_Analysis/2_Sample_data/4_sample_info_allbiomes.parquet
             file_format: parquet
           - title: Sample data for all studies (txt)
             component_type: dataframe
-            file_path: example_data/MicW2Graph/1_Exploratory_Data_Analysis/2_Sample_data/5_sample_info_allbiomes.txt
+            file_path: docs/example_data/MicW2Graph/1_Exploratory_Data_Analysis/2_Sample_data/5_sample_info_allbiomes.txt
             file_format: txt
       - title: Extra information
         components:
@@ -66,17 +66,17 @@ sections:
           - title: Network1 (graphml)
             component_type: plot
             plot_type: interactive_network
-            file_path: example_data/MicW2Graph/2_Microbial_Association_Networks/1_Network_visualization1/1_man_example.graphml
+            file_path: docs/example_data/MicW2Graph/2_Microbial_Association_Networks/1_Network_visualization1/1_man_example.graphml
       - title: Network Visualization2
         components:
           - title: Network2 (edge list csv)
             component_type: plot
             plot_type: interactive_network
             csv_network_format: edgelist
-            file_path: example_data/MicW2Graph/2_Microbial_Association_Networks/2_Network_visualization2/1_man_example_edgelist.csv
+            file_path: docs/example_data/MicW2Graph/2_Microbial_Association_Networks/2_Network_visualization2/1_man_example_edgelist.csv
           - title: Edge list (csv)
             component_type: dataframe
-            file_path: example_data/MicW2Graph/2_Microbial_Association_Networks/2_Network_visualization2/1_man_example_edgelist.csv
+            file_path: docs/example_data/MicW2Graph/2_Microbial_Association_Networks/2_Network_visualization2/1_man_example_edgelist.csv
             file_format: csv
             delimiter: ','
             caption: This is the edge list of the network
@@ -85,13 +85,13 @@ sections:
           - title: Network3 (cyjs)
             component_type: plot
             plot_type: interactive_network
-            file_path: example_data/MicW2Graph/2_Microbial_Association_Networks/3_Network_visualization3/1_man_example.cyjs
+            file_path: docs/example_data/MicW2Graph/2_Microbial_Association_Networks/3_Network_visualization3/1_man_example.cyjs
       - title: Network Visualization4
         components:
           - title: Network4 (html)
             component_type: plot
             plot_type: interactive_network
-            file_path: example_data/MicW2Graph/2_Microbial_Association_Networks/4_Network_visualization4/1_ckg_network.html
+            file_path: docs/example_data/MicW2Graph/2_Microbial_Association_Networks/4_Network_visualization4/1_ckg_network.html
       - title: Network Visualization5
         components:
           - title: Network5 (remote html)
