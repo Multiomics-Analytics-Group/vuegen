@@ -1,5 +1,6 @@
 import logging
-import os
+import os   
+import json
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Union
 
@@ -94,23 +95,21 @@ class ConfigManager:
         # Check for interactive plots 
         elif file_ext == ".json":
             component_config ["component_type"] = r.ComponentType.PLOT.value
-            if "plotly" in file_path.stem.lower():
-                component_config ["plot_type"] = r.PlotType.PLOTLY.value
-            elif "altair" in file_path.stem.lower():
-                component_config ["plot_type"] = r.PlotType.ALTAIR.value
-            else:
-                component_config ["plot_type"] = "unknown"
+            try:
+                with open(file_path, "r", encoding="utf-8") as f:
+                    json_data = json.load(f)
+                if "$schema" in json_data:
+                    component_config["plot_type"] = r.PlotType.ALTAIR.value
+                else:
+                    component_config["plot_type"] = r.PlotType.PLOTLY.value
+            except Exception as e:
+                self.logger.warning(f"Could not parse JSON file {file_path}: {e}")
+                component_config["plot_type"] = "unknown"
         elif file_ext == ".md":
             component_config ["component_type"] = r.ComponentType.MARKDOWN.value
         else:
-            error_msg = (
-                f"Unsupported file extension: {file_ext}. "
-                f"Supported extensions include:\n"
-                f"  - Network formats: {', '.join(fmt.value_with_dot for fmt in r.NetworkFormat)}\n"
-                f"  - DataFrame formats: {', '.join(fmt.value_with_dot for fmt in r.DataFrameFormat)}"
-            )
-            #self.logger.error(error_msg)
-            raise ValueError(error_msg)
+            self.logger.error(f"Unsupported file extension: {file_ext}. Skipping file: {file_path}\n")
+            return None
 
         return component_config 
 
@@ -165,6 +164,9 @@ class ConfigManager:
         for file in sorted_files:
             if file.is_file():
                 component_config = self._create_component_config_fromfile(file)
+                 # Skip unsupported files
+                if component_config is None:
+                    continue
 
                 # Ensure the file path is absolute
                 file_path = file.resolve()  

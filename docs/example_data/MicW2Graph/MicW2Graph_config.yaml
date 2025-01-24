@@ -12,13 +12,13 @@ sections:
     components:
     - component_type: plot
       plot_type: plotly
-      title: Top Species Plot Biome Plotly
-      file_path: /Users/asaru/Documents/DTU/MoNA/vuegen/docs/example_data/MicW2Graph/1_Exploratory_Data_Analysis/1_Abundance_data/1_top_species_plot_biome_plotly.json
+      title: Top Species Plot Biome
+      file_path: /Users/asaru/Documents/DTU/MoNA/vuegen/docs/example_data/MicW2Graph/1_Exploratory_Data_Analysis/1_Abundance_data/1_top_species_plot_biome.json
       description: ''
     - component_type: plot
       plot_type: altair
-      title: Multilineplot Altair
-      file_path: /Users/asaru/Documents/DTU/MoNA/vuegen/docs/example_data/MicW2Graph/1_Exploratory_Data_Analysis/1_Abundance_data/2_multilineplot_altair.json
+      title: Multilineplot
+      file_path: /Users/asaru/Documents/DTU/MoNA/vuegen/docs/example_data/MicW2Graph/1_Exploratory_Data_Analysis/1_Abundance_data/2_multilineplot.json
       description: ''
     - component_type: dataframe
       file_format: csv
