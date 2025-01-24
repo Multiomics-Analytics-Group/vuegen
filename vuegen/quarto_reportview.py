@@ -237,12 +237,12 @@ r.ReportType.JUPYTER: """
 
             if component.component_type == r.ComponentType.PLOT:
                 subsection_content.extend(self._generate_plot_content(component, is_report_static))
-            
             elif component.component_type == r.ComponentType.DATAFRAME:
                 subsection_content.extend(self._generate_dataframe_content(component, is_report_static))
-            
             elif component.component_type == r.ComponentType.MARKDOWN:
                 subsection_content.extend(self._generate_markdown_content(component))
+            elif component.component_type == r.ComponentType.HTML and not is_report_static:
+                subsection_content.extend(self._generate_html_content(component))
             else:
                 self.report.logger.warning(f"Unsupported component type '{component.component_type}' in subsection: {subsection.title}")
         
@@ -488,6 +488,41 @@ with open('{os.path.join("..", markdown.file_path)}', 'r') as markdown_file:
         
         self.report.logger.info(f"Successfully generated content for Markdown: '{markdown.title}'")
         return markdown_content
+
+    def _generate_html_content(self, html) -> List[str]:
+        """
+        Adds an HTML component to the report.
+
+        Parameters
+        ----------
+        html : Html
+            The HTML component to add to the report. This could be a local file path or a URL.
+
+        Returns
+        -------
+        list : List[str]
+            The list of content lines for embedding the HTML.
+        """
+        html_content = []
+        
+        # Add title
+        html_content.append(f'### {html.title}')
+        
+        try:
+            # Embed the HTML in an iframe
+            iframe_src = html.file_path if is_url(html.file_path) else os.path.join("..", html.file_path)
+            iframe_code = f"""
+<div style="text-align: center;">
+<iframe src="{iframe_src}" alt="{html.title}" width="800px" height="630px"></iframe>
+</div>\n"""
+            html_content.append(iframe_code)
+
+        except Exception as e:
+            self.report.logger.error(f"Error generating content for HTML: {html.title}. Error: {str(e)}")
+            raise
+        
+        self.report.logger.info(f"Successfully generated content for HTML: '{html.title}'")
+        return html_content
 
     def _generate_image_content(self, image_path: str, alt_text: str = "", width: int = 650, height: int = 400) -> str:
         """

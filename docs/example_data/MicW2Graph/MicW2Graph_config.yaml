@@ -67,6 +67,10 @@ sections:
       title: Test Md
       file_path: /Users/asaru/Documents/DTU/MoNA/vuegen/docs/example_data/MicW2Graph/1_Exploratory_Data_Analysis/3_Extra_info/1_test_md.md
       description: ''
+    - component_type: html
+      title: Plot
+      file_path: /Users/asaru/Documents/DTU/MoNA/vuegen/docs/example_data/MicW2Graph/1_Exploratory_Data_Analysis/3_Extra_info/plot.html
+      description: ''
 - title: Microbial Association Networks
   description: ''
   subsections:

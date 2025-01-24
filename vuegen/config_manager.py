@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Union
 
 from . import report as r
-from .utils import assert_enum_value, get_logger
+from .utils import assert_enum_value, get_logger, is_pyvis_html
 
 
 class ConfigManager:
@@ -80,6 +80,12 @@ class ConfigManager:
         elif file_ext in [fmt.value_with_dot for fmt in r.DataFrameFormat if fmt not in [r.DataFrameFormat.CSV, r.DataFrameFormat.TXT]]:
             component_config ["component_type"] = r.ComponentType.DATAFRAME.value
             component_config ["file_format"] = next(fmt.value for fmt in r.DataFrameFormat if fmt.value_with_dot == file_ext)
+        elif file_ext == ".html":
+            if is_pyvis_html(file_path):
+                component_config["component_type"] = r.ComponentType.PLOT.value
+                component_config["plot_type"] = r.PlotType.INTERACTIVE_NETWORK.value
+            else:
+                component_config["component_type"] = r.ComponentType.HTML.value
         # Check for network formats
         elif file_ext in [fmt.value_with_dot for fmt in r.NetworkFormat]:
             component_config ["component_type"] = r.ComponentType.PLOT.value
@@ -370,6 +376,8 @@ class ConfigManager:
             return self._create_dataframe_component(component_data)
         elif component_type == r.ComponentType.MARKDOWN:
             return self._create_markdown_component(component_data)
+        elif component_type == r.ComponentType.HTML:
+            return self._create_html_component(component_data)
         elif component_type == r.ComponentType.APICALL:
             return self._create_apicall_component(component_data)
         elif component_type == r.ComponentType.CHATBOT:
@@ -444,6 +452,27 @@ class ConfigManager:
             A Markdown object populated with the provided metadata.
         """
         return r.Markdown(
+            title = component_data['title'],
+            logger = self.logger,
+            file_path = component_data['file_path'],
+            caption = component_data.get('caption')
+        )
+    
+    def _create_html_component(self, component_data: dict) -> r.Html:
+        """
+        Creates an Html component.
+
+        Parameters
+        ----------
+        component_data : dict
+            A dictionary containing hml component metadata.
+
+        Returns
+        -------
+        Html
+            An Html object populated with the provided metadata.
+        """
+        return r.Html(
             title = component_data['title'],
             logger = self.logger,
             file_path = component_data['file_path'],

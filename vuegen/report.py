@@ -35,6 +35,7 @@ class ComponentType(StrEnum):
     PLOT = auto()
     DATAFRAME = auto()
     MARKDOWN = auto()
+    HTML = auto()
     APICALL = auto()
     CHATBOT = auto()
 
@@ -380,9 +381,20 @@ class Markdown(Component):
     """
     def __init__(self, title: str, logger: logging.Logger, file_path: str=None, caption: str=None):
         """
-        Initializes a DataFrame object.
+        Initializes a Markdown object.
         """
         super().__init__(title = title, logger = logger, component_type=ComponentType.MARKDOWN, 
+                         file_path=file_path, caption=caption)
+        
+class Html(Component):
+    """
+    An html component within a subsection of a report.
+    """
+    def __init__(self, title: str, logger: logging.Logger, file_path: str=None, caption: str=None):
+        """
+        Initializes an html object.
+        """
+        super().__init__(title = title, logger = logger, component_type=ComponentType.HTML, 
                          file_path=file_path, caption=caption)
 
 class APICall(Component):
