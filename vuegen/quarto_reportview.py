@@ -239,7 +239,7 @@ r.ReportType.JUPYTER: """
                 subsection_content.extend(self._generate_plot_content(component, is_report_static))
             elif component.component_type == r.ComponentType.DATAFRAME:
                 subsection_content.extend(self._generate_dataframe_content(component, is_report_static))
-            elif component.component_type == r.ComponentType.MARKDOWN:
+            elif component.component_type == r.ComponentType.MARKDOWN and component.title.lower() != "description":
                 subsection_content.extend(self._generate_markdown_content(component))
             elif component.component_type == r.ComponentType.HTML and not is_report_static:
                 subsection_content.extend(self._generate_html_content(component))

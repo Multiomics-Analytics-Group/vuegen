@@ -296,7 +296,8 @@ report_nav.run()""")
                 subsection_content.extend(self._generate_plot_content(component))
             elif component.component_type == r.ComponentType.DATAFRAME:
                 subsection_content.extend(self._generate_dataframe_content(component))
-            elif component.component_type == r.ComponentType.MARKDOWN:
+            # If md files is called "description.md", do not include it in the report
+            elif component.component_type == r.ComponentType.MARKDOWN and component.title.lower() != "description":
                 subsection_content.extend(self._generate_markdown_content(component))
             elif component.component_type == r.ComponentType.HTML:
                 subsection_content.extend(self._generate_html_content(component))

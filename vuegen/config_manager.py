@@ -143,6 +143,25 @@ class ConfigManager:
             return numeric_prefix, path.name.lower()  
 
         return sorted(paths, key=get_sort_key)
+    
+    def _read_description_file(self, folder_path: Path) -> str:
+        """
+        Reads the content of a description.md file if it exists in the given folder.
+        
+        Parameters
+        ----------
+        folder_path : Path
+            Path to the folder where description.md might be located.
+        
+        Returns
+        -------
+        str
+            Content of the description.md file if found, otherwise an empty string.
+        """
+        description_file = folder_path / "description.md"
+        if description_file.exists():
+            return f"{description_file.read_text().strip().replace('\n', '\n  ')}\n"
+        return ""
 
     def _create_subsect_config_fromdir(self, subsection_dir_path: Path) -> Dict[str, Union[str, List[Dict]]]:
         """
@@ -160,7 +179,7 @@ class ConfigManager:
         """
         subsection_config = {
             "title": self._create_title_fromdir(subsection_dir_path.name),
-            "description": "",
+            "description": self._read_description_file(subsection_dir_path),
             "components": [],
         }
 
@@ -206,7 +225,7 @@ class ConfigManager:
         """
         section_config = {
             "title": self._create_title_fromdir(section_dir_path.name),
-            "description": "",
+            "description": self._read_description_file(section_dir_path),
             "subsections": [],
         }
 
@@ -240,7 +259,7 @@ class ConfigManager:
         yaml_config = {
             "report": {
                 "title": self._create_title_fromdir(base_dir_path.name),
-                "description": "",
+                "description": self._read_description_file(base_dir_path),
                 "graphical_abstract": "",
                 "logo": "",
             },
