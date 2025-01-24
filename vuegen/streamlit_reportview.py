@@ -256,6 +256,8 @@ report_nav.run()""")
                                 f"Error processing subsection '{subsection.id}' '{subsection.title}' in section  '{section.id}' '{section.title}': {str(subsection_error)}"
                             )
                             raise
+                else:
+                    self.report.logger.warning(f"No subsections found in section: '{section.title}'. To show content in the report, add subsections to the section.") 
         except Exception as e:
             self.report.logger.error(f"Error generating sections: {str(e)}")
             raise

@@ -81,7 +81,9 @@ class QuartoReportView(r.ReportView):
                         # Generate content for the subsection
                         subsection_content, subsection_imports = self._generate_subsection(subsection, is_report_static, is_report_revealjs)
                         qmd_content.extend(subsection_content)
-                        report_imports.extend(subsection_imports) 
+                        report_imports.extend(subsection_imports)
+                else:
+                    self.report.logger.warning(f"No subsections found in section: '{section.title}'. To show content in the report, add subsections to the section.") 
             
             # Flatten the subsection_imports into a single list
             flattened_report_imports = [imp for sublist in report_imports for imp in sublist]
