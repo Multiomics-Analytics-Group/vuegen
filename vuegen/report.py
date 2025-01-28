@@ -204,7 +204,11 @@ class Plot(Component):
                     edge_attributes = [col for col in df_net.columns if col not in required_columns]
                     
                     # Return a NetworkX graph object from the edgelist
-                    G = nx.from_pandas_edgelist(df_net, source="source", target="target", edge_attr=edge_attributes)
+                    if edge_attributes:
+                        G = nx.from_pandas_edgelist(df_net, source="source", target="target", edge_attr=edge_attributes)
+                    else:
+                        G = nx.from_pandas_edgelist(df_net, source="source", target="target")
+                        
                     self.logger.info(f"Successfully read network from file: {self.file_path}.")
                     return G
                 elif self.csv_network_format == CSVNetworkFormat.ADJLIST:
