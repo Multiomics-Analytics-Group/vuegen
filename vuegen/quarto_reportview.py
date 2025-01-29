@@ -546,11 +546,10 @@ with open('{os.path.join("..", markdown.file_path)}', 'r') as markdown_file:
         """
         if is_url(image_path):
             src = image_path
+            return f"""![]({src}){{fig-alt={alt_text} width={width} height={height}}}\n"""
         else:
             src = Path(image_path).resolve()
-
-        # Return the image content
-        return f"""![](/{src}){{fig-alt={alt_text} width={width} height={height}}}\n"""
+            return f"""![](/{src}){{fig-alt={alt_text} width={width} height={height}}}\n"""
     
     def _show_dataframe(self, dataframe, is_report_static, static_dir: str = STATIC_FILES_DIR) -> List[str]:
         """
