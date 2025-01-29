@@ -1,10 +1,11 @@
 import logging
-import os
+import os   
+import json
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Union
 
 from . import report as r
-from .utils import assert_enum_value, get_logger
+from .utils import assert_enum_value, get_logger, is_pyvis_html
 
 
 class ConfigManager:
@@ -59,6 +60,12 @@ class ConfigManager:
         file_ext = file_path.suffix.lower()
         component_config = {}
 
+        # Add title, file path, and description
+        component_config["title"] = self._create_title_fromdir(file_path.name)
+        component_config["file_path"] = str(file_path.resolve())
+        component_config["description"] = ""
+        component_config["caption"] = ""
+
         # Infer component config
         if file_ext in [r.DataFrameFormat.CSV.value_with_dot, r.DataFrameFormat.TXT.value_with_dot]:
             # Check for CSVNetworkFormat keywords
@@ -79,6 +86,12 @@ class ConfigManager:
         elif file_ext in [fmt.value_with_dot for fmt in r.DataFrameFormat if fmt not in [r.DataFrameFormat.CSV, r.DataFrameFormat.TXT]]:
             component_config ["component_type"] = r.ComponentType.DATAFRAME.value
             component_config ["file_format"] = next(fmt.value for fmt in r.DataFrameFormat if fmt.value_with_dot == file_ext)
+        elif file_ext == ".html":
+            if is_pyvis_html(file_path):
+                component_config["component_type"] = r.ComponentType.PLOT.value
+                component_config["plot_type"] = r.PlotType.INTERACTIVE_NETWORK.value
+            else:
+                component_config["component_type"] = r.ComponentType.HTML.value
         # Check for network formats
         elif file_ext in [fmt.value_with_dot for fmt in r.NetworkFormat]:
             component_config ["component_type"] = r.ComponentType.PLOT.value
@@ -94,23 +107,21 @@ class ConfigManager:
         # Check for interactive plots 
         elif file_ext == ".json":
             component_config ["component_type"] = r.ComponentType.PLOT.value
-            if "plotly" in file_path.stem.lower():
-                component_config ["plot_type"] = r.PlotType.PLOTLY.value
-            elif "altair" in file_path.stem.lower():
-                component_config ["plot_type"] = r.PlotType.ALTAIR.value
-            else:
-                component_config ["plot_type"] = "unknown"
+            try:
+                with open(file_path, "r", encoding="utf-8") as f:
+                    json_data = json.load(f)
+                if "$schema" in json_data:
+                    component_config["plot_type"] = r.PlotType.ALTAIR.value
+                else:
+                    component_config["plot_type"] = r.PlotType.PLOTLY.value
+            except Exception as e:
+                self.logger.warning(f"Could not parse JSON file {file_path}: {e}")
+                component_config["plot_type"] = "unknown"
         elif file_ext == ".md":
             component_config ["component_type"] = r.ComponentType.MARKDOWN.value
         else:
-            error_msg = (
-                f"Unsupported file extension: {file_ext}. "
-                f"Supported extensions include:\n"
-                f"  - Network formats: {', '.join(fmt.value_with_dot for fmt in r.NetworkFormat)}\n"
-                f"  - DataFrame formats: {', '.join(fmt.value_with_dot for fmt in r.DataFrameFormat)}"
-            )
-            #self.logger.error(error_msg)
-            raise ValueError(error_msg)
+            self.logger.error(f"Unsupported file extension: {file_ext}. Skipping file: {file_path}\n")
+            return None
 
         return component_config 
 
@@ -138,6 +149,25 @@ class ConfigManager:
             return numeric_prefix, path.name.lower()  
 
         return sorted(paths, key=get_sort_key)
+    
+    def _read_description_file(self, folder_path: Path) -> str:
+        """
+        Reads the content of a description.md file if it exists in the given folder.
+        
+        Parameters
+        ----------
+        folder_path : Path
+            Path to the folder where description.md might be located.
+        
+        Returns
+        -------
+        str
+            Content of the description.md file if found, otherwise an empty string.
+        """
+        description_file = folder_path / "description.md"
+        if description_file.exists():
+            return f"{description_file.read_text().strip().replace('\n', '\n  ')}\n"
+        return ""
 
     def _create_subsect_config_fromdir(self, subsection_dir_path: Path) -> Dict[str, Union[str, List[Dict]]]:
         """
@@ -153,33 +183,24 @@ class ConfigManager:
         Dict[str, Union[str, List[Dict]]]
             The subsection config.
         """
-        subsection_config = {
-            "title": self._create_title_fromdir(subsection_dir_path.name),
-            "description": "",
-            "components": [],
-        }
-
         # Sort files by number prefix
         sorted_files = self._sort_paths_by_numprefix(list(subsection_dir_path.iterdir()))
 
+        components = []
         for file in sorted_files:
             if file.is_file():
                 component_config = self._create_component_config_fromfile(file)
-
-                # Ensure the file path is absolute
-                file_path = file.resolve()  
-
-                component_config_updt = {
-                    "title": self._create_title_fromdir(file.name),
-                    "file_path": str(file_path), 
-                    "description": "",
-                }
-
-                # Update inferred config information
-                component_config.update(component_config_updt)
-
-                subsection_config["components"].append(component_config)
-
+                 # Skip unsupported files
+                if component_config is None:
+                    continue
+                # Add component config to list 
+                components.append(component_config)
+        
+        subsection_config = {
+            "title": self._create_title_fromdir(subsection_dir_path.name),
+            "description": self._read_description_file(subsection_dir_path),
+            "components": components,
+        }
         return subsection_config
 
     def _create_sect_config_fromdir(self, section_dir_path: Path) -> Dict[str, Union[str, List[Dict]]]:
@@ -196,19 +217,19 @@ class ConfigManager:
         Dict[str, Union[str, List[Dict]]]
             The section config.
         """
-        section_config = {
-            "title": self._create_title_fromdir(section_dir_path.name),
-            "description": "",
-            "subsections": [],
-        }
-
         # Sort subsections by number prefix 
         sorted_subsections = self._sort_paths_by_numprefix(list(section_dir_path.iterdir()))
 
+        subsections = []
         for subsection_dir in sorted_subsections:
             if subsection_dir.is_dir():
-                section_config["subsections"].append(self._create_subsect_config_fromdir(subsection_dir))
+                subsections.append(self._create_subsect_config_fromdir(subsection_dir))
 
+        section_config = {
+            "title": self._create_title_fromdir(section_dir_path.name),
+            "description": self._read_description_file(section_dir_path),
+            "subsections": subsections,
+        }
         return section_config
 
     def create_yamlconfig_fromdir(self, base_dir: str) -> Tuple[Dict[str, Union[str, List[Dict]]], Path]:
@@ -232,7 +253,7 @@ class ConfigManager:
         yaml_config = {
             "report": {
                 "title": self._create_title_fromdir(base_dir_path.name),
-                "description": "",
+                "description": self._read_description_file(base_dir_path),
                 "graphical_abstract": "",
                 "logo": "",
             },
@@ -368,6 +389,8 @@ class ConfigManager:
             return self._create_dataframe_component(component_data)
         elif component_type == r.ComponentType.MARKDOWN:
             return self._create_markdown_component(component_data)
+        elif component_type == r.ComponentType.HTML:
+            return self._create_html_component(component_data)
         elif component_type == r.ComponentType.APICALL:
             return self._create_apicall_component(component_data)
         elif component_type == r.ComponentType.CHATBOT:
@@ -442,6 +465,27 @@ class ConfigManager:
             A Markdown object populated with the provided metadata.
         """
         return r.Markdown(
+            title = component_data['title'],
+            logger = self.logger,
+            file_path = component_data['file_path'],
+            caption = component_data.get('caption')
+        )
+    
+    def _create_html_component(self, component_data: dict) -> r.Html:
+        """
+        Creates an Html component.
+
+        Parameters
+        ----------
+        component_data : dict
+            A dictionary containing hml component metadata.
+
+        Returns
+        -------
+        Html
+            An Html object populated with the provided metadata.
+        """
+        return r.Html(
             title = component_data['title'],
             logger = self.logger,
             file_path = component_data['file_path'],

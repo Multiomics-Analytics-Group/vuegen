@@ -35,6 +35,7 @@ class ComponentType(StrEnum):
     PLOT = auto()
     DATAFRAME = auto()
     MARKDOWN = auto()
+    HTML = auto()
     APICALL = auto()
     CHATBOT = auto()
 
@@ -203,7 +204,11 @@ class Plot(Component):
                     edge_attributes = [col for col in df_net.columns if col not in required_columns]
                     
                     # Return a NetworkX graph object from the edgelist
-                    G = nx.from_pandas_edgelist(df_net, source="source", target="target", edge_attr=edge_attributes)
+                    if edge_attributes:
+                        G = nx.from_pandas_edgelist(df_net, source="source", target="target", edge_attr=edge_attributes)
+                    else:
+                        G = nx.from_pandas_edgelist(df_net, source="source", target="target")
+                        
                     self.logger.info(f"Successfully read network from file: {self.file_path}.")
                     return G
                 elif self.csv_network_format == CSVNetworkFormat.ADJLIST:
@@ -380,9 +385,20 @@ class Markdown(Component):
     """
     def __init__(self, title: str, logger: logging.Logger, file_path: str=None, caption: str=None):
         """
-        Initializes a DataFrame object.
+        Initializes a Markdown object.
         """
         super().__init__(title = title, logger = logger, component_type=ComponentType.MARKDOWN, 
+                         file_path=file_path, caption=caption)
+        
+class Html(Component):
+    """
+    An html component within a subsection of a report.
+    """
+    def __init__(self, title: str, logger: logging.Logger, file_path: str=None, caption: str=None):
+        """
+        Initializes an html object.
+        """
+        super().__init__(title = title, logger = logger, component_type=ComponentType.HTML, 
                          file_path=file_path, caption=caption)
 
 class APICall(Component):
@@ -459,75 +475,6 @@ class ChatBot(Component):
             headers=headers, 
             params=params 
         )
-
-    def get_chatbot_answer(self, prompt: str) -> dict:
-        """
-        Sends a query to the chatbot API and retrieves the resulting response. This method constructs 
-        the request body for the chatbot, sends the request to the API, and parses the response.
-
-        Parameters
-        ----------
-        prompt : str
-            The prompt or message to send to the chatbot for a response.
-
-        Returns
-        -------
-        dict
-            The parsed response from the chatbot API, containing the chatbot's answer.
-        """
-        request_body = self._generate_query(prompt)
-        response = self.api_call.make_api_request(method="POST", request_body=request_body)  # Delegate API call
-        if response:
-            self.logger.info("Request successful")
-        else:
-            self.logger.warning("No response retrieved.")
-        parsed_response = self._parse_api_response(response)
-        return parsed_response
-
-
-    def _generate_query(self, messages: str) -> dict:
-        """
-        Constructs the request body for the chatbot query.
-
-        Parameters
-        ----------
-        messages : str
-            The messages to send to the chatbot.
-
-        Returns
-        -------
-        dict
-            The constructed request body for the chatbot query.
-        """
-        self.logger.info(f"Generating request body for message: {messages}")
-        return {
-            "model": self.model,
-            "messages": messages,
-            "stream": True
-        }
-
-    def _parse_api_response(self, response: dict) -> dict:
-        """
-        Processes and extracts relevant data from the API response.
-
-        Parameters
-        ----------
-        response : dict
-            The response from the API.
-
-        Returns
-        -------
-        dict
-            The processed response, including the role and content of the assistant's reply.
-        """
-        output = ""
-        for line in response.iter_lines():
-            body = json.loads(line)
-            if "error" in body:
-                raise Exception(body["error"])
-            if body.get("done", False):
-                return {"role": "assistant", "content": output}
-            output += body.get("message", {}).get("content", "")
     
 @dataclass
 class Subsection:

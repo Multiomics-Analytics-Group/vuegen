@@ -108,6 +108,43 @@ def is_url(filepath: str) -> bool:
     return bool(parsed_url.scheme and parsed_url.netloc)
 
 
+import os
+from bs4 import BeautifulSoup
+
+def is_pyvis_html(filepath: str) -> bool:
+    """
+    Check if the provided HTML file is a Pyvis network visualization.
+
+    Parameters
+    ----------
+    filepath : str
+        The path to the HTML file to check.
+
+    Returns
+    -------
+    bool
+        True if the input HTML file is a Pyvis network, meaning:
+        - It contains a `<div>` element with `id="mynetwork"`.
+        - The `<body>` only contains `<div>` and `<script>` elements.
+        Returns False otherwise.
+
+    """
+    # Parse the HTML file
+    with open(filepath, "r", encoding="utf-8") as f:
+        soup = BeautifulSoup(f, "html.parser")
+
+    # Validate both conditions
+    pyvis_identifier_valid = bool(soup.find("div", {"id": "mynetwork"}))
+    
+    # Count top-level elements inside <body>
+    body_children = [tag.name for tag in soup.body.find_all(recursive=False)]
+    
+    # A pure Pyvis file should contain only "div" and "script" elements in <body>
+    body_structure_valid = set(body_children) <= {"div", "script"}
+
+    # Both conditions must be true
+    return pyvis_identifier_valid and body_structure_valid
+
 ## FILE_SYSTEM
 def create_folder(directory_path: str, is_nested: bool = False) -> bool:
     """

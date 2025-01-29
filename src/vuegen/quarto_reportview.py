@@ -81,7 +81,9 @@ class QuartoReportView(r.ReportView):
                         # Generate content for the subsection
                         subsection_content, subsection_imports = self._generate_subsection(subsection, is_report_static, is_report_revealjs)
                         qmd_content.extend(subsection_content)
-                        report_imports.extend(subsection_imports) 
+                        report_imports.extend(subsection_imports)
+                else:
+                    self.report.logger.warning(f"No subsections found in section: '{section.title}'. To show content in the report, add subsections to the section.") 
             
             # Flatten the subsection_imports into a single list
             flattened_report_imports = [imp for sublist in report_imports for imp in sublist]
@@ -235,12 +237,12 @@ r.ReportType.JUPYTER: """
 
             if component.component_type == r.ComponentType.PLOT:
                 subsection_content.extend(self._generate_plot_content(component, is_report_static))
-            
             elif component.component_type == r.ComponentType.DATAFRAME:
                 subsection_content.extend(self._generate_dataframe_content(component, is_report_static))
-            
-            elif component.component_type == r.ComponentType.MARKDOWN:
+            elif component.component_type == r.ComponentType.MARKDOWN and component.title.lower() != "description":
                 subsection_content.extend(self._generate_markdown_content(component))
+            elif component.component_type == r.ComponentType.HTML and not is_report_static:
+                subsection_content.extend(self._generate_html_content(component))
             else:
                 self.report.logger.warning(f"Unsupported component type '{component.component_type}' in subsection: {subsection.title}")
         
@@ -487,6 +489,41 @@ with open('{os.path.join("..", markdown.file_path)}', 'r') as markdown_file:
         self.report.logger.info(f"Successfully generated content for Markdown: '{markdown.title}'")
         return markdown_content
 
+    def _generate_html_content(self, html) -> List[str]:
+        """
+        Adds an HTML component to the report.
+
+        Parameters
+        ----------
+        html : Html
+            The HTML component to add to the report. This could be a local file path or a URL.
+
+        Returns
+        -------
+        list : List[str]
+            The list of content lines for embedding the HTML.
+        """
+        html_content = []
+        
+        # Add title
+        html_content.append(f'### {html.title}')
+        
+        try:
+            # Embed the HTML in an iframe
+            iframe_src = html.file_path if is_url(html.file_path) else os.path.join("..", html.file_path)
+            iframe_code = f"""
+<div style="text-align: center;">
+<iframe src="{iframe_src}" alt="{html.title}" width="800px" height="630px"></iframe>
+</div>\n"""
+            html_content.append(iframe_code)
+
+        except Exception as e:
+            self.report.logger.error(f"Error generating content for HTML: {html.title}. Error: {str(e)}")
+            raise
+        
+        self.report.logger.info(f"Successfully generated content for HTML: '{html.title}'")
+        return html_content
+
     def _generate_image_content(self, image_path: str, alt_text: str = "", width: int = 650, height: int = 400) -> str:
         """
         Adds an image to the content list in an HTML format with a specified width and height.
@@ -509,11 +546,10 @@ with open('{os.path.join("..", markdown.file_path)}', 'r') as markdown_file:
         """
         if is_url(image_path):
             src = image_path
+            return f"""![]({src}){{fig-alt={alt_text} width={width} height={height}}}\n"""
         else:
             src = Path(image_path).resolve()
-
-        # Return the image content
-        return f"""![](/{src}){{fig-alt={alt_text} width={width} height={height}}}\n"""
+            return f"""![](/{src}){{fig-alt={alt_text} width={width} height={height}}}\n"""
     
     def _show_dataframe(self, dataframe, is_report_static, static_dir: str = STATIC_FILES_DIR) -> List[str]:
         """

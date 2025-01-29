@@ -256,6 +256,8 @@ report_nav.run()""")
                                 f"Error processing subsection '{subsection.id}' '{subsection.title}' in section  '{section.id}' '{section.title}': {str(subsection_error)}"
                             )
                             raise
+                else:
+                    self.report.logger.warning(f"No subsections found in section: '{section.title}'. To show content in the report, add subsections to the section.") 
         except Exception as e:
             self.report.logger.error(f"Error generating sections: {str(e)}")
             raise
@@ -294,8 +296,11 @@ report_nav.run()""")
                 subsection_content.extend(self._generate_plot_content(component))
             elif component.component_type == r.ComponentType.DATAFRAME:
                 subsection_content.extend(self._generate_dataframe_content(component))
-            elif component.component_type == r.ComponentType.MARKDOWN:
+            # If md files is called "description.md", do not include it in the report
+            elif component.component_type == r.ComponentType.MARKDOWN and component.title.lower() != "description":
                 subsection_content.extend(self._generate_markdown_content(component))
+            elif component.component_type == r.ComponentType.HTML:
+                subsection_content.extend(self._generate_html_content(component))
             elif component.component_type == r.ComponentType.APICALL:
                 subsection_content.extend(self._generate_apicall_content(component))
             elif component.component_type == r.ComponentType.CHATBOT:
@@ -514,6 +519,52 @@ with open('{os.path.join("..", markdown.file_path)}', 'r') as markdown_file:
         
         self.report.logger.info(f"Successfully generated content for Markdown: '{markdown.title}'")
         return markdown_content
+    
+    def _generate_html_content(self, html) -> List[str]:
+        """
+        Generate content for an HTML component in a Streamlit app.
+
+        Parameters
+        ----------
+        html : HTML
+            The HTML component to generate content for.
+
+        Returns
+        -------
+        list : List[str]
+            The list of content lines for the HTML display.
+        """
+        html_content = []
+
+        # Add title
+        html_content.append(self._format_text(text=html.title, type='header', level=4, color='#2b8cbe'))
+
+        try:
+            if is_url(html.file_path):  
+                # If it's a URL, fetch content dynamically
+                html_content.append(f"""
+response = requests.get('{html.file_path}')
+response.raise_for_status()
+html_content = response.text\n""")
+            else:
+                # If it's a local file
+                html_content.append(f"""
+with open('{os.path.join("..", html.file_path)}', 'r', encoding='utf-8') as html_file:
+    html_content = html_file.read()\n""")
+
+            # Display HTML content using Streamlit
+            html_content.append("st.components.v1.html(html_content, height=600, scrolling=True)\n")
+
+        except Exception as e:
+            self.report.logger.error(f"Error generating content for HTML: {html.title}. Error: {str(e)}")
+            raise
+
+        # Add caption if available
+        if html.caption:
+            html_content.append(self._format_text(text=html.caption, type='caption', text_align="left"))
+
+        self.report.logger.info(f"Successfully generated content for HTML: '{html.title}'")
+        return html_content
     
     def _generate_apicall_content(self, apicall) -> List[str]:
         """
