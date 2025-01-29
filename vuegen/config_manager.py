@@ -64,6 +64,7 @@ class ConfigManager:
         component_config["title"] = self._create_title_fromdir(file_path.name)
         component_config["file_path"] = str(file_path.resolve())
         component_config["description"] = ""
+        component_config["caption"] = ""
 
         # Infer component config
         if file_ext in [r.DataFrameFormat.CSV.value_with_dot, r.DataFrameFormat.TXT.value_with_dot]:
