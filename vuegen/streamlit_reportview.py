@@ -161,8 +161,6 @@ report_nav.run()""")
             tag = f"h{level}"
         elif type == 'paragraph':
             tag = 'p'
-        elif type == 'caption':
-            tag = 'figcaption'
 
         return f"""st.markdown('''<{tag} style='text-align: {text_align}; color: {color};'>{text}</{tag}>''', unsafe_allow_html=True)"""
 
@@ -378,8 +376,8 @@ st.markdown(f"<p style='text-align: center; color: black;'> <b>Number of relatio
             raise      
         
         # Add caption if available
-        if plot.caption:
-            plot_content.append(self._format_text(text=plot.caption, type='caption', text_align="left"))
+        #if plot.caption:
+         #   plot_content.append(self._format_text(text=plot.caption, type='caption', text_align="left"))
 
         self.report.logger.info(f"Successfully generated content for plot '{plot.id}': '{plot.title}'")
         return plot_content

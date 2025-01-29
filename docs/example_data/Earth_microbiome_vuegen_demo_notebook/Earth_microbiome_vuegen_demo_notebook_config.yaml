@@ -1,0 +1,161 @@
+report:
+  description: "The Earth Microbiome Project (EMP) is a systematic attempt to characterize\
+    \ global microbial taxonomic and functional diversity for the benefit of the planet\
+    \ and humankind. \n  It aimed to sample the Earth\u2019s microbial communities\
+    \ at an unprecedented scale in order to advance our understanding of the organizing\
+    \ biogeographic principles that govern microbial community structure. \n  The\
+    \ EMP dataset is generated from samples that individual researchers have compiled\
+    \ and contributed to the EMP. \n  The result is both a reference database giving\
+    \ global context to DNA sequence data and a framework for incorporating data from\
+    \ future studies, fostering increasingly complete characterization of Earth\u2019\
+    s microbial diversity.\n  \n  You can find more information about the Earth Microbiome\
+    \ Project at https://earthmicrobiome.org/ and in the [original article](https://www.nature.com/articles/nature24621).\n"
+  graphical_abstract: ./example_data/Earth_microbiome_vuegen_demo_notebook/emp_logo.png
+  logo: ./example_data/Earth_microbiome_vuegen_demo_notebook/emp_logo.png
+  title: Earth Microbiome Vuegen Demo Notebook
+sections:
+- description: This section contains the exploratory data analysis of the Earth Microbiome
+    Project (EMP) dataset.
+  subsections:
+  - components:
+    - caption: ''
+      component_type: dataframe
+      delimiter: ','
+      description: ''
+      file_format: csv
+      file_path: /Users/asaru/Documents/DTU/MoNA/vuegen/docs/example_data/Earth_microbiome_vuegen_demo_notebook/1_Exploratory_data_analysis/1_sample_exploration/1_metadata_random_subset.csv
+      title: Metadata Random Subset
+    - caption: ''
+      component_type: plot
+      description: ''
+      file_path: /Users/asaru/Documents/DTU/MoNA/vuegen/docs/example_data/Earth_microbiome_vuegen_demo_notebook/1_Exploratory_data_analysis/1_sample_exploration/2_animal_samples_map.png
+      plot_type: static
+      title: Animal Samples Map
+    - caption: ''
+      component_type: plot
+      description: ''
+      file_path: /Users/asaru/Documents/DTU/MoNA/vuegen/docs/example_data/Earth_microbiome_vuegen_demo_notebook/1_Exploratory_data_analysis/1_sample_exploration/3_plant_samples_map.json
+      plot_type: plotly
+      title: Plant Samples Map
+    - caption: ''
+      component_type: plot
+      description: ''
+      file_path: /Users/asaru/Documents/DTU/MoNA/vuegen/docs/example_data/Earth_microbiome_vuegen_demo_notebook/1_Exploratory_data_analysis/1_sample_exploration/4_saline_samples_map.json
+      plot_type: altair
+      title: Saline Samples Map
+    - caption: Pairwise scatter plots of available physicochemical metadat are shown
+        for temperature, salinity, oxygen, and pH, and for phosphate, nitrate, and
+        ammonium
+      component_type: plot
+      description: ''
+      file_path: https://raw.githubusercontent.com/biocore/emp/master/methods/images/figureED1_physicochemical.png
+      plot_type: static
+      title: Physicochemical properties of the EMP samples
+    description: ''
+    title: Sample Exploration
+  title: Exploratory Data Analysis
+- description: ''
+  subsections:
+  - components:
+    - caption: ''
+      component_type: plot
+      description: ''
+      file_path: /Users/asaru/Documents/DTU/MoNA/vuegen/docs/example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/1_alpha_diversity/1_alpha_diversity_host_associated_samples.png
+      plot_type: static
+      title: Alpha Diversity Host Associated Samples
+    - caption: ''
+      component_type: plot
+      description: ''
+      file_path: /Users/asaru/Documents/DTU/MoNA/vuegen/docs/example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/1_alpha_diversity/2_alpha_diversity_free_living_samples.json
+      plot_type: plotly
+      title: Alpha Diversity Free Living Samples
+    description: This subsection contains the alpha diversity analysis of the EMP
+      dataset.
+    title: Alpha Diversity
+  - components:
+    - caption: ''
+      component_type: plot
+      description: ''
+      file_path: /Users/asaru/Documents/DTU/MoNA/vuegen/docs/example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/2_average_copy_number/1_average_copy_number_emp_ontology_level2.png
+      plot_type: static
+      title: Average Copy Number Emp Ontology Level2
+    - caption: ''
+      component_type: plot
+      description: ''
+      file_path: /Users/asaru/Documents/DTU/MoNA/vuegen/docs/example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/2_average_copy_number/2_average_copy_number_emp_ontology_level3.json
+      plot_type: plotly
+      title: Average Copy Number Emp Ontology Level3
+    description: ''
+    title: Average Copy Number
+  - components:
+    - caption: ''
+      component_type: dataframe
+      delimiter: ','
+      description: ''
+      file_format: csv
+      file_path: /Users/asaru/Documents/DTU/MoNA/vuegen/docs/example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/3_nestedness/1_nestedness_random_subset.csv
+      title: Nestedness Random Subset
+    - caption: ''
+      component_type: plot
+      description: ''
+      file_path: /Users/asaru/Documents/DTU/MoNA/vuegen/docs/example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/3_nestedness/2_all_samples.json
+      plot_type: plotly
+      title: All Samples
+    - caption: ''
+      component_type: plot
+      description: ''
+      file_path: /Users/asaru/Documents/DTU/MoNA/vuegen/docs/example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/3_nestedness/3_plant_samples.json
+      plot_type: plotly
+      title: Plant Samples
+    - caption: ''
+      component_type: plot
+      description: ''
+      file_path: /Users/asaru/Documents/DTU/MoNA/vuegen/docs/example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/3_nestedness/4_animal_samples.png
+      plot_type: static
+      title: Animal Samples
+    - caption: ''
+      component_type: plot
+      description: ''
+      file_path: /Users/asaru/Documents/DTU/MoNA/vuegen/docs/example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/3_nestedness/5_non_saline_samples.png
+      plot_type: static
+      title: Non Saline Samples
+    description: ''
+    title: Nestedness
+  - components:
+    - caption: a) Environment distribution in all genera and 400 randomly chosen tag
+        sequence. b) and c) Shannon entropy within each taxonomic group.
+      component_type: plot
+      description: ''
+      file_path: https://raw.githubusercontent.com/biocore/emp/master/methods/images/figure4_entropy.png
+      plot_type: static
+      title: Specificity of sequences and higher taxonomic groups for environment
+    description: This subsection contains the Shannon entropy analysis of the EMP
+      dataset.
+    title: Shanon entropy analysis
+  title: Metagenomics
+- description: ''
+  subsections:
+  - components:
+    - caption: ''
+      component_type: dataframe
+      delimiter: ','
+      description: ''
+      file_format: csv
+      file_path: /Users/asaru/Documents/DTU/MoNA/vuegen/docs/example_data/Earth_microbiome_vuegen_demo_notebook/3_Network_analysis/1_phyla_association_networks/1_phyla_counts_subset.csv
+      title: Phyla Counts Subset
+    - caption: ''
+      component_type: plot
+      csv_network_format: edgelist
+      description: ''
+      file_path: /Users/asaru/Documents/DTU/MoNA/vuegen/docs/example_data/Earth_microbiome_vuegen_demo_notebook/3_Network_analysis/1_phyla_association_networks/2_phyla_correlation_network_with_0.5_threshold_edgelist.csv
+      plot_type: interactive_network
+      title: Phyla Correlation Network With 0.5 Threshold Edgelist
+    - caption: ''
+      component_type: plot
+      description: ''
+      file_path: /Users/asaru/Documents/DTU/MoNA/vuegen/docs/example_data/Earth_microbiome_vuegen_demo_notebook/3_Network_analysis/1_phyla_association_networks/3_phyla_correlation_network_with_0.5_threshold.png
+      plot_type: static
+      title: Phyla Correlation Network With 0.5 Threshold
+    description: ''
+    title: Phyla Association Networks
+  title: Network Analysis
