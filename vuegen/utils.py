@@ -107,10 +107,6 @@ def is_url(filepath: str) -> bool:
     parsed_url = urlparse(filepath)
     return bool(parsed_url.scheme and parsed_url.netloc)
 
-
-import os
-from bs4 import BeautifulSoup
-
 def is_pyvis_html(filepath: str) -> bool:
     """
     Check if the provided HTML file is a Pyvis network visualization.
@@ -717,3 +713,35 @@ def get_logger(log_suffix):
     logger.info(f"Path to log file: {log_file}")
 
     return logger
+
+## REPORT FORMATTING
+def generate_footer() -> str:
+    """
+    Generate an HTML footer for a report.
+
+    This function creates a styled HTML footer that includes a link to VueGen 
+    and the Multiomics Network Analytics Group (MoNA).
+
+    Returns
+    -------
+    str
+        A formatted HTML string representing the footer.
+    """
+    footer = '''<style type="text/css">
+.footer {
+    position: relative;
+    left: 0;
+    width: 100%;
+    text-align: center;
+}
+</style>
+<footer class="footer">
+    This report was generated with 
+    <a href="https://github.com/Multiomics-Analytics-Group/vuegen" target="_blank">
+        <img src="../../docs/images/vuegen_logo.svg" alt="VueGen" width="65px">
+    </a>
+    | © 2025 <a href="https://github.com/Multiomics-Analytics-Group" target="_blank">
+        Multiomics Network Analytics Group (MoNA)
+    </a>
+</footer>'''
+    return footer

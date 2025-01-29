@@ -5,7 +5,7 @@ from typing import List
 import pandas as pd
 
 from . import report as r
-from .utils import create_folder, is_url
+from .utils import create_folder, is_url, generate_footer
 
 
 class StreamlitReportView(r.WebAppReportView):
@@ -193,6 +193,10 @@ report_nav.run()""")
             if self.report.graphical_abstract:
                 home_content.append(f"\nst.image('{self.report.graphical_abstract}', use_column_width=True)")
 
+            # Define the footer variable and add it to the home page content
+            home_content.append("footer = '''" + generate_footer() + "'''\n")
+            home_content.append("st.markdown(footer, unsafe_allow_html=True)\n")
+
             # Write the home page content to a Python file
             home_page_path = os.path.join(home_dir_path, "Homepage.py")
             with open(home_page_path, 'w') as home_page:
@@ -305,6 +309,10 @@ report_nav.run()""")
                 subsection_content.extend(self._generate_chatbot_content(component))
             else:
                 self.report.logger.warning(f"Unsupported component type '{component.component_type}' in subsection: {subsection.title}")
+        
+        # Define the footer variable and add it to the home page content
+        subsection_content.append("footer = '''" + generate_footer() + "'''\n")
+        subsection_content.append("st.markdown(footer, unsafe_allow_html=True)\n")
         
         self.report.logger.info(f"Generated content and imports for subsection: '{subsection.title}'")
         return subsection_content, subsection_imports
