@@ -374,10 +374,6 @@ st.markdown(f"<p style='text-align: center; color: black;'> <b>Number of relatio
         except Exception as e:
             self.report.logger.error(f"Error generating content for '{plot.plot_type}' plot '{plot.id}' '{plot.title}': {str(e)}")
             raise      
-        
-        # Add caption if available
-        #if plot.caption:
-         #   plot_content.append(self._format_text(text=plot.caption, type='caption', text_align="left"))
 
         self.report.logger.info(f"Successfully generated content for plot '{plot.id}': '{plot.title}'")
         return plot_content
