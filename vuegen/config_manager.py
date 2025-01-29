@@ -60,6 +60,11 @@ class ConfigManager:
         file_ext = file_path.suffix.lower()
         component_config = {}
 
+        # Add title, file path, and description
+        component_config["title"] = self._create_title_fromdir(file_path.name)
+        component_config["file_path"] = str(file_path.resolve())
+        component_config["description"] = ""
+
         # Infer component config
         if file_ext in [r.DataFrameFormat.CSV.value_with_dot, r.DataFrameFormat.TXT.value_with_dot]:
             # Check for CSVNetworkFormat keywords
@@ -177,36 +182,24 @@ class ConfigManager:
         Dict[str, Union[str, List[Dict]]]
             The subsection config.
         """
-        subsection_config = {
-            "title": self._create_title_fromdir(subsection_dir_path.name),
-            "description": self._read_description_file(subsection_dir_path),
-            "components": [],
-        }
-
         # Sort files by number prefix
         sorted_files = self._sort_paths_by_numprefix(list(subsection_dir_path.iterdir()))
 
+        components = []
         for file in sorted_files:
             if file.is_file():
                 component_config = self._create_component_config_fromfile(file)
                  # Skip unsupported files
                 if component_config is None:
                     continue
-
-                # Ensure the file path is absolute
-                file_path = file.resolve()  
-
-                component_config_updt = {
-                    "title": self._create_title_fromdir(file.name),
-                    "file_path": str(file_path), 
-                    "description": "",
-                }
-
-                # Update inferred config information
-                component_config.update(component_config_updt)
-
-                subsection_config["components"].append(component_config)
-
+                # Add component config to list 
+                components.append(component_config)
+        
+        subsection_config = {
+            "title": self._create_title_fromdir(subsection_dir_path.name),
+            "description": self._read_description_file(subsection_dir_path),
+            "components": components,
+        }
         return subsection_config
 
     def _create_sect_config_fromdir(self, section_dir_path: Path) -> Dict[str, Union[str, List[Dict]]]:
@@ -223,19 +216,19 @@ class ConfigManager:
         Dict[str, Union[str, List[Dict]]]
             The section config.
         """
-        section_config = {
-            "title": self._create_title_fromdir(section_dir_path.name),
-            "description": self._read_description_file(section_dir_path),
-            "subsections": [],
-        }
-
         # Sort subsections by number prefix 
         sorted_subsections = self._sort_paths_by_numprefix(list(section_dir_path.iterdir()))
 
+        subsections = []
         for subsection_dir in sorted_subsections:
             if subsection_dir.is_dir():
-                section_config["subsections"].append(self._create_subsect_config_fromdir(subsection_dir))
+                subsections.append(self._create_subsect_config_fromdir(subsection_dir))
 
+        section_config = {
+            "title": self._create_title_fromdir(section_dir_path.name),
+            "description": self._read_description_file(section_dir_path),
+            "subsections": subsections,
+        }
         return section_config
 
     def create_yamlconfig_fromdir(self, base_dir: str) -> Tuple[Dict[str, Union[str, List[Dict]]], Path]:
