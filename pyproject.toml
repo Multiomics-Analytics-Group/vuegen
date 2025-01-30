@@ -34,7 +34,7 @@ ipywidgets = {version="*", optional=true}
 sphinx-new-tab-link = {version = "!=0.2.2", optional=true}
 jupytext = {version="*", optional=true}
 # quarto
-quarto-cli = {version="*"}
+quarto-cli = "*"
 
 [tool.poetry.group.dev.dependencies]
 ipykernel = {version="^6.29.5", optional=true}
@@ -45,8 +45,8 @@ build-backend = "poetry.core.masonry.api"
 
 # https://stackoverflow.com/a/60990574/9684872
 [tool.poetry.extras]
-streamlit = ["streamlit"]
-quarto = ["quarto-cli", "ipykernel"]
+# streamlit = ["streamlit"]
+# quarto = ["quarto-cli", "ipykernel"]
 docs = ["sphinx", "sphinx-book-theme", "myst-nb", "ipywidgets", "sphinx-new-tab-link", "jupytext"]
 
 [tool.poetry.scripts]
