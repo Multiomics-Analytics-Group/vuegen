@@ -30,7 +30,7 @@ jobs:
       - name: Build references
         run: |
             cd docs
-            sphinx-apidoc --force --implicit-namespaces --module-first -o reference ../vuegen
+            sphinx-apidoc --force --implicit-namespaces --module-first -o reference ../src/vuegen
       - name: Build documentation
         run: |
             cd docs
