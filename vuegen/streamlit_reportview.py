@@ -5,7 +5,7 @@ from typing import List
 import pandas as pd
 
 from . import report as r
-from .utils import create_folder, is_url
+from .utils import create_folder, is_url, generate_footer
 
 
 class StreamlitReportView(r.WebAppReportView):
@@ -161,8 +161,6 @@ report_nav.run()""")
             tag = f"h{level}"
         elif type == 'paragraph':
             tag = 'p'
-        elif type == 'caption':
-            tag = 'figcaption'
 
         return f"""st.markdown('''<{tag} style='text-align: {text_align}; color: {color};'>{text}</{tag}>''', unsafe_allow_html=True)"""
 
@@ -194,6 +192,10 @@ report_nav.run()""")
                 home_content.append(self._format_text(text=self.report.description, type='paragraph'))
             if self.report.graphical_abstract:
                 home_content.append(f"\nst.image('{self.report.graphical_abstract}', use_column_width=True)")
+
+            # Define the footer variable and add it to the home page content
+            home_content.append("footer = '''" + generate_footer() + "'''\n")
+            home_content.append("st.markdown(footer, unsafe_allow_html=True)\n")
 
             # Write the home page content to a Python file
             home_page_path = os.path.join(home_dir_path, "Homepage.py")
@@ -308,6 +310,10 @@ report_nav.run()""")
             else:
                 self.report.logger.warning(f"Unsupported component type '{component.component_type}' in subsection: {subsection.title}")
         
+        # Define the footer variable and add it to the home page content
+        subsection_content.append("footer = '''" + generate_footer() + "'''\n")
+        subsection_content.append("st.markdown(footer, unsafe_allow_html=True)\n")
+        
         self.report.logger.info(f"Generated content and imports for subsection: '{subsection.title}'")
         return subsection_content, subsection_imports
     
@@ -376,10 +382,6 @@ st.markdown(f"<p style='text-align: center; color: black;'> <b>Number of relatio
         except Exception as e:
             self.report.logger.error(f"Error generating content for '{plot.plot_type}' plot '{plot.id}' '{plot.title}': {str(e)}")
             raise      
-        
-        # Add caption if available
-        if plot.caption:
-            plot_content.append(self._format_text(text=plot.caption, type='caption', text_align="left"))
 
         self.report.logger.info(f"Successfully generated content for plot '{plot.id}': '{plot.title}'")
         return plot_content

@@ -33,7 +33,8 @@ jobs:
       - name: Execute streamlit report
         run: |
           cd docs
-          vuegen --config example_data/MicW2Graph/report_config_micw2graph.yaml
+          vuegen --directory example_data/Earth_microbiome_vuegen_demo_notebook
+          vuegen --config example_data/Earth_microbiome_vuegen_demo_notebook/Earth_microbiome_vuegen_demo_notebook_config.yaml
   
   other-reports:
     name: Integration tests
@@ -56,33 +57,41 @@ jobs:
       - name: Execute streamlit report (to check)
         run: |
           cd docs
-          vuegen -c example_data/MicW2Graph/report_config_micw2graph.yaml
+          vuegen -dir example_data/Earth_microbiome_vuegen_demo_notebook
+          vuegen -c example_data/Earth_microbiome_vuegen_demo_notebook/Earth_microbiome_vuegen_demo_notebook_config.yaml
       # repeat for easier inspection on GitHub:
       - name: quarto html report
         run: |
           cd docs
-          vuegen -c example_data/MicW2Graph/report_config_micw2graph.yaml -rt html
+          vuegen -dir example_data/Earth_microbiome_vuegen_demo_notebook -rt html
+          vuegen -c example_data/Earth_microbiome_vuegen_demo_notebook/Earth_microbiome_vuegen_demo_notebook_config.yaml -rt html
       - name: quarto pdf report
         run: |
           cd docs
-          vuegen -c example_data/MicW2Graph/report_config_micw2graph.yaml -rt pdf
+          vuegen -dir example_data/Earth_microbiome_vuegen_demo_notebook -rt pdf
+          vuegen -c example_data/Earth_microbiome_vuegen_demo_notebook/Earth_microbiome_vuegen_demo_notebook_config.yaml -rt pdf
       - name: quarto docx report
         run: |
           cd docs
-          vuegen -c example_data/MicW2Graph/report_config_micw2graph.yaml -rt docx
+          vuegen -dir example_data/Earth_microbiome_vuegen_demo_notebook -rt docx
+          vuegen -c example_data/Earth_microbiome_vuegen_demo_notebook/Earth_microbiome_vuegen_demo_notebook_config.yaml -rt docx
       - name: quarto odt report
         run: |
           cd docs
-          vuegen -c example_data/MicW2Graph/report_config_micw2graph.yaml -rt odt
+          vuegen -dir example_data/Earth_microbiome_vuegen_demo_notebook -rt odt
+          vuegen -c example_data/Earth_microbiome_vuegen_demo_notebook/Earth_microbiome_vuegen_demo_notebook_config.yaml -rt odt
       - name: quarto revealjs report
         run: |
           cd docs
-          vuegen -c example_data/MicW2Graph/report_config_micw2graph.yaml -rt revealjs
+          vuegen -dir example_data/Earth_microbiome_vuegen_demo_notebook -rt revealjs
+          vuegen -c example_data/Earth_microbiome_vuegen_demo_notebook/Earth_microbiome_vuegen_demo_notebook_config.yaml -rt revealjs
       - name: quarto pptx report
         run: |
           cd docs
-          vuegen -c example_data/MicW2Graph/report_config_micw2graph.yaml -rt pptx
+          vuegen -dir example_data/Earth_microbiome_vuegen_demo_notebook -rt pptx
+          vuegen -c example_data/Earth_microbiome_vuegen_demo_notebook/Earth_microbiome_vuegen_demo_notebook_config.yaml -rt pptx
       - name: quarto jupyter report
         run: |
           cd docs
-          vuegen -c example_data/MicW2Graph/report_config_micw2graph.yaml -rt jupyter
+          vuegen -dir example_data/Earth_microbiome_vuegen_demo_notebook -rt jupyter
+          vuegen -c example_data/Earth_microbiome_vuegen_demo_notebook/Earth_microbiome_vuegen_demo_notebook_config.yaml -rt jupyter

@@ -11,10 +11,13 @@
 - [About the project](#about-the-project)
 - [Installation](#installation)
 - [Execution](#execution)
+- [Acknowledgements](#acknowledgements)
 - [Contact](#contact)
 
 ## About the project
-VueGen automates the creation of scientific reports based on a YAML configuration file.  This configuration file specifies the structure of the report, including sections, subsections, and various components such as plots, dataframes, markdown, and API calls. Reports can be generated in various formats, including documents (PDF, HTML, DOCX, ODT), presentations (PPTX, Reveal.js), notebooks (Jupyter) or [Streamlit](streamlit) web applications.
+VueGen automates the creation of reports based on a directory with plots, dataframes, and other files in different formats. A YAML configuration file is generated from the directory to define the structure of the report. Users can customize the report by modifying the configuration file, or they can create their own configuration file instead of passing a directory as input. 
+
+The configuration file specifies the structure of the report, including sections, subsections, and various components such as plots, dataframes, markdown, html, and API calls. Reports can be generated in various formats, including documents (PDF, HTML, DOCX, ODT), presentations (PPTX, Reveal.js), notebooks (Jupyter) or [Streamlit](streamlit) web applications.
 
 An overview of the VueGen workflow is shown in the figure below:
 
@@ -41,7 +44,7 @@ You can install the package for development from this repository by running the 
 
 ```bash
 pip install -e path/to/vuegen # specify location 
-pip install -e . # in case you pwd is in the vuegen directory
+pip install -e . # in case your pwd is in the vuegen directory
 ```
 
 ### Quarto installation
@@ -67,27 +70,39 @@ quarto check
 
 ## Execution
 
-Run VueGen using a configuration file with the following command:
+Run VueGen using a directory with the following command:
 
 ```bash
 cd docs
-vuegen --config example_data/MicW2Graph/report_config_micw2graph.yaml --report_type streamlit
+vuegen --directory example_data/Earth_microbiome_vuegen_demo_notebook --report_type streamlit
 ```
 
 > 💡 If `vuegen` does not work, try `python -m vuegen` instead.
 
 By default, the `streamlit_autorun` argument is set to False, but you can use it in case you want to automatically run the streamlit app.
 
-It's also possible to provide a directory instead of a configuration file:
+It's also possible to provide a configuration file instead of a directory:
 
 ```bash
-vuegen --directory docs/example_data/MicW2Graph/ --report_type streamlit
+vuegen --config example_data/Earth_microbiome_vuegen_demo_notebook/Earth_microbiome_vuegen_demo_notebook_config.yaml --report_type streamlit
 ```
 
 The current report types are streamlit, html, pdf, docx, odt, revealjs, pptx, and jupyter.
+
+## Acknowledgements
+
+- Vuegen was developed by the [Multiomics Network Analytics Group (MoNA)][Mona] at the [Novo Nordisk Foundation Center for Biosustainability (DTU Biosustain)][Biosustain].
+- The vuegen logo was designed based on an image created by [Scriberia][scriberia] for The [Turing Way Community][turingway], which is shared under a CC-BY licence. The original image can be found at [Zenodo][zenodo-turingway].
 
 ## Contact
 If you have comments or suggestions about this project, you can [open an issue][issues] in this repository.
 
 [issues]: https://github.com/Multiomics-Analytics-Group/vuegen/issues/new
 [streamlit]: https://streamlit.io/ 
+[Mona]: https://multiomics-analytics-group.github.io/
+[Biosustain]: https://www.biosustain.dtu.dk/
+[scriberia]: https://www.scriberia.co.uk/
+[turingway]: https://github.com/the-turing-way/the-turing-way
+[zenodo-turingway]: https://zenodo.org/records/3695300
+
+
