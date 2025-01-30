@@ -1,11 +1,14 @@
-[tool.poetry]
+[project]
 name = "vuegen"
-version = "0.1.0"
+dynamic = ["version"]
+
+[tool.poetry]
 description = "Module to generate automatic web interface reports with visualizations"
 authors = ["MoNA group"]
 license = "MIT"
 readme = "README.md"
 repository = "https://github.com/Multiomics-Analytics-Group/vuegen"
+version = "0.1.0"
 
 [tool.poetry.dependencies]
 python = ">=3.9,<3.9.7 || >3.9.7,<4.0"
@@ -39,9 +42,16 @@ quarto-cli = "*"
 [tool.poetry.group.dev.dependencies]
 ipykernel = {version="^6.29.5", optional=true}
 
+[tool.poetry.requires-plugins]
+poetry-dynamic-versioning = { version = ">=1.0.0,<2.0.0", extras = ["plugin"] }
+
+ 
+[tool.poetry-dynamic-versioning]
+enable = true
+
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning>=1.0.0,<2.0.0"]
+build-backend = "poetry_dynamic_versioning.backend"
 
 # https://stackoverflow.com/a/60990574/9684872
 [tool.poetry.extras]
