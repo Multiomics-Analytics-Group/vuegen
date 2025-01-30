@@ -1,6 +1,6 @@
-import logging
-import os   
 import json
+import logging
+import os
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Union
 
@@ -166,7 +166,8 @@ class ConfigManager:
         """
         description_file = folder_path / "description.md"
         if description_file.exists():
-            return f"{description_file.read_text().strip().replace('\n', '\n  ')}\n"
+            ret = description_file.read_text().strip().replace('\n', '\n  ')
+            return f"{ret}\n"
         return ""
 
     def _create_subsect_config_fromdir(self, subsection_dir_path: Path) -> Dict[str, Union[str, List[Dict]]]:

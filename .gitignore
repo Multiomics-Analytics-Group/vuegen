@@ -128,6 +128,3 @@ docs/images/Graphical_abstract/
 docs/images/Nfcore_module_figure
 docs/presentations/
 test.py
-docs/example_data/Earth_microbiome_vuegen_demo_notebook/
-docs/example_data/emp_deblur_100bp.subset_2k.rare_5000.biom
-docs/vuegen_case_study_earth_microbiome.ipynb

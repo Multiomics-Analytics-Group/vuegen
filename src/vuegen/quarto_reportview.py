@@ -155,10 +155,39 @@ format:"""
     toc-location: left
     toc-depth: 3
     page-layout: full
-    self-contained: true""",
+    self-contained: true
+include-in-header:
+    text: |
+        <style type="text/css">
+        .footer {
+        position: relative;
+        left: 0;
+        width: 100%;
+        text-align: center;
+        margin-top: 20px;
+        }
+        </style>
+include-after-body:
+    text: |
+        <footer class="footer">
+            This report was generated with 
+            <a href="https://github.com/Multiomics-Analytics-Group/vuegen" target="_blank">
+                <img src="../docs/images/vuegen_logo.svg" alt="VueGen" width="65px">
+            </a>
+            | © 2025 <a href="https://github.com/Multiomics-Analytics-Group" target="_blank">Multiomics Network Analytics Group (MoNA)</a>
+        </footer>""",
             r.ReportType.PDF: """
   pdf:
-    toc: false""",
+    toc: false
+    margin:
+      - bottom=40mm
+    include-in-header: 
+        text: |
+            \\usepackage{scrlayer-scrpage}
+            \\usepackage{hyperref}
+            \\clearpairofpagestyles
+            \\lofoot{This report was generated with \\href{https://github.com/Multiomics-Analytics-Group/vuegen}{VueGen} | \\copyright{} 2025 \\href{https://github.com/Multiomics-Analytics-Group}{Multiomics Network Analytics Group}}
+            \\rofoot{\pagemark}""",
             r.ReportType.DOCX: """
   docx:
     toc: false""",
@@ -172,7 +201,27 @@ format:"""
     controls: true
     navigation-mode: vertical
     controls-layout: bottom-right
-    output-file: quarto_report_revealjs.html""",
+    output-file: quarto_report_revealjs.html
+include-in-header:
+    text: |
+        <style type="text/css">
+        .footer {
+        position: fixed;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        text-align: center;
+        }
+        </style>
+include-after-body:
+    text: |
+        <footer class="footer">
+            This report was generated with 
+            <a href="https://github.com/Multiomics-Analytics-Group/vuegen" target="_blank">
+                <img src="../docs/images/vuegen_logo.svg" alt="VueGen" width="65px">
+            </a>
+            | © 2025 <a href="https://github.com/Multiomics-Analytics-Group" target="_blank">Multiomics Network Analytics Group (MoNA)</a>
+        </footer>""",
             r.ReportType.PPTX: """
   pptx:
     toc: false
@@ -183,9 +232,28 @@ r.ReportType.JUPYTER: """
     toc-location: left
     toc-depth: 3
     page-layout: full
-    self-contained: true"""
+    self-contained: true
+include-in-header:
+    text: |
+        <style type="text/css">
+        .footer {
+        position: relative;
+        left: 0;
+        width: 100%;
+        text-align: center;
+        margin-top: 20px;
         }
-
+        </style>
+include-after-body:
+    text: |
+        <footer class="footer">
+            This report was generated with 
+            <a href="https://github.com/Multiomics-Analytics-Group/vuegen" target="_blank">
+                <img src="../docs/images/vuegen_logo.svg" alt="VueGen" width="65px">
+            </a>
+            | © 2025 <a href="https://github.com/Multiomics-Analytics-Group" target="_blank">Multiomics Network Analytics Group (MoNA)</a>
+        </footer>"""
+        }
         # Create a key based on the report type and format
         key = self.report_type
 

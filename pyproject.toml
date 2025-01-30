@@ -24,7 +24,7 @@ kaleido = "0.2.0"
 vl-convert-python = "^1.7.0"
 dataframe-image = "^0.2.6"
 strenum = { version = "^0.4.15", python = "<3.11" }
-
+pyyaml = "^6.0.2"
 # optional doc depencencies, follow approach as described here:
 # https://github.com/python-poetry/poetry/issues/2567#issuecomment-646766059
 sphinx = {version="*", optional=true}
