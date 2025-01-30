@@ -35,8 +35,8 @@ jobs:
         run: |
             cd docs
             sphinx-build -n --keep-going -b html ./ ./_build/
-      - name: save artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: Sphinx_${{ matrix.python-version }}
-          path: docs/_build/
+      # - name: save artifacts
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: Sphinx_${{ matrix.python-version }}
+      #     path: docs/_build/
