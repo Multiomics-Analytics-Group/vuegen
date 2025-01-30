@@ -11,6 +11,7 @@
 - [About the project](#about-the-project)
 - [Installation](#installation)
 - [Execution](#execution)
+- [Acknowledgements](#acknowledgements)
 - [Contact](#contact)
 
 ## About the project
@@ -88,8 +89,20 @@ vuegen --config example_data/Earth_microbiome_vuegen_demo_notebook/Earth_microbi
 
 The current report types are streamlit, html, pdf, docx, odt, revealjs, pptx, and jupyter.
 
+## Acknowledgements
+
+- Vuegen was developed by the [Multiomics Network Analytics Group (MoNA)][Mona] at the [Novo Nordisk Foundation Center for Biosustainability (DTU Biosustain)][Biosustain].
+- The vuegen logo was designed based on an image created by [Scriberia][scriberia] for The [Turing Way Community][turingway], which is shared under a CC-BY licence. The original image can be found at [Zenodo][zenodo-turingway].
+
 ## Contact
 If you have comments or suggestions about this project, you can [open an issue][issues] in this repository.
 
 [issues]: https://github.com/Multiomics-Analytics-Group/vuegen/issues/new
 [streamlit]: https://streamlit.io/ 
+[Mona]: https://multiomics-analytics-group.github.io/
+[Biosustain]: https://www.biosustain.dtu.dk/
+[scriberia]: https://www.scriberia.co.uk/
+[turingway]: https://github.com/the-turing-way/the-turing-way
+[zenodo-turingway]: https://zenodo.org/records/3695300
+
+
