@@ -47,25 +47,21 @@ pip install -e path/to/vuegen # specify location
 pip install -e . # in case your pwd is in the vuegen directory
 ```
 
-### Quarto installation
+This will both install `quarto` and `streamlit` as our backends for report generation.
 
-Install quarto with vueguen if you don't have it globally installed.
-
-```bash
-pip install -e ".[quarto]" # specify location
-```
-
-if you use conda a conda environement you can install quatro from the conda-forge channel 
-in case it did not work.
-
-```bash
-conda install -c conda-forge quarto
-```
+### Verify quarto installation
 
 Test your quarto installation by running the following command:
 
 ```bash
 quarto check
+```
+
+If you use conda a conda environement you can install quatro from the conda-forge channel 
+in case it did not work.
+
+```bash
+conda install -c conda-forge quarto
 ```
 
 ## Execution
