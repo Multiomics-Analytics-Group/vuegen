@@ -53,7 +53,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install --upgrade pip
-          pip install -e ".[quarto]"
+          pip install -e "."
       - name: Execute streamlit report (to check)
         run: |
           cd docs

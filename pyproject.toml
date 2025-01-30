@@ -34,7 +34,7 @@ ipywidgets = {version="*", optional=true}
 sphinx-new-tab-link = {version = "!=0.2.2", optional=true}
 jupytext = {version="*", optional=true}
 # quarto
-quarto-cli = {version="*", optional=true}
+quarto-cli = {version="*"}
 
 [tool.poetry.group.dev.dependencies]
 ipykernel = {version="^6.29.5", optional=true}
