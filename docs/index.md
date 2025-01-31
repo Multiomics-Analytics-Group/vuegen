@@ -15,6 +15,14 @@ vuegen_demo
 ```
 
 ```{toctree}
+:maxdepth: 1
+:caption: Building a report
+
+vuegen_case_study_earth_microbiome
+example_report
+```
+
+```{toctree}
 :maxdepth: 2
 :caption: Modules
 :hidden:
