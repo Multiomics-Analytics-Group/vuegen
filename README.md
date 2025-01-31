@@ -1,7 +1,7 @@
 <!-- <div align="center">
   <img width="300px" src="images/vuegen_logo.svg">
 </div> -->
-![VueGen Logo](docs/images/vuegen_logo.svg)
+![VueGen Logo](https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/vuegen_logo.svg)
 -----------------
 <p align="center">
    VueGen is a Python library that automates the creation of scientific reports.
@@ -26,7 +26,7 @@ An overview of the VueGen workflow is shown in the figure below:
   <img width="650px" src="images/vuegen_graph_abstract.png" alt="VueGen overview"/>
 </figure>
 </p> -->
-![VueGen Abstract](docs/images/vuegen_graph_abstract.png)
+![VueGen Abstract](https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/vuegen_graph_abstract.png)
 
 Also, the class diagram for the project is presented below to illustrate the architecture and relationships between classes:
 
@@ -36,33 +36,32 @@ Also, the class diagram for the project is presented below to illustrate the arc
 </figure>
 </p> -->
 
-![VueGen Class Diagram](docs/images/vuegen_classdiagram_noattmeth.png)
+![VueGen Class Diagram](https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/vuegen_classdiagram_noattmeth.png)
 
 ## Installation
 
-You can install the package for development from this repository by running the following command:
+Vuegen is available on [PyPI][vuegen-pypi] and can be installed using pip:
+
+```bash
+pip install vuegen
+```
+
+You can also install the package for development from this repository by running the following command:
 
 ```bash
 pip install -e path/to/vuegen # specify location 
 pip install -e . # in case your pwd is in the vuegen directory
 ```
 
-This will both install `quarto` and `streamlit` as our backends for report generation.
+### Quarto installation
 
-### Verify quarto installation
-
-Test your quarto installation by running the following command:
+Vuegen uses [Quarto][quarto] to generate various report types. The pip insallation includes quarto using the [quarto-cli Python library][quarto-cli-pypi]. To test if quarto is installed in your computer, run the following command:
 
 ```bash
 quarto check
 ```
 
-If you use conda a conda environement you can install quatro from the conda-forge channel 
-in case it did not work.
-
-```bash
-conda install -c conda-forge quarto
-```
+If quarto is not installed, you can download the command-line interface from the [Quarto website][quarto-cli] for your operating system.
 
 ## Execution
 
@@ -83,7 +82,15 @@ It's also possible to provide a configuration file instead of a directory:
 vuegen --config example_data/Earth_microbiome_vuegen_demo_notebook/Earth_microbiome_vuegen_demo_notebook_config.yaml --report_type streamlit
 ```
 
-The current report types are streamlit, html, pdf, docx, odt, revealjs, pptx, and jupyter.
+The current report types supported by VueGen are:
+* Streamlit
+* HTML
+* PDF
+* DOCX
+* ODT
+* Reveal.js
+* PPTX
+* Jupyter
 
 ## Acknowledgements
 
@@ -95,10 +102,15 @@ If you have comments or suggestions about this project, you can [open an issue][
 
 [issues]: https://github.com/Multiomics-Analytics-Group/vuegen/issues/new
 [streamlit]: https://streamlit.io/ 
+[vuegen-pypi]: https://pypi.org/project/vuegen/
+[quarto]: https://quarto.org/
+[quarto-cli-pypi]: https://pypi.org/project/quarto-cli/
+[quarto-cli]: https://quarto.org/docs/get-started/
 [Mona]: https://multiomics-analytics-group.github.io/
 [Biosustain]: https://www.biosustain.dtu.dk/
 [scriberia]: https://www.scriberia.co.uk/
 [turingway]: https://github.com/the-turing-way/the-turing-way
 [zenodo-turingway]: https://zenodo.org/records/3695300
+[issues]: https://github.com/Multiomics-Analytics-Group/vuegen/issues/new
 
 
