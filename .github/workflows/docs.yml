@@ -39,6 +39,8 @@ jobs:
         run: |
             mv docs/quarto_report/quarto_report.html docs/quarto_report/index.html
       - name: Publish html report to github pages
+        # Only publish a new static report upon a new release -> can be changed.
+        if: startsWith(github.ref, 'refs/tags')
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
