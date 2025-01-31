@@ -15,7 +15,7 @@ from importlib import metadata
 
 # -- Project information -----------------------------------------------------
 
-project = "mockup"
+project = "vuegen"
 copyright = "2024, Multiomics-Analytics-Group"
 author = "Multiomics-Analytics-Group, Sebastián Ayala Ruano, Henry Webel, Alberto Santos"
 PACKAGE_VERSION = metadata.version("vuegen")
@@ -130,7 +130,7 @@ if os.environ.get("READTHEDOCS") == "True":
     from pathlib import Path
 
     PROJECT_ROOT = Path(__file__).parent.parent
-    PACKAGE_ROOT = PROJECT_ROOT / "vuegen"
+    PACKAGE_ROOT = PROJECT_ROOT / "src" / "vuegen"
 
     def run_apidoc(_):
         from sphinx.ext import apidoc
