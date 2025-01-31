@@ -1,4 +1,4 @@
-name: Test documentation building (until it's moved to ReadTheDocs)
+name: Test documentation building, and publish report to GitHub Pages
 
 on:
   push:
@@ -35,6 +35,14 @@ jobs:
         run: |
             cd docs
             sphinx-build -n --keep-going -b html ./ ./_build/
+      - name: Rename entry point of report to index.html
+        run: |
+            mv docs/quarto_report/quarto_report.html docs/quarto_report/index.html
+      - name: Publish html report to github pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: docs/quarto_report/
       # - name: save artifacts
       #   uses: actions/upload-artifact@v4
       #   with:
