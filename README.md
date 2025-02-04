@@ -100,7 +100,6 @@ The current report types supported by VueGen are:
 ## Contact
 If you have comments or suggestions about this project, you can [open an issue][issues] in this repository.
 
-[issues]: https://github.com/Multiomics-Analytics-Group/vuegen/issues/new
 [streamlit]: https://streamlit.io/ 
 [vuegen-pypi]: https://pypi.org/project/vuegen/
 [quarto]: https://quarto.org/
