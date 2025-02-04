@@ -7,6 +7,14 @@
    VueGen is a Python library that automates the creation of scientific reports.
 </p>
 
+| Information | Links |
+| :--- | :--- |
+| **Package** |[ ![PyPI Latest Release](https://img.shields.io/pypi/v/vuegen.svg)](https://pypi.org/project/vuegen/) [![Supported versions](https://img.shields.io/pypi/pyversions/vuegen.svg)](https://pypi.org/project/vuegen/)|
+| **Documentation** | [![Docs](https://readthedocs.org/projects/vuegen/badge/?style=flat)](https://vuegen.readthedocs.io/)|
+| **Build** | [![CI](https://github.com/Multiomics-Analytics-Group/vuegen/actions/workflows/cdci.yml/badge.svg)](https://github.com/Multiomics-Analytics-Group/vuegen/actions/workflows/cdci.yml) [![Docs](https://github.com/Multiomics-Analytics-Group/vuegen/actions/workflows/docs.yml/badge.svg)](https://github.com/Multiomics-Analytics-Group/vuegen/actions/workflows/docs.yml)|
+| **Examples** | [![HTML5](https://img.shields.io/badge/html5-%23E34F26.svg?style=for-the-badge&logo=html5&logoColor=white)](https://multiomics-analytics-group.github.io/vuegen/) [![Streamlit](https://img.shields.io/badge/Streamlit-%23FE4B4B.svg?style=for-the-badge&logo=streamlit&logoColor=white)](https://multiomics-analytics-group.github.io/vuegen/)|
+| **Discuss on GitHub** | [![GitHub issues](https://img.shields.io/github/issues/Multiomics-Analytics-Group/vuegen)](https://github.com/Multiomics-Analytics-Group/vuegen/issues) [![GitHub pull requests](https://img.shields.io/github/issues-pr/Multiomics-Analytics-Group/vuegen)](https://github.com/Multiomics-Analytics-Group/vuegen/pulls) |
+
 ## Table of contents:
 - [About the project](#about-the-project)
 - [Installation](#installation)
@@ -100,7 +108,6 @@ The current report types supported by VueGen are:
 ## Contact
 If you have comments or suggestions about this project, you can [open an issue][issues] in this repository.
 
-[issues]: https://github.com/Multiomics-Analytics-Group/vuegen/issues/new
 [streamlit]: https://streamlit.io/ 
 [vuegen-pypi]: https://pypi.org/project/vuegen/
 [quarto]: https://quarto.org/
