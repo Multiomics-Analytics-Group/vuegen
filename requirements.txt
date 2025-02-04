@@ -55,7 +55,6 @@ ipywidgets==8.1.5
 isoduration==20.11.0 
 itables==2.2.4 
 jedi==0.19.2 
-jinja2==3.1.4 
 json5==0.10.0 
 jsonpickle==4.0.1 
 jsonpointer==3.0.0 
