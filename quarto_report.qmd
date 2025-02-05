@@ -27,7 +27,7 @@ include-after-body:
         <footer class="footer">
             This report was generated with 
             <a href="https://github.com/Multiomics-Analytics-Group/vuegen" target="_blank">
-                <img src="../docs/images/vuegen_logo.svg" alt="VueGen" width="65px">
+                <img src="https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/vuegen_logo.svg" alt="VueGen" width="65px">
             </a>
             | © 2025 <a href="https://github.com/Multiomics-Analytics-Group" target="_blank">Multiomics Network Analytics Group (MoNA)</a>
         </footer>
@@ -35,12 +35,12 @@ include-after-body:
 
 ```{python}
 #| label: 'Imports'
-import plotly.io as pio
-import requests
-import pandas as pd
-from itables import show
 import altair as alt
 import dataframe_image as dfi
+import plotly.io as pio
+from itables import show
+import requests
+import pandas as pd
 ```
 
 The Earth Microbiome Project (EMP) is a systematic attempt to characterize global microbial taxonomic and functional diversity for the benefit of the planet and humankind. 
@@ -50,7 +50,7 @@ The Earth Microbiome Project (EMP) is a systematic attempt to characterize globa
   
   You can find more information about the Earth Microbiome Project at https://earthmicrobiome.org/ and in the [original article](https://www.nature.com/articles/nature24621).
 
-![](//home/runner/work/vuegen/vuegen/docs/example_data/Earth_microbiome_vuegen_demo_notebook/emp_logo.png){fig-alt= width=650 height=400}
+![](https://raw.githubusercontent.com/ElDeveloper/cogs220/master/emp-logo.svg){fig-alt= width=650 height=400}
 
 # Exploratory Data Analysis
 This section contains the exploratory data analysis of the Earth Microbiome Project (EMP) dataset.
