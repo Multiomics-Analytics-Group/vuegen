@@ -4,10 +4,10 @@ from .config_manager import ConfigManager
 from .quarto_reportview import QuartoReportView
 from .report import ReportType
 from .streamlit_reportview import StreamlitReportView
-from .utils import assert_enum_value, load_yaml_config, write_yaml_config
+from .utils import assert_enum_value, load_yaml_config, write_yaml_config, get_logger
 
 
-def get_report(report_type: str, logger: logging.Logger, config_path: str = None, dir_path: str = None, streamlit_autorun: bool = False) -> None:
+def get_report(report_type: str, logger: logging.Logger = get_logger("report"), config_path: str = None, dir_path: str = None, streamlit_autorun: bool = False) -> None:
     """
     Generate and run a report based on the specified engine.
 
@@ -15,8 +15,8 @@ def get_report(report_type: str, logger: logging.Logger, config_path: str = None
     ----------
     report_type : str
         The report type. It should be one of the values of the ReportType Enum.
-    logger : logging.Logger
-        A logger object to track warnings, errors, and info messages.
+    logger : logging.Logger, optional
+        A logger object to track warnings, errors, and info messages. If not provided, a default logger will be created.
     config_path : str, optional
         Path to the YAML configuration file.
     dir_path : str, optional
@@ -29,7 +29,7 @@ def get_report(report_type: str, logger: logging.Logger, config_path: str = None
     ValueError
         If neither 'config_path' nor 'directory' is provided.
     """
-    # Initialize the config manager object 
+    # Initialize the config manager object
     config_manager = ConfigManager(logger)
     
     if dir_path:
