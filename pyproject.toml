@@ -13,7 +13,7 @@ version = "0.1.0"
 [tool.poetry.dependencies]
 python = ">=3.9,<3.9.7 || >3.9.7,<4.0"
 streamlit = "1.39.0"
-streamlit-aggrid = "1.1.0"
+streamlit-aggrid = "1.0.5"
 quarto-cli = "*"
 plotly = "5.15.0"
 pyvis = "^0.3.2"
