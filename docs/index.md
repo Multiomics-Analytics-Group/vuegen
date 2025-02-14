@@ -2,6 +2,7 @@
 
 <!-- https://myst-parser.readthedocs.io/en/latest/faq/index.html
 #include-a-file-from-outside-the-docs-folder-like-readme-md -->
+
 ```{include} ../README.md
 :start-line: 0
 :relative-docs: docs
@@ -18,6 +19,7 @@ vuegen_demo
 :maxdepth: 1
 :caption: Building a report
 
+vuegen_basic_case_study
 vuegen_case_study_earth_microbiome
 example_report
 ```
