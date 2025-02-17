@@ -744,7 +744,7 @@ if prompt := st.chat_input("Enter your prompt here:"):
             component_imports.extend(components_imports['chatbot'])
         elif component_type == r.ComponentType.DATAFRAME:
             component_imports.extend(components_imports['dataframe'])
-            component_imports.extend("df_index = 1")
+            component_imports.append('df_index = 1')
 
         # Return the list of import statements
         return component_imports     
