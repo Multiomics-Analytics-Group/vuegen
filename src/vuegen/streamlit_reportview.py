@@ -466,9 +466,27 @@ st.components.v1.html(html_data, height=net_html_height)\n"""
             read_function = read_function_mapping[file_extension]
             dataframe_content.append(f"""df = pd.{read_function.__name__}('{dataframe.file_path}')""")
             
-            # Display the dataframe
-            dataframe_content.append("st.dataframe(df, use_container_width=True)")
-        
+            # Displays a DataFrame using AgGrid with configurable options.
+            dataframe_content.append("""
+# Displays a DataFrame using AgGrid with configurable options.
+grid_builder = GridOptionsBuilder.from_dataframe(df)
+grid_builder.configure_default_column(editable=True, groupable=True)
+grid_builder.configure_side_bar(filters_panel=True, columns_panel=True)
+grid_builder.configure_selection(selection_mode="multiple")
+grid_builder.configure_pagination(enabled=True, paginationAutoPageSize=False, paginationPageSize=20)
+grid_options = grid_builder.build()
+
+AgGrid(df, gridOptions=grid_options)
+
+# Button to download the df
+df_csv = df.to_csv(sep=',', header=True, index=False).encode('utf-8')
+st.download_button(
+    label="Download dataframe as CSV",
+    data=df_csv,
+    file_name=f"dataframe_{df_index}.csv",
+    mime='text/csv',
+    key=f"download_button_{df_index}")
+df_index += 1""")
         except Exception as e:
             self.report.logger.error(f"Error generating content for DataFrame: {dataframe.title}. Error: {str(e)}")
             raise
@@ -707,7 +725,7 @@ if prompt := st.chat_input("Enter your prompt here:"):
                 r.PlotType.PLOTLY: ['import json', 'import requests'],
                 r.PlotType.INTERACTIVE_NETWORK: ['import requests']
             },
-            'dataframe': ['import pandas as pd'],
+            'dataframe': ['import pandas as pd', 'from st_aggrid import AgGrid, GridOptionsBuilder'],
             'markdown': ['import requests'],
             'chatbot': ['import time', 'import json', 'import requests']
         }
@@ -720,12 +738,13 @@ if prompt := st.chat_input("Enter your prompt here:"):
             plot_type = getattr(component, 'plot_type', None)
             if plot_type in components_imports['plot']:
                 component_imports.extend(components_imports['plot'][plot_type])
-        elif component_type == r.ComponentType.DATAFRAME:
-            component_imports.extend(components_imports['dataframe'])
         elif component_type == r.ComponentType.MARKDOWN:
             component_imports.extend(components_imports['markdown'])
         elif component_type == r.ComponentType.CHATBOT:
             component_imports.extend(components_imports['chatbot'])
+        elif component_type == r.ComponentType.DATAFRAME:
+            component_imports.extend(components_imports['dataframe'])
+            component_imports.append('df_index = 1')
 
         # Return the list of import statements
         return component_imports     

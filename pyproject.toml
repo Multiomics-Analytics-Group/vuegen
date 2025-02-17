@@ -13,6 +13,8 @@ version = "0.1.0"
 [tool.poetry.dependencies]
 python = ">=3.9,<3.9.7 || >3.9.7,<4.0"
 streamlit = "1.39.0"
+streamlit-aggrid = "*"
+quarto-cli = "*"
 plotly = "5.15.0"
 pyvis = "^0.3.2"
 pandas = {extras = ["parquet"], version = "^2.2.3"}
@@ -21,13 +23,14 @@ xlrd = "^2.0.1"
 nbformat = "^5.10.4"
 nbclient = "^0.10.0"
 matplotlib = "^3.9.2"
-altair = "^5.4.1"
+altair = "*"
 itables = "^2.2.2"
 kaleido = "0.2.0"
 vl-convert-python = "^1.7.0"
 dataframe-image = "^0.2.6"
 strenum = { version = "^0.4.15", python = "<3.11" }
 pyyaml = "^6.0.2"
+
 # optional doc depencencies, follow approach as described here:
 # https://github.com/python-poetry/poetry/issues/2567#issuecomment-646766059
 sphinx = {version="*", optional=true}
@@ -36,15 +39,12 @@ myst-nb = {version="*", optional=true}
 ipywidgets = {version="*", optional=true}
 sphinx-new-tab-link = {version = "!=0.2.2", optional=true}
 jupytext = {version="*", optional=true}
-# quarto
-quarto-cli = "*"
 
 [tool.poetry.group.dev.dependencies]
 ipykernel = {version="^6.29.5", optional=true}
 
 [tool.poetry.requires-plugins]
 poetry-dynamic-versioning = { version = ">=1.0.0,<2.0.0", extras = ["plugin"] }
-
  
 [tool.poetry-dynamic-versioning]
 enable = true
