@@ -468,7 +468,6 @@ st.components.v1.html(html_data, height=net_html_height)\n"""
             
             # Displays a DataFrame using AgGrid with configurable options.
             dataframe_content.append("""
-df_index = 1
 # Displays a DataFrame using AgGrid with configurable options.
 grid_builder = GridOptionsBuilder.from_dataframe(df)
 grid_builder.configure_default_column(editable=True, groupable=True)
@@ -482,11 +481,11 @@ AgGrid(df, gridOptions=grid_options)
 # Button to download the df
 df_csv = df.to_csv(sep=',', header=True, index=False).encode('utf-8')
 st.download_button(
-    label="Download dataframe {df_index} as CSV",
+    label="Download dataframe as CSV",
     data=df_csv,
-    file_name="dataframe_{df_index}.csv",
+    file_name=f"dataframe_{df_index}.csv",
     mime='text/csv',
-    key="download_button_{df_index}")
+    key=f"download_button_{df_index}")
 df_index += 1""")
         except Exception as e:
             self.report.logger.error(f"Error generating content for DataFrame: {dataframe.title}. Error: {str(e)}")
@@ -739,12 +738,13 @@ if prompt := st.chat_input("Enter your prompt here:"):
             plot_type = getattr(component, 'plot_type', None)
             if plot_type in components_imports['plot']:
                 component_imports.extend(components_imports['plot'][plot_type])
-        elif component_type == r.ComponentType.DATAFRAME:
-            component_imports.extend(components_imports['dataframe'])
         elif component_type == r.ComponentType.MARKDOWN:
             component_imports.extend(components_imports['markdown'])
         elif component_type == r.ComponentType.CHATBOT:
             component_imports.extend(components_imports['chatbot'])
+        elif component_type == r.ComponentType.DATAFRAME:
+            component_imports.extend(components_imports['dataframe'])
+            component_imports.extend("df_index = 1")
 
         # Return the list of import statements
         return component_imports     
