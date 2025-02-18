@@ -1,0 +1,13 @@
+report:
+  title: Chatbot example
+  description: >
+    A chatbot exaple.
+sections:
+  - title: ChatBot test
+    subsections:
+      - title: Simple test
+        components:
+          - title: ChatBot test
+            component_type: chatbot
+            api_url: http://localhost:11434/api/chat
+            model: llama3.2

@@ -1,0 +1,11 @@
+report:
+  title: APICall example
+  description: An APICall exaple.
+sections:
+  - title: APICall test
+    subsections:
+      - title: JSONPlaceholder test
+        components:
+          - title: JSONPlaceholder component
+            component_type: apicall
+            api_url: https://jsonplaceholder.typicode.com/todos/1
