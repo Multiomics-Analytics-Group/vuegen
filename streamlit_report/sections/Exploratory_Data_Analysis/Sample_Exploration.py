@@ -1,14 +1,14 @@
-from st_aggrid import AgGrid, GridOptionsBuilder
-import altair as alt
-import json
-df_index = 1
-import streamlit as st
 import pandas as pd
+import json
+import streamlit as st
 import requests
+from st_aggrid import AgGrid, GridOptionsBuilder
+df_index = 1
+import altair as alt
 
 st.markdown('''<h3 style='text-align: center; color: #023558;'>Sample Exploration</h3>''', unsafe_allow_html=True)
 st.markdown('''<h4 style='text-align: center; color: #2b8cbe;'>Metadata Random Subset</h4>''', unsafe_allow_html=True)
-df = pd.read_csv('/home/runner/work/vuegen/vuegen/docs/example_data/Earth_microbiome_vuegen_demo_notebook/1_Exploratory_data_analysis/1_sample_exploration/1_metadata_random_subset.csv')
+df = pd.read_csv('example_data/Earth_microbiome_vuegen_demo_notebook/1_Exploratory_data_analysis/1_sample_exploration/1_metadata_random_subset.csv')
 
 # Displays a DataFrame using AgGrid with configurable options.
 grid_builder = GridOptionsBuilder.from_dataframe(df)
@@ -31,17 +31,17 @@ st.download_button(
 df_index += 1
 st.markdown('''<h4 style='text-align: center; color: #2b8cbe;'>Animal Samples Map</h4>''', unsafe_allow_html=True)
 
-st.image('/home/runner/work/vuegen/vuegen/docs/example_data/Earth_microbiome_vuegen_demo_notebook/1_Exploratory_data_analysis/1_sample_exploration/2_animal_samples_map.png', caption='', use_column_width=True)
+st.image('example_data/Earth_microbiome_vuegen_demo_notebook/1_Exploratory_data_analysis/1_sample_exploration/2_animal_samples_map.png', caption='', use_column_width=True)
 
 st.markdown('''<h4 style='text-align: center; color: #2b8cbe;'>Plant Samples Map</h4>''', unsafe_allow_html=True)
 
-with open('/home/runner/work/vuegen/vuegen/docs/example_data/Earth_microbiome_vuegen_demo_notebook/1_Exploratory_data_analysis/1_sample_exploration/3_plant_samples_map.json', 'r') as plot_file:
+with open('example_data/Earth_microbiome_vuegen_demo_notebook/1_Exploratory_data_analysis/1_sample_exploration/3_plant_samples_map.json', 'r') as plot_file:
     plot_json = json.load(plot_file)
 st.plotly_chart(plot_json, use_container_width=True)
 
 st.markdown('''<h4 style='text-align: center; color: #2b8cbe;'>Saline Samples Map</h4>''', unsafe_allow_html=True)
 
-with open('/home/runner/work/vuegen/vuegen/docs/example_data/Earth_microbiome_vuegen_demo_notebook/1_Exploratory_data_analysis/1_sample_exploration/4_saline_samples_map.json', 'r') as plot_file:
+with open('example_data/Earth_microbiome_vuegen_demo_notebook/1_Exploratory_data_analysis/1_sample_exploration/4_saline_samples_map.json', 'r') as plot_file:
     plot_json = json.load(plot_file)
 
 altair_plot = alt.Chart.from_dict(plot_json)

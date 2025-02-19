@@ -1,17 +1,17 @@
-import requests
 import streamlit as st
+import requests
 
 st.markdown('''<h3 style='text-align: center; color: #023558;'>All Html</h3>''', unsafe_allow_html=True)
 st.markdown('''<h4 style='text-align: center; color: #2b8cbe;'>Plot</h4>''', unsafe_allow_html=True)
 
-with open('/home/runner/work/vuegen/vuegen/docs/example_data/Basic_example_vuegen_demo_notebook/4_Html/1_All_html/1_plot.html', 'r', encoding='utf-8') as html_file:
+with open('example_data/Basic_example_vuegen_demo_notebook/4_Html/1_All_html/1_plot.html', 'r', encoding='utf-8') as html_file:
     html_content = html_file.read()
 
 st.components.v1.html(html_content, height=600, scrolling=True)
 
 st.markdown('''<h4 style='text-align: center; color: #2b8cbe;'>Ckg Network</h4>''', unsafe_allow_html=True)
 
-with open('/home/runner/work/vuegen/vuegen/docs/example_data/Basic_example_vuegen_demo_notebook/4_Html/1_All_html/2_ckg_network.html', 'r') as f:
+with open('example_data/Basic_example_vuegen_demo_notebook/4_Html/1_All_html/2_ckg_network.html', 'r') as f:
     html_data = f.read()
 
 
@@ -26,7 +26,7 @@ st.components.v1.html(html_data, height=net_html_height)
 
 st.markdown('''<h4 style='text-align: center; color: #2b8cbe;'>Multiqc Report</h4>''', unsafe_allow_html=True)
 
-with open('/home/runner/work/vuegen/vuegen/docs/example_data/Basic_example_vuegen_demo_notebook/4_Html/1_All_html/3_multiqc_report.html', 'r', encoding='utf-8') as html_file:
+with open('example_data/Basic_example_vuegen_demo_notebook/4_Html/1_All_html/3_multiqc_report.html', 'r', encoding='utf-8') as html_file:
     html_content = html_file.read()
 
 st.components.v1.html(html_content, height=600, scrolling=True)

@@ -1,12 +1,12 @@
-from st_aggrid import AgGrid, GridOptionsBuilder
-df_index = 1
-import streamlit as st
 import pandas as pd
+df_index = 1
+from st_aggrid import AgGrid, GridOptionsBuilder
+import streamlit as st
 
 st.markdown('''<h3 style='text-align: center; color: #023558;'>All Formats</h3>''', unsafe_allow_html=True)
 st.markdown('''<p style='text-align: center; color: #000000;'>This subsection contains example dataframes.</p>''', unsafe_allow_html=True)
 st.markdown('''<h4 style='text-align: center; color: #2b8cbe;'>Phyla Correlation Network Csv</h4>''', unsafe_allow_html=True)
-df = pd.read_csv('/home/runner/work/vuegen/vuegen/docs/example_data/Basic_example_vuegen_demo_notebook/2_Dataframes/1_All_formats/1_phyla_correlation_network_csv.csv')
+df = pd.read_csv('example_data/Basic_example_vuegen_demo_notebook/2_Dataframes/1_All_formats/1_phyla_correlation_network_csv.csv')
 
 # Displays a DataFrame using AgGrid with configurable options.
 grid_builder = GridOptionsBuilder.from_dataframe(df)
@@ -28,7 +28,7 @@ st.download_button(
     key=f"download_button_{df_index}")
 df_index += 1
 st.markdown('''<h4 style='text-align: center; color: #2b8cbe;'>Abundance Table Example Xls</h4>''', unsafe_allow_html=True)
-df = pd.read_excel('/home/runner/work/vuegen/vuegen/docs/example_data/Basic_example_vuegen_demo_notebook/2_Dataframes/1_All_formats/2_abundance_table_example_xls.xls')
+df = pd.read_excel('example_data/Basic_example_vuegen_demo_notebook/2_Dataframes/1_All_formats/2_abundance_table_example_xls.xls')
 
 # Displays a DataFrame using AgGrid with configurable options.
 grid_builder = GridOptionsBuilder.from_dataframe(df)
@@ -50,7 +50,7 @@ st.download_button(
     key=f"download_button_{df_index}")
 df_index += 1
 st.markdown('''<h4 style='text-align: center; color: #2b8cbe;'>Sample Info Example Txt</h4>''', unsafe_allow_html=True)
-df = pd.read_table('/home/runner/work/vuegen/vuegen/docs/example_data/Basic_example_vuegen_demo_notebook/2_Dataframes/1_All_formats/3_sample_info_example_txt.txt')
+df = pd.read_table('example_data/Basic_example_vuegen_demo_notebook/2_Dataframes/1_All_formats/3_sample_info_example_txt.txt')
 
 # Displays a DataFrame using AgGrid with configurable options.
 grid_builder = GridOptionsBuilder.from_dataframe(df)
@@ -72,7 +72,7 @@ st.download_button(
     key=f"download_button_{df_index}")
 df_index += 1
 st.markdown('''<h4 style='text-align: center; color: #2b8cbe;'>Sample Info Example Parquet</h4>''', unsafe_allow_html=True)
-df = pd.read_parquet('/home/runner/work/vuegen/vuegen/docs/example_data/Basic_example_vuegen_demo_notebook/2_Dataframes/1_All_formats/4_sample_info_example_parquet.parquet')
+df = pd.read_parquet('example_data/Basic_example_vuegen_demo_notebook/2_Dataframes/1_All_formats/4_sample_info_example_parquet.parquet')
 
 # Displays a DataFrame using AgGrid with configurable options.
 grid_builder = GridOptionsBuilder.from_dataframe(df)

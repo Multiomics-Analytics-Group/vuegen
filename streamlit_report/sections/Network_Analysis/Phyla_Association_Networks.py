@@ -1,12 +1,12 @@
+import pandas as pd
+import streamlit as st
+import requests
 from st_aggrid import AgGrid, GridOptionsBuilder
 df_index = 1
-import streamlit as st
-import pandas as pd
-import requests
 
 st.markdown('''<h3 style='text-align: center; color: #023558;'>Phyla Association Networks</h3>''', unsafe_allow_html=True)
 st.markdown('''<h4 style='text-align: center; color: #2b8cbe;'>Phyla Counts Subset</h4>''', unsafe_allow_html=True)
-df = pd.read_csv('/home/runner/work/vuegen/vuegen/docs/example_data/Earth_microbiome_vuegen_demo_notebook/3_Network_analysis/1_phyla_association_networks/1_phyla_counts_subset.csv')
+df = pd.read_csv('example_data/Earth_microbiome_vuegen_demo_notebook/3_Network_analysis/1_phyla_association_networks/1_phyla_counts_subset.csv')
 
 # Displays a DataFrame using AgGrid with configurable options.
 grid_builder = GridOptionsBuilder.from_dataframe(df)
@@ -44,7 +44,7 @@ st.components.v1.html(html_data, height=net_html_height)
 
 st.markdown('''<h4 style='text-align: center; color: #2b8cbe;'>Phyla Correlation Network With 0.5 Threshold</h4>''', unsafe_allow_html=True)
 
-st.image('/home/runner/work/vuegen/vuegen/docs/example_data/Earth_microbiome_vuegen_demo_notebook/3_Network_analysis/1_phyla_association_networks/3_phyla_correlation_network_with_0.5_threshold.png', caption='', use_column_width=True)
+st.image('example_data/Earth_microbiome_vuegen_demo_notebook/3_Network_analysis/1_phyla_association_networks/3_phyla_correlation_network_with_0.5_threshold.png', caption='', use_column_width=True)
 
 footer = '''<style type="text/css">
 .footer {

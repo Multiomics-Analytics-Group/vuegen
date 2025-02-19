@@ -1,13 +1,13 @@
-from st_aggrid import AgGrid, GridOptionsBuilder
-import json
-df_index = 1
-import streamlit as st
 import pandas as pd
+import json
+import streamlit as st
 import requests
+from st_aggrid import AgGrid, GridOptionsBuilder
+df_index = 1
 
 st.markdown('''<h3 style='text-align: center; color: #023558;'>Nestedness</h3>''', unsafe_allow_html=True)
 st.markdown('''<h4 style='text-align: center; color: #2b8cbe;'>Nestedness Random Subset</h4>''', unsafe_allow_html=True)
-df = pd.read_csv('/home/runner/work/vuegen/vuegen/docs/example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/3_nestedness/1_nestedness_random_subset.csv')
+df = pd.read_csv('example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/3_nestedness/1_nestedness_random_subset.csv')
 
 # Displays a DataFrame using AgGrid with configurable options.
 grid_builder = GridOptionsBuilder.from_dataframe(df)
@@ -30,23 +30,23 @@ st.download_button(
 df_index += 1
 st.markdown('''<h4 style='text-align: center; color: #2b8cbe;'>All Samples</h4>''', unsafe_allow_html=True)
 
-with open('/home/runner/work/vuegen/vuegen/docs/example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/3_nestedness/2_all_samples.json', 'r') as plot_file:
+with open('example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/3_nestedness/2_all_samples.json', 'r') as plot_file:
     plot_json = json.load(plot_file)
 st.plotly_chart(plot_json, use_container_width=True)
 
 st.markdown('''<h4 style='text-align: center; color: #2b8cbe;'>Plant Samples</h4>''', unsafe_allow_html=True)
 
-with open('/home/runner/work/vuegen/vuegen/docs/example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/3_nestedness/3_plant_samples.json', 'r') as plot_file:
+with open('example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/3_nestedness/3_plant_samples.json', 'r') as plot_file:
     plot_json = json.load(plot_file)
 st.plotly_chart(plot_json, use_container_width=True)
 
 st.markdown('''<h4 style='text-align: center; color: #2b8cbe;'>Animal Samples</h4>''', unsafe_allow_html=True)
 
-st.image('/home/runner/work/vuegen/vuegen/docs/example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/3_nestedness/4_animal_samples.png', caption='', use_column_width=True)
+st.image('example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/3_nestedness/4_animal_samples.png', caption='', use_column_width=True)
 
 st.markdown('''<h4 style='text-align: center; color: #2b8cbe;'>Non Saline Samples</h4>''', unsafe_allow_html=True)
 
-st.image('/home/runner/work/vuegen/vuegen/docs/example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/3_nestedness/5_non_saline_samples.png', caption='', use_column_width=True)
+st.image('example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/3_nestedness/5_non_saline_samples.png', caption='', use_column_width=True)
 
 footer = '''<style type="text/css">
 .footer {
