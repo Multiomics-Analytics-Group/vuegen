@@ -35,10 +35,11 @@ jobs:
         run: |
             cd docs
             sphinx-build -n --keep-going -b html ./ ./_build/
+      # --- HTML example deployment ---
       - name: Rename entry point of report to index.html
         run: |
             mv docs/quarto_report/quarto_report.html docs/quarto_report/index.html
-      - name: Publish html report to github pages
+      - name: Publish HTML report to GitHub Pages (gh-pages branch)
         # Only publish a new static report upon a new release -> can be changed.
         if: startsWith(github.ref, 'refs/tags')
         uses: peaceiris/actions-gh-pages@v4
@@ -50,3 +51,14 @@ jobs:
       #   with:
       #     name: Sphinx_${{ matrix.python-version }}
       #     path: docs/_build/
+
+      # --- Streamlit example deployment ---
+      - name: Fix Absolute Paths in Streamlit Scripts
+        run: |
+          find docs/streamlit_report/sections -type f -name "*.py" -exec sed -i 's|/home/runner/work/vuegen/vuegen/docs/||g' {} +
+      - name: Publish Streamlit report to streamlit-example branch
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: docs/
+          publish_branch: streamlit-report-example
