@@ -1,0 +1,174 @@
+report:
+  description: 'A general description of the report.
+
+    '
+  graphical_abstract: https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/vuegen_logo.svg
+  logo: https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/vuegen_logo.svg
+  title: Basic Example Vuegen Demo Notebook
+sections:
+- description: This section contains example plots
+  subsections:
+  - components:
+    - caption: ''
+      component_type: plot
+      description: ''
+      file_path: /home/runner/work/vuegen/vuegen/docs/example_data/Basic_example_vuegen_demo_notebook/1_Plots/1_Interactive_plots/1_top_species_plot_by_biome_plotly.json
+      plot_type: plotly
+      title: Top Species Plot By Biome Plotly
+    - caption: ''
+      component_type: plot
+      description: ''
+      file_path: /home/runner/work/vuegen/vuegen/docs/example_data/Basic_example_vuegen_demo_notebook/1_Plots/1_Interactive_plots/2_multiline_plot_altair.json
+      plot_type: altair
+      title: Multiline Plot Altair
+    - caption: ''
+      component_type: plot
+      description: ''
+      file_path: /home/runner/work/vuegen/vuegen/docs/example_data/Basic_example_vuegen_demo_notebook/1_Plots/1_Interactive_plots/3_pie_plot_countries_plotly.json
+      plot_type: plotly
+      title: Pie Plot Countries Plotly
+    - caption: ''
+      component_type: plot
+      description: ''
+      file_path: /home/runner/work/vuegen/vuegen/docs/example_data/Basic_example_vuegen_demo_notebook/1_Plots/1_Interactive_plots/4_pie_plots_biomes_plotly.json
+      plot_type: plotly
+      title: Pie Plots Biomes Plotly
+    - caption: ''
+      component_type: plot
+      description: ''
+      file_path: /home/runner/work/vuegen/vuegen/docs/example_data/Basic_example_vuegen_demo_notebook/1_Plots/1_Interactive_plots/5_saline_metagenomics_samples_map_altair.json
+      plot_type: altair
+      title: Saline Metagenomics Samples Map Altair
+    - caption: ''
+      component_type: markdown
+      description: ''
+      file_path: /home/runner/work/vuegen/vuegen/docs/example_data/Basic_example_vuegen_demo_notebook/1_Plots/1_Interactive_plots/description.md
+      title: Description
+    description: 'Optional description for section.
+
+      '
+    title: Interactive Plots
+  - components:
+    - caption: ''
+      component_type: plot
+      description: ''
+      file_path: /home/runner/work/vuegen/vuegen/docs/example_data/Basic_example_vuegen_demo_notebook/1_Plots/2_Static_plots/1_number_samples_per_study.png
+      plot_type: static
+      title: Number Samples Per Study
+    - caption: ''
+      component_type: plot
+      description: ''
+      file_path: /home/runner/work/vuegen/vuegen/docs/example_data/Basic_example_vuegen_demo_notebook/1_Plots/2_Static_plots/2_animal_metagenomics_samples_map.png
+      plot_type: static
+      title: Animal Metagenomics Samples Map
+    - caption: ''
+      component_type: plot
+      description: ''
+      file_path: /home/runner/work/vuegen/vuegen/docs/example_data/Basic_example_vuegen_demo_notebook/1_Plots/2_Static_plots/3_alpha_diversity_host_associated_samples.png
+      plot_type: static
+      title: Alpha Diversity Host Associated Samples
+    - caption: The diagram illustrates the processing pipeline of VueGen, starting
+        from either a directory or a YAML configuration file. Reports consist of hierarchical
+        sections and subsections, each containing various components such as plots,
+        dataframes, Markdown, HTML, and data retrieved via API calls.
+      component_type: plot
+      description: ''
+      file_path: https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/vuegen_graph_abstract.png
+      plot_type: static
+      title: "Graphical overview of VueGen\u2019s workflow and components"
+    description: ''
+    title: Static Plots
+  title: Plots
+- description: ''
+  subsections:
+  - components:
+    - caption: ''
+      component_type: dataframe
+      delimiter: ','
+      description: ''
+      file_format: csv
+      file_path: /home/runner/work/vuegen/vuegen/docs/example_data/Basic_example_vuegen_demo_notebook/2_Dataframes/1_All_formats/1_phyla_correlation_network_csv.csv
+      title: Phyla Correlation Network Csv
+    - caption: ''
+      component_type: dataframe
+      description: ''
+      file_format: xls
+      file_path: /home/runner/work/vuegen/vuegen/docs/example_data/Basic_example_vuegen_demo_notebook/2_Dataframes/1_All_formats/2_abundance_table_example_xls.xls
+      title: Abundance Table Example Xls
+    - caption: ''
+      component_type: dataframe
+      delimiter: \t
+      description: ''
+      file_format: txt
+      file_path: /home/runner/work/vuegen/vuegen/docs/example_data/Basic_example_vuegen_demo_notebook/2_Dataframes/1_All_formats/3_sample_info_example_txt.txt
+      title: Sample Info Example Txt
+    - caption: ''
+      component_type: dataframe
+      description: ''
+      file_format: parquet
+      file_path: /home/runner/work/vuegen/vuegen/docs/example_data/Basic_example_vuegen_demo_notebook/2_Dataframes/1_All_formats/4_sample_info_example_parquet.parquet
+      title: Sample Info Example Parquet
+    description: This subsection contains example dataframes.
+    title: All Formats
+  title: Dataframes
+- description: ''
+  subsections:
+  - components:
+    - caption: ''
+      component_type: plot
+      description: ''
+      file_path: /home/runner/work/vuegen/vuegen/docs/example_data/Basic_example_vuegen_demo_notebook/3_Networks/1_Interactive_networks/1_man_example.graphml
+      plot_type: interactive_network
+      title: Man Example
+    - caption: ''
+      component_type: markdown
+      description: ''
+      file_path: /home/runner/work/vuegen/vuegen/docs/example_data/Basic_example_vuegen_demo_notebook/3_Networks/1_Interactive_networks/description.md
+      title: Description
+    description: 'Optional description for subsection.
+
+      '
+    title: Interactive Networks
+  - components:
+    - caption: ''
+      component_type: plot
+      description: ''
+      file_path: /home/runner/work/vuegen/vuegen/docs/example_data/Basic_example_vuegen_demo_notebook/3_Networks/2_Static_networks/1_phyla_correlation_network.png
+      plot_type: static
+      title: Phyla Correlation Network
+    description: ''
+    title: Static Networks
+  title: Networks
+- description: ''
+  subsections:
+  - components:
+    - caption: ''
+      component_type: html
+      description: ''
+      file_path: /home/runner/work/vuegen/vuegen/docs/example_data/Basic_example_vuegen_demo_notebook/4_Html/1_All_html/1_plot.html
+      title: Plot
+    - caption: ''
+      component_type: plot
+      description: ''
+      file_path: /home/runner/work/vuegen/vuegen/docs/example_data/Basic_example_vuegen_demo_notebook/4_Html/1_All_html/2_ckg_network.html
+      plot_type: interactive_network
+      title: Ckg Network
+    - caption: ''
+      component_type: html
+      description: ''
+      file_path: /home/runner/work/vuegen/vuegen/docs/example_data/Basic_example_vuegen_demo_notebook/4_Html/1_All_html/3_multiqc_report.html
+      title: Multiqc Report
+    description: ''
+    title: All Html
+  title: Html
+- description: ''
+  subsections:
+  - components:
+    - caption: ''
+      component_type: markdown
+      description: ''
+      file_path: /home/runner/work/vuegen/vuegen/docs/example_data/Basic_example_vuegen_demo_notebook/5_Markdown/1_All_markdown/README.md
+      title: Readme
+    description: ''
+    title: All Markdown
+  title: Markdown
