@@ -1,7 +1,7 @@
-from st_aggrid import AgGrid, GridOptionsBuilder
-df_index = 1
-import streamlit as st
 import pandas as pd
+from st_aggrid import AgGrid, GridOptionsBuilder
+import streamlit as st
+df_index = 1
 
 st.markdown('''<h3 style='text-align: center; color: #023558;'>All Formats</h3>''', unsafe_allow_html=True)
 st.markdown('''<p style='text-align: center; color: #000000;'>This subsection contains example dataframes.</p>''', unsafe_allow_html=True)

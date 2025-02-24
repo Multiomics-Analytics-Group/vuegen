@@ -1,10 +1,10 @@
-from st_aggrid import AgGrid, GridOptionsBuilder
-import pandas as pd
+import altair as alt
+import streamlit as st
+import requests
 df_index = 1
 import json
-import requests
-import streamlit as st
-import altair as alt
+from st_aggrid import AgGrid, GridOptionsBuilder
+import pandas as pd
 
 st.markdown('''<h3 style='text-align: center; color: #023558;'>Sample Exploration</h3>''', unsafe_allow_html=True)
 st.markdown('''<h4 style='text-align: center; color: #2b8cbe;'>Metadata Random Subset</h4>''', unsafe_allow_html=True)
