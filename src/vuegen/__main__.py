@@ -26,11 +26,11 @@ def main():
         # https://docs.python.org/3/library/argparse.html#printing-help
         parser.print_help()
         sys.exit(1)
-        
+
     if config_path and dir_path:
         print("Please provide only one of configuration file or directory path:\n")
         parser.print_help()
-        sys.exit(1) # otherwise could resort to either or ?
+        sys.exit(1)  # otherwise could resort to either or ?
 
     # Define logger suffix based on report type and name
     logger_suffix = f"{report_type}_report_{str(report_name)}"
@@ -39,11 +39,14 @@ def main():
     logger = get_logger(f"{logger_suffix}")
 
     # Generate the report
-    report_generator.get_report(report_type=report_type,
-                                logger=logger,
-                                config_path=config_path,
-                                dir_path=dir_path,
-                                streamlit_autorun=streamlit_autorun)
+    report_generator.get_report(
+        report_type=report_type,
+        logger=logger,
+        config_path=config_path,
+        dir_path=dir_path,
+        streamlit_autorun=streamlit_autorun,
+    )
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

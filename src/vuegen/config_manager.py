@@ -12,7 +12,8 @@ class ConfigManager:
     """
     Class for handling metadata of reports from YAML config file and creating report objects.
     """
-    def __init__(self, logger: Optional[logging.Logger]=None):
+
+    def __init__(self, logger: Optional[logging.Logger] = None):
         """
         Initializes the ConfigManager with a logger.
 
@@ -67,25 +68,44 @@ class ConfigManager:
         component_config["caption"] = ""
 
         # Infer component config
-        if file_ext in [r.DataFrameFormat.CSV.value_with_dot, r.DataFrameFormat.TXT.value_with_dot]:
+        if file_ext in [
+            r.DataFrameFormat.CSV.value_with_dot,
+            r.DataFrameFormat.TXT.value_with_dot,
+        ]:
             # Check for CSVNetworkFormat keywords
             if "edgelist" in file_path.stem.lower():
                 component_config["component_type"] = r.ComponentType.PLOT.value
                 component_config["plot_type"] = r.PlotType.INTERACTIVE_NETWORK.value
-                component_config ["csv_network_format"] = r.CSVNetworkFormat.EDGELIST.value
+                component_config["csv_network_format"] = (
+                    r.CSVNetworkFormat.EDGELIST.value
+                )
             elif "adjlist" in file_path.stem.lower():
-                component_config ["component_type"] = r.ComponentType.PLOT.value
-                component_config ["plot_type"] = r.PlotType.INTERACTIVE_NETWORK.value
-                component_config ["csv_network_format"] = r.CSVNetworkFormat.ADJLIST.value
+                component_config["component_type"] = r.ComponentType.PLOT.value
+                component_config["plot_type"] = r.PlotType.INTERACTIVE_NETWORK.value
+                component_config["csv_network_format"] = (
+                    r.CSVNetworkFormat.ADJLIST.value
+                )
             # Fill the config with dataframe content
             else:
-                component_config ["component_type"] = r.ComponentType.DATAFRAME.value
-                component_config ["file_format"] = r.DataFrameFormat.CSV.value if file_ext == r.DataFrameFormat.CSV.value_with_dot else r.DataFrameFormat.TXT.value
-                component_config ["delimiter"] = "," if file_ext == r.DataFrameFormat.CSV.value_with_dot else "\\t"
+                component_config["component_type"] = r.ComponentType.DATAFRAME.value
+                component_config["file_format"] = (
+                    r.DataFrameFormat.CSV.value
+                    if file_ext == r.DataFrameFormat.CSV.value_with_dot
+                    else r.DataFrameFormat.TXT.value
+                )
+                component_config["delimiter"] = (
+                    "," if file_ext == r.DataFrameFormat.CSV.value_with_dot else "\\t"
+                )
         # Check other DataframeFormats than csv and txt
-        elif file_ext in [fmt.value_with_dot for fmt in r.DataFrameFormat if fmt not in [r.DataFrameFormat.CSV, r.DataFrameFormat.TXT]]:
-            component_config ["component_type"] = r.ComponentType.DATAFRAME.value
-            component_config ["file_format"] = next(fmt.value for fmt in r.DataFrameFormat if fmt.value_with_dot == file_ext)
+        elif file_ext in [
+            fmt.value_with_dot
+            for fmt in r.DataFrameFormat
+            if fmt not in [r.DataFrameFormat.CSV, r.DataFrameFormat.TXT]
+        ]:
+            component_config["component_type"] = r.ComponentType.DATAFRAME.value
+            component_config["file_format"] = next(
+                fmt.value for fmt in r.DataFrameFormat if fmt.value_with_dot == file_ext
+            )
         elif file_ext == ".html":
             if is_pyvis_html(file_path):
                 component_config["component_type"] = r.ComponentType.PLOT.value
@@ -94,19 +114,19 @@ class ConfigManager:
                 component_config["component_type"] = r.ComponentType.HTML.value
         # Check for network formats
         elif file_ext in [fmt.value_with_dot for fmt in r.NetworkFormat]:
-            component_config ["component_type"] = r.ComponentType.PLOT.value
+            component_config["component_type"] = r.ComponentType.PLOT.value
             if file_ext in [
                 r.NetworkFormat.PNG.value_with_dot,
                 r.NetworkFormat.JPG.value_with_dot,
                 r.NetworkFormat.JPEG.value_with_dot,
                 r.NetworkFormat.SVG.value_with_dot,
             ]:
-                component_config ["plot_type"] = r.PlotType.STATIC.value
+                component_config["plot_type"] = r.PlotType.STATIC.value
             else:
-                component_config ["plot_type"] = r.PlotType.INTERACTIVE_NETWORK.value
-        # Check for interactive plots 
+                component_config["plot_type"] = r.PlotType.INTERACTIVE_NETWORK.value
+        # Check for interactive plots
         elif file_ext == ".json":
-            component_config ["component_type"] = r.ComponentType.PLOT.value
+            component_config["component_type"] = r.ComponentType.PLOT.value
             try:
                 with open(file_path, "r", encoding="utf-8") as f:
                     json_data = json.load(f)
@@ -118,12 +138,14 @@ class ConfigManager:
                 self.logger.warning(f"Could not parse JSON file {file_path}: {e}")
                 component_config["plot_type"] = "unknown"
         elif file_ext == ".md":
-            component_config ["component_type"] = r.ComponentType.MARKDOWN.value
+            component_config["component_type"] = r.ComponentType.MARKDOWN.value
         else:
-            self.logger.error(f"Unsupported file extension: {file_ext}. Skipping file: {file_path}\n")
+            self.logger.error(
+                f"Unsupported file extension: {file_ext}. Skipping file: {file_path}\n"
+            )
             return None
 
-        return component_config 
+        return component_config
 
     def _sort_paths_by_numprefix(self, paths: List[Path]) -> List[Path]:
         """
@@ -139,26 +161,27 @@ class ConfigManager:
         List[Path]
             The sorted list of Path objects.
         """
+
         def get_sort_key(path: Path) -> tuple:
             parts = path.name.split("_", 1)
             if parts[0].isdigit():
                 numeric_prefix = int(parts[0])
             else:
                 # Non-numeric prefixes go to the end
-                numeric_prefix = float('inf')  
-            return numeric_prefix, path.name.lower()  
+                numeric_prefix = float("inf")
+            return numeric_prefix, path.name.lower()
 
         return sorted(paths, key=get_sort_key)
-    
+
     def _read_description_file(self, folder_path: Path) -> str:
         """
         Reads the content of a description.md file if it exists in the given folder.
-        
+
         Parameters
         ----------
         folder_path : Path
             Path to the folder where description.md might be located.
-        
+
         Returns
         -------
         str
@@ -166,11 +189,13 @@ class ConfigManager:
         """
         description_file = folder_path / "description.md"
         if description_file.exists():
-            ret = description_file.read_text().strip().replace('\n', '\n  ')
+            ret = description_file.read_text().strip().replace("\n", "\n  ")
             return f"{ret}\n"
         return ""
 
-    def _create_subsect_config_fromdir(self, subsection_dir_path: Path) -> Dict[str, Union[str, List[Dict]]]:
+    def _create_subsect_config_fromdir(
+        self, subsection_dir_path: Path
+    ) -> Dict[str, Union[str, List[Dict]]]:
         """
         Creates subsection config from a directory.
 
@@ -185,18 +210,20 @@ class ConfigManager:
             The subsection config.
         """
         # Sort files by number prefix
-        sorted_files = self._sort_paths_by_numprefix(list(subsection_dir_path.iterdir()))
+        sorted_files = self._sort_paths_by_numprefix(
+            list(subsection_dir_path.iterdir())
+        )
 
         components = []
         for file in sorted_files:
             if file.is_file():
                 component_config = self._create_component_config_fromfile(file)
-                 # Skip unsupported files
+                # Skip unsupported files
                 if component_config is None:
                     continue
-                # Add component config to list 
+                # Add component config to list
                 components.append(component_config)
-        
+
         subsection_config = {
             "title": self._create_title_fromdir(subsection_dir_path.name),
             "description": self._read_description_file(subsection_dir_path),
@@ -204,7 +231,9 @@ class ConfigManager:
         }
         return subsection_config
 
-    def _create_sect_config_fromdir(self, section_dir_path: Path) -> Dict[str, Union[str, List[Dict]]]:
+    def _create_sect_config_fromdir(
+        self, section_dir_path: Path
+    ) -> Dict[str, Union[str, List[Dict]]]:
         """
         Creates section config from a directory.
 
@@ -218,8 +247,10 @@ class ConfigManager:
         Dict[str, Union[str, List[Dict]]]
             The section config.
         """
-        # Sort subsections by number prefix 
-        sorted_subsections = self._sort_paths_by_numprefix(list(section_dir_path.iterdir()))
+        # Sort subsections by number prefix
+        sorted_subsections = self._sort_paths_by_numprefix(
+            list(section_dir_path.iterdir())
+        )
 
         subsections = []
         for subsection_dir in sorted_subsections:
@@ -233,7 +264,9 @@ class ConfigManager:
         }
         return section_config
 
-    def create_yamlconfig_fromdir(self, base_dir: str) -> Tuple[Dict[str, Union[str, List[Dict]]], Path]:
+    def create_yamlconfig_fromdir(
+        self, base_dir: str
+    ) -> Tuple[Dict[str, Union[str, List[Dict]]], Path]:
         """
         Generates a YAML-compatible config file from a directory. It also returns the resolved folder path.
 
@@ -264,10 +297,12 @@ class ConfigManager:
         # Sort sections by their number prefix
         sorted_sections = self._sort_paths_by_numprefix(list(base_dir_path.iterdir()))
 
-        # Generate sections and subsections config 
+        # Generate sections and subsections config
         for section_dir in sorted_sections:
             if section_dir.is_dir():
-                yaml_config["sections"].append(self._create_sect_config_fromdir(section_dir))
+                yaml_config["sections"].append(
+                    self._create_sect_config_fromdir(section_dir)
+                )
 
         return yaml_config, base_dir_path
 
@@ -294,20 +329,22 @@ class ConfigManager:
         """
         # Create a Report object from metadata
         report = r.Report(
-            title = config['report']['title'],
-            logger = self.logger,
-            sections = [],
-            description = config['report'].get('description'),
-            graphical_abstract = config['report'].get('graphical_abstract'),
-            logo = config['report'].get('logo')
+            title=config["report"]["title"],
+            logger=self.logger,
+            sections=[],
+            description=config["report"].get("description"),
+            graphical_abstract=config["report"].get("graphical_abstract"),
+            logo=config["report"].get("logo"),
         )
 
         # Create sections and subsections
-        for section_data in config.get('sections', []):
+        for section_data in config.get("sections", []):
             section = self._create_section(section_data)
             report.sections.append(section)
 
-        self.logger.info(f"Report '{report.title}' initialized with {len(report.sections)} sections.")
+        self.logger.info(
+            f"Report '{report.title}' initialized with {len(report.sections)} sections."
+        )
         return report, config
 
     def _create_section(self, section_data: dict) -> r.Section:
@@ -326,16 +363,16 @@ class ConfigManager:
         """
         # Initialize the Section object
         section = r.Section(
-            title = section_data['title'],
-            subsections = [],
-            description = section_data.get('description')
+            title=section_data["title"],
+            subsections=[],
+            description=section_data.get("description"),
         )
 
         # Create subsections
-        for subsection_data in section_data.get('subsections', []):
+        for subsection_data in section_data.get("subsections", []):
             subsection = self._create_subsection(subsection_data)
             section.subsections.append(subsection)
-        
+
         return section
 
     def _create_subsection(self, subsection_data: dict) -> r.Subsection:
@@ -354,13 +391,13 @@ class ConfigManager:
         """
         # Initialize the Subsection object
         subsection = r.Subsection(
-            title = subsection_data['title'],
-            components = [],
-            description = subsection_data.get('description')
+            title=subsection_data["title"],
+            components=[],
+            description=subsection_data.get("description"),
         )
 
         # Create components
-        for component_data in subsection_data.get('components', []):
+        for component_data in subsection_data.get("components", []):
             component = self._create_component(component_data)
             subsection.components.append(component)
 
@@ -381,7 +418,9 @@ class ConfigManager:
             A Component object (Plot, DataFrame, or Markdown) populated with the provided metadata.
         """
         # Determine the component type
-        component_type = assert_enum_value(r.ComponentType, component_data['component_type'], self.logger)
+        component_type = assert_enum_value(
+            r.ComponentType, component_data["component_type"], self.logger
+        )
 
         # Dispatch to the corresponding creation method
         if component_type == r.ComponentType.PLOT:
@@ -412,17 +451,26 @@ class ConfigManager:
             A Plot object populated with the provided metadata.
         """
         # Validate enum fields
-        plot_type = assert_enum_value(r.PlotType, component_data['plot_type'], self.logger)
-        csv_network_format = (assert_enum_value(r.CSVNetworkFormat, component_data.get('csv_network_format', ''), self.logger) 
-                              if component_data.get('csv_network_format') else None)
+        plot_type = assert_enum_value(
+            r.PlotType, component_data["plot_type"], self.logger
+        )
+        csv_network_format = (
+            assert_enum_value(
+                r.CSVNetworkFormat,
+                component_data.get("csv_network_format", ""),
+                self.logger,
+            )
+            if component_data.get("csv_network_format")
+            else None
+        )
 
         return r.Plot(
-            title = component_data['title'],
-            logger = self.logger,
-            file_path = component_data['file_path'],
-            plot_type = plot_type,
-            csv_network_format = csv_network_format,
-            caption = component_data.get('caption')
+            title=component_data["title"],
+            logger=self.logger,
+            file_path=component_data["file_path"],
+            plot_type=plot_type,
+            csv_network_format=csv_network_format,
+            caption=component_data.get("caption"),
         )
 
     def _create_dataframe_component(self, component_data: dict) -> r.DataFrame:
@@ -438,17 +486,19 @@ class ConfigManager:
         -------
         DataFrame
             A DataFrame object populated with the provided metadata.
-        """        
+        """
         # Validate enum field and return dataframe
-        file_format = assert_enum_value(r.DataFrameFormat, component_data['file_format'], self.logger)
-        
+        file_format = assert_enum_value(
+            r.DataFrameFormat, component_data["file_format"], self.logger
+        )
+
         return r.DataFrame(
-            title = component_data['title'],
-            logger = self.logger,
-            file_path = component_data['file_path'],
-            file_format = file_format,
-            delimiter = component_data.get('delimiter'),
-            caption = component_data.get('caption')
+            title=component_data["title"],
+            logger=self.logger,
+            file_path=component_data["file_path"],
+            file_format=file_format,
+            delimiter=component_data.get("delimiter"),
+            caption=component_data.get("caption"),
         )
 
     def _create_markdown_component(self, component_data: dict) -> r.Markdown:
@@ -466,12 +516,12 @@ class ConfigManager:
             A Markdown object populated with the provided metadata.
         """
         return r.Markdown(
-            title = component_data['title'],
-            logger = self.logger,
-            file_path = component_data['file_path'],
-            caption = component_data.get('caption')
+            title=component_data["title"],
+            logger=self.logger,
+            file_path=component_data["file_path"],
+            caption=component_data.get("caption"),
         )
-    
+
     def _create_html_component(self, component_data: dict) -> r.Html:
         """
         Creates an Html component.
@@ -487,12 +537,12 @@ class ConfigManager:
             An Html object populated with the provided metadata.
         """
         return r.Html(
-            title = component_data['title'],
-            logger = self.logger,
-            file_path = component_data['file_path'],
-            caption = component_data.get('caption')
+            title=component_data["title"],
+            logger=self.logger,
+            file_path=component_data["file_path"],
+            caption=component_data.get("caption"),
         )
-    
+
     def _create_apicall_component(self, component_data: dict) -> r.APICall:
         """
         Creates an APICall component.
@@ -508,14 +558,14 @@ class ConfigManager:
             An APICall object populated with the provided metadata.
         """
         return r.APICall(
-            title = component_data['title'],
-            logger = self.logger,
-            api_url = component_data['api_url'],
-            caption = component_data.get('caption'),
-            headers = component_data.get('headers'),
-            params = component_data.get('params')
+            title=component_data["title"],
+            logger=self.logger,
+            api_url=component_data["api_url"],
+            caption=component_data.get("caption"),
+            headers=component_data.get("headers"),
+            params=component_data.get("params"),
         )
-    
+
     def _create_chatbot_component(self, component_data: dict) -> r.ChatBot:
         """
         Creates a ChatBot component.
@@ -531,11 +581,11 @@ class ConfigManager:
             A chatbot object populated with the provided metadata.
         """
         return r.ChatBot(
-            title = component_data['title'],
-            logger = self.logger,
-            api_url = component_data['api_url'],
-            model = component_data['model'],
-            caption = component_data.get('caption'),
-            headers = component_data.get('headers'),
-            params = component_data.get('params')
+            title=component_data["title"],
+            logger=self.logger,
+            api_url=component_data["api_url"],
+            model=component_data["model"],
+            caption=component_data.get("caption"),
+            headers=component_data.get("headers"),
+            params=component_data.get("params"),
         )
