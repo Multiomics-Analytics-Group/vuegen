@@ -1,4 +1,5 @@
 import logging
+import shutil
 
 from .config_manager import ConfigManager
 from .quarto_reportview import QuartoReportView
@@ -61,6 +62,11 @@ def get_report(
         st_report.run_report()
 
     else:
+        # Check if Quarto is installed
+        if shutil.which("quarto") is None:
+            logger.error("Quarto is not installed. Please install Quarto before generating this report type.")
+            raise RuntimeError("Quarto is not installed. Please install Quarto before generating this report type.")
+        
         quarto_report = QuartoReportView(report=report, report_type=report_type)
         quarto_report.generate_report()
         quarto_report.run_report()
