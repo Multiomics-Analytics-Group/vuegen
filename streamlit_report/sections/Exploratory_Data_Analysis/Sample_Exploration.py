@@ -1,9 +1,9 @@
+import streamlit as st
+df_index = 1
 import requests
 import altair as alt
-import pandas as pd
-import streamlit as st
 import json
-df_index = 1
+import pandas as pd
 from st_aggrid import AgGrid, GridOptionsBuilder
 
 st.markdown('''<h3 style='text-align: center; color: #023558;'>Sample Exploration</h3>''', unsafe_allow_html=True)

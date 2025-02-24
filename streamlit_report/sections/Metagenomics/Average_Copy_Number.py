@@ -1,5 +1,5 @@
-import streamlit as st
 import requests
+import streamlit as st
 import json
 
 st.markdown('''<h3 style='text-align: center; color: #023558;'>Average Copy Number</h3>''', unsafe_allow_html=True)

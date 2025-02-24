@@ -1,5 +1,5 @@
-import requests
 import streamlit as st
+import requests
 
 st.markdown('''<h3 style='text-align: center; color: #023558;'>All Markdown</h3>''', unsafe_allow_html=True)
 st.markdown('''<h4 style='text-align: center; color: #2b8cbe;'>Readme</h4>''', unsafe_allow_html=True)
