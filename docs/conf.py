@@ -17,7 +17,9 @@ from importlib import metadata
 
 project = "vuegen"
 copyright = "2024, Multiomics-Analytics-Group"
-author = "Multiomics-Analytics-Group, Sebastián Ayala Ruano, Henry Webel, Alberto Santos"
+author = (
+    "Multiomics-Analytics-Group, Sebastián Ayala Ruano, Henry Webel, Alberto Santos"
+)
 PACKAGE_VERSION = metadata.version("vuegen")
 version = PACKAGE_VERSION
 release = PACKAGE_VERSION
