@@ -1,4 +1,3 @@
-
 def test_imports():
     import vuegen
     import vuegen.__main__
@@ -9,4 +8,3 @@ def test_imports():
     import vuegen.utils
 
     assert vuegen.__version__
-

@@ -60,3 +60,6 @@ docs = ["sphinx", "sphinx-book-theme", "myst-nb", "ipywidgets", "sphinx-new-tab-
 [tool.poetry.scripts]
 # https://python-poetry.org/docs/pyproject/#scripts
 vuegen = "vuegen.__main__:main"
+
+[tool.isort]
+profile = "black"
