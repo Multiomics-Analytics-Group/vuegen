@@ -4,8 +4,7 @@ from .config_manager import ConfigManager
 from .quarto_reportview import QuartoReportView
 from .report import ReportType
 from .streamlit_reportview import StreamlitReportView
-from .utils import (assert_enum_value, get_logger, load_yaml_config,
-                    write_yaml_config)
+from .utils import assert_enum_value, get_logger, load_yaml_config, write_yaml_config
 
 
 def get_report(
