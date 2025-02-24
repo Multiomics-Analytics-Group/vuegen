@@ -70,7 +70,6 @@ def get_report(
             raise RuntimeError(
                 "Quarto is not installed. Please install Quarto before generating this report type."
             )
-        
         quarto_report = QuartoReportView(report=report, report_type=report_type)
         quarto_report.generate_report()
         quarto_report.run_report()
