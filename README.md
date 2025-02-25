@@ -6,7 +6,7 @@
 
 | Information | Links |
 | :--- | :--- |
-| **Package** |[ ![PyPI Latest Release](https://img.shields.io/pypi/v/vuegen.svg)][vuegen-pypi] [![Supported versions](https://img.shields.io/pypi/pyversions/vuegen.svg)][vuegen-pypi]|
+| **Package** |[ ![PyPI Latest Release](https://img.shields.io/pypi/v/vuegen.svg)][vuegen-pypi] [![Supported versions](https://img.shields.io/pypi/pyversions/vuegen.svg)][vuegen-pypi] [![Docker Repository on Quay](https://quay.io/repository/dtu_biosustain_dsp/vuegen/status "Docker Repository on Quay")][vuegen-docker-quay] ![License](https://img.shields.io/github/license/Multiomics-Analytics-Group/vuegen)|
 | **Documentation** | [![Docs](https://readthedocs.org/projects/vuegen/badge/?style=flat)][vuegen-docs]|
 | **Build** | [![CI](https://github.com/Multiomics-Analytics-Group/vuegen/actions/workflows/cdci.yml/badge.svg)][ci-gh-action] [![Docs](https://github.com/Multiomics-Analytics-Group/vuegen/actions/workflows/docs.yml/badge.svg)][ci-docs]|
 | **Examples** | [![HTML5](https://img.shields.io/badge/html5-%23E34F26.svg?style=for-the-badge&logo=html5&logoColor=white)][emp-html-demo] [![Streamlit](https://img.shields.io/badge/Streamlit-%23FE4B4B.svg?style=for-the-badge&logo=streamlit&logoColor=white)][emp-st-demo]|
@@ -19,7 +19,7 @@
 - [Case studies](#case-studies)
 - [Web application deployment](#web-application-deployment)
 - [Credits and acknowledgements](#credits-and-acknowledgements)
-- [Contact](#contact)
+- [Contact and feedback](#contact-and-feedback)
 
 ## About the project
 VueGen automates the creation of reports based on a directory with plots, dataframes, and other files in different formats. A YAML configuration file is generated from the directory to define the structure of the report. Users can customize the report by modifying the configuration file, or they can create their own configuration file instead of passing a directory as input. 
@@ -33,6 +33,8 @@ An overview of the VueGen workflow is shown in the figure below:
 Also, the class diagram for the project is presented below to illustrate the architecture and relationships between classes:
 
 ![VueGen Class Diagram](https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/vuegen_classdiagram_noattmeth.png)
+
+The VueGen documentation is available at [vuegen.readthedocs.io][vuegen-docs], where you can find detailed information of the package’s classes and functions, installation and execution instructions, and case studies to demonstrate its functionality. 
 
 ## Installation
 Vuegen is available on [PyPI][vuegen-pypi] and can be installed using pip:
@@ -51,7 +53,6 @@ pip install -e . # in case your pwd is in the vuegen directory
 > [!TIP]
 > It is recommended to install VueGen inside a virtual environment to manage depenendencies and avoid conflicts with existing packages. You can use the virtual environment manager of your choice, such as `poetry`, `conda`, or `pipenv`.
 
-### Quarto installation
 Vuegen uses [Quarto][quarto] to generate various report types. The pip insallation includes quarto using the [quarto-cli Python library][quarto-cli-pypi]. To test if quarto is installed in your computer, run the following command:
 
 ```bash
@@ -60,6 +61,8 @@ quarto check
 
 > [!TIP]
 > If quarto is not installed, you can download the command-line interface from the [Quarto website][quarto-cli] for your operating system.
+
+If you prefer not to install VueGen on your system, a pre-configured Docker container is available. It includes all dependencies, ensuring a fully reproducible execution environment. See the [Execution section](#execution) for details on running VueGen with Docker. The official Docker image is available at [quay.io/dtu_biosustain_dsp/vuegen][vuegen-docker-quay]. 
 
 ## Execution
 Run VueGen using a directory with the following command:
@@ -87,6 +90,16 @@ The current report types supported by VueGen are:
 * PPTX
 * Jupyter
 
+### Running VueGen with Docker
+Instead of installing VueGen locally, you can run it directly from a Docker container with the following command:
+
+```bash
+docker run --rm \
+  -v "$(pwd)/Earth_microbiome_vuegen_demo_notebook:/home/appuser/Earth_microbiome_vuegen_demo_notebook" \
+  -v "$(pwd)/output_docker:/home/appuser/quarto_report" \
+  quay.io/dtu_biosustain_dsp/vuegen:docker --directory /home/appuser/Earth_microbiome_vuegen_demo_notebook --report_type streamlit
+```
+
 ## Case studies
 VueGen’s functionality is demonstrated through two case studies:
 
@@ -103,26 +116,28 @@ This advanced case study demonstrates the application of VueGen in a real-world 
 🔗 [![Open in Colab][colab_badge]][colab_link_emp_demo]
 
 > [!NOTE]
-> An HTML report example of the current vuegen release is available [here][emp-html-demo].
+> The EMP case study is available online as [HTML][emp-html-demo] and [Streamlit][emp-st-demo] reports.
 
 ## Web application deployment
 Once a Streamlit report is generated, it can be deployed as a web application to make it accessible online. There are multiple ways to achieve this:
 
 * **Streamlit Community Cloud**: Deploy your report easily using [Streamlit Cloud][st-cloud], as demonstrated in the [EMP VueGen Demo][emp-st-demo]. The process involves moving the necessary scripts, data, and a requirements.txt file into a GitHub repository. Then, the app can be deployed via the Streamlit Cloud interface. The deployment example is available in the `streamlit-report-example` branch.
 * **Standalone Executables**: Convert your Streamlit application into a desktop app by packaging it as an executable file for different operating systems. A detailed explanation of this process can be found in this [Streamlit forum post][st-forum-exe].
-* [Stlite][stlite]: Run Streamlit apps directly in the browser with stlite, a WebAssembly port of Streamlit powered by Pyodide, eliminating the need for a server. It also allows packaging apps as standalone desktop executables using stlite desktop.
+* **Stlite**: Run Streamlit apps directly in the browser with [stlite][stlite], a WebAssembly port of Streamlit powered by Pyodide, eliminating the need for a server. It also allows packaging apps as standalone desktop executables using stlite desktop.
 
 These options provide flexibility depending on whether the goal is online accessibility, lightweight execution, or local application distribution.
 
 ## Credits and acknowledgements
 - Vuegen was developed by the [Multiomics Network Analytics Group (MoNA)][Mona] at the [Novo Nordisk Foundation Center for Biosustainability (DTU Biosustain)][Biosustain].
+- VueGen relies on the work of numerous open-source projects like [Streamlit](streamlit), [Quarto][quarto], and others. A big thank you to their authors for making this possible!
 - The vuegen logo was designed based on an image created by [Scriberia][scriberia] for The [Turing Way Community][turingway], which is shared under a CC-BY licence. The original image can be found at [Zenodo][zenodo-turingway].
 
-## Contact
-If you have comments or suggestions about this project, you can [open an issue][issues] in this repository.
+## Contact and feedback
+We appreciate your feedback! If you have any comments, suggestions, or run into issues while using VueGen, feel free to [open an issue][new-issue] in this repository. Your input helps us make VueGen better for everyone. 
 
 [streamlit]: https://streamlit.io/ 
 [vuegen-pypi]: https://pypi.org/project/vuegen/
+[vuegen-docker-quay]: https://quay.io/repository/dtu_biosustain_dsp/vuegen
 [vuegen-docs]: https://vuegen.readthedocs.io/
 [ci-gh-action]: https://github.com/Multiomics-Analytics-Group/vuegen/actions/workflows/cdci.yml
 [ci-docs]: https://github.com/Multiomics-Analytics-Group/vuegen/actions/workflows/docs.yml
