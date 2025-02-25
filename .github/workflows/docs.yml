@@ -57,6 +57,7 @@ jobs:
         run: |
           find docs/streamlit_report/sections -type f -name "*.py" -exec sed -i 's|/home/runner/work/vuegen/vuegen/docs/||g' {} +
       - name: Publish Streamlit report to streamlit-example branch
+        if: startsWith(github.ref, 'refs/tags')
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}

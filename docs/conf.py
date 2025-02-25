@@ -56,6 +56,8 @@ html_js_files = [
 nb_execution_raise_on_error = True
 # Rendering
 nb_merge_streams = True
+# maximum execution time per cell in seconds
+nb_execution_timeout = 120
 
 # https://myst-nb.readthedocs.io/en/latest/authoring/custom-formats.html#write-custom-formats
 # ! if you use it, then you cannot directly execute the notebook in the browser in colab

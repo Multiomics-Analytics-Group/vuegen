@@ -773,7 +773,7 @@ with open('{os.path.join("..", markdown.file_path)}', 'r') as markdown_file:
                 static_dir, f"{dataframe.title.replace(' ', '_')}.png"
             )
             dataframe_content.append(
-                f"dfi.export(df, '{os.path.abspath(df_image)}', max_rows=10, max_cols=5)\n```\n"
+                f"df.dfi.export('{os.path.abspath(df_image)}', max_rows=10, max_cols=5)\n```\n"
             )
             # Use helper method to add centered image content
             dataframe_content.append(self._generate_image_content(df_image))
