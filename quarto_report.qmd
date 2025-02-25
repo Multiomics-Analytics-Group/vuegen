@@ -35,12 +35,12 @@ include-after-body:
 
 ```{python}
 #| label: 'Imports'
-import altair as alt
 import dataframe_image as dfi
-import plotly.io as pio
-from itables import show
-import requests
 import pandas as pd
+import altair as alt
+import requests
+from itables import show
+import plotly.io as pio
 ```
 
 The Earth Microbiome Project (EMP) is a systematic attempt to characterize global microbial taxonomic and functional diversity for the benefit of the planet and humankind. 
