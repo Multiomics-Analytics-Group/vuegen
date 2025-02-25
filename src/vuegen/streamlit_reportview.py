@@ -37,16 +37,23 @@ class StreamlitReportView(r.WebAppReportView):
     A Streamlit-based implementation of the WebAppReportView abstract base class.
     """
 
-    BASE_DIR = 'streamlit_report'
-    SECTIONS_DIR = os.path.join(BASE_DIR, 'sections')
-    STATIC_FILES_DIR = os.path.join(BASE_DIR, 'static')
-    REPORT_MANAG_SCRIPT = 'report_manager.py'
+    BASE_DIR = "streamlit_report"
+    SECTIONS_DIR = os.path.join(BASE_DIR, "sections")
+    STATIC_FILES_DIR = os.path.join(BASE_DIR, "static")
+    REPORT_MANAG_SCRIPT = "report_manager.py"
 
-    def __init__(self, report: r.Report, report_type: r.ReportType, streamlit_autorun: bool = False):
-        super().__init__(report = report, report_type = report_type)
+    def __init__(
+        self,
+        report: r.Report,
+        report_type: r.ReportType,
+        streamlit_autorun: bool = False,
+    ):
+        super().__init__(report=report, report_type=report_type)
         self.streamlit_autorun = streamlit_autorun
 
-    def generate_report(self, output_dir: str = SECTIONS_DIR, static_dir: str = STATIC_FILES_DIR) -> None:
+    def generate_report(
+        self, output_dir: str = SECTIONS_DIR, static_dir: str = STATIC_FILES_DIR
+    ) -> None:
         """
         Generates the Streamlit report and creates Python files for each section and its subsections and plots.
 
@@ -57,9 +64,11 @@ class StreamlitReportView(r.WebAppReportView):
         static_dir : str, optional
             The folder where the static files will be saved (default is STATIC_FILES_DIR).
         """
-        self.report.logger.debug(f"Generating '{self.report_type}' report in directory: '{output_dir}'")
+        self.report.logger.debug(
+            f"Generating '{self.report_type}' report in directory: '{output_dir}'"
+        )
 
-        # Create the output folder 
+        # Create the output folder
         if create_folder(output_dir, is_nested=True):
             self.report.logger.info(f"Created output directory: '{output_dir}'")
         else:
@@ -67,30 +76,42 @@ class StreamlitReportView(r.WebAppReportView):
 
         # Create the static folder
         if create_folder(static_dir):
-            self.report.logger.info(f"Created output directory for static content: '{static_dir}'")
+            self.report.logger.info(
+                f"Created output directory for static content: '{static_dir}'"
+            )
         else:
-            self.report.logger.info(f"Output directory for static content already existed: '{static_dir}'")
-        
+            self.report.logger.info(
+                f"Output directory for static content already existed: '{static_dir}'"
+            )
+
         try:
             self.report.logger.debug("Processing app navigation code.")
             # Define the Streamlit imports and report manager content
             report_manag_content = []
-            if self.report.logo: 
+            if self.report.logo:
                 report_manag_content.append(
                     f"""import streamlit as st\n
 st.set_page_config(layout="wide", page_title="{self.report.title}", page_icon="{self.report.logo}")
-st.logo("{self.report.logo}")""")
+st.logo("{self.report.logo}")"""
+                )
             else:
                 report_manag_content.append(
                     f"""import streamlit as st\n
-st.set_page_config(layout="wide", page_title="{self.report.title}")""")
-            report_manag_content.append(self._format_text(text=self.report.title, type = 'header', level=1, color='#023858'))
+st.set_page_config(layout="wide", page_title="{self.report.title}")"""
+                )
+            report_manag_content.append(
+                self._format_text(
+                    text=self.report.title, type="header", level=1, color="#023858"
+                )
+            )
 
             # Initialize a dictionary to store the navigation structure
             report_manag_content.append("\nsections_pages = {}")
 
             # Generate the home page and update the report manager content
-            self._generate_home_section(output_dir=output_dir, report_manag_content=report_manag_content)
+            self._generate_home_section(
+                output_dir=output_dir, report_manag_content=report_manag_content
+            )
 
             for section in self.report.sections:
                 # Create a folder for each section
@@ -99,34 +120,52 @@ st.set_page_config(layout="wide", page_title="{self.report.title}")""")
                 section_dir_path = os.path.join(output_dir, section_name_var)
 
                 if create_folder(section_dir_path):
-                    self.report.logger.debug(f"Created section directory: {section_dir_path}")
+                    self.report.logger.debug(
+                        f"Created section directory: {section_dir_path}"
+                    )
                 else:
-                    self.report.logger.debug(f"Section directory already existed: {section_dir_path}")
-                
+                    self.report.logger.debug(
+                        f"Section directory already existed: {section_dir_path}"
+                    )
+
                 for subsection in section.subsections:
                     subsection_name_var = subsection.title.replace(" ", "_")
-                    subsection_file_path = os.path.join(section_name_var, subsection_name_var + ".py")
+                    subsection_file_path = os.path.join(
+                        section_name_var, subsection_name_var + ".py"
+                    )
 
                     # Create a Page object for each subsection and add it to the home page content
-                    report_manag_content.append(f"{subsection_name_var} = st.Page('{subsection_file_path}', title='{subsection.title}')")
+                    report_manag_content.append(
+                        f"{subsection_name_var} = st.Page('{subsection_file_path}', title='{subsection.title}')"
+                    )
                     subsection_page_vars.append(subsection_name_var)
-                
+
                 # Add all subsection Page objects to the corresponding section
-                report_manag_content.append(f"sections_pages['{section.title}'] = [{', '.join(subsection_page_vars)}]\n")
+                report_manag_content.append(
+                    f"sections_pages['{section.title}'] = [{', '.join(subsection_page_vars)}]\n"
+                )
 
             # Add navigation object to the home page content
-            report_manag_content.append(f"""report_nav = st.navigation(sections_pages)
-report_nav.run()""")
-            
+            report_manag_content.append(
+                f"""report_nav = st.navigation(sections_pages)
+report_nav.run()"""
+            )
+
             # Write the navigation and general content to a Python file
-            with open(os.path.join(output_dir, self.REPORT_MANAG_SCRIPT), 'w') as nav_manager:
+            with open(
+                os.path.join(output_dir, self.REPORT_MANAG_SCRIPT), "w"
+            ) as nav_manager:
                 nav_manager.write("\n".join(report_manag_content))
-                self.report.logger.info(f"Created app navigation script: {self.REPORT_MANAG_SCRIPT}")
+                self.report.logger.info(
+                    f"Created app navigation script: {self.REPORT_MANAG_SCRIPT}"
+                )
 
             # Create Python files for each section and its subsections and plots
             self._generate_sections(output_dir=output_dir)
         except Exception as e:
-            self.report.logger.error(f"An error occurred while generating the report: {str(e)}")
+            self.report.logger.error(
+                f"An error occurred while generating the report: {str(e)}"
+            )
             raise
 
     def run_report(self, output_dir: str = SECTIONS_DIR) -> None:
@@ -166,6 +205,18 @@ report_nav.run()""")
                     f"Running Streamlit report from file: {target_file}"
                 )
                 streamlit_run(target_file)
+            self.report.logger.info(
+                f"Running '{self.report.title}' {self.report_type} report."
+            )
+            try:
+                subprocess.run(
+                    [
+                        "streamlit",
+                        "run",
+                        os.path.join(output_dir, self.REPORT_MANAG_SCRIPT),
+                    ],
+                    check=True,
+                )
             except KeyboardInterrupt:
                 print("Streamlit process interrupted.")
             except subprocess.CalledProcessError as e:
@@ -173,20 +224,33 @@ report_nav.run()""")
                 raise
         else:
             # If autorun is False, print instructions for manual execution
-            self.report.logger.info(f"All the scripts to build the Streamlit app are available at {output_dir}")
-            self.report.logger.info(f"To run the Streamlit app, use the following command:")
-            self.report.logger.info(f"streamlit run {os.path.join(output_dir, self.REPORT_MANAG_SCRIPT)}")
+            self.report.logger.info(
+                f"All the scripts to build the Streamlit app are available at {output_dir}"
+            )
+            self.report.logger.info(
+                f"To run the Streamlit app, use the following command:"
+            )
+            self.report.logger.info(
+                f"streamlit run {os.path.join(output_dir, self.REPORT_MANAG_SCRIPT)}"
+            )
             msg = (
                 f"\nAll the scripts to build the Streamlit app are available at: {output_dir}\n\n"
                 f"To run the Streamlit app, use the following command:\n\n"
                 f"\tstreamlit run {os.path.join(output_dir, self.REPORT_MANAG_SCRIPT)}"
-                )
+            )
             print(msg)
 
-    def _format_text(self, text: str, type: str, level: int = 1, color: str = '#000000', text_align: str = 'center') -> str:
+    def _format_text(
+        self,
+        text: str,
+        type: str,
+        level: int = 1,
+        color: str = "#000000",
+        text_align: str = "center",
+    ) -> str:
         """
         Generates a Streamlit markdown text string with the specified level and color.
-        
+
         Parameters
         ----------
         text : str
@@ -205,14 +269,16 @@ report_nav.run()""")
         str
             A formatted markdown string for the specified text.
         """
-        if type == 'header':
+        if type == "header":
             tag = f"h{level}"
-        elif type == 'paragraph':
-            tag = 'p'
+        elif type == "paragraph":
+            tag = "p"
 
         return f"""st.markdown('''<{tag} style='text-align: {text_align}; color: {color};'>{text}</{tag}>''', unsafe_allow_html=True)"""
 
-    def _generate_home_section(self, output_dir: str, report_manag_content: list) -> None:
+    def _generate_home_section(
+        self, output_dir: str, report_manag_content: list
+    ) -> None:
         """
         Generates the homepage for the report and updates the report manager content.
 
@@ -228,18 +294,24 @@ report_nav.run()""")
         try:
             # Create folder for the home page
             home_dir_path = os.path.join(output_dir, "Home")
-            if create_folder(home_dir_path): 
+            if create_folder(home_dir_path):
                 self.report.logger.debug(f"Created home directory: {home_dir_path}")
             else:
-                self.report.logger.debug(f"Home directory already existed: {home_dir_path}")
-            
+                self.report.logger.debug(
+                    f"Home directory already existed: {home_dir_path}"
+                )
+
             # Create the home page content
             home_content = []
             home_content.append(f"import streamlit as st")
             if self.report.description:
-                home_content.append(self._format_text(text=self.report.description, type='paragraph'))
+                home_content.append(
+                    self._format_text(text=self.report.description, type="paragraph")
+                )
             if self.report.graphical_abstract:
-                home_content.append(f"\nst.image('{self.report.graphical_abstract}', use_column_width=True)")
+                home_content.append(
+                    f"\nst.image('{self.report.graphical_abstract}', use_column_width=True)"
+                )
 
             # Define the footer variable and add it to the home page content
             home_content.append("footer = '''" + generate_footer() + "'''\n")
@@ -247,12 +319,14 @@ report_nav.run()""")
 
             # Write the home page content to a Python file
             home_page_path = os.path.join(home_dir_path, "Homepage.py")
-            with open(home_page_path, 'w') as home_page:
+            with open(home_page_path, "w") as home_page:
                 home_page.write("\n".join(home_content))
             self.report.logger.info(f"Home page content written to '{home_page_path}'.")
 
             # Add the home page to the report manager content
-            report_manag_content.append(f"homepage = st.Page('Home/Homepage.py', title='Homepage')")
+            report_manag_content.append(
+                f"homepage = st.Page('Home/Homepage.py', title='Homepage')"
+            )
             report_manag_content.append(f"sections_pages['Home'] = [homepage]\n")
             self.report.logger.info("Home page added to the report manager content.")
         except Exception as e:
@@ -262,7 +336,7 @@ report_nav.run()""")
     def _generate_sections(self, output_dir: str) -> None:
         """
         Generates Python files for each section in the report, including subsections and its components (plots, dataframes, markdown).
-        
+
         Parameters
         ----------
         output_dir : str
@@ -273,48 +347,66 @@ report_nav.run()""")
         try:
             for section in self.report.sections:
                 section_name_var = section.title.replace(" ", "_")
-                self.report.logger.debug(f"Processing section '{section.id}': '{section.title}' - {len(section.subsections)} subsection(s)")
+                self.report.logger.debug(
+                    f"Processing section '{section.id}': '{section.title}' - {len(section.subsections)} subsection(s)"
+                )
 
                 if section.subsections:
                     # Iterate through subsections and integrate them into the section file
                     for subsection in section.subsections:
-                        self.report.logger.debug(f"Processing subsection '{subsection.id}': '{subsection.title} - {len(subsection.components)} component(s)'")
+                        self.report.logger.debug(
+                            f"Processing subsection '{subsection.id}': '{subsection.title} - {len(subsection.components)} component(s)'"
+                        )
                         try:
                             # Create subsection file
-                            subsection_file_path = os.path.join(output_dir, section_name_var, subsection.title.replace(" ", "_") + ".py")
-                            
+                            subsection_file_path = os.path.join(
+                                output_dir,
+                                section_name_var,
+                                subsection.title.replace(" ", "_") + ".py",
+                            )
+
                             # Generate content and imports for the subsection
-                            subsection_content, subsection_imports = self._generate_subsection(subsection)
+                            subsection_content, subsection_imports = (
+                                self._generate_subsection(subsection)
+                            )
 
                             # Flatten the subsection_imports into a single list
-                            flattened_subsection_imports = [imp for sublist in subsection_imports for imp in sublist]
-                            
+                            flattened_subsection_imports = [
+                                imp for sublist in subsection_imports for imp in sublist
+                            ]
+
                             # Remove duplicated imports
                             unique_imports = list(set(flattened_subsection_imports))
 
                             # Write everything to the subsection file
-                            with open(subsection_file_path, 'w') as subsection_file:
+                            with open(subsection_file_path, "w") as subsection_file:
                                 # Write imports at the top of the file
-                                subsection_file.write("\n".join(unique_imports) + "\n\n")
+                                subsection_file.write(
+                                    "\n".join(unique_imports) + "\n\n"
+                                )
 
                                 # Write the subsection content (descriptions, plots)
                                 subsection_file.write("\n".join(subsection_content))
 
-                            self.report.logger.info(f"Subsection file created: '{subsection_file_path}'")
+                            self.report.logger.info(
+                                f"Subsection file created: '{subsection_file_path}'"
+                            )
                         except Exception as subsection_error:
                             self.report.logger.error(
                                 f"Error processing subsection '{subsection.id}' '{subsection.title}' in section  '{section.id}' '{section.title}': {str(subsection_error)}"
                             )
                             raise
                 else:
-                    self.report.logger.warning(f"No subsections found in section: '{section.title}'. To show content in the report, add subsections to the section.") 
+                    self.report.logger.warning(
+                        f"No subsections found in section: '{section.title}'. To show content in the report, add subsections to the section."
+                    )
         except Exception as e:
             self.report.logger.error(f"Error generating sections: {str(e)}")
             raise
 
     def _generate_subsection(self, subsection) -> tuple[List[str], List[str]]:
         """
-        Generate code to render components (plots, dataframes, markdown) in the given subsection, 
+        Generate code to render components (plots, dataframes, markdown) in the given subsection,
         creating imports and content for the subsection based on the component type.
 
         Parameters
@@ -330,11 +422,17 @@ report_nav.run()""")
         """
         subsection_content = []
         subsection_imports = []
-        
+
         # Add subsection header and description
-        subsection_content.append(self._format_text(text=subsection.title, type='header', level=3, color='#023558'))
+        subsection_content.append(
+            self._format_text(
+                text=subsection.title, type="header", level=3, color="#023558"
+            )
+        )
         if subsection.description:
-            subsection_content.append(self._format_text(text=subsection.description, type='paragraph'))
+            subsection_content.append(
+                self._format_text(text=subsection.description, type="paragraph")
+            )
 
         for component in subsection.components:
             # Write imports if not already done
@@ -347,7 +445,10 @@ report_nav.run()""")
             elif component.component_type == r.ComponentType.DATAFRAME:
                 subsection_content.extend(self._generate_dataframe_content(component))
             # If md files is called "description.md", do not include it in the report
-            elif component.component_type == r.ComponentType.MARKDOWN and component.title.lower() != "description":
+            elif (
+                component.component_type == r.ComponentType.MARKDOWN
+                and component.title.lower() != "description"
+            ):
                 subsection_content.extend(self._generate_markdown_content(component))
             elif component.component_type == r.ComponentType.HTML:
                 subsection_content.extend(self._generate_html_content(component))
@@ -356,19 +457,25 @@ report_nav.run()""")
             elif component.component_type == r.ComponentType.CHATBOT:
                 subsection_content.extend(self._generate_chatbot_content(component))
             else:
-                self.report.logger.warning(f"Unsupported component type '{component.component_type}' in subsection: {subsection.title}")
-        
+                self.report.logger.warning(
+                    f"Unsupported component type '{component.component_type}' in subsection: {subsection.title}"
+                )
+
         # Define the footer variable and add it to the home page content
         subsection_content.append("footer = '''" + generate_footer() + "'''\n")
         subsection_content.append("st.markdown(footer, unsafe_allow_html=True)\n")
-        
-        self.report.logger.info(f"Generated content and imports for subsection: '{subsection.title}'")
+
+        self.report.logger.info(
+            f"Generated content and imports for subsection: '{subsection.title}'"
+        )
         return subsection_content, subsection_imports
-    
-    def _generate_plot_content(self, plot, static_dir: str = STATIC_FILES_DIR) -> List[str]:
+
+    def _generate_plot_content(
+        self, plot, static_dir: str = STATIC_FILES_DIR
+    ) -> List[str]:
         """
         Generate content for a plot component based on the plot type (static or interactive).
-        
+
         Parameters
         ----------
         plot : Plot
@@ -383,12 +490,16 @@ report_nav.run()""")
         """
         plot_content = []
         # Add title
-        plot_content.append(self._format_text(text=plot.title, type='header', level=4, color='#2b8cbe'))
-        
+        plot_content.append(
+            self._format_text(text=plot.title, type="header", level=4, color="#2b8cbe")
+        )
+
         # Add content for the different plot types
         try:
             if plot.plot_type == r.PlotType.STATIC:
-                plot_content.append(f"\nst.image('{plot.file_path}', caption='{plot.caption}', use_column_width=True)\n")  
+                plot_content.append(
+                    f"\nst.image('{plot.file_path}', caption='{plot.caption}', use_column_width=True)\n"
+                )
             elif plot.plot_type == r.PlotType.PLOTLY:
                 plot_content.append(self._generate_plot_code(plot))
             elif plot.plot_type == r.PlotType.ALTAIR:
@@ -400,43 +511,57 @@ report_nav.run()""")
                     networkx_graph, html_plot_file = networkx_graph
                 else:
                     # Otherwise, create and save a new pyvis network from the netowrkx graph
-                    html_plot_file = os.path.join(static_dir, f"{plot.title.replace(' ', '_')}.html")
-                    pyvis_graph = plot.create_and_save_pyvis_network(networkx_graph, html_plot_file)
-                
+                    html_plot_file = os.path.join(
+                        static_dir, f"{plot.title.replace(' ', '_')}.html"
+                    )
+                    pyvis_graph = plot.create_and_save_pyvis_network(
+                        networkx_graph, html_plot_file
+                    )
+
                 # Add number of nodes and edges to the plor conetnt
                 num_nodes = networkx_graph.number_of_nodes()
                 num_edges = networkx_graph.number_of_edges()
-                
+
                 # Determine whether the file path is a URL or a local file
                 if is_url(html_plot_file):
-                    plot_content.append(f"""
+                    plot_content.append(
+                        f"""
 response = requests.get('{html_plot_file}')
 response.raise_for_status()
-html_data = response.text\n""")
+html_data = response.text\n"""
+                    )
                 else:
-                    plot_content.append(f"""
+                    plot_content.append(
+                        f"""
 with open('{html_plot_file}', 'r') as f:
-    html_data = f.read()\n""")
+    html_data = f.read()\n"""
+                    )
 
                 # Append the code for additional information (nodes and edges count)
-                plot_content.append(f"""
+                plot_content.append(
+                    f"""
 st.markdown(f"<p style='text-align: center; color: black;'> <b>Number of nodes:</b> {num_nodes} </p>", unsafe_allow_html=True)
-st.markdown(f"<p style='text-align: center; color: black;'> <b>Number of relationships:</b> {num_edges} </p>", unsafe_allow_html=True)\n""")
-                
+st.markdown(f"<p style='text-align: center; color: black;'> <b>Number of relationships:</b> {num_edges} </p>", unsafe_allow_html=True)\n"""
+                )
+
                 # Add the specific code for visualization
                 plot_content.append(self._generate_plot_code(plot))
             else:
                 self.report.logger.warning(f"Unsupported plot type: {plot.plot_type}")
         except Exception as e:
-            self.report.logger.error(f"Error generating content for '{plot.plot_type}' plot '{plot.id}' '{plot.title}': {str(e)}")
-            raise      
+            self.report.logger.error(
+                f"Error generating content for '{plot.plot_type}' plot '{plot.id}' '{plot.title}': {str(e)}"
+            )
+            raise
 
-        self.report.logger.info(f"Successfully generated content for plot '{plot.id}': '{plot.title}'")
+        self.report.logger.info(
+            f"Successfully generated content for plot '{plot.id}': '{plot.title}'"
+        )
         return plot_content
-    
+
     def _generate_plot_code(self, plot) -> str:
         """
-        Create the plot code based on its visualization tool. 
+        Create the plot code based on its visualization tool.
 
         Parameters
         ----------
@@ -450,7 +575,7 @@ st.markdown(f"<p style='text-align: center; color: black;'> <b>Number of relatio
             The generated plot code as a string.
         """
         # If the file path is a URL, generate code to fetch content via requests
-        if is_url(plot.file_path): 
+        if is_url(plot.file_path):
             plot_code = f"""
 response = requests.get('{plot.file_path}')
 response.raise_for_status()
@@ -458,8 +583,8 @@ plot_json = json.loads(response.text)\n"""
         else:  # If it's a local file
             plot_code = f"""
 with open('{os.path.join(plot.file_path)}', 'r') as plot_file:
-    plot_json = json.load(plot_file)\n""" 
-        
+    plot_json = json.load(plot_file)\n"""
+
         # Add specific code for each visualization tool
         if plot.plot_type == r.PlotType.PLOTLY:
             plot_code += "st.plotly_chart(plot_json, use_container_width=True)\n"
@@ -468,7 +593,7 @@ with open('{os.path.join(plot.file_path)}', 'r') as plot_file:
             plot_code += """
 altair_plot = alt.Chart.from_dict(plot_json)
 st.vega_lite_chart(json.loads(altair_plot.to_json()), use_container_width=True)\n"""
-        
+
         elif plot.plot_type == r.PlotType.INTERACTIVE_NETWORK:
             plot_code = """# Streamlit checkbox for controlling the layout
 control_layout = st.checkbox('Add panel to control layout', value=True)
@@ -476,7 +601,7 @@ net_html_height = 1200 if control_layout else 630
 # Load HTML into HTML component for display on Streamlit
 st.components.v1.html(html_data, height=net_html_height)\n"""
         return plot_code
-    
+
     def _generate_dataframe_content(self, dataframe) -> List[str]:
         """
         Generate content for a DataFrame component.
@@ -493,29 +618,40 @@ st.components.v1.html(html_data, height=net_html_height)\n"""
         """
         dataframe_content = []
         # Add title
-        dataframe_content.append(self._format_text(text=dataframe.title, type='header', level=4, color='#2b8cbe'))
-        
+        dataframe_content.append(
+            self._format_text(
+                text=dataframe.title, type="header", level=4, color="#2b8cbe"
+            )
+        )
+
         # Mapping of file extensions to read functions
         read_function_mapping = {
             r.DataFrameFormat.CSV.value_with_dot: pd.read_csv,
             r.DataFrameFormat.PARQUET.value_with_dot: pd.read_parquet,
             r.DataFrameFormat.TXT.value_with_dot: pd.read_table,
             r.DataFrameFormat.XLS.value_with_dot: pd.read_excel,
-            r.DataFrameFormat.XLSX.value_with_dot: pd.read_excel
+            r.DataFrameFormat.XLSX.value_with_dot: pd.read_excel,
         }
 
         try:
             # Check if the file extension matches any DataFrameFormat value
             file_extension = os.path.splitext(dataframe.file_path)[1].lower()
-            if not any(file_extension == fmt.value_with_dot for fmt in r.DataFrameFormat):
-                self.report.logger.error(f"Unsupported file extension: {file_extension}. Supported extensions are: {', '.join(fmt.value for fmt in r.DataFrameFormat)}.")
+            if not any(
+                file_extension == fmt.value_with_dot for fmt in r.DataFrameFormat
+            ):
+                self.report.logger.error(
+                    f"Unsupported file extension: {file_extension}. Supported extensions are: {', '.join(fmt.value for fmt in r.DataFrameFormat)}."
+                )
 
             # Load the DataFrame using the correct function
             read_function = read_function_mapping[file_extension]
-            dataframe_content.append(f"""df = pd.{read_function.__name__}('{dataframe.file_path}')""")
-            
+            dataframe_content.append(
+                f"""df = pd.{read_function.__name__}('{dataframe.file_path}')"""
+            )
+
             # Displays a DataFrame using AgGrid with configurable options.
-            dataframe_content.append("""
+            dataframe_content.append(
+                """
 # Displays a DataFrame using AgGrid with configurable options.
 grid_builder = GridOptionsBuilder.from_dataframe(df)
 grid_builder.configure_default_column(editable=True, groupable=True)
@@ -534,18 +670,27 @@ st.download_button(
     file_name=f"dataframe_{df_index}.csv",
     mime='text/csv',
     key=f"download_button_{df_index}")
-df_index += 1""")
+df_index += 1"""
+            )
         except Exception as e:
-            self.report.logger.error(f"Error generating content for DataFrame: {dataframe.title}. Error: {str(e)}")
+            self.report.logger.error(
+                f"Error generating content for DataFrame: {dataframe.title}. Error: {str(e)}"
+            )
             raise
-        
+
         # Add caption if available
         if dataframe.caption:
-            dataframe_content.append(self._format_text(text=dataframe.caption, type='caption', text_align="left"))
-        
-        self.report.logger.info(f"Successfully generated content for DataFrame: '{dataframe.title}'")
+            dataframe_content.append(
+                self._format_text(
+                    text=dataframe.caption, type="caption", text_align="left"
+                )
+            )
+
+        self.report.logger.info(
+            f"Successfully generated content for DataFrame: '{dataframe.title}'"
+        )
         return dataframe_content
-    
+
     def _generate_markdown_content(self, markdown) -> List[str]:
         """
         Generate content for a Markdown component.
@@ -563,31 +708,49 @@ df_index += 1""")
         markdown_content = []
 
         # Add title
-        markdown_content.append(self._format_text(text=markdown.title, type='header', level=4, color='#2b8cbe'))
+        markdown_content.append(
+            self._format_text(
+                text=markdown.title, type="header", level=4, color="#2b8cbe"
+            )
+        )
         try:
             # If the file path is a URL, generate code to fetch content via requests
-            if is_url(markdown.file_path): 
-                markdown_content.append(f"""
+            if is_url(markdown.file_path):
+                markdown_content.append(
+                    f"""
 response = requests.get('{markdown.file_path}')
 response.raise_for_status()
-markdown_content = response.text\n""")
-            else: #If it's a local file
-                markdown_content.append(f"""
+markdown_content = response.text\n"""
+                )
+            else:  # If it's a local file
+                markdown_content.append(
+                    f"""
 with open('{os.path.join("..", markdown.file_path)}', 'r') as markdown_file:
-    markdown_content = markdown_file.read()\n""")
+    markdown_content = markdown_file.read()\n"""
+                )
             # Code to display md content
-            markdown_content.append("st.markdown(markdown_content, unsafe_allow_html=True)\n")
+            markdown_content.append(
+                "st.markdown(markdown_content, unsafe_allow_html=True)\n"
+            )
         except Exception as e:
-            self.report.logger.error(f"Error generating content for Markdown: {markdown.title}. Error: {str(e)}")
+            self.report.logger.error(
+                f"Error generating content for Markdown: {markdown.title}. Error: {str(e)}"
+            )
             raise
-        
+
         # Add caption if available
         if markdown.caption:
-            markdown_content.append(self._format_text(text=markdown.caption, type='caption', text_align="left"))
-        
-        self.report.logger.info(f"Successfully generated content for Markdown: '{markdown.title}'")
+            markdown_content.append(
+                self._format_text(
+                    text=markdown.caption, type="caption", text_align="left"
+                )
+            )
+
+        self.report.logger.info(
+            f"Successfully generated content for Markdown: '{markdown.title}'"
+        )
         return markdown_content
-    
+
     def _generate_html_content(self, html) -> List[str]:
         """
         Generate content for an HTML component in a Streamlit app.
@@ -605,35 +768,49 @@ with open('{os.path.join("..", markdown.file_path)}', 'r') as markdown_file:
         html_content = []
 
         # Add title
-        html_content.append(self._format_text(text=html.title, type='header', level=4, color='#2b8cbe'))
+        html_content.append(
+            self._format_text(text=html.title, type="header", level=4, color="#2b8cbe")
+        )
 
         try:
-            if is_url(html.file_path):  
+            if is_url(html.file_path):
                 # If it's a URL, fetch content dynamically
-                html_content.append(f"""
+                html_content.append(
+                    f"""
 response = requests.get('{html.file_path}')
 response.raise_for_status()
-html_content = response.text\n""")
+html_content = response.text\n"""
+                )
             else:
                 # If it's a local file
-                html_content.append(f"""
+                html_content.append(
+                    f"""
 with open('{os.path.join("..", html.file_path)}', 'r', encoding='utf-8') as html_file:
-    html_content = html_file.read()\n""")
+    html_content = html_file.read()\n"""
+                )
 
             # Display HTML content using Streamlit
-            html_content.append("st.components.v1.html(html_content, height=600, scrolling=True)\n")
+            html_content.append(
+                "st.components.v1.html(html_content, height=600, scrolling=True)\n"
+            )
 
         except Exception as e:
-            self.report.logger.error(f"Error generating content for HTML: {html.title}. Error: {str(e)}")
+            self.report.logger.error(
+                f"Error generating content for HTML: {html.title}. Error: {str(e)}"
+            )
             raise
 
         # Add caption if available
         if html.caption:
-            html_content.append(self._format_text(text=html.caption, type='caption', text_align="left"))
+            html_content.append(
+                self._format_text(text=html.caption, type="caption", text_align="left")
+            )
 
-        self.report.logger.info(f"Successfully generated content for HTML: '{html.title}'")
+        self.report.logger.info(
+            f"Successfully generated content for HTML: '{html.title}'"
+        )
         return html_content
-    
+
     def _generate_apicall_content(self, apicall) -> List[str]:
         """
         Generate content for a Markdown component.
@@ -651,21 +828,33 @@ with open('{os.path.join("..", html.file_path)}', 'r', encoding='utf-8') as html
         apicall_content = []
 
         # Add tile
-        apicall_content.append(self._format_text(text=apicall.title, type='header', level=4, color='#2b8cbe'))
+        apicall_content.append(
+            self._format_text(
+                text=apicall.title, type="header", level=4, color="#2b8cbe"
+            )
+        )
         try:
-            apicall_response = apicall.make_api_request(method='GET')
+            apicall_response = apicall.make_api_request(method="GET")
             apicall_content.append(f"""st.write({apicall_response})\n""")
         except Exception as e:
-            self.report.logger.error(f"Error generating content for APICall: {apicall.title}. Error: {str(e)}")
+            self.report.logger.error(
+                f"Error generating content for APICall: {apicall.title}. Error: {str(e)}"
+            )
             raise
 
         # Add caption if available
         if apicall.caption:
-            apicall_content.append(self._format_text(text=apicall.caption, type='caption', text_align="left"))
-        
-        self.report.logger.info(f"Successfully generated content for APICall: '{apicall.title}'")
+            apicall_content.append(
+                self._format_text(
+                    text=apicall.caption, type="caption", text_align="left"
+                )
+            )
+
+        self.report.logger.info(
+            f"Successfully generated content for APICall: '{apicall.title}'"
+        )
         return apicall_content
-    
+
     def _generate_chatbot_content(self, chatbot) -> List[str]:
         """
         Generate content for a ChatBot component.
@@ -683,10 +872,15 @@ with open('{os.path.join("..", html.file_path)}', 'r', encoding='utf-8') as html
         chatbot_content = []
 
         # Add title
-        chatbot_content.append(self._format_text(text=chatbot.title, type='header', level=4, color='#2b8cbe'))
+        chatbot_content.append(
+            self._format_text(
+                text=chatbot.title, type="header", level=4, color="#2b8cbe"
+            )
+        )
 
         # Chatbot logic for embedding in the web application
-        chatbot_content.append(f"""
+        chatbot_content.append(
+            f"""
 def generate_query(messages):
     response = requests.post(
         "{chatbot.api_call.api_url}",
@@ -741,15 +935,22 @@ if prompt := st.chat_input("Enter your prompt here:"):
     st.session_state.messages.append(parsed_response)
     with st.chat_message("assistant"):
         st.write_stream(response_generator(parsed_response["content"]))
-    """)
+    """
+        )
 
         # Add caption if available
         if chatbot.caption:
-            chatbot_content.append(self._format_text(text=chatbot.caption, type='caption', text_align="left"))
+            chatbot_content.append(
+                self._format_text(
+                    text=chatbot.caption, type="caption", text_align="left"
+                )
+            )
 
-        self.report.logger.info(f"Successfully generated content for ChatBot: '{chatbot.title}'")
+        self.report.logger.info(
+            f"Successfully generated content for ChatBot: '{chatbot.title}'"
+        )
         return chatbot_content
-    
+
     def _generate_component_imports(self, component: r.Component) -> List[str]:
         """
         Generate necessary imports for a component of the report.
@@ -760,7 +961,7 @@ if prompt := st.chat_input("Enter your prompt here:"):
             The component for which to generate the required imports. The component can be of type:
             - PLOT
             - DATAFRAME
-        
+
         Returns
         -------
         list : List[str]
@@ -768,31 +969,40 @@ if prompt := st.chat_input("Enter your prompt here:"):
         """
         # Dictionary to hold the imports for each component type
         components_imports = {
-            'plot': {
-                r.PlotType.ALTAIR: ['import json', 'import altair as alt', 'import requests'],
-                r.PlotType.PLOTLY: ['import json', 'import requests'],
-                r.PlotType.INTERACTIVE_NETWORK: ['import requests']
+            "plot": {
+                r.PlotType.ALTAIR: [
+                    "import json",
+                    "import altair as alt",
+                    "import requests",
+                ],
+                r.PlotType.PLOTLY: ["import json", "import requests"],
+                r.PlotType.INTERACTIVE_NETWORK: ["import requests"],
             },
-            'dataframe': ['import pandas as pd', 'from st_aggrid import AgGrid, GridOptionsBuilder'],
-            'markdown': ['import requests'],
-            'chatbot': ['import time', 'import json', 'import requests']
+            "dataframe": [
+                "import pandas as pd",
+                "from st_aggrid import AgGrid, GridOptionsBuilder",
+            ],
+            "markdown": ["import requests"],
+            "chatbot": ["import time", "import json", "import requests"],
         }
 
         component_type = component.component_type
-        component_imports = ['import streamlit as st']
+        component_imports = ["import streamlit as st"]
 
         # Add relevant imports based on component type and visualization tool
         if component_type == r.ComponentType.PLOT:
-            plot_type = getattr(component, 'plot_type', None)
-            if plot_type in components_imports['plot']:
-                component_imports.extend(components_imports['plot'][plot_type])
+            plot_type = getattr(component, "plot_type", None)
+            if plot_type in components_imports["plot"]:
+                component_imports.extend(components_imports["plot"][plot_type])
         elif component_type == r.ComponentType.MARKDOWN:
-            component_imports.extend(components_imports['markdown'])
+            component_imports.extend(components_imports["markdown"])
         elif component_type == r.ComponentType.CHATBOT:
-            component_imports.extend(components_imports['chatbot'])
+            component_imports.extend(components_imports["chatbot"])
         elif component_type == r.ComponentType.DATAFRAME:
-            component_imports.extend(components_imports['dataframe'])
-            component_imports.append('df_index = 1')
+            component_imports.extend(components_imports["dataframe"])
+            component_imports.append("df_index = 1")
 
         # Return the list of import statements
         return component_imports     
+
+        return component_imports

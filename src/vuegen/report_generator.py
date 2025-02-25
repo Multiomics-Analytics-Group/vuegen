@@ -1,13 +1,20 @@
 import logging
+import shutil
 
 from .config_manager import ConfigManager
 from .quarto_reportview import QuartoReportView
 from .report import ReportType
 from .streamlit_reportview import StreamlitReportView
-from .utils import assert_enum_value, load_yaml_config, write_yaml_config, get_logger
+from .utils import assert_enum_value, get_logger, load_yaml_config, write_yaml_config
 
 
-def get_report(report_type: str, logger: logging.Logger = get_logger("report"), config_path: str = None, dir_path: str = None, streamlit_autorun: bool = False) -> None:
+def get_report(
+    report_type: str,
+    logger: logging.Logger = get_logger("report"),
+    config_path: str = None,
+    dir_path: str = None,
+    streamlit_autorun: bool = False,
+) -> None:
     """
     Generate and run a report based on the specified engine.
 
@@ -31,7 +38,7 @@ def get_report(report_type: str, logger: logging.Logger = get_logger("report"), 
     """
     # Initialize the config manager object
     config_manager = ConfigManager(logger)
-    
+
     if dir_path:
         # Generate configuration from the provided directory
         yaml_data, base_folder_path = config_manager.create_yamlconfig_fromdir(dir_path)
@@ -39,7 +46,7 @@ def get_report(report_type: str, logger: logging.Logger = get_logger("report"), 
 
     # Load the YAML configuration file with the report metadata
     report_config = load_yaml_config(config_path)
-    
+
     # Load report object and metadata
     report, report_metadata = config_manager.initialize_report(report_config)
 
@@ -49,17 +56,20 @@ def get_report(report_type: str, logger: logging.Logger = get_logger("report"), 
     # Create and run ReportView object based on its type
     if report_type == ReportType.STREAMLIT:
         st_report = StreamlitReportView(
-            report = report,
-            report_type = report_type,
-            streamlit_autorun = streamlit_autorun
+            report=report, report_type=report_type, streamlit_autorun=streamlit_autorun
         )
         st_report.generate_report()
         st_report.run_report()
 
     else:
-        quarto_report = QuartoReportView(
-            report = report,
-            report_type = report_type
-        )
+        # Check if Quarto is installed
+        if shutil.which("quarto") is None:
+            logger.error(
+                "Quarto is not installed. Please install Quarto before generating this report type."
+            )
+            raise RuntimeError(
+                "Quarto is not installed. Please install Quarto before generating this report type."
+            )
+        quarto_report = QuartoReportView(report=report, report_type=report_type)
         quarto_report.generate_report()
         quarto_report.run_report()
