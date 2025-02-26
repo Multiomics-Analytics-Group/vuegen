@@ -4,32 +4,10 @@ import sys
 from typing import List
 
 import pandas as pd
-from streamlit.web.cli import _main_run as streamlit_run
+from streamlit.web import cli as stcli
 
 from . import report as r
 from .utils import create_folder, generate_footer, is_url
-
-
-def streamlit_run(
-    file,
-    args=None,
-    flag_options=None,
-    **kwargs
-) -> None:
-    if args is None:
-        args = []
-
-    if flag_options is None:
-        flag_options = {}
-
-    import streamlit.web.bootstrap as bootstrap
-    from streamlit.runtime.credentials import check_credentials
-
-    bootstrap.load_config_options(flag_options=kwargs)
-
-    check_credentials()
-
-    bootstrap.run(file, False, args, flag_options)
 
 
 class StreamlitReportView(r.WebAppReportView):
@@ -184,44 +162,28 @@ report_nav.run()"""
             self.report.logger.debug(
                 f"Running Streamlit report from directory: {output_dir}"
             )
-            # command = [
-            #     sys.executable, # ! will be vuegen main script, not the Python Interpreter
-            #     "-m",
-            #     "streamlit",
-            #     "run",
-            #     os.path.join(output_dir, self.REPORT_MANAG_SCRIPT),
-            # ]
-            self.report.logger.debug(sys.executable)
-            self.report.logger.debug(sys.path)
+            # ! using pyinstaller: vuegen main script as executable, not the Python Interpreter
+            msg = f"{sys.executable = }"
+            self.report.logger.debug(msg)
             try:
-                # ! streamlit is not known in packaged app
-                # self.report.logger.debug(f"Running command: {' '.join(command)}")
-                # subprocess.run(
-                #     command,
-                #     check=True,
-                # )
+                # ! streamlit  command option is not known in packaged app
                 target_file = os.path.join(output_dir, self.REPORT_MANAG_SCRIPT)
                 self.report.logger.debug(
                     f"Running Streamlit report from file: {target_file}"
                 )
-                streamlit_run(target_file)
-            self.report.logger.info(
-                f"Running '{self.report.title}' {self.report_type} report."
-            )
-            try:
-                subprocess.run(
-                    [
-                        "streamlit",
-                        "run",
-                        os.path.join(output_dir, self.REPORT_MANAG_SCRIPT),
-                    ],
-                    check=True,
-                )
+                args = [
+                    "streamlit",
+                    "run",
+                    target_file,
+                ]
+                sys.argv = args
+
+                sys.exit(stcli.main())
             except KeyboardInterrupt:
                 print("Streamlit process interrupted.")
-            except subprocess.CalledProcessError as e:
-                self.report.logger.error(f"Error running Streamlit report: {str(e)}")
-                raise
+            # except subprocess.CalledProcessError as e:
+            #     self.report.logger.error(f"Error running Streamlit report: {str(e)}")
+            #     raise
         else:
             # If autorun is False, print instructions for manual execution
             self.report.logger.info(
@@ -1003,6 +965,6 @@ if prompt := st.chat_input("Enter your prompt here:"):
             component_imports.append("df_index = 1")
 
         # Return the list of import statements
-        return component_imports     
+        return component_imports
 
         return component_imports
