@@ -175,6 +175,7 @@ report_nav.run()"""
                     "streamlit",
                     "run",
                     target_file,
+                    "--global.developmentMode=false",
                 ]
                 sys.argv = args
 

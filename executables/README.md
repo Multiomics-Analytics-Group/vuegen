@@ -26,3 +26,11 @@ Windows and macOS specific options:
                         macOS .app bundle. On Windows this option is automatically set if the first script is a '.pyw' file. This option
                         is ignored on *NIX systems.
 ```
+
+## Using bundled executable
+
+try using basic example
+
+```bash
+./dist/vuegen/vuegen -d  ../docs/example_data/Basic_example_vuegen_demo_notebook -st_autorun
+```
