@@ -3,10 +3,13 @@
 - pyvis templates were not copied, so make these explicit (see [this](https://stackoverflow.com/a/72687433/9684872))
 
 ```bash
-# from root of the project
-pyinstaller -D --collect-all pyvis -n vuegen src/vuegen/__main__.py
 # from this README folder
-pyinstaller -D --collect-all pyvis --collect-all streamlit -n vuegen ../src/vuegen/__main__.py
+pyinstaller -D --collect-all pyvis --collect-all streamlit --collect-all  st_aggrid  -n vuegen ../src/vuegen/__main__.py
+```
+
+```bash
+# other pyinstaller options
+--noconfirm # is used to avoid the prompt for overwriting the existing dist folder
 ```
 
 ## Pyinstaller options
