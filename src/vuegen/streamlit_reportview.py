@@ -28,6 +28,12 @@ class StreamlitReportView(r.WebAppReportView):
     ):
         super().__init__(report=report, report_type=report_type)
         self.streamlit_autorun = streamlit_autorun
+        self.BUNDLED_EXECUTION = False
+        if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+            self.report.logger.info("running in a PyInstaller bundle")
+            self.BUNDLED_EXECUTION = True
+        else:
+            self.report.logger.info("running in a normal Python process")
 
     def generate_report(
         self, output_dir: str = SECTIONS_DIR, static_dir: str = STATIC_FILES_DIR
@@ -171,20 +177,27 @@ report_nav.run()"""
                 self.report.logger.debug(
                     f"Running Streamlit report from file: {target_file}"
                 )
-                args = [
-                    "streamlit",
-                    "run",
-                    target_file,
-                    "--global.developmentMode=false",
-                ]
-                sys.argv = args
+                if self.BUNDLED_EXECUTION:
+                    args = [
+                        "streamlit",
+                        "run",
+                        target_file,
+                        "--global.developmentMode=false",
+                    ]
+                    sys.argv = args
 
-                sys.exit(stcli.main())
+                    sys.exit(stcli.main())
+                else:
+                    self.report.logger.debug("Run using subprocess.")
+                    subprocess.run(
+                        [sys.executable, "-m", "streamlit", "run", target_file],
+                        check=True,
+                    )
             except KeyboardInterrupt:
                 print("Streamlit process interrupted.")
-            # except subprocess.CalledProcessError as e:
-            #     self.report.logger.error(f"Error running Streamlit report: {str(e)}")
-            #     raise
+            except subprocess.CalledProcessError as e:
+                self.report.logger.error(f"Error running Streamlit report: {str(e)}")
+                raise
         else:
             # If autorun is False, print instructions for manual execution
             self.report.logger.info(
