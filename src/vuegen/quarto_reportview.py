@@ -1,5 +1,6 @@
 import os
 import subprocess
+import sys
 from pathlib import Path
 from typing import List
 
@@ -20,6 +21,12 @@ class QuartoReportView(r.ReportView):
 
     def __init__(self, report: r.Report, report_type: r.ReportType):
         super().__init__(report=report, report_type=report_type)
+        self.BUNDLED_EXECUTION = False
+        if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+            self.report.logger.info("running in a PyInstaller bundle")
+            self.BUNDLED_EXECUTION = True
+        else:
+            self.report.logger.info("running in a normal Python process")
 
     def generate_report(
         self, output_dir: str = BASE_DIR, static_dir: str = STATIC_FILES_DIR
@@ -155,22 +162,32 @@ class QuartoReportView(r.ReportView):
             The folder where the report was generated (default is 'sections').
         """
         try:
-            subprocess.run(
-                ["quarto", "render", os.path.join(output_dir, f"{self.BASE_DIR}.qmd")],
-                check=True,
-            )
-            if self.report_type == r.ReportType.JUPYTER:
+            if not self.BUNDLED_EXECUTION:
                 subprocess.run(
                     [
                         "quarto",
-                        "convert",
+                        "render",
                         os.path.join(output_dir, f"{self.BASE_DIR}.qmd"),
                     ],
                     check=True,
                 )
-            self.report.logger.info(
-                f"'{self.report.title}' '{self.report_type}' report rendered"
-            )
+                if self.report_type == r.ReportType.JUPYTER:
+                    subprocess.run(
+                        [
+                            "quarto",
+                            "convert",
+                            os.path.join(output_dir, f"{self.BASE_DIR}.qmd"),
+                        ],
+                        check=True,
+                    )
+                self.report.logger.info(
+                    f"'{self.report.title}' '{self.report_type}' report rendered"
+                )
+            else:
+                self.report.logger.info(
+                    f"Quarto report '{self.report.title}' '{self.report_type}' cannot "
+                    "be run in a PyInstaller bundle"
+                )
         except subprocess.CalledProcessError as e:
             self.report.logger.error(
                 f"Error running '{self.report.title}' {self.report_type} report: {str(e)}"
