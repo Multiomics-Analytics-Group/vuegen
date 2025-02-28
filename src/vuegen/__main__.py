@@ -2,7 +2,7 @@ import sys
 from pathlib import Path
 
 from vuegen import report_generator
-from vuegen.utils import get_logger, get_parser
+from vuegen.utils import get_logger, get_parser, print_completion_message
 
 
 def main():
@@ -47,6 +47,8 @@ def main():
         streamlit_autorun=streamlit_autorun,
     )
 
+    # Print completion message
+    print_completion_message(report_type)
 
 if __name__ == "__main__":
     main()

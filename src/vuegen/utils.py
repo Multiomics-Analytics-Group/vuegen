@@ -743,6 +743,45 @@ def get_logger(log_suffix):
 
     return logger
 
+def print_completion_message(report_type: str):
+    """
+    Prints a formatted completion message after report generation.
+    """
+    border = "─" * 65  # Creates a separator line
+    print(f"\n{border}\n🎉 Pipeline Execution Complete! 🎉\n")
+
+    if report_type == "streamlit":
+        print(
+            """🚀 Streamlit Report Generated!
+
+📂 All scripts to build the Streamlit app are available at:
+    nf_container_results/streamlit_report/sections
+
+▶️ To run the Streamlit app, use the following command:
+    streamlit run nf_container_results/streamlit_report/sections/report_manager.py
+
+✨ You can extend the report by adding new files to the input directory or updating the config file.
+
+🛠️ Advanced users can modify the Python scripts directly in:
+    nf_container_results/streamlit_report/sections
+"""
+        )
+    else:
+        print(
+            f"""🚀 {report_type.capitalize()} Report Generated!
+
+📂 Your {report_type} report is available at:
+    nf_container_results/quarto_report
+
+✨ You can extend the report by adding new files to the input directory or updating the config file.
+
+🛠️ Advanced users can modify the report template directly in:
+    nf_container_results/quarto_report/quarto_report.qmd
+"""
+        )
+
+    print(border)
+
 
 ## REPORT FORMATTING
 def generate_footer() -> str:
