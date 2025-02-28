@@ -743,6 +743,7 @@ def get_logger(log_suffix):
 
     return logger
 
+
 def print_completion_message(report_type: str):
     """
     Prints a formatted completion message after report generation.
