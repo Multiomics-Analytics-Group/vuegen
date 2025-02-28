@@ -39,6 +39,7 @@ myst-nb = {version="*", optional=true}
 ipywidgets = {version="*", optional=true}
 sphinx-new-tab-link = {version = "!=0.2.2", optional=true}
 jupytext = {version="*", optional=true}
+customtkinter = {version="*", optional=true}
 
 [tool.poetry.group.dev.dependencies]
 ipykernel = {version="^6.29.5", optional=true}
