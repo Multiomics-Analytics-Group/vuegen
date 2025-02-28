@@ -10,7 +10,7 @@ from .utils import assert_enum_value, get_logger, load_yaml_config, write_yaml_c
 
 def get_report(
     report_type: str,
-    logger: logging.Logger = get_logger("report"),
+    logger: logging.Logger = None,
     config_path: str = None,
     dir_path: str = None,
     streamlit_autorun: bool = False,
@@ -36,7 +36,11 @@ def get_report(
     ValueError
         If neither 'config_path' nor 'directory' is provided.
     """
-    # Initialize the config manager object
+    # Initialize logger only if it's not provided
+    if logger is None:
+        logger = get_logger("report")
+
+    # Create the config manager object
     config_manager = ConfigManager(logger)
 
     if dir_path:
