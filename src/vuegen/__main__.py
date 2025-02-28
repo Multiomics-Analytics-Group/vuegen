@@ -50,5 +50,6 @@ def main():
     # Print completion message
     print_completion_message(report_type)
 
+
 if __name__ == "__main__":
     main()
