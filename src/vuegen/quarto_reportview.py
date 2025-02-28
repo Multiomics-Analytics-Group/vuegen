@@ -166,7 +166,7 @@ class QuartoReportView(r.ReportView):
                 subprocess.run(
                     [
                         "quarto",
-                        "render",
+                        "convert",
                         os.path.join(output_dir, f"{self.BASE_DIR}.qmd"),
                     ],
                     check=True,
