@@ -14,7 +14,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        # python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.11"]
     steps:
       - uses: actions/checkout@v4
       - uses: psf/black@stable
@@ -43,7 +44,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        # python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.11"]
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python ${{ matrix.python-version }}
@@ -141,7 +143,7 @@ jobs:
       - name: Build executable
         run: |
           cd gui
-          pyinstaller -n vuegen_gui --no-confirm --onedir --collect-all pyvis --collect-all streamlit --collect-all  st_aggrid  --collect-all customtkinter app.py
+          pyinstaller -n vuegen_gui -D --collect-all pyvis --collect-all streamlit --collect-all  st_aggrid  --collect-all customtkinter app.py
       - name: Upload executable
         uses: actions/upload-artifact@v4
         with:
