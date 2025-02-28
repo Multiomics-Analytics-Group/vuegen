@@ -55,7 +55,7 @@ build-backend = "poetry_dynamic_versioning.backend"
 
 # https://stackoverflow.com/a/60990574/9684872
 [tool.poetry.extras]
-docs = ["sphinx", "sphinx-book-theme", "myst-nb", "ipywidgets", "sphinx-new-tab-link", "jupytext"]
+gui = ["customtkinter"]
 
 [tool.poetry.scripts]
 # https://python-poetry.org/docs/pyproject/#scripts
