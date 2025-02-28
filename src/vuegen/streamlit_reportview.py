@@ -1,8 +1,10 @@
 import os
 import subprocess
+import sys
 from typing import List
 
 import pandas as pd
+from streamlit.web import cli as stcli
 
 from . import report as r
 from .utils import create_folder, generate_footer, is_url
@@ -26,6 +28,12 @@ class StreamlitReportView(r.WebAppReportView):
     ):
         super().__init__(report=report, report_type=report_type)
         self.streamlit_autorun = streamlit_autorun
+        self.BUNDLED_EXECUTION = False
+        if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+            self.report.logger.info("running in a PyInstaller bundle")
+            self.BUNDLED_EXECUTION = True
+        else:
+            self.report.logger.info("running in a normal Python process")
 
     def generate_report(
         self, output_dir: str = SECTIONS_DIR, static_dir: str = STATIC_FILES_DIR
@@ -157,15 +165,34 @@ report_nav.run()"""
             self.report.logger.info(
                 f"Running '{self.report.title}' {self.report_type} report."
             )
+            self.report.logger.debug(
+                f"Running Streamlit report from directory: {output_dir}"
+            )
+            # ! using pyinstaller: vuegen main script as executable, not the Python Interpreter
+            msg = f"{sys.executable = }"
+            self.report.logger.debug(msg)
             try:
-                subprocess.run(
-                    [
+                # ! streamlit  command option is not known in packaged app
+                target_file = os.path.join(output_dir, self.REPORT_MANAG_SCRIPT)
+                self.report.logger.debug(
+                    f"Running Streamlit report from file: {target_file}"
+                )
+                if self.BUNDLED_EXECUTION:
+                    args = [
                         "streamlit",
                         "run",
-                        os.path.join(output_dir, self.REPORT_MANAG_SCRIPT),
-                    ],
-                    check=True,
-                )
+                        target_file,
+                        "--global.developmentMode=false",
+                    ]
+                    sys.argv = args
+
+                    sys.exit(stcli.main())
+                else:
+                    self.report.logger.debug("Run using subprocess.")
+                    subprocess.run(
+                        [sys.executable, "-m", "streamlit", "run", target_file],
+                        check=True,
+                    )
             except KeyboardInterrupt:
                 print("Streamlit process interrupted.")
             except subprocess.CalledProcessError as e:
@@ -952,4 +979,6 @@ if prompt := st.chat_input("Enter your prompt here:"):
             component_imports.append("df_index = 1")
 
         # Return the list of import statements
+        return component_imports
+
         return component_imports
