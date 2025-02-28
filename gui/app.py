@@ -129,7 +129,7 @@ print("report_type value:", _report_type)
 
 ##########################################################################################
 # Run Streamlit radio button
-run_streamlit = tk.IntVar(value=0)
+run_streamlit = tk.IntVar(value=1)
 callback_radio_st_run = radiobutton_event(run_streamlit)
 ctk_radio_st_autorun_1 = customtkinter.CTkRadioButton(
     app,
