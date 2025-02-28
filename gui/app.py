@@ -31,6 +31,7 @@ customtkinter.set_appearance_mode("system")
 customtkinter.set_default_color_theme("dark-blue")
 
 
+##########################################################################################
 # callbacks
 def create_run_vuegen(is_dir, config_path, report_type, run_streamlit):
     def inner():
@@ -63,12 +64,7 @@ def radiobutton_event(value):
     return radio_button_callback
 
 
-# Options
-
-# get list of report types from Enum
-report_types = [report_type.value.lower() for report_type in ReportType]
-
-
+##########################################################################################
 # APP
 app = customtkinter.CTk()
 app.geometry("460x400")
@@ -110,6 +106,9 @@ config_path_entry.grid(row=2, column=0, columnspan=2, padx=20, pady=10)
 
 ##########################################################################################
 # Report type dropdown
+# - get list of report types from Enum
+report_types = [report_type.value.lower() for report_type in ReportType]
+
 ctk_label_report = customtkinter.CTkLabel(
     app,
     text="Select type of report to generate (use streamlit for now)",
