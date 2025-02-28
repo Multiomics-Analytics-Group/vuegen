@@ -29,11 +29,12 @@ as the streamlit server and the GUI itself.
 # from this README folder
 pyinstaller \
 -n vuegen_gui \
---no-confirm \
+--noconfirm \
 --onedir \
 --collect-all pyvis \
 --collect-all streamlit \
 --collect-all  st_aggrid  \
 --collect-all customtkinter \
+--add-data ../docs/example_data/Basic_example_vuegen_demo_notebook:example_data/Basic_example_vuegen_demo_notebook \
 app.py
 ```

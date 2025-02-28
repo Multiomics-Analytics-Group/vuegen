@@ -21,6 +21,7 @@ optional arguments:
 
 import sys
 import tkinter as tk
+from pathlib import Path
 
 import customtkinter
 
@@ -29,6 +30,26 @@ from vuegen.report import ReportType
 
 customtkinter.set_appearance_mode("system")
 customtkinter.set_default_color_theme("dark-blue")
+
+app_path = Path(__file__).absolute()
+print("app_path:", app_path)
+
+if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+    # PyInstaller bundeled case
+    path_to_dat = (
+        app_path.parent / "example_data/Basic_example_vuegen_demo_notebook"
+    ).resolve()
+elif app_path.parent.name == "gui":
+    # should be always the case for GUI run from command line
+    path_to_dat = (
+        app_path.parent
+        / ".."
+        / "docs"
+        / "example_data"
+        / "Basic_example_vuegen_demo_notebook"
+    ).resolve()
+else:
+    path_to_dat = "docs/example_data/Basic_example_vuegen_demo_notebook"
 
 
 ##########################################################################################
@@ -96,7 +117,7 @@ ctk_radio_config_1 = customtkinter.CTkRadioButton(
 )
 ctk_radio_config_1.grid(row=1, column=1, padx=20, pady=2)
 
-config_path = tk.StringVar()
+config_path = tk.StringVar(value=str(path_to_dat))
 config_path_entry = customtkinter.CTkEntry(
     app,
     width=400,

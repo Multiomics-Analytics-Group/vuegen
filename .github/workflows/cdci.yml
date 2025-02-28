@@ -124,7 +124,7 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
 
   build-executable:
-    name: Build executable - vuegen_gui_${{ matrix.os.label }}
+    name: Build-exe-vuegen_gui_${{ matrix.os.label }}
     runs-on: ${{ matrix.os.runner }}
     needs:
       - test
@@ -152,7 +152,7 @@ jobs:
       - name: Build executable
         run: |
           cd gui
-          pyinstaller -n vuegen_gui -D --collect-all pyvis --collect-all streamlit --collect-all  st_aggrid  --collect-all customtkinter app.py
+          pyinstaller -n vuegen_gui -D --collect-all pyvis --collect-all streamlit --collect-all  st_aggrid  --collect-all customtkinter --add-data ../docs/example_data/Basic_example_vuegen_demo_notebook:example_data/Basic_example_vuegen_demo_notebook app.py
       - name: Upload executable
         uses: actions/upload-artifact@v4
         with:
