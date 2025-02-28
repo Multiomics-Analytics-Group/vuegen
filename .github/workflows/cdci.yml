@@ -124,7 +124,7 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
 
   build-executable:
-    name: Build executable: vuegen_gui_${{ matrix.os.label }}
+    name: Build executable - vuegen_gui_${{ matrix.os.label }}
     runs-on: ${{ matrix.os.runner }}
     needs:
       - test
@@ -148,7 +148,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install VueGen GUI and pyinstaller
-        run: python -m pip install '.[gui]' pyinstaller
+        run: python -m pip install ".[gui]" pyinstaller
       - name: Build executable
         run: |
           cd gui
