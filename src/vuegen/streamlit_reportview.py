@@ -1,5 +1,6 @@
 import os
 import subprocess
+from pathlib import Path
 from typing import List
 
 import pandas as pd
@@ -106,9 +107,9 @@ st.set_page_config(layout="wide", page_title="{self.report.title}")"""
 
                 for subsection in section.subsections:
                     subsection_name_var = subsection.title.replace(" ", "_")
-                    subsection_file_path = os.path.join(
-                        section_name_var, subsection_name_var + ".py"
-                    )
+                    subsection_file_path = (
+                        Path(section_name_var) / f"{subsection_name_var}.py"
+                    ).as_posix()  # Make sure it's Posix Paths
 
                     # Create a Page object for each subsection and add it to the home page content
                     report_manag_content.append(
@@ -274,7 +275,7 @@ report_nav.run()"""
 
             # Add the home page to the report manager content
             report_manag_content.append(
-                f"homepage = st.Page('Home/Homepage.py', title='Homepage')"
+                f"homepage = st.Page('Home/Homepage.py', title='Homepage')"  # ! here Posix Path is hardcoded
             )
             report_manag_content.append(f"sections_pages['Home'] = [homepage]\n")
             self.report.logger.info("Home page added to the report manager content.")

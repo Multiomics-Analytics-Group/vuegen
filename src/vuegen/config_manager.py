@@ -63,7 +63,9 @@ class ConfigManager:
 
         # Add title, file path, and description
         component_config["title"] = self._create_title_fromdir(file_path.name)
-        component_config["file_path"] = str(file_path.resolve())
+        component_config["file_path"] = (
+            file_path.resolve().as_posix()
+        )  # ! needs to be posix for all OS support
         component_config["description"] = ""
         component_config["caption"] = ""
 
