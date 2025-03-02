@@ -34,7 +34,7 @@ Also, the class diagram for the project is presented below to illustrate the arc
 
 ![VueGen Class Diagram](https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/vuegen_classdiagram_noattmeth.png)
 
-An extended version of the class diagram with attributes and methods is available [here][https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/vuegen_classdiagram_withattmeth.pdf].
+An extended version of the class diagram with attributes and methods is available [here][vuegen-class-diag-att].
 
 The VueGen documentation is available at [vuegen.readthedocs.io][vuegen-docs], where you can find detailed information of the package’s classes and functions, installation and execution instructions, and case studies to demonstrate its functionality. 
 
@@ -140,6 +140,7 @@ We appreciate your feedback! If you have any comments, suggestions, or run into 
 [streamlit]: https://streamlit.io/ 
 [vuegen-pypi]: https://pypi.org/project/vuegen/
 [vuegen-docker-quay]: https://quay.io/repository/dtu_biosustain_dsp/vuegen
+[vuegen-class-diag-att]: https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/vuegen_classdiagram_withattmeth.pdf
 [vuegen-docs]: https://vuegen.readthedocs.io/
 [ci-gh-action]: https://github.com/Multiomics-Analytics-Group/vuegen/actions/workflows/cdci.yml
 [ci-docs]: https://github.com/Multiomics-Analytics-Group/vuegen/actions/workflows/docs.yml
