@@ -57,14 +57,14 @@ else:
 def create_run_vuegen(is_dir, config_path, report_type, run_streamlit):
     def inner():
         args = ["vuegen"]
-        if is_dir:
+        if is_dir.get():
             args.append("--directory")
         else:
             args.append("--config")
         args.append(config_path.get())
         args.append("--report_type")
         args.append(report_type.get())
-        if run_streamlit:
+        if run_streamlit.get():
             args.append("--streamlit_autorun")
         print("args:", args)
         sys.argv = args
