@@ -10,12 +10,6 @@
 ```
 
 ```{toctree}
-:maxdepth: 2
-
-vuegen_demo
-```
-
-```{toctree}
 :maxdepth: 1
 :caption: Building a report
 
