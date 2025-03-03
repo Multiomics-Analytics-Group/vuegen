@@ -129,9 +129,7 @@ report_nav.run()"""
             )
 
             # Write the navigation and general content to a Python file
-            with open(
-                Path(output_dir) / self.REPORT_MANAG_SCRIPT, "w"
-            ) as nav_manager:
+            with open(Path(output_dir) / self.REPORT_MANAG_SCRIPT, "w") as nav_manager:
                 nav_manager.write("\n".join(report_manag_content))
                 self.report.logger.info(
                     f"Created app navigation script: {self.REPORT_MANAG_SCRIPT}"
@@ -309,7 +307,11 @@ report_nav.run()"""
                         )
                         try:
                             # Create subsection file
-                            subsection_file_path = Path(output_dir) / section_name_var / f"{subsection.title.replace(' ', '_')}.py"
+                            subsection_file_path = (
+                                Path(output_dir)
+                                / section_name_var
+                                / f"{subsection.title.replace(' ', '_')}.py"
+                            )
 
                             # Generate content and imports for the subsection
                             subsection_content, subsection_imports = (
@@ -457,7 +459,9 @@ report_nav.run()"""
                     networkx_graph, html_plot_file = networkx_graph
                 else:
                     # Otherwise, create and save a new pyvis network from the netowrkx graph
-                    html_plot_file = Path(static_dir) / f"{plot.title.replace(' ', '_')}.html"
+                    html_plot_file = (
+                        Path(static_dir) / f"{plot.title.replace(' ', '_')}.html"
+                    )
                     pyvis_graph = plot.create_and_save_pyvis_network(
                         networkx_graph, html_plot_file
                     )

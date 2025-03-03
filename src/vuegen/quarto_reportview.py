@@ -124,9 +124,7 @@ class QuartoReportView(r.ReportView):
             report_formatted_imports = "\n".join(report_unique_imports)
 
             # Write the navigation and general content to a Python file
-            with open(
-                Path(output_dir) / f"{self.BASE_DIR}.qmd", "w"
-            ) as quarto_report:
+            with open(Path(output_dir) / f"{self.BASE_DIR}.qmd", "w") as quarto_report:
                 quarto_report.write(yaml_header)
                 quarto_report.write(
                     f"""\n```{{python}}
