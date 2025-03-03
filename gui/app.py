@@ -129,10 +129,10 @@ config_path_entry.grid(row=2, column=0, columnspan=2, padx=20, pady=10)
 # Report type dropdown
 # - get list of report types from Enum
 report_types = [report_type.value.lower() for report_type in ReportType]
-
+report_types = ["streamlit"]  # ! for now, only streamlit is supported
 ctk_label_report = customtkinter.CTkLabel(
     app,
-    text="Select type of report to generate (use streamlit for now)",
+    text="Select type of report to generate (using only streamlit for now)",
 )
 ctk_label_report.grid(row=3, column=0, columnspan=2, padx=20, pady=20)
 report_type = tk.StringVar(value=report_types[0])
