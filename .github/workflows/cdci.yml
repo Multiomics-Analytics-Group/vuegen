@@ -124,7 +124,7 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
 
   build-executable:
-    name: Build-exe-vuegen_gui_${{ matrix.os.label }}
+    name: Build-exe-${{ matrix.os.label }}
     runs-on: ${{ matrix.os.runner }}
     needs:
       - test
