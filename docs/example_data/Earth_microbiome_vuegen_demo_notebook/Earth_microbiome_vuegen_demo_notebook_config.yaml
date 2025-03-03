@@ -21,30 +21,30 @@ sections:
     description: ''
     components:
     - title: Metadata Random Subset
-      file_path: example_data/Earth_microbiome_vuegen_demo_notebook/1_Exploratory_data_analysis/1_sample_exploration/1_metadata_random_subset.csv
+      file_path: /Users/asaru/Documents/DTU/MoNA/vuegen/docs/example_data/Earth_microbiome_vuegen_demo_notebook/1_Exploratory_data_analysis/1_sample_exploration/1_metadata_random_subset.csv
       description: ''
       caption: ''
-      component_type: DATAFRAME
-      file_format: CSV
+      component_type: dataframe
+      file_format: csv
       delimiter: ','
     - title: Animal Samples Map
-      file_path: example_data/Earth_microbiome_vuegen_demo_notebook/1_Exploratory_data_analysis/1_sample_exploration/2_animal_samples_map.png
+      file_path: /Users/asaru/Documents/DTU/MoNA/vuegen/docs/example_data/Earth_microbiome_vuegen_demo_notebook/1_Exploratory_data_analysis/1_sample_exploration/2_animal_samples_map.png
       description: ''
       caption: ''
-      component_type: PLOT
-      plot_type: STATIC
+      component_type: plot
+      plot_type: static
     - title: Plant Samples Map
-      file_path: example_data/Earth_microbiome_vuegen_demo_notebook/1_Exploratory_data_analysis/1_sample_exploration/3_plant_samples_map.json
+      file_path: /Users/asaru/Documents/DTU/MoNA/vuegen/docs/example_data/Earth_microbiome_vuegen_demo_notebook/1_Exploratory_data_analysis/1_sample_exploration/3_plant_samples_map.json
       description: ''
       caption: ''
-      component_type: PLOT
-      plot_type: PLOTLY
+      component_type: plot
+      plot_type: plotly
     - title: Saline Samples Map
-      file_path: example_data/Earth_microbiome_vuegen_demo_notebook/1_Exploratory_data_analysis/1_sample_exploration/4_saline_samples_map.json
+      file_path: /Users/asaru/Documents/DTU/MoNA/vuegen/docs/example_data/Earth_microbiome_vuegen_demo_notebook/1_Exploratory_data_analysis/1_sample_exploration/4_saline_samples_map.json
       description: ''
       caption: ''
-      component_type: PLOT
-      plot_type: ALTAIR
+      component_type: plot
+      plot_type: altair
 - title: Metagenomics
   description: ''
   subsections:
@@ -52,66 +52,66 @@ sections:
     description: ''
     components:
     - title: Alpha Diversity Host Associated Samples
-      file_path: example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/1_alpha_diversity/1_alpha_diversity_host_associated_samples.png
+      file_path: /Users/asaru/Documents/DTU/MoNA/vuegen/docs/example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/1_alpha_diversity/1_alpha_diversity_host_associated_samples.png
       description: ''
       caption: ''
-      component_type: PLOT
-      plot_type: STATIC
+      component_type: plot
+      plot_type: static
     - title: Alpha Diversity Free Living Samples
-      file_path: example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/1_alpha_diversity/2_alpha_diversity_free_living_samples.json
+      file_path: /Users/asaru/Documents/DTU/MoNA/vuegen/docs/example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/1_alpha_diversity/2_alpha_diversity_free_living_samples.json
       description: ''
       caption: ''
-      component_type: PLOT
-      plot_type: PLOTLY
+      component_type: plot
+      plot_type: plotly
   - title: Average Copy Number
     description: ''
     components:
     - title: Average Copy Number Emp Ontology Level2
-      file_path: example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/2_average_copy_number/1_average_copy_number_emp_ontology_level2.png
+      file_path: /Users/asaru/Documents/DTU/MoNA/vuegen/docs/example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/2_average_copy_number/1_average_copy_number_emp_ontology_level2.png
       description: ''
       caption: ''
-      component_type: PLOT
-      plot_type: STATIC
+      component_type: plot
+      plot_type: static
     - title: Average Copy Number Emp Ontology Level3
-      file_path: example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/2_average_copy_number/2_average_copy_number_emp_ontology_level3.json
+      file_path: /Users/asaru/Documents/DTU/MoNA/vuegen/docs/example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/2_average_copy_number/2_average_copy_number_emp_ontology_level3.json
       description: ''
       caption: ''
-      component_type: PLOT
-      plot_type: PLOTLY
+      component_type: plot
+      plot_type: plotly
   - title: Nestedness
     description: ''
     components:
     - title: Nestedness Random Subset
-      file_path: example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/3_nestedness/1_nestedness_random_subset.csv
+      file_path: /Users/asaru/Documents/DTU/MoNA/vuegen/docs/example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/3_nestedness/1_nestedness_random_subset.csv
       description: ''
       caption: ''
-      component_type: DATAFRAME
-      file_format: CSV
+      component_type: dataframe
+      file_format: csv
       delimiter: ','
     - title: All Samples
-      file_path: example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/3_nestedness/2_all_samples.json
+      file_path: /Users/asaru/Documents/DTU/MoNA/vuegen/docs/example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/3_nestedness/2_all_samples.json
       description: ''
       caption: ''
-      component_type: PLOT
-      plot_type: PLOTLY
+      component_type: plot
+      plot_type: plotly
     - title: Plant Samples
-      file_path: example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/3_nestedness/3_plant_samples.json
+      file_path: /Users/asaru/Documents/DTU/MoNA/vuegen/docs/example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/3_nestedness/3_plant_samples.json
       description: ''
       caption: ''
-      component_type: PLOT
-      plot_type: PLOTLY
+      component_type: plot
+      plot_type: plotly
     - title: Animal Samples
-      file_path: example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/3_nestedness/4_animal_samples.png
+      file_path: /Users/asaru/Documents/DTU/MoNA/vuegen/docs/example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/3_nestedness/4_animal_samples.png
       description: ''
       caption: ''
-      component_type: PLOT
-      plot_type: STATIC
+      component_type: plot
+      plot_type: static
     - title: Non Saline Samples
-      file_path: example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/3_nestedness/5_non_saline_samples.png
+      file_path: /Users/asaru/Documents/DTU/MoNA/vuegen/docs/example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/3_nestedness/5_non_saline_samples.png
       description: ''
       caption: ''
-      component_type: PLOT
-      plot_type: STATIC
+      component_type: plot
+      plot_type: static
 - title: Network Analysis
   description: ''
   subsections:
@@ -119,22 +119,22 @@ sections:
     description: ''
     components:
     - title: Phyla Counts Subset
-      file_path: example_data/Earth_microbiome_vuegen_demo_notebook/3_Network_analysis/1_phyla_association_networks/1_phyla_counts_subset.csv
+      file_path: /Users/asaru/Documents/DTU/MoNA/vuegen/docs/example_data/Earth_microbiome_vuegen_demo_notebook/3_Network_analysis/1_phyla_association_networks/1_phyla_counts_subset.csv
       description: ''
       caption: ''
-      component_type: DATAFRAME
-      file_format: CSV
+      component_type: dataframe
+      file_format: csv
       delimiter: ','
     - title: Phyla Correlation Network With 0.5 Threshold Edgelist
-      file_path: example_data/Earth_microbiome_vuegen_demo_notebook/3_Network_analysis/1_phyla_association_networks/2_phyla_correlation_network_with_0.5_threshold_edgelist.csv
+      file_path: /Users/asaru/Documents/DTU/MoNA/vuegen/docs/example_data/Earth_microbiome_vuegen_demo_notebook/3_Network_analysis/1_phyla_association_networks/2_phyla_correlation_network_with_0.5_threshold_edgelist.csv
       description: ''
       caption: ''
-      component_type: PLOT
-      plot_type: INTERACTIVE_NETWORK
-      csv_network_format: EDGELIST
+      component_type: plot
+      plot_type: interactive_network
+      csv_network_format: edgelist
     - title: Phyla Correlation Network With 0.5 Threshold
-      file_path: example_data/Earth_microbiome_vuegen_demo_notebook/3_Network_analysis/1_phyla_association_networks/3_phyla_correlation_network_with_0.5_threshold.png
+      file_path: /Users/asaru/Documents/DTU/MoNA/vuegen/docs/example_data/Earth_microbiome_vuegen_demo_notebook/3_Network_analysis/1_phyla_association_networks/3_phyla_correlation_network_with_0.5_threshold.png
       description: ''
       caption: ''
-      component_type: PLOT
-      plot_type: STATIC
+      component_type: plot
+      plot_type: static

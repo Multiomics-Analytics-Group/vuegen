@@ -227,7 +227,7 @@ include-after-body:
             <a href="https://github.com/Multiomics-Analytics-Group/vuegen" target="_blank">
                 <img src="https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/vuegen_logo.svg" alt="VueGen" width="65px">
             </a>
-            | © 2025 <a href="https://github.com/Multiomics-Analytics-Group" target="_blank">Multiomics Network Analytics Group (MoNA)</a>
+            | Copyright 2025 <a href="https://github.com/Multiomics-Analytics-Group" target="_blank">Multiomics Network Analytics Group (MoNA)</a>
         </footer>""",
             r.ReportType.PDF: """
   pdf:
@@ -273,7 +273,7 @@ include-after-body:
             <a href="https://github.com/Multiomics-Analytics-Group/vuegen" target="_blank">
                 <img src="https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/vuegen_logo.svg" alt="VueGen" width="65px">
             </a>
-            | © 2025 <a href="https://github.com/Multiomics-Analytics-Group" target="_blank">Multiomics Network Analytics Group (MoNA)</a>
+            | Copyright 2025 <a href="https://github.com/Multiomics-Analytics-Group" target="_blank">Multiomics Network Analytics Group (MoNA)</a>
         </footer>""",
             r.ReportType.PPTX: """
   pptx:
@@ -304,7 +304,7 @@ include-after-body:
             <a href="https://github.com/Multiomics-Analytics-Group/vuegen" target="_blank">
                 <img src="../docs/images/vuegen_logo.svg" alt="VueGen" width="65px">
             </a>
-            | © 2025 <a href="https://github.com/Multiomics-Analytics-Group" target="_blank">Multiomics Network Analytics Group (MoNA)</a>
+            | Copyright 2025 <a href="https://github.com/Multiomics-Analytics-Group" target="_blank">Multiomics Network Analytics Group (MoNA)</a>
         </footer>""",
         }
         # Create a key based on the report type and format
