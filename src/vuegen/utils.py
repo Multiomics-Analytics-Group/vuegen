@@ -24,27 +24,20 @@ from bs4 import BeautifulSoup
 
 
 ## CHECKS
-def check_path(filepath: str) -> bool:
+def check_path(filepath: Path) -> bool:
     """
     Checks if the given file or folder path exists.
 
     Parameters
     ---------
-    filepath : str
+    filepath : Path
         The file or folder path to check.
 
     Returns
     -------
     bool
         True if the path exists, False otherwise.
-
-    Raises
-    ------
-    AssertionError
-        If the filepath is not a valid string.
     """
-    # Assert that the filepath is a string
-    assert isinstance(filepath, str), f"Filepath must be a string: {filepath}"
 
     # Check if the path exists
     return os.path.exists(os.path.abspath(filepath))
@@ -87,13 +80,13 @@ def assert_enum_value(
         )
 
 
-def is_url(filepath: str) -> bool:
+def is_url(filepath: Path) -> bool:
     """
     Check if the provided path is a valid URL.
 
     Parameters
     ----------
-    filepath : str
+    filepath : Path
         The filepath to check.
 
     Returns
@@ -102,17 +95,9 @@ def is_url(filepath: str) -> bool:
         True if the input path is a valid URL, meaning it contains both a scheme
         (e.g., http, https, ftp) and a network location (e.g., example.com).
         Returns False if either the scheme or the network location is missing or invalid.
-
-    Raises
-    ------
-    AssertionError
-        If the filepath is not a valid string.
     """
-    # Assert that the filepath is a string
-    assert isinstance(filepath, str), f"Filepath must be a string: {filepath}"
-
     # Parse the url and return validation
-    parsed_url = urlparse(filepath)
+    parsed_url = urlparse(str(filepath))
     return bool(parsed_url.scheme and parsed_url.netloc)
 
 
