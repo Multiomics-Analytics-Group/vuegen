@@ -34,6 +34,8 @@ customtkinter.set_default_color_theme("dark-blue")
 app_path = Path(__file__).absolute()
 print("app_path:", app_path)
 
+##########################################################################################
+# Path to example data dependend on how the GUI is run
 if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
     # PyInstaller bundeled case
     path_to_dat = (
@@ -129,7 +131,6 @@ config_path_entry.grid(row=2, column=0, columnspan=2, padx=20, pady=10)
 # Report type dropdown
 # - get list of report types from Enum
 report_types = [report_type.value.lower() for report_type in ReportType]
-report_types = ["streamlit"]  # ! for now, only streamlit is supported
 ctk_label_report = customtkinter.CTkLabel(
     app,
     text="Select type of report to generate (using only streamlit for now)",

@@ -25,6 +25,7 @@ class QuartoReportView(r.ReportView):
         if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
             self.report.logger.info("running in a PyInstaller bundle")
             self.BUNDLED_EXECUTION = True
+            self.report.logger.debug(f"sys._MEIPASS: {sys._MEIPASS}")
         else:
             self.report.logger.info("running in a normal Python process")
 
@@ -161,43 +162,64 @@ class QuartoReportView(r.ReportView):
         output_dir : str, optional
             The folder where the report was generated (default is 'sections').
         """
-        try:
-            if not self.BUNDLED_EXECUTION:
-                subprocess.run(
-                    [
-                        "quarto",
-                        "render",
-                        os.path.join(output_dir, f"{self.BASE_DIR}.qmd"),
-                    ],
-                    check=True,
-                )
+        # from quarto_cli import run_quarto # entrypoint of quarto-cli not in module?
+
+        file_path_to_qmd = os.path.join(output_dir, f"{self.BASE_DIR}.qmd")
+        args = ["quarto", "render", file_path_to_qmd]
+        self.report.logger.info(
+            f"Running '{self.report.title}' '{self.report_type}' report with {args!r}"
+        )
+        if not self.BUNDLED_EXECUTION:
+            subprocess.run(
+                args,
+                check=True,
+            )
+            try:
                 if self.report_type == r.ReportType.JUPYTER:
+                    args = ["quarto", "convert", file_path_to_qmd]
                     subprocess.run(
-                        [
-                            "quarto",
-                            "convert",
-                            os.path.join(output_dir, f"{self.BASE_DIR}.qmd"),
-                        ],
+                        args,
                         check=True,
+                    )
+                    self.report.logger.info(
+                        f"Converted '{self.report.title}' '{self.report_type}' report to Jupyter Notebook after execution"
                     )
                 self.report.logger.info(
                     f"'{self.report.title}' '{self.report_type}' report rendered"
                 )
-            else:
-                self.report.logger.info(
-                    f"Quarto report '{self.report.title}' '{self.report_type}' cannot "
-                    "be run in a PyInstaller bundle"
+            except subprocess.CalledProcessError as e:
+                self.report.logger.error(
+                    f"Error running '{self.report.title}' {self.report_type} report: {str(e)}"
                 )
-        except subprocess.CalledProcessError as e:
-            self.report.logger.error(
-                f"Error running '{self.report.title}' {self.report_type} report: {str(e)}"
+                raise
+            except FileNotFoundError as e:
+                self.report.logger.error(
+                    f"Quarto is not installed. Please install Quarto to run the report: {str(e)}"
+                )
+                raise
+        else:
+            quarto_path = Path(sys._MEIPASS) / "quarto_cli" / "bin" / "quarto"
+            if sys.platform == "win32":
+                # ! to check
+                quarto_path = self.quarto_path.with_suffix(".exe")
+            self.report.logger.info(f"quarto_path: {quarto_path}")
+
+            args = [f"{quarto_path}", "convert", file_path_to_qmd]
+            subprocess.run(
+                args,
+                check=True,
             )
-            raise
-        except FileNotFoundError as e:
-            self.report.logger.error(
-                f"Quarto is not installed. Please install Quarto to run the report: {str(e)}"
+            self.report.logger.info(
+                f"Converted '{self.report.title}' '{self.report_type}' report to Jupyter Notebook after execution"
             )
-            raise
+            notebook_filename = Path(file_path_to_qmd).with_suffix(".ipynb")
+            # ipynb will not be executed  per default
+            # ! check if execution works although qmd cannot be executed...
+            args = [f"{quarto_path}", "render", notebook_filename]
+            subprocess.run(
+                args,
+                check=True,
+            )
 
     def _create_yaml_header(self) -> str:
         """

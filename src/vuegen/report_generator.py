@@ -1,5 +1,6 @@
 import logging
 import shutil
+import sys
 
 from .config_manager import ConfigManager
 from .quarto_reportview import QuartoReportView
@@ -67,7 +68,9 @@ def get_report(
 
     else:
         # Check if Quarto is installed
-        if shutil.which("quarto") is None:
+        if shutil.which("quarto") is None and not hasattr(
+            sys, "_MEIPASS"
+        ):  # ? and not getattr(sys, "frozen", False)
             logger.error(
                 "Quarto is not installed. Please install Quarto before generating this report type."
             )
