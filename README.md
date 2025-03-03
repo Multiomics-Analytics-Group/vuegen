@@ -34,6 +34,8 @@ Also, the class diagram for the project is presented below to illustrate the arc
 
 ![VueGen Class Diagram](https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/vuegen_classdiagram_noattmeth.png)
 
+An extended version of the class diagram with attributes and methods is available [here][vuegen-class-diag-att].
+
 The VueGen documentation is available at [vuegen.readthedocs.io][vuegen-docs], where you can find detailed information of the package’s classes and functions, installation and execution instructions, and case studies to demonstrate its functionality. 
 
 ## Installation
@@ -68,7 +70,7 @@ If you prefer not to install VueGen on your system, a pre-configured Docker cont
 Run VueGen using a directory with the following command:
 
 ```bash
-vuegen --directory example_data/Earth_microbiome_vuegen_demo_notebook --report_type streamlit
+vuegen --directory docs/example_data/Earth_microbiome_vuegen_demo_notebook --report_type streamlit
 ```
 
 > [!NOTE]
@@ -77,7 +79,7 @@ vuegen --directory example_data/Earth_microbiome_vuegen_demo_notebook --report_t
 It's also possible to provide a configuration file instead of a directory:
 
 ```bash
-vuegen --config example_data/Earth_microbiome_vuegen_demo_notebook/Earth_microbiome_vuegen_demo_notebook_config.yaml --report_type streamlit
+vuegen --config docs/example_data/Earth_microbiome_vuegen_demo_notebook/Earth_microbiome_vuegen_demo_notebook_config.yaml --report_type streamlit
 ```
 
 The current report types supported by VueGen are:
@@ -95,7 +97,7 @@ Instead of installing VueGen locally, you can run it directly from a Docker cont
 
 ```bash
 docker run --rm \
-  -v "$(pwd)/Earth_microbiome_vuegen_demo_notebook:/home/appuser/Earth_microbiome_vuegen_demo_notebook" \
+  -v "$(pwd)docs/example_data/Earth_microbiome_vuegen_demo_notebook:/home/appuser/Earth_microbiome_vuegen_demo_notebook" \
   -v "$(pwd)/output_docker:/home/appuser/quarto_report" \
   quay.io/dtu_biosustain_dsp/vuegen:docker --directory /home/appuser/Earth_microbiome_vuegen_demo_notebook --report_type streamlit
 ```
@@ -138,6 +140,7 @@ We appreciate your feedback! If you have any comments, suggestions, or run into 
 [streamlit]: https://streamlit.io/ 
 [vuegen-pypi]: https://pypi.org/project/vuegen/
 [vuegen-docker-quay]: https://quay.io/repository/dtu_biosustain_dsp/vuegen
+[vuegen-class-diag-att]: https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/vuegen_classdiagram_withattmeth.pdf
 [vuegen-docs]: https://vuegen.readthedocs.io/
 [ci-gh-action]: https://github.com/Multiomics-Analytics-Group/vuegen/actions/workflows/cdci.yml
 [ci-docs]: https://github.com/Multiomics-Analytics-Group/vuegen/actions/workflows/docs.yml
