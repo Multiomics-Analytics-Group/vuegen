@@ -16,7 +16,7 @@ class QuartoReportView(r.ReportView):
     """
 
     BASE_DIR = "quarto_report"
-    STATIC_FILES_DIR = os.path.join(BASE_DIR, "static")
+    STATIC_FILES_DIR = Path(BASE_DIR) / "static"
 
     def __init__(self, report: r.Report, report_type: r.ReportType):
         super().__init__(report=report, report_type=report_type)
@@ -124,9 +124,7 @@ class QuartoReportView(r.ReportView):
             report_formatted_imports = "\n".join(report_unique_imports)
 
             # Write the navigation and general content to a Python file
-            with open(
-                os.path.join(output_dir, f"{self.BASE_DIR}.qmd"), "w"
-            ) as quarto_report:
+            with open(Path(output_dir) / f"{self.BASE_DIR}.qmd", "w") as quarto_report:
                 quarto_report.write(yaml_header)
                 quarto_report.write(
                     f"""\n```{{python}}
@@ -156,7 +154,7 @@ class QuartoReportView(r.ReportView):
         """
         try:
             subprocess.run(
-                ["quarto", "render", os.path.join(output_dir, f"{self.BASE_DIR}.qmd")],
+                ["quarto", "render", Path(output_dir) / f"{self.BASE_DIR}.qmd"],
                 check=True,
             )
             if self.report_type == r.ReportType.JUPYTER:
@@ -164,7 +162,7 @@ class QuartoReportView(r.ReportView):
                     [
                         "quarto",
                         "convert",
-                        os.path.join(output_dir, f"{self.BASE_DIR}.qmd"),
+                        Path(output_dir) / f"{self.BASE_DIR}.qmd",
                     ],
                     check=True,
                 )
@@ -227,7 +225,7 @@ include-after-body:
             <a href="https://github.com/Multiomics-Analytics-Group/vuegen" target="_blank">
                 <img src="https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/vuegen_logo.svg" alt="VueGen" width="65px">
             </a>
-            | © 2025 <a href="https://github.com/Multiomics-Analytics-Group" target="_blank">Multiomics Network Analytics Group (MoNA)</a>
+            | Copyright 2025 <a href="https://github.com/Multiomics-Analytics-Group" target="_blank">Multiomics Network Analytics Group (MoNA)</a>
         </footer>""",
             r.ReportType.PDF: """
   pdf:
@@ -273,7 +271,7 @@ include-after-body:
             <a href="https://github.com/Multiomics-Analytics-Group/vuegen" target="_blank">
                 <img src="https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/vuegen_logo.svg" alt="VueGen" width="65px">
             </a>
-            | © 2025 <a href="https://github.com/Multiomics-Analytics-Group" target="_blank">Multiomics Network Analytics Group (MoNA)</a>
+            | Copyright 2025 <a href="https://github.com/Multiomics-Analytics-Group" target="_blank">Multiomics Network Analytics Group (MoNA)</a>
         </footer>""",
             r.ReportType.PPTX: """
   pptx:
@@ -304,7 +302,7 @@ include-after-body:
             <a href="https://github.com/Multiomics-Analytics-Group/vuegen" target="_blank">
                 <img src="../docs/images/vuegen_logo.svg" alt="VueGen" width="65px">
             </a>
-            | © 2025 <a href="https://github.com/Multiomics-Analytics-Group" target="_blank">Multiomics Network Analytics Group (MoNA)</a>
+            | Copyright 2025 <a href="https://github.com/Multiomics-Analytics-Group" target="_blank">Multiomics Network Analytics Group (MoNA)</a>
         </footer>""",
         }
         # Create a key based on the report type and format
@@ -413,13 +411,9 @@ include-after-body:
 
         # Define plot path
         if is_report_static:
-            static_plot_path = os.path.join(
-                static_dir, f"{plot.title.replace(' ', '_')}.png"
-            )
+            static_plot_path = Path(static_dir) / f"{plot.title.replace(' ', '_')}.png"
         else:
-            html_plot_file = os.path.join(
-                static_dir, f"{plot.title.replace(' ', '_')}.html"
-            )
+            html_plot_file = Path(static_dir) / f"{plot.title.replace(' ', '_')}.html"
 
         # Add content for the different plot types
         try:
@@ -431,7 +425,7 @@ include-after-body:
                 plot_content.append(self._generate_plot_code(plot))
                 if is_report_static:
                     plot_content.append(
-                        f"""fig_plotly.write_image("{os.path.abspath(static_plot_path)}")\n```\n"""
+                        f"""fig_plotly.write_image("{static_plot_path.resolve()}")\n```\n"""
                     )
                     plot_content.append(self._generate_image_content(static_plot_path))
                 else:
@@ -440,7 +434,7 @@ include-after-body:
                 plot_content.append(self._generate_plot_code(plot))
                 if is_report_static:
                     plot_content.append(
-                        f"""fig_altair.save("{os.path.abspath(static_plot_path)}")\n```\n"""
+                        f"""fig_altair.save("{static_plot_path.resolve()}")\n```\n"""
                     )
                     plot_content.append(self._generate_image_content(static_plot_path))
                 else:
@@ -513,7 +507,7 @@ response.raise_for_status()
 plot_json = response.text\n"""
         else:  # If it's a local file
             plot_code += f"""
-with open('{os.path.join("..", plot.file_path)}', 'r') as plot_file:
+with open('{Path("..") / plot.file_path}', 'r') as plot_file:
     plot_json = plot_file.read()\n"""
         # Add specific code for each visualization tool
         if plot.plot_type == r.PlotType.PLOTLY:
@@ -527,7 +521,7 @@ fig_plotly.update_layout(width=950, height=500)\n"""
             if is_url(plot.file_path) and plot.file_path.endswith(".html"):
                 iframe_src = output_file
             else:
-                iframe_src = os.path.join("..", output_file)
+                iframe_src = Path("..") / output_file
 
             # Embed the HTML file in an iframe
             plot_code = f"""
@@ -573,7 +567,7 @@ fig_plotly.update_layout(width=950, height=500)\n"""
         }
         try:
             # Check if the file extension matches any DataFrameFormat value
-            file_extension = os.path.splitext(dataframe.file_path)[1].lower()
+            file_extension = Path(dataframe.file_path).suffix.lower()
             if not any(
                 file_extension == fmt.value_with_dot for fmt in r.DataFrameFormat
             ):
@@ -585,7 +579,7 @@ fig_plotly.update_layout(width=950, height=500)\n"""
             file_path = (
                 dataframe.file_path
                 if is_url(dataframe.file_path)
-                else os.path.join("..", dataframe.file_path)
+                else Path("..") / dataframe.file_path
             )
 
             # Load the DataFrame using the correct function
@@ -648,7 +642,7 @@ markdown_content = response.text\n"""
             else:  # If it's a local file
                 markdown_content.append(
                     f"""
-with open('{os.path.join("..", markdown.file_path)}', 'r') as markdown_file:
+with open('{Path("..") / markdown.file_path}', 'r') as markdown_file:
     markdown_content = markdown_file.read()\n"""
                 )
 
@@ -694,7 +688,7 @@ with open('{os.path.join("..", markdown.file_path)}', 'r') as markdown_file:
             iframe_src = (
                 html.file_path
                 if is_url(html.file_path)
-                else os.path.join("..", html.file_path)
+                else Path("..") / html.file_path
             )
             iframe_code = f"""
 <div style="text-align: center;">
@@ -769,11 +763,9 @@ with open('{os.path.join("..", markdown.file_path)}', 'r') as markdown_file:
         dataframe_content = []
         if is_report_static:
             # Generate path for the DataFrame image
-            df_image = os.path.join(
-                static_dir, f"{dataframe.title.replace(' ', '_')}.png"
-            )
+            df_image = Path(static_dir) / f"{dataframe.title.replace(' ', '_')}.png"
             dataframe_content.append(
-                f"df.dfi.export('{os.path.abspath(df_image)}', max_rows=10, max_cols=5)\n```\n"
+                f"df.dfi.export('{Path(df_image).resolve()}', max_rows=10, max_cols=5)\n```\n"
             )
             # Use helper method to add centered image content
             dataframe_content.append(self._generate_image_content(df_image))

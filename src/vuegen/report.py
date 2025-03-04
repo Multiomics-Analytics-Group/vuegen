@@ -382,7 +382,7 @@ class Plot(Component):
             net.show_buttons(filter_=["physics"])
 
             # Save the network as an HTML file
-            net.save_graph(output_file)
+            net.save_graph(str(output_file))
             self.logger.info(f"PyVis network created and saved as: {output_file}.")
             return net
 
