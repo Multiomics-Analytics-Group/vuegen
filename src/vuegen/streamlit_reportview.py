@@ -1,6 +1,7 @@
 import os
 import subprocess
 import sys
+from pathlib import Path
 from typing import List
 
 import pandas as pd
@@ -16,8 +17,8 @@ class StreamlitReportView(r.WebAppReportView):
     """
 
     BASE_DIR = "streamlit_report"
-    SECTIONS_DIR = os.path.join(BASE_DIR, "sections")
-    STATIC_FILES_DIR = os.path.join(BASE_DIR, "static")
+    SECTIONS_DIR = Path(BASE_DIR) / "sections"
+    STATIC_FILES_DIR = Path(BASE_DIR) / "static"
     REPORT_MANAG_SCRIPT = "report_manager.py"
 
     def __init__(
@@ -101,7 +102,7 @@ st.set_page_config(layout="wide", page_title="{self.report.title}")"""
                 # Create a folder for each section
                 subsection_page_vars = []
                 section_name_var = section.title.replace(" ", "_")
-                section_dir_path = os.path.join(output_dir, section_name_var)
+                section_dir_path = Path(output_dir) / section_name_var
 
                 if create_folder(section_dir_path):
                     self.report.logger.debug(
@@ -114,9 +115,9 @@ st.set_page_config(layout="wide", page_title="{self.report.title}")"""
 
                 for subsection in section.subsections:
                     subsection_name_var = subsection.title.replace(" ", "_")
-                    subsection_file_path = os.path.join(
-                        section_name_var, subsection_name_var + ".py"
-                    )
+                    subsection_file_path = (
+                        Path(section_name_var) / f"{subsection_name_var}.py"
+                    ).as_posix()  # Make sure it's Posix Paths
 
                     # Create a Page object for each subsection and add it to the home page content
                     report_manag_content.append(
@@ -136,9 +137,7 @@ report_nav.run()"""
             )
 
             # Write the navigation and general content to a Python file
-            with open(
-                os.path.join(output_dir, self.REPORT_MANAG_SCRIPT), "w"
-            ) as nav_manager:
+            with open(Path(output_dir) / self.REPORT_MANAG_SCRIPT, "w") as nav_manager:
                 nav_manager.write("\n".join(report_manag_content))
                 self.report.logger.info(
                     f"Created app navigation script: {self.REPORT_MANAG_SCRIPT}"
@@ -207,12 +206,12 @@ report_nav.run()"""
                 f"To run the Streamlit app, use the following command:"
             )
             self.report.logger.info(
-                f"streamlit run {os.path.join(output_dir, self.REPORT_MANAG_SCRIPT)}"
+                f"streamlit run {Path(output_dir) / self.REPORT_MANAG_SCRIPT}"
             )
             msg = (
                 f"\nAll the scripts to build the Streamlit app are available at: {output_dir}\n\n"
                 f"To run the Streamlit app, use the following command:\n\n"
-                f"\tstreamlit run {os.path.join(output_dir, self.REPORT_MANAG_SCRIPT)}"
+                f"\tstreamlit run {Path(output_dir) / self.REPORT_MANAG_SCRIPT}"
             )
             print(msg)
 
@@ -269,7 +268,7 @@ report_nav.run()"""
 
         try:
             # Create folder for the home page
-            home_dir_path = os.path.join(output_dir, "Home")
+            home_dir_path = Path(output_dir) / "Home"
             if create_folder(home_dir_path):
                 self.report.logger.debug(f"Created home directory: {home_dir_path}")
             else:
@@ -294,14 +293,14 @@ report_nav.run()"""
             home_content.append("st.markdown(footer, unsafe_allow_html=True)\n")
 
             # Write the home page content to a Python file
-            home_page_path = os.path.join(home_dir_path, "Homepage.py")
+            home_page_path = Path(home_dir_path) / "Homepage.py"
             with open(home_page_path, "w") as home_page:
                 home_page.write("\n".join(home_content))
             self.report.logger.info(f"Home page content written to '{home_page_path}'.")
 
             # Add the home page to the report manager content
             report_manag_content.append(
-                f"homepage = st.Page('Home/Homepage.py', title='Homepage')"
+                f"homepage = st.Page('Home/Homepage.py', title='Homepage')"  # ! here Posix Path is hardcoded
             )
             report_manag_content.append(f"sections_pages['Home'] = [homepage]\n")
             self.report.logger.info("Home page added to the report manager content.")
@@ -335,10 +334,10 @@ report_nav.run()"""
                         )
                         try:
                             # Create subsection file
-                            subsection_file_path = os.path.join(
-                                output_dir,
-                                section_name_var,
-                                subsection.title.replace(" ", "_") + ".py",
+                            subsection_file_path = (
+                                Path(output_dir)
+                                / section_name_var
+                                / f"{subsection.title.replace(' ', '_')}.py"
                             )
 
                             # Generate content and imports for the subsection
@@ -487,8 +486,8 @@ report_nav.run()"""
                     networkx_graph, html_plot_file = networkx_graph
                 else:
                     # Otherwise, create and save a new pyvis network from the netowrkx graph
-                    html_plot_file = os.path.join(
-                        static_dir, f"{plot.title.replace(' ', '_')}.html"
+                    html_plot_file = (
+                        Path(static_dir) / f"{plot.title.replace(' ', '_')}.html"
                     )
                     pyvis_graph = plot.create_and_save_pyvis_network(
                         networkx_graph, html_plot_file
@@ -558,7 +557,7 @@ response.raise_for_status()
 plot_json = json.loads(response.text)\n"""
         else:  # If it's a local file
             plot_code = f"""
-with open('{os.path.join(plot.file_path)}', 'r') as plot_file:
+with open('{Path(plot.file_path)}', 'r') as plot_file:
     plot_json = json.load(plot_file)\n"""
 
         # Add specific code for each visualization tool
@@ -611,7 +610,7 @@ st.components.v1.html(html_data, height=net_html_height)\n"""
 
         try:
             # Check if the file extension matches any DataFrameFormat value
-            file_extension = os.path.splitext(dataframe.file_path)[1].lower()
+            file_extension = Path(dataframe.file_path).suffix.lower()
             if not any(
                 file_extension == fmt.value_with_dot for fmt in r.DataFrameFormat
             ):
@@ -701,7 +700,7 @@ markdown_content = response.text\n"""
             else:  # If it's a local file
                 markdown_content.append(
                     f"""
-with open('{os.path.join("..", markdown.file_path)}', 'r') as markdown_file:
+with open('{Path("..") / markdown.file_path}', 'r') as markdown_file:
     markdown_content = markdown_file.read()\n"""
                 )
             # Code to display md content
@@ -761,7 +760,7 @@ html_content = response.text\n"""
                 # If it's a local file
                 html_content.append(
                     f"""
-with open('{os.path.join("..", html.file_path)}', 'r', encoding='utf-8') as html_file:
+with open('{Path("..") / html.file_path}', 'r', encoding='utf-8') as html_file:
     html_content = html_file.read()\n"""
                 )
 
