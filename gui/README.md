@@ -69,5 +69,6 @@ Windows and macOS specific options:
 Basic workflow for bundle:
 
 1. use quarto (pandoc?) to convert qmd to ipynb
-1. use nbconvert and a copied Python executable to execute notebook
+1. use nbconvert programmatically (see [docs](https://nbconvert.readthedocs.io/en/latest/execute_api.html#example))
+   and the bundled Python executable to execute notebook
 1. use quarto (pandoc?) ot convert executed ipynb to desired format
