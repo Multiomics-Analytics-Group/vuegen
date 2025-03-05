@@ -152,7 +152,7 @@ jobs:
       - name: Build executable
         run: |
           cd gui
-          pyinstaller -n vuegen_gui -D --collect-all pyvis --collect-all streamlit --collect-all  st_aggrid  --collect-all customtkinter --add-data ../docs/example_data/Basic_example_vuegen_demo_notebook:example_data/Basic_example_vuegen_demo_notebook app.py
+          pyinstaller -n vuegen_gui -D --collect-all pyvis --collect-all streamlit --collect-all  st_aggrid  --collect-all customtkinter 	--collect-all quarto_cli --collect-all jupyter_core --collect-all yaml --collect-all ipykernel --collect-all nbconvert --collect-all notebook --collect-all ipywidgets --collect-all jupyter_console --collect-all jupyter_client -add-data ../docs/example_data/Basic_example_vuegen_demo_notebook:example_data/Basic_example_vuegen_demo_notebook app.py
           python copy_python_executable.py
       - name: Upload executable
         uses: actions/upload-artifact@v4

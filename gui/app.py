@@ -59,6 +59,7 @@ else:
 def create_run_vuegen(is_dir, config_path, report_type, run_streamlit):
     def inner():
         args = ["vuegen"]
+        print(f"{is_dir.get() = }")
         if is_dir.get():
             args.append("--directory")
         else:
@@ -66,6 +67,7 @@ def create_run_vuegen(is_dir, config_path, report_type, run_streamlit):
         args.append(config_path.get())
         args.append("--report_type")
         args.append(report_type.get())
+        print(f"{run_streamlit.get() = }")
         if run_streamlit.get():
             args.append("--streamlit_autorun")
         print("args:", args)
@@ -80,9 +82,9 @@ def optionmenu_callback(choice):
     print("optionmenu dropdown clicked:", choice)
 
 
-def radiobutton_event(value):
+def radiobutton_event(value, name="radiobutton"):
     def radio_button_callback():
-        print("radiobutton toggled, current value:", value.get())
+        print(f"{name} toggled, current value:", value.get())
 
     return radio_button_callback
 
@@ -100,14 +102,14 @@ ctk_label_config = customtkinter.CTkLabel(
     text="Add path to config file or directory. Select radio button accordingly",
 )
 ctk_label_config.grid(row=0, column=0, columnspan=2, padx=20, pady=20)
-is_dir = tk.IntVar(value=1)
-callback_radio_config = radiobutton_event(is_dir)
+is_dir = tk.BooleanVar(value=True)
+callback_radio_config = radiobutton_event(is_dir, name="is_dir")
 ctk_radio_config_0 = customtkinter.CTkRadioButton(
     app,
     text="Use config",
     command=callback_radio_config,
     variable=is_dir,
-    value=0,
+    value=False,
 )
 ctk_radio_config_0.grid(row=1, column=0, padx=20, pady=2)
 ctk_radio_config_1 = customtkinter.CTkRadioButton(
@@ -115,7 +117,7 @@ ctk_radio_config_1 = customtkinter.CTkRadioButton(
     text="Use dir",
     command=callback_radio_config,
     variable=is_dir,
-    value=1,
+    value=True,
 )
 ctk_radio_config_1.grid(row=1, column=1, padx=20, pady=2)
 
@@ -150,12 +152,12 @@ print("report_type value:", _report_type)
 
 ##########################################################################################
 # Run Streamlit radio button
-run_streamlit = tk.IntVar(value=1)
-callback_radio_st_run = radiobutton_event(run_streamlit)
+run_streamlit = tk.BooleanVar(value=True)
+callback_radio_st_run = radiobutton_event(run_streamlit, name="run_streamlit")
 ctk_radio_st_autorun_1 = customtkinter.CTkRadioButton(
     app,
     text="autorun streamlit",
-    value=1,
+    value=True,
     variable=run_streamlit,
     command=callback_radio_st_run,
 )
@@ -163,7 +165,7 @@ ctk_radio_st_autorun_1.grid(row=5, column=0, padx=20, pady=20)
 ctk_radio_st_autorun_0 = customtkinter.CTkRadioButton(
     app,
     text="skip starting streamlit",
-    value=0,
+    value=False,
     variable=run_streamlit,
     command=callback_radio_st_run,
 )
