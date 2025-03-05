@@ -199,9 +199,9 @@ class QuartoReportView(r.ReportView):
                 raise
         else:
             quarto_path = Path(sys._MEIPASS) / "quarto_cli" / "bin" / "quarto"
-            if sys.platform == "win32":
-                # ! to check
-                quarto_path = self.quarto_path.with_suffix(".exe")
+            _sys_exe = sys.executable
+            # set executable to the bundled python (manually added to bundle)
+            sys.executable = str(Path(sys._MEIPASS) / "python")
             self.report.logger.info(f"quarto_path: {quarto_path}")
 
             args = [f"{quarto_path}", "convert", file_path_to_qmd]
@@ -213,13 +213,25 @@ class QuartoReportView(r.ReportView):
                 f"Converted '{self.report.title}' '{self.report_type}' report to Jupyter Notebook after execution"
             )
             notebook_filename = Path(file_path_to_qmd).with_suffix(".ipynb")
-            # ipynb will not be executed  per default
-            # ! check if execution works although qmd cannot be executed...
+            # quarto does not try to execute ipynb files, just render them
+            # execute manually using bundled python binary
+            # https://nbconvert.readthedocs.io/en/latest/execute_api.html
+            import nbformat
+            from nbconvert.preprocessors import ExecutePreprocessor
+
+            with open(notebook_filename, encoding="utf-8") as f:
+                nb = nbformat.read(f, as_version=4)
+            ep = ExecutePreprocessor(timeout=600, kernel_name="python3")
+            nb, _ = ep.preprocess(nb, {"metadata": {"path": "./"}})
+            with open(notebook_filename, "w", encoding="utf-8") as f:
+                nbformat.write(nb, f)
+            # quarto does not try execute ipynb files per default, just render these
             args = [f"{quarto_path}", "render", notebook_filename]
             subprocess.run(
                 args,
                 check=True,
             )
+            sys.executable = _sys_exe
 
     def _create_yaml_header(self) -> str:
         """

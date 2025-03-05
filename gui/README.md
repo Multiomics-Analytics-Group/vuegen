@@ -60,3 +60,14 @@ Windows and macOS specific options:
                         macOS .app bundle. On Windows this option is automatically set if the first script is a '.pyw' file. This option
                         is ignored on *NIX systems.
 ```
+
+## Quarto notebook execution
+
+- add python exe to bundle as suggested [on stackoverflow](https://stackoverflow.com/a/72639099/9684872)
+- use [copy_python_executable.py](copy_python_executable.py) to copy the python executable to the bundle after PyInstaller is done
+
+Basic workflow for bundle:
+
+1. use quarto (pandoc?) to convert qmd to ipynb
+1. use nbconvert and a copied Python executable to execute notebook
+1. use quarto (pandoc?) ot convert executed ipynb to desired format
