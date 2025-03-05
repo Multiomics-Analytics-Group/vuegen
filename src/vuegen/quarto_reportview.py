@@ -1,3 +1,4 @@
+import logging
 import os
 import subprocess
 import sys
@@ -219,6 +220,7 @@ class QuartoReportView(r.ReportView):
 
             with open(notebook_filename, encoding="utf-8") as f:
                 nb = nbformat.read(f, as_version=4)
+            logging.getLogger("traitlets").setLevel(logging.INFO)
             ep = ExecutePreprocessor(timeout=600, kernel_name="python3")
             nb, _ = ep.preprocess(nb, {"metadata": {"path": "./"}})
             with open(notebook_filename, "w", encoding="utf-8") as f:
