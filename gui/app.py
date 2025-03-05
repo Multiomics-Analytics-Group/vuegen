@@ -82,7 +82,7 @@ def optionmenu_callback(choice):
     print("optionmenu dropdown clicked:", choice)
 
 
-def radiobutton_event(value, name="radiobutton"):
+def create_radio_button_callback(value, name="radiobutton"):
     def radio_button_callback():
         print(f"{name} toggled, current value:", value.get())
 
@@ -103,7 +103,7 @@ ctk_label_config = customtkinter.CTkLabel(
 )
 ctk_label_config.grid(row=0, column=0, columnspan=2, padx=20, pady=20)
 is_dir = tk.BooleanVar(value=True)
-callback_radio_config = radiobutton_event(is_dir, name="is_dir")
+callback_radio_config = create_radio_button_callback(is_dir, name="is_dir")
 ctk_radio_config_0 = customtkinter.CTkRadioButton(
     app,
     text="Use config",
@@ -147,13 +147,12 @@ report_dropdown = customtkinter.CTkOptionMenu(
 )
 report_dropdown.grid(row=4, column=0, columnspan=2, padx=20, pady=20)
 
-_report_type = report_dropdown.get()
-print("report_type value:", _report_type)
-
 ##########################################################################################
 # Run Streamlit radio button
 run_streamlit = tk.BooleanVar(value=True)
-callback_radio_st_run = radiobutton_event(run_streamlit, name="run_streamlit")
+callback_radio_st_run = create_radio_button_callback(
+    run_streamlit, name="run_streamlit"
+)
 ctk_radio_st_autorun_1 = customtkinter.CTkRadioButton(
     app,
     text="autorun streamlit",
