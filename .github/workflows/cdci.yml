@@ -137,9 +137,9 @@ jobs:
           - runner: "ubuntu-latest"
             label: "ubuntu-latest_LTS-x64"
           - runner: "macos-13"
-            label: "macos-x64"
-          - runner: "macos-latest"
-            label: "macos-arm64"
+            label: "macos-13-x64"
+          - runner: "macos-15"
+            label: "macos-15-arm64"
           - runner: "windows-latest"
             label: "windows-x64"
     steps:
