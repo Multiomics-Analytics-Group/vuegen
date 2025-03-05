@@ -200,7 +200,7 @@ class QuartoReportView(r.ReportView):
             quarto_path = Path(sys._MEIPASS) / "quarto_cli" / "bin" / "quarto"
             _sys_exe = sys.executable
             # set executable to the bundled python (manually added to bundle)
-            sys.executable = str(Path(sys._MEIPASS) / "python")
+            sys.executable = str(Path(sys._MEIPASS).parent / "python")
             self.report.logger.info(f"quarto_path: {quarto_path}")
 
             args = [f"{quarto_path}", "convert", file_path_to_qmd]
