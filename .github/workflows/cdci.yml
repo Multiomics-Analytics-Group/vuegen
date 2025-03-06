@@ -126,9 +126,9 @@ jobs:
   build-executable:
     name: Build-exe-${{ matrix.os.label }}
     runs-on: ${{ matrix.os.runner }}
-    needs:
-      - test
-      - other-reports
+    # needs:
+    #   - test
+    #   - other-reports
     strategy:
       matrix:
         python-version: ["3.11"]
@@ -144,8 +144,12 @@ jobs:
             label: "windows-x64"
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      # - uses: actions/setup-python@v5
+      #   with:
+      #     python-version: ${{ matrix.python-version }}
+      - uses: conda-incubator/setup-miniconda@v3
         with:
+          auto-update-conda: true
           python-version: ${{ matrix.python-version }}
       - name: Install VueGen GUI and pyinstaller
         run: python -m pip install ".[gui]" pyinstaller
