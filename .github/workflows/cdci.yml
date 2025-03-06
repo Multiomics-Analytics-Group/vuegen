@@ -152,6 +152,7 @@ jobs:
           auto-update-conda: true
           python-version: ${{ matrix.python-version }}
           auto-activate-base: true
+          activate-environment: "test"
       - name: Install VueGen GUI and pyinstaller
         run: |
           conda info
