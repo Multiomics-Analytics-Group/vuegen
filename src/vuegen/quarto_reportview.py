@@ -23,10 +23,12 @@ class QuartoReportView(r.ReportView):
     def __init__(self, report: r.Report, report_type: r.ReportType):
         super().__init__(report=report, report_type=report_type)
         self.BUNDLED_EXECUTION = False
+        self.quarto_path = "quarto"
         if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
             self.report.logger.info("running in a PyInstaller bundle")
             self.BUNDLED_EXECUTION = True
             self.report.logger.debug(f"sys._MEIPASS: {sys._MEIPASS}")
+            self.quarto_path = Path(sys._MEIPASS) / "quarto_cli" / "bin" / "quarto"
         else:
             self.report.logger.info("running in a normal Python process")
 
@@ -164,74 +166,85 @@ class QuartoReportView(r.ReportView):
         # from quarto_cli import run_quarto # entrypoint of quarto-cli not in module?
 
         file_path_to_qmd = os.path.join(output_dir, f"{self.BASE_DIR}.qmd")
-        args = ["quarto", "render", file_path_to_qmd]
+        args = [self.quarto_path, "render", file_path_to_qmd]
         self.report.logger.info(
             f"Running '{self.report.title}' '{self.report_type}' report with {args!r}"
         )
-        if not self.BUNDLED_EXECUTION:
-            subprocess.run(
-                ["quarto", "render", os.path.join(output_dir, f"{self.BASE_DIR}.qmd")],
-                check=True,
-            )
-            try:
-                if self.report_type == r.ReportType.JUPYTER:
-                    args = ["quarto", "convert", file_path_to_qmd]
-                    subprocess.run(
-                        args,
-                        check=True,
-                    )
-                    self.report.logger.info(
-                        f"Converted '{self.report.title}' '{self.report_type}' report to Jupyter Notebook after execution"
-                    )
+        subprocess.run(
+            [
+                self.quarto_path,
+                "render",
+                os.path.join(output_dir, f"{self.BASE_DIR}.qmd"),
+            ],
+            check=True,
+        )
+        try:
+            if self.report_type == r.ReportType.JUPYTER:
+                args = [self.quarto_path, "convert", file_path_to_qmd]
+                subprocess.run(
+                    args,
+                    check=True,
+                )
                 self.report.logger.info(
-                    f"'{self.report.title}' '{self.report_type}' report rendered"
+                    f"Converted '{self.report.title}' '{self.report_type}' report to Jupyter Notebook after execution"
                 )
-            except subprocess.CalledProcessError as e:
-                self.report.logger.error(
-                    f"Error running '{self.report.title}' {self.report_type} report: {str(e)}"
-                )
-                raise
-            except FileNotFoundError as e:
-                self.report.logger.error(
-                    f"Quarto is not installed. Please install Quarto to run the report: {str(e)}"
-                )
-                raise
-        else:
-            quarto_path = Path(sys._MEIPASS) / "quarto_cli" / "bin" / "quarto"
-            _sys_exe = sys.executable
-            # set executable to the bundled python (manually added to bundle)
-            sys.executable = str(Path(sys._MEIPASS).parent / "python")
-            self.report.logger.info(f"quarto_path: {quarto_path}")
-
-            args = [f"{quarto_path}", "convert", file_path_to_qmd]
-            subprocess.run(
-                args,
-                check=True,
-            )
             self.report.logger.info(
-                f"Converted '{self.report.title}' '{self.report_type}' report to Jupyter Notebook after execution"
+                f"'{self.report.title}' '{self.report_type}' report rendered"
             )
-            notebook_filename = Path(file_path_to_qmd).with_suffix(".ipynb")
-            # quarto does not try to execute ipynb files, just render them
-            # execute manually using bundled python binary
-            # https://nbconvert.readthedocs.io/en/latest/execute_api.html
-            import nbformat
-            from nbconvert.preprocessors import ExecutePreprocessor
+        except subprocess.CalledProcessError as e:
+            self.report.logger.error(
+                f"Error running '{self.report.title}' {self.report_type} report: {str(e)}"
+            )
+            raise
+        except FileNotFoundError as e:
+            self.report.logger.error(
+                f"Quarto is not installed. Please install Quarto to run the report: {str(e)}"
+            )
+            raise
+        # else:
+        #     quarto_path = Path(sys._MEIPASS) / "quarto_cli" / "bin" / "quarto"
+        # _sys_exe = sys.executable
+        # set executable to the bundled python (manually added to bundle)
+        # sys.executable = str(Path(sys._MEIPASS).parent / "python")
+        # self.report.logger.info(f"quarto_path: {self.quarto_path}")
 
-            with open(notebook_filename, encoding="utf-8") as f:
-                nb = nbformat.read(f, as_version=4)
-            logging.getLogger("traitlets").setLevel(logging.INFO)
-            ep = ExecutePreprocessor(timeout=600, kernel_name="python3")
-            nb, _ = ep.preprocess(nb, {"metadata": {"path": "./"}})
-            with open(notebook_filename, "w", encoding="utf-8") as f:
-                nbformat.write(nb, f)
-            # quarto does not try execute ipynb files per default, just render these
-            args = [f"{quarto_path}", "render", notebook_filename]
-            subprocess.run(
-                args,
-                check=True,
-            )
-            sys.executable = _sys_exe
+        # args = [f"{quarto_path}", "render", file_path_to_qmd]
+        # subprocess.run(
+        #     args,
+        #     check=True,
+        # )
+        # self.report.logger.info(
+        #     f"Converted '{self.report.title}' '{self.report_type}' report to Jupyter Notebook after execution"
+        # )
+        # notebook_filename = Path(file_path_to_qmd).with_suffix(".ipynb")
+        # try papermill
+        # import papermill as pm
+
+        # pm.execute_notebook(
+        #     "path/to/input.ipynb",
+        #     "path/to/output.ipynb",
+        #     parameters=dict(alpha=0.6, ratio=0.1),
+        # )
+        # quarto does not try to execute ipynb files, just render them
+        # execute manually using bundled python binary
+        # https://nbconvert.readthedocs.io/en/latest/execute_api.html
+        # import nbformat
+        # from nbconvert.preprocessors import ExecutePreprocessor
+
+        # with open(notebook_filename, encoding="utf-8") as f:
+        #     nb = nbformat.read(f, as_version=4)
+        # logging.getLogger("traitlets").setLevel(logging.INFO)
+        # ep = ExecutePreprocessor(timeout=600, kernel_name="python3")
+        # nb, _ = ep.preprocess(nb, {"metadata": {"path": "./"}})
+        # with open(notebook_filename, "w", encoding="utf-8") as f:
+        #     nbformat.write(nb, f)
+        # quarto does not try execute ipynb files per default, just render these
+        # args = [f"{quarto_path}", "render", notebook_filename]
+        # subprocess.run(
+        #     args,
+        #     check=True,
+        # )
+        # sys.executable = _sys_exe
 
     def _create_yaml_header(self) -> str:
         """

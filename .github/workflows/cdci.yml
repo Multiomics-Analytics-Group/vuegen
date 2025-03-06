@@ -126,9 +126,6 @@ jobs:
   build-executable:
     name: Build-exe-${{ matrix.os.label }}
     runs-on: ${{ matrix.os.runner }}
-    defaults:
-      run:
-        shell: bash -el {0}
     # needs:
     #   - test
     #   - other-reports
@@ -147,29 +144,16 @@ jobs:
           #   label: "windows-x64"
     steps:
       - uses: actions/checkout@v4
-      # - uses: actions/setup-python@v5
-      #   with:
-      #     python-version: ${{ matrix.python-version }}
-      - uses: conda-incubator/setup-miniconda@v3
+      - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-          activate-environment: "test"
-          auto-activate-base: true
-          auto-update-conda: true
       - name: Install VueGen GUI and pyinstaller
         run: |
-          conda info
-          conda info -e
-          conda list 
           python -m pip install ".[gui]" pyinstaller
-          conda list
       - name: Build executable
         run: |
-          conda activate test
           cd gui
-          pyinstaller -n vuegen_gui -D --collect-all pyvis --collect-all streamlit --collect-all st_aggrid --collect-all customtkinter --collect-all quarto_cli --collect-all jupyter_core --collect-all yaml --collect-all ipykernel --collect-all nbconvert --collect-all notebook --collect-all ipywidgets --collect-all jupyter_console --collect-all jupyter_client --add-data ../docs/example_data/Basic_example_vuegen_demo_notebook:example_data/Basic_example_vuegen_demo_notebook app.py
-          conda info
-          python copy_python_executable.py
+          pyinstaller -n vuegen_gui -D --collect-all pyvis --collect-all streamlit --collect-all st_aggrid --collect-all customtkinter --collect-all quarto_cli --add-data ../docs/example_data/Basic_example_vuegen_demo_notebook:example_data/Basic_example_vuegen_demo_notebook app.py
       - name: Upload executable
         uses: actions/upload-artifact@v4
         with:
