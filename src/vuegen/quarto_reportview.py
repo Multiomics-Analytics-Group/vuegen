@@ -170,15 +170,28 @@ class QuartoReportView(r.ReportView):
         self.report.logger.info(
             f"Running '{self.report.title}' '{self.report_type}' report with {args!r}"
         )
-        subprocess.run(
-            [
-                self.quarto_path,
-                "render",
-                os.path.join(output_dir, f"{self.BASE_DIR}.qmd"),
-            ],
-            check=True,
-        )
+        if self.report_type in [
+            r.ReportType.PDF,
+            r.ReportType.DOCX,
+            r.ReportType.ODT,
+        ]:
+            subprocess.run(
+                [self.quarto_path, "install", "tinytex"],
+                check=True,
+            )
+            subprocess.run(
+                [self.quarto_path, "install", "chromium"],
+                check=True,
+            )
         try:
+            subprocess.run(
+                [
+                    self.quarto_path,
+                    "render",
+                    os.path.join(output_dir, f"{self.BASE_DIR}.qmd"),
+                ],
+                check=True,
+            )
             if self.report_type == r.ReportType.JUPYTER:
                 args = [self.quarto_path, "convert", file_path_to_qmd]
                 subprocess.run(
