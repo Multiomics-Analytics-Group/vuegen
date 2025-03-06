@@ -134,14 +134,14 @@ jobs:
         python-version: ["3.11"]
         os:
           # https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/running-variations-of-jobs-in-a-workflow#example-using-a-multi-dimension-matrix
-          - runner: "ubuntu-latest"
-            label: "ubuntu-latest_LTS-x64"
-          - runner: "macos-13"
-            label: "macos-13-x64"
+          # - runner: "ubuntu-latest"
+          #   label: "ubuntu-latest_LTS-x64"
+          # - runner: "macos-13"
+          #   label: "macos-13-x64"
           - runner: "macos-15"
             label: "macos-15-arm64"
-          - runner: "windows-latest"
-            label: "windows-x64"
+          # - runner: "windows-latest"
+          #   label: "windows-x64"
     steps:
       - uses: actions/checkout@v4
       # - uses: actions/setup-python@v5
@@ -151,17 +151,18 @@ jobs:
         with:
           auto-update-conda: true
           python-version: ${{ matrix.python-version }}
-          auto-activate-base: true
           activate-environment: "test"
       - name: Install VueGen GUI and pyinstaller
         run: |
           conda info
           conda info -e
+          conda activate test
           conda list 
           python -m pip install ".[gui]" pyinstaller
           conda list
       - name: Build executable
         run: |
+          conda activate test
           cd gui
           pyinstaller -n vuegen_gui -D --collect-all pyvis --collect-all streamlit --collect-all st_aggrid --collect-all customtkinter --collect-all quarto_cli --collect-all jupyter_core --collect-all yaml --collect-all ipykernel --collect-all nbconvert --collect-all notebook --collect-all ipywidgets --collect-all jupyter_console --collect-all jupyter_client --add-data ../docs/example_data/Basic_example_vuegen_demo_notebook:example_data/Basic_example_vuegen_demo_notebook app.py
           conda info
