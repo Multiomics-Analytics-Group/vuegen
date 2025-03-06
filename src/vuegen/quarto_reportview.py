@@ -201,50 +201,6 @@ class QuartoReportView(r.ReportView):
                 f"Quarto is not installed. Please install Quarto to run the report: {str(e)}"
             )
             raise
-        # else:
-        #     quarto_path = Path(sys._MEIPASS) / "quarto_cli" / "bin" / "quarto"
-        # _sys_exe = sys.executable
-        # set executable to the bundled python (manually added to bundle)
-        # sys.executable = str(Path(sys._MEIPASS).parent / "python")
-        # self.report.logger.info(f"quarto_path: {self.quarto_path}")
-
-        # args = [f"{quarto_path}", "render", file_path_to_qmd]
-        # subprocess.run(
-        #     args,
-        #     check=True,
-        # )
-        # self.report.logger.info(
-        #     f"Converted '{self.report.title}' '{self.report_type}' report to Jupyter Notebook after execution"
-        # )
-        # notebook_filename = Path(file_path_to_qmd).with_suffix(".ipynb")
-        # try papermill
-        # import papermill as pm
-
-        # pm.execute_notebook(
-        #     "path/to/input.ipynb",
-        #     "path/to/output.ipynb",
-        #     parameters=dict(alpha=0.6, ratio=0.1),
-        # )
-        # quarto does not try to execute ipynb files, just render them
-        # execute manually using bundled python binary
-        # https://nbconvert.readthedocs.io/en/latest/execute_api.html
-        # import nbformat
-        # from nbconvert.preprocessors import ExecutePreprocessor
-
-        # with open(notebook_filename, encoding="utf-8") as f:
-        #     nb = nbformat.read(f, as_version=4)
-        # logging.getLogger("traitlets").setLevel(logging.INFO)
-        # ep = ExecutePreprocessor(timeout=600, kernel_name="python3")
-        # nb, _ = ep.preprocess(nb, {"metadata": {"path": "./"}})
-        # with open(notebook_filename, "w", encoding="utf-8") as f:
-        #     nbformat.write(nb, f)
-        # quarto does not try execute ipynb files per default, just render these
-        # args = [f"{quarto_path}", "render", notebook_filename]
-        # subprocess.run(
-        #     args,
-        #     check=True,
-        # )
-        # sys.executable = _sys_exe
 
     def _create_yaml_header(self) -> str:
         """
