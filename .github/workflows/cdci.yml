@@ -126,6 +126,9 @@ jobs:
   build-executable:
     name: Build-exe-${{ matrix.os.label }}
     runs-on: ${{ matrix.os.runner }}
+    defaults:
+      run:
+        shell: bash -el {0}
     # needs:
     #   - test
     #   - other-reports
@@ -157,8 +160,6 @@ jobs:
         run: |
           conda info
           conda info -e
-          conda init
-          conda activate test
           conda list 
           python -m pip install ".[gui]" pyinstaller
           conda list
