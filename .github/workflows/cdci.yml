@@ -150,8 +150,9 @@ jobs:
       - name: Install VueGen GUI and pyinstaller
         run: |
           python -m pip install ".[gui]" pyinstaller
-      - name: Install tinytex into local quarto installation
+      - name: Install quarto tools
         run: |
+          quarto install chromium
           quarto install tinytex
       - name: Build executable
         run: |
