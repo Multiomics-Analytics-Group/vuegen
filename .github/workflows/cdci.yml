@@ -140,8 +140,8 @@ jobs:
           #   label: "macos-13-x64"
           - runner: "macos-15"
             label: "macos-15-arm64"
-          # - runner: "windows-latest"
-          #   label: "windows-x64"
+          - runner: "windows-latest"
+            label: "windows-x64"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5

@@ -28,7 +28,7 @@ class QuartoReportView(r.ReportView):
             self.report.logger.info("running in a PyInstaller bundle")
             self.BUNDLED_EXECUTION = True
             self.report.logger.debug(f"sys._MEIPASS: {sys._MEIPASS}")
-            self.quarto_path = Path(sys._MEIPASS) / "quarto_cli" / "bin" / "quarto"
+            self.quarto_path = str(Path(sys._MEIPASS) / "quarto_cli" / "bin" / "quarto")
         else:
             self.report.logger.info("running in a normal Python process")
 
