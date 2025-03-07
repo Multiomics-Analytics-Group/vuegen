@@ -17,8 +17,8 @@ class QuartoReportView(r.ReportView):
     A ReportView subclass for generating Quarto reports.
     """
 
-    BASE_DIR = "quarto_report"
-    STATIC_FILES_DIR = Path(BASE_DIR) / "static"
+    BASE_DIR = Path("quarto_report")
+    STATIC_FILES_DIR = BASE_DIR / "static"
 
     def __init__(self, report: r.Report, report_type: r.ReportType):
         super().__init__(report=report, report_type=report_type)
@@ -33,16 +33,16 @@ class QuartoReportView(r.ReportView):
             self.report.logger.info("running in a normal Python process")
 
     def generate_report(
-        self, output_dir: str = BASE_DIR, static_dir: str = STATIC_FILES_DIR
+        self, output_dir: Path = BASE_DIR, static_dir: Path = STATIC_FILES_DIR
     ) -> None:
         """
         Generates the qmd file of the quarto report. It creates code for rendering each section and its subsections with all components.
 
         Parameters
         ----------
-        output_dir : str, optional
+        output_dir : Path, optional
             The folder where the generated report files will be saved (default is BASE_DIR).
-        static_dir : str, optional
+        static_dir : Path, optional
             The folder where the static files will be saved (default is STATIC_FILES_DIR).
         """
         self.report.logger.debug(
@@ -165,7 +165,7 @@ class QuartoReportView(r.ReportView):
         """
         # from quarto_cli import run_quarto # entrypoint of quarto-cli not in module?
 
-        file_path_to_qmd = os.path.join(output_dir, f"{self.BASE_DIR}.qmd")
+        file_path_to_qmd = str(Path(output_dir) / f"{self.BASE_DIR}.qmd"
         args = [self.quarto_path, "render", file_path_to_qmd]
         self.report.logger.info(
             f"Running '{self.report.title}' '{self.report_type}' report with {args!r}"
@@ -185,11 +185,7 @@ class QuartoReportView(r.ReportView):
             )
         try:
             subprocess.run(
-                [
-                    self.quarto_path,
-                    "render",
-                    os.path.join(output_dir, f"{self.BASE_DIR}.qmd"),
-                ],
+                args,
                 check=True,
             )
             if self.report_type == r.ReportType.JUPYTER:
@@ -460,7 +456,7 @@ include-after-body:
                 plot_content.append(self._generate_plot_code(plot))
                 if is_report_static:
                     plot_content.append(
-                        f"""fig_plotly.write_image("{static_plot_path.resolve()}")\n```\n"""
+                        f"""fig_plotly.write_image("{static_plot_path.resolve().as_posix()}")\n```\n"""
                     )
                     plot_content.append(self._generate_image_content(static_plot_path))
                 else:
@@ -469,7 +465,7 @@ include-after-body:
                 plot_content.append(self._generate_plot_code(plot))
                 if is_report_static:
                     plot_content.append(
-                        f"""fig_altair.save("{static_plot_path.resolve()}")\n```\n"""
+                        f"""fig_altair.save("{static_plot_path.resolve().as_posix()}")\n```\n"""
                     )
                     plot_content.append(self._generate_image_content(static_plot_path))
                 else:
@@ -542,7 +538,7 @@ response.raise_for_status()
 plot_json = response.text\n"""
         else:  # If it's a local file
             plot_code += f"""
-with open('{Path("..") / plot.file_path}', 'r') as plot_file:
+with open('{(Path("..") / plot.file_path).as_posix()}', 'r') as plot_file:
     plot_json = plot_file.read()\n"""
         # Add specific code for each visualization tool
         if plot.plot_type == r.PlotType.PLOTLY:
@@ -620,7 +616,7 @@ fig_plotly.update_layout(width=950, height=500)\n"""
             # Load the DataFrame using the correct function
             read_function = read_function_mapping[file_extension]
             dataframe_content.append(
-                f"""df = pd.{read_function.__name__}('{file_path}')"""
+                f"""df = pd.{read_function.__name__}('{file_path.as_posix()}')\n"""
             )
 
             # Display the dataframe
@@ -677,7 +673,7 @@ markdown_content = response.text\n"""
             else:  # If it's a local file
                 markdown_content.append(
                     f"""
-with open('{Path("..") / markdown.file_path}', 'r') as markdown_file:
+with open('{(Path("..") / markdown.file_path).as_posix()}', 'r') as markdown_file:
     markdown_content = markdown_file.read()\n"""
                 )
 
@@ -800,7 +796,7 @@ with open('{Path("..") / markdown.file_path}', 'r') as markdown_file:
             # Generate path for the DataFrame image
             df_image = Path(static_dir) / f"{dataframe.title.replace(' ', '_')}.png"
             dataframe_content.append(
-                f"df.dfi.export('{Path(df_image).resolve()}', max_rows=10, max_cols=5)\n```\n"
+                f"df.dfi.export('{Path(df_image).resolve().as_posix()}', max_rows=10, max_cols=5)\n```\n"
             )
             # Use helper method to add centered image content
             dataframe_content.append(self._generate_image_content(df_image))
