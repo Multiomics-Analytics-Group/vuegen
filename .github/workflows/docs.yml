@@ -7,7 +7,7 @@ on:
     branches: [main]
   release:
     types: [published]
-    
+
 jobs:
   test:
     name: Test
@@ -21,24 +21,24 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-          cache: 'pip' # caching pip dependencies
-          cache-dependency-path: '**/pyproject.toml'
+          cache: "pip" # caching pip dependencies
+          cache-dependency-path: "**/pyproject.toml"
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -e .[docs]
+          pip install .[docs]
       - name: Build references
         run: |
-            cd docs
-            sphinx-apidoc --force --implicit-namespaces --module-first -o reference ../src/vuegen
+          cd docs
+          sphinx-apidoc --force --implicit-namespaces --module-first -o reference ../src/vuegen
       - name: Build documentation
         run: |
-            cd docs
-            sphinx-build -n --keep-going -b html ./ ./_build/
+          cd docs
+          sphinx-build -n --keep-going -b html ./ ./_build/
       # --- HTML example deployment ---
       - name: Rename entry point of report to index.html
         run: |
-            mv docs/quarto_report/quarto_report.html docs/quarto_report/index.html
+          mv docs/quarto_report/quarto_report.html docs/quarto_report/index.html
       - name: Publish HTML report to GitHub Pages (gh-pages branch)
         # Only publish a new static report upon a new release -> can be changed.
         if: startsWith(github.ref, 'refs/tags')
