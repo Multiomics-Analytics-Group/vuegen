@@ -165,7 +165,7 @@ class QuartoReportView(r.ReportView):
         """
         # from quarto_cli import run_quarto # entrypoint of quarto-cli not in module?
 
-        file_path_to_qmd = str(Path(output_dir) / f"{self.BASE_DIR}.qmd"
+        file_path_to_qmd = str(Path(output_dir) / f"{self.BASE_DIR}.qmd")
         args = [self.quarto_path, "render", file_path_to_qmd]
         self.report.logger.info(
             f"Running '{self.report.title}' '{self.report_type}' report with {args!r}"
