@@ -530,7 +530,7 @@ response.raise_for_status()
 plot_json = json.loads(response.text)\n"""
         else:  # If it's a local file
             plot_code = f"""
-with open('{Path(plot.file_path)}', 'r') as plot_file:
+with open('{Path(plot.file_path).as_posix()}', 'r') as plot_file:
     plot_json = json.load(plot_file)\n"""
 
         # Add specific code for each visualization tool
@@ -594,7 +594,7 @@ st.components.v1.html(html_data, height=net_html_height)\n"""
             # Load the DataFrame using the correct function
             read_function = read_function_mapping[file_extension]
             dataframe_content.append(
-                f"""df = pd.{read_function.__name__}('{dataframe.file_path}')"""
+                f"""df = pd.{read_function.__name__}('{dataframe.file_path}')\n"""
             )
 
             # Displays a DataFrame using AgGrid with configurable options.
@@ -673,7 +673,7 @@ markdown_content = response.text\n"""
             else:  # If it's a local file
                 markdown_content.append(
                     f"""
-with open('{Path("..") / markdown.file_path}', 'r') as markdown_file:
+with open('{(Path("..") / markdown.file_path).as_posix()}', 'r') as markdown_file:
     markdown_content = markdown_file.read()\n"""
                 )
             # Code to display md content
@@ -733,7 +733,7 @@ html_content = response.text\n"""
                 # If it's a local file
                 html_content.append(
                     f"""
-with open('{Path("..") / html.file_path}', 'r', encoding='utf-8') as html_file:
+with open('{(Path("..") / html.file_path).as_posix()}', 'r', encoding='utf-8') as html_file:
     html_content = html_file.read()\n"""
                 )
 
