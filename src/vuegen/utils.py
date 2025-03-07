@@ -5,6 +5,7 @@ import json
 import logging
 import os
 import sys
+import unicodedata
 from datetime import datetime
 
 try:
@@ -729,14 +730,31 @@ def get_logger(log_suffix):
     return logger
 
 
+def strip_unicode(text: str) -> str:
+    """
+    Strip Unicode characters from the given text.
+
+    Parameters
+    ----------
+    text : str
+        The input text from which to strip Unicode characters.
+
+    Returns
+    -------
+    str
+        The text with Unicode characters removed.
+    """
+    return "".join(c for c in text if ord(c) < 128)
+
+
 def print_completion_message(report_type: str):
     """
     Prints a formatted completion message after report generation.
     """
     border = "─" * 65  # Creates a separator line
     if report_type == "streamlit":
-        print(
-            """🚀 Streamlit Report Generated!
+        msg = """
+🚀 Streamlit Report Generated!
 
 📂 All scripts to build the Streamlit app are available at:
     streamlit_report/sections
@@ -749,10 +767,9 @@ def print_completion_message(report_type: str):
 🛠️ Advanced users can modify the Python scripts directly in:
     streamlit_report/sections
 """
-        )
     else:
-        print(
-            f"""🚀 {report_type.capitalize()} Report Generated!
+        msg = f"""
+🚀 {report_type.capitalize()} Report Generated!
 
 📂 Your {report_type} report is available at:
     quarto_report
@@ -762,8 +779,11 @@ def print_completion_message(report_type: str):
 🛠️ Advanced users can modify the report template directly in:
     quarto_report/quarto_report.qmd
 """
-        )
-
+    try:
+        print(msg)
+    except UnicodeEncodeError:
+        msg = strip_unicode(msg)
+        print(msg)
     print(border)
 
 
