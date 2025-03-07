@@ -1,0 +1,34 @@
+cff-version: 1.2.0
+message: "If you use VueGen in your research, please cite it as below."
+title: "VueGen: Automating the generation of scientific reports"
+version: 1.0.0
+authors:
+  - family-names: "Ayala-Ruano"
+    given-names: "Sebastian"
+    orcid: "http://orcid.org/0000-0001-9756-6745"
+  - family-names: "Webel"
+    given-names: "Henry"
+    orcid: "http://orcid.org/0000-0001-8833-7617"
+  - family-names: "Santos"
+    given-names: "Alberto"
+    orcid: "http://orcid.org/0000-0002-9163-7730"
+doi: "10.1101/2025.03.05.641152"
+date-released: "2025-03-05"
+url: "https://github.com/YOUR_GITHUB_USERNAME/YOUR_REPO_NAME"
+preferred-citation:
+  type: article
+  authors:
+    - family-names: "Ayala-Ruano"
+      given-names: "Sebastian"
+      orcid: "http://orcid.org/0000-0001-9756-6745"
+    - family-names: "Webel"
+      given-names: "Henry"
+      orcid: "http://orcid.org/0000-0001-8833-7617"
+    - family-names: "Santos"
+      given-names: "Alberto"
+      orcid: "http://orcid.org/0000-0002-9163-7730"
+  title: "VueGen: Automating the generation of scientific reports"
+  journal: "bioRxiv"
+  year: 2025
+  doi: "10.1101/2025.03.05.641152"
+  url: "https://www.biorxiv.org/content/10.1101/2025.03.05.641152v1"
