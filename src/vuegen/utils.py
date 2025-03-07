@@ -781,10 +781,11 @@ def print_completion_message(report_type: str):
 """
     try:
         print(msg)
+        print(border)
     except UnicodeEncodeError:
         msg = strip_unicode(msg)
         print(msg)
-    print(border)
+        print('-' * 65)
 
 
 ## REPORT FORMATTING
