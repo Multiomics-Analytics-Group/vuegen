@@ -113,7 +113,10 @@ class QuartoReportView(r.ReportView):
                         # Generate content for the subsection
                         subsection_content, subsection_imports = (
                             self._generate_subsection(
-                                subsection, is_report_static, is_report_revealjs
+                                subsection,
+                                is_report_static,
+                                is_report_revealjs,
+                                static_dir=static_dir,
                             )
                         )
                         qmd_content.extend(subsection_content)
@@ -352,7 +355,11 @@ include-after-body:
         return yaml_header
 
     def _generate_subsection(
-        self, subsection, is_report_static, is_report_revealjs
+        self,
+        subsection,
+        is_report_static,
+        is_report_revealjs,
+        static_dir: str,
     ) -> tuple[List[str], List[str]]:
         """
         Generate code to render components (plots, dataframes, markdown) in the given subsection,
@@ -366,6 +373,8 @@ include-after-body:
             A boolean indicating whether the report is static or interactive.
         is_report_revealjs : bool
             A boolean indicating whether the report is in revealjs format.
+        static_dir : str
+            The folder where the static files will be saved.
         Returns
         -------
         tuple : (List[str], List[str])
@@ -389,11 +398,15 @@ include-after-body:
 
             if component.component_type == r.ComponentType.PLOT:
                 subsection_content.extend(
-                    self._generate_plot_content(component, is_report_static)
+                    self._generate_plot_content(
+                        component, is_report_static, static_dir=static_dir
+                    )
                 )
             elif component.component_type == r.ComponentType.DATAFRAME:
                 subsection_content.extend(
-                    self._generate_dataframe_content(component, is_report_static)
+                    self._generate_dataframe_content(
+                        component, is_report_static, static_dir=static_dir
+                    )
                 )
             elif (
                 component.component_type == r.ComponentType.MARKDOWN
@@ -419,7 +432,7 @@ include-after-body:
         return subsection_content, subsection_imports
 
     def _generate_plot_content(
-        self, plot, is_report_static, static_dir: str = STATIC_FILES_DIR
+        self, plot, is_report_static, static_dir: str
     ) -> List[str]:
         """
         Generate content for a plot component based on the report type.
@@ -428,8 +441,8 @@ include-after-body:
         ----------
         plot : Plot
             The plot component to generate content for.
-        static_dir : str, optional
-            The folder where the static files will be saved (default is STATIC_FILES_DIR).
+        static_dir : str
+            The folder where the static files will be saved.
 
         Returns
         -------
@@ -561,7 +574,9 @@ fig_plotly.update_layout(width=950, height=500)\n"""
 </div>\n"""
         return plot_code
 
-    def _generate_dataframe_content(self, dataframe, is_report_static) -> List[str]:
+    def _generate_dataframe_content(
+        self, dataframe, is_report_static, static_dir: str
+    ) -> List[str]:
         """
         Generate content for a DataFrame component based on the report type.
 
@@ -571,6 +586,8 @@ fig_plotly.update_layout(width=950, height=500)\n"""
             The dataframe component to add to content.
         is_report_static : bool
             A boolean indicating whether the report is static or interactive.
+        static_dir : str
+            The folder where the static files will be saved.
 
         Returns
         -------
@@ -620,7 +637,9 @@ fig_plotly.update_layout(width=950, height=500)\n"""
             )
 
             # Display the dataframe
-            dataframe_content.extend(self._show_dataframe(dataframe, is_report_static))
+            dataframe_content.extend(
+                self._show_dataframe(dataframe, is_report_static, static_dir=static_dir)
+            )
 
         except Exception as e:
             self.report.logger.error(
@@ -772,7 +791,7 @@ with open('{(Path("..") / markdown.file_path).as_posix()}', 'r') as markdown_fil
             )
 
     def _show_dataframe(
-        self, dataframe, is_report_static, static_dir: str = STATIC_FILES_DIR
+        self, dataframe, is_report_static, static_dir: str
     ) -> List[str]:
         """
         Appends either a static image or an interactive representation of a DataFrame to the content list.
@@ -783,8 +802,8 @@ with open('{(Path("..") / markdown.file_path).as_posix()}', 'r') as markdown_fil
             The DataFrame object containing the data to display.
         is_report_static : bool
             Determines if the report is in a static format (e.g., PDF) or interactive (e.g., HTML).
-        static_dir : str, optional
-            The folder where the static files will be saved (default is STATIC_FILES_DIR).
+        static_dir : str
+            The folder where the static files will be saved.
 
         Returns
         -------

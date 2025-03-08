@@ -144,7 +144,7 @@ report_nav.run()"""
                 )
 
             # Create Python files for each section and its subsections and plots
-            self._generate_sections(output_dir=output_dir)
+            self._generate_sections(output_dir=output_dir, static_dir=static_dir)
         except Exception as e:
             self.report.logger.error(
                 f"An error occurred while generating the report: {str(e)}"
@@ -308,7 +308,7 @@ report_nav.run()"""
             self.report.logger.error(f"Error generating the home section: {str(e)}")
             raise
 
-    def _generate_sections(self, output_dir: str) -> None:
+    def _generate_sections(self, output_dir: str, static_dir: str) -> None:
         """
         Generates Python files for each section in the report, including subsections and its components (plots, dataframes, markdown).
 
@@ -316,6 +316,8 @@ report_nav.run()"""
         ----------
         output_dir : str
             The folder where section files will be saved.
+        static_dir : str
+            The folder where the static files will be saved.
         """
         self.report.logger.info("Starting to generate sections for the report.")
 
@@ -342,7 +344,9 @@ report_nav.run()"""
 
                             # Generate content and imports for the subsection
                             subsection_content, subsection_imports = (
-                                self._generate_subsection(subsection)
+                                self._generate_subsection(
+                                    subsection, static_dir=static_dir
+                                )
                             )
 
                             # Flatten the subsection_imports into a single list
@@ -379,7 +383,9 @@ report_nav.run()"""
             self.report.logger.error(f"Error generating sections: {str(e)}")
             raise
 
-    def _generate_subsection(self, subsection) -> tuple[List[str], List[str]]:
+    def _generate_subsection(
+        self, subsection, static_dir
+    ) -> tuple[List[str], List[str]]:
         """
         Generate code to render components (plots, dataframes, markdown) in the given subsection,
         creating imports and content for the subsection based on the component type.
@@ -388,6 +394,8 @@ report_nav.run()"""
         ----------
         subsection : Subsection
             The subsection containing the components.
+        static_dir : str
+            The folder where the static files will be saved.
 
         Returns
         -------
@@ -416,7 +424,9 @@ report_nav.run()"""
 
             # Handle different types of components
             if component.component_type == r.ComponentType.PLOT:
-                subsection_content.extend(self._generate_plot_content(component))
+                subsection_content.extend(
+                    self._generate_plot_content(component, static_dir=static_dir)
+                )
             elif component.component_type == r.ComponentType.DATAFRAME:
                 subsection_content.extend(self._generate_dataframe_content(component))
             # If md files is called "description.md", do not include it in the report
@@ -445,9 +455,7 @@ report_nav.run()"""
         )
         return subsection_content, subsection_imports
 
-    def _generate_plot_content(
-        self, plot, static_dir: str = STATIC_FILES_DIR
-    ) -> List[str]:
+    def _generate_plot_content(self, plot, static_dir: str) -> List[str]:
         """
         Generate content for a plot component based on the plot type (static or interactive).
 
@@ -460,8 +468,8 @@ report_nav.run()"""
         -------
         list : List[str]
             The list of content lines for the plot.
-        static_dir : str, optional
-            The folder where the static files will be saved (default is STATIC_FILES_DIR).
+        static_dir : str
+            The folder where the static files will be saved.
         """
         plot_content = []
         # Add title
