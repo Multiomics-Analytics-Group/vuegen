@@ -22,14 +22,19 @@ optional arguments:
 import sys
 import tkinter as tk
 from pathlib import Path
+from pprint import pprint
 
 import customtkinter
 
-from vuegen.__main__ import main
+# from vuegen.__main__ import main
 from vuegen.report import ReportType
 
 customtkinter.set_appearance_mode("system")
 customtkinter.set_default_color_theme("dark-blue")
+from tkinter import filedialog
+
+from vuegen import report_generator
+from vuegen.utils import print_completion_message
 
 app_path = Path(__file__).absolute()
 print("app_path:", app_path)
@@ -56,23 +61,42 @@ else:
 
 ##########################################################################################
 # callbacks
+# def create_run_vuegen(is_dir, config_path, report_type, run_streamlit):
+#     def inner():
+#         args = ["vuegen"]
+#         print(f"{is_dir.get() = }")
+#         if is_dir.get():
+#             args.append("--directory")
+#         else:
+#             args.append("--config")
+#         args.append(config_path.get())
+#         args.append("--report_type")
+#         args.append(report_type.get())
+#         print(f"{run_streamlit.get() = }")
+#         if run_streamlit.get():
+#             args.append("--streamlit_autorun")
+#         print("args:", args)
+#         sys.argv = args
+#         main()  # Call the main function from vuegen
+
+#     return inner
+
+
 def create_run_vuegen(is_dir, config_path, report_type, run_streamlit):
     def inner():
-        args = ["vuegen"]
+        kwargs = {}
         print(f"{is_dir.get() = }")
         if is_dir.get():
-            args.append("--directory")
+            kwargs["dir_path"] = config_path.get()
         else:
-            args.append("--config")
-        args.append(config_path.get())
-        args.append("--report_type")
-        args.append(report_type.get())
+            kwargs["config_path"] = config_path.get()
+        kwargs["report_type"] = report_type.get()
         print(f"{run_streamlit.get() = }")
-        if run_streamlit.get():
-            args.append("--streamlit_autorun")
-        print("args:", args)
-        sys.argv = args
-        main()  # Call the main function from vuegen
+        kwargs["streamlit_autorun"] = run_streamlit.get()
+        print("kwargs:")
+        pprint(kwargs)
+        report_generator.get_report(**kwargs)
+        print_completion_message(report_type.get())
 
     return inner
 
@@ -89,10 +113,18 @@ def create_radio_button_callback(value, name="radiobutton"):
     return radio_button_callback
 
 
+def create_select_directory(string_var):
+    def select_directory():
+        directory = filedialog.askdirectory()
+        string_var.set(directory)
+
+    return select_directory
+
+
 ##########################################################################################
 # APP
 app = customtkinter.CTk()
-app.geometry("460x400")
+app.geometry("600x400")
 app.title("VueGen GUI")
 
 ##########################################################################################
@@ -127,7 +159,12 @@ config_path_entry = customtkinter.CTkEntry(
     width=400,
     textvariable=config_path,
 )
-config_path_entry.grid(row=2, column=0, columnspan=2, padx=20, pady=10)
+config_path_entry.grid(row=2, column=0, columnspan=2, padx=5, pady=10)
+select_directory = create_select_directory(config_path)
+select_button = customtkinter.CTkButton(
+    app, text="Select Directory", command=select_directory
+)
+select_button.grid(row=2, column=2, columnspan=2, padx=5, pady=10)
 
 ##########################################################################################
 # Report type dropdown
