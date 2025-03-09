@@ -15,6 +15,7 @@ def get_report(
     config_path: str = None,
     dir_path: str = None,
     streamlit_autorun: bool = False,
+    output_dir: Path = None,
 ) -> None:
     """
     Generate and run a report based on the specified engine.
@@ -37,9 +38,16 @@ def get_report(
     ValueError
         If neither 'config_path' nor 'directory' is provided.
     """
+    if output_dir is None:
+        output_dir = Path(".")
+    else:
+        output_dir = Path(output_dir)
     # Initialize logger only if it's not provided
     if logger is None:
-        logger = get_logger("report")
+        _folder = "logs"
+        if output_dir:
+            _folder = output_dir / _folder
+        logger, _ = get_logger("report", folder=_folder)
 
     # Create the config manager object
     config_manager = ConfigManager(logger)

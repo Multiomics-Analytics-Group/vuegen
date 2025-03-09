@@ -22,7 +22,9 @@ class ConfigManager:
         logger : logging.Logger, optional
             A logger instance for the class. If not provided, a default logger will be created.
         """
-        self.logger = logger or get_logger("report")
+        if logger is None:
+            logger, _ = get_logger("report")
+        self.logger = logger
 
     def _create_title_fromdir(self, file_dirname: str) -> str:
         """
