@@ -7,24 +7,25 @@ on:
     branches: [main]
   release:
     types: [published]
-    
+
 jobs:
   test:
     name: Unittests+streamlit
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        # python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.11"]
     steps:
       - uses: actions/checkout@v4
-      - uses: psf/black@stable 
+      - uses: psf/black@stable
       - uses: isort/isort-action@v1
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-          cache: 'pip' # caching pip dependencies
-          cache-dependency-path: '**/pyproject.toml'
+          cache: "pip" # caching pip dependencies
+          cache-dependency-path: "**/pyproject.toml"
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -37,21 +38,22 @@ jobs:
           cd docs
           vuegen --directory example_data/Earth_microbiome_vuegen_demo_notebook
           vuegen --config example_data/Earth_microbiome_vuegen_demo_notebook/Earth_microbiome_vuegen_demo_notebook_config.yaml
-  
+
   other-reports:
     name: Integration tests
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        # python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.11"]
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-          cache: 'pip' # caching pip dependencies
-          cache-dependency-path: '**/pyproject.toml'
+          cache: "pip" # caching pip dependencies
+          cache-dependency-path: "**/pyproject.toml"
       - name: Install dependencies
         run: |
           pip install --upgrade pip
@@ -110,7 +112,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-  
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
@@ -120,3 +122,45 @@ jobs:
         run: python -m build
       - name: Publish package distributions to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
+
+  build-executable:
+    name: Build-exe-${{ matrix.os.label }}
+    runs-on: ${{ matrix.os.runner }}
+    # needs:
+    #   - test
+    #   - other-reports
+    strategy:
+      matrix:
+        python-version: ["3.11"]
+        os:
+          # https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/running-variations-of-jobs-in-a-workflow#example-using-a-multi-dimension-matrix
+          # - runner: "ubuntu-latest"
+          #   label: "ubuntu-latest_LTS-x64"
+          # - runner: "macos-13"
+          #   label: "macos-13-x64"
+          - runner: "macos-15"
+            label: "macos-15-arm64"
+          - runner: "windows-latest"
+            label: "windows-x64"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install VueGen GUI and pyinstaller
+        run: |
+          python -m pip install ".[gui]" pyinstaller
+      - name: Install quarto tools
+        run: |
+          quarto install chromium
+          quarto install tinytex
+      - name: Build executable
+        run: |
+          cd gui
+          pyinstaller -n vuegen_gui -D --collect-all pyvis --collect-all streamlit --collect-all st_aggrid --collect-all customtkinter --collect-all quarto_cli --add-data ../docs/example_data/Basic_example_vuegen_demo_notebook:example_data/Basic_example_vuegen_demo_notebook app.py
+        # -w -F
+      - name: Upload executable
+        uses: actions/upload-artifact@v4
+        with:
+          name: vuegen_gui_${{ matrix.os.label }}
+          path: gui/dist/
