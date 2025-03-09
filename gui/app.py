@@ -28,16 +28,21 @@ import customtkinter
 
 # from vuegen.__main__ import main
 from vuegen.report import ReportType
+from vuegen.utils import get_logger
 
 customtkinter.set_appearance_mode("system")
 customtkinter.set_default_color_theme("dark-blue")
-from tkinter import filedialog
+import traceback
+from tkinter import filedialog, messagebox
 
 from vuegen import report_generator
 from vuegen.utils import print_completion_message
 
-app_path = Path(__file__).absolute()
+app_path = Path(__file__).absolute().resolve()
 print("app_path:", app_path)
+output_dir = (Path.home() / "vuegen_gen" / "reports").resolve()
+print("output_dir:", output_dir)
+output_dir.mkdir(exist_ok=True, parents=True)
 
 ##########################################################################################
 # Path to example data dependend on how the GUI is run
@@ -82,20 +87,45 @@ else:
 #     return inner
 
 
-def create_run_vuegen(is_dir, config_path, report_type, run_streamlit):
+def create_run_vuegen(
+    is_dir, config_path, report_type, run_streamlit, output_dir_entry
+):
     def inner():
         kwargs = {}
         print(f"{is_dir.get() = }")
         if is_dir.get():
             kwargs["dir_path"] = config_path.get()
+            report_name = Path(config_path.get()).stem
         else:
             kwargs["config_path"] = config_path.get()
+            report_name = Path(config_path.get()).stem
         kwargs["report_type"] = report_type.get()
         print(f"{run_streamlit.get() = }")
         kwargs["streamlit_autorun"] = run_streamlit.get()
+        kwargs["output_dir"] = output_dir_entry.get()
         print("kwargs:")
         pprint(kwargs)
-        report_generator.get_report(**kwargs)
+        try:
+            # Define logger suffix based on report type and name
+            logger_suffix = f"{report_type.get()}_report_{str(report_name)}"
+
+            # Initialize logger
+            kwargs["logger"], log_file = get_logger(
+                f"{logger_suffix}",
+                folder=(Path(kwargs["output_dir"]) / "logs").as_posix(),
+            )
+            report_generator.get_report(**kwargs)
+            messagebox.showinfo(
+                "Success",
+                "Report generation completed successfully." f"\nLogs at {log_file}",
+            )
+        except Exception as e:
+            stacktrace = traceback.format_exc()
+            messagebox.showerror(
+                "Error",
+                f"An error occurred: {e}\n\n{stacktrace}"
+                f"\n See logs for more details {log_file}",
+            )
         print_completion_message(report_type.get())
 
     return inner
@@ -115,7 +145,7 @@ def create_radio_button_callback(value, name="radiobutton"):
 
 def create_select_directory(string_var):
     def select_directory():
-        directory = filedialog.askdirectory()
+        directory = filedialog.askdirectory(initialdir=string_var.get())
         string_var.set(directory)
 
     return select_directory
@@ -124,7 +154,7 @@ def create_select_directory(string_var):
 ##########################################################################################
 # APP
 app = customtkinter.CTk()
-app.geometry("600x400")
+app.geometry("620x500")
 app.title("VueGen GUI")
 
 ##########################################################################################
@@ -208,14 +238,38 @@ ctk_radio_st_autorun_0 = customtkinter.CTkRadioButton(
 ctk_radio_st_autorun_0.grid(row=5, column=1, padx=20, pady=20)
 
 ##########################################################################################
+# output directory selection
+# ctk_label_outdir = customtkinter.CTkLabel
+output_dir_entry = tk.StringVar(value=str(output_dir))
+select_output_dir = create_select_directory(output_dir_entry)
+select_output_dir_button = customtkinter.CTkButton(
+    app, text="Select Output Directory", command=select_output_dir
+)
+select_output_dir_button.grid(row=6, column=2, columnspan=2, padx=5, pady=10)
+
+ctk_entry_outpath = customtkinter.CTkEntry(
+    app,
+    width=400,
+    textvariable=output_dir_entry,
+)
+ctk_entry_outpath.grid(row=6, column=0, columnspan=2, padx=10, pady=10)
+ctk_label_appath = customtkinter.CTkLabel(
+    app,
+    text=f"App path: {app_path}",
+)
+ctk_label_appath.grid(row=7, column=0, columnspan=2, padx=20, pady=5)
+
+##########################################################################################
 # Run VueGen button
-run_vuegen = create_run_vuegen(is_dir, config_path, report_type, run_streamlit)
+run_vuegen = create_run_vuegen(
+    is_dir, config_path, report_type, run_streamlit, output_dir_entry
+)
 run_button = customtkinter.CTkButton(
     app,
     text="Run VueGen",
     command=run_vuegen,
 )
-run_button.grid(row=6, column=0, columnspan=2, padx=20, pady=20)
+run_button.grid(row=8, column=0, columnspan=2, padx=20, pady=20)
 
 ##########################################################################################
 # Run the app in the mainloop

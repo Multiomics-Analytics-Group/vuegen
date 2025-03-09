@@ -1,6 +1,7 @@
 import logging
 import shutil
 import sys
+from pathlib import Path
 
 from .config_manager import ConfigManager
 from .quarto_reportview import QuartoReportView
@@ -68,12 +69,14 @@ def get_report(
 
     # Create and run ReportView object based on its type
     if report_type == ReportType.STREAMLIT:
+        base_dir = output_dir / "streamlit_report"
+        sections_dir = base_dir / "sections"
+        static_files_dir = base_dir / "static"
         st_report = StreamlitReportView(
             report=report, report_type=report_type, streamlit_autorun=streamlit_autorun
         )
-        st_report.generate_report()
-        st_report.run_report()
-
+        st_report.generate_report(output_dir=sections_dir, static_dir=static_files_dir)
+        st_report.run_report(output_dir=sections_dir)
     else:
         # Check if Quarto is installed
         if shutil.which("quarto") is None and not hasattr(
@@ -85,6 +88,8 @@ def get_report(
             raise RuntimeError(
                 "Quarto is not installed. Please install Quarto before generating this report type."
             )
+        base_dir = output_dir / "quarto_report"
+        static_files_dir = base_dir / "static"
         quarto_report = QuartoReportView(report=report, report_type=report_type)
-        quarto_report.generate_report()
-        quarto_report.run_report()
+        quarto_report.generate_report(output_dir=base_dir, static_dir=static_files_dir)
+        quarto_report.run_report(output_dir=base_dir)
