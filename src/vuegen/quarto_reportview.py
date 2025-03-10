@@ -239,6 +239,7 @@ fig-align: center
 execute:
   echo: false
   output: asis
+jupyter: python3
 format:"""
 
         # Define format-specific YAML configurations
