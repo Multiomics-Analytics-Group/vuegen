@@ -635,9 +635,11 @@ def generate_log_filename(folder: str = "logs", suffix: str = "") -> str:
     str
         The file path to the log file
     """
-    # PRECONDITIONS
-    create_folder(folder)
-
+    try:
+        # PRECONDITIONS
+        create_folder(folder)  # ? Path(folder).mkdir(parents=True, exist_ok=True)
+    except OSError as e:
+        raise OSError(f"Error creating directory '{folder}': {e}")
     # MAIN FUNCTION
     log_filename = get_time(incl_timezone=False) + "_" + suffix + ".log"
     log_filepath = os.path.join(folder, log_filename)
@@ -703,7 +705,7 @@ def init_log(
     return logger
 
 
-def get_logger(log_suffix):
+def get_logger(log_suffix, folder="logs", display=True) -> tuple[logging.Logger, str]:
     """
     Initialize the logger with a log file name that includes an optional suffix.
 
@@ -714,19 +716,19 @@ def get_logger(log_suffix):
 
     Returns
     -------
-    logging.Logger
-        An initialized logger instance.
+    tuple[logging.Logger, str
+        A tuple containing the logger instance and the log file path.
     """
     # Generate log file name
-    log_file = generate_log_filename(suffix=log_suffix)
+    log_file = generate_log_filename(folder=folder, suffix=log_suffix)
 
     # Initialize logger
-    logger = init_log(log_file, display=True)
+    logger = init_log(log_file, display=display)
 
     # Log the path to the log file
     logger.info(f"Path to log file: {log_file}")
 
-    return logger
+    return logger, log_file
 
 
 def print_completion_message(report_type: str):

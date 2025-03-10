@@ -1,5 +1,7 @@
 import logging
 import shutil
+import sys
+from pathlib import Path
 
 from .config_manager import ConfigManager
 from .quarto_reportview import QuartoReportView
@@ -14,6 +16,7 @@ def get_report(
     config_path: str = None,
     dir_path: str = None,
     streamlit_autorun: bool = False,
+    output_dir: Path = None,
 ) -> None:
     """
     Generate and run a report based on the specified engine.
@@ -36,9 +39,16 @@ def get_report(
     ValueError
         If neither 'config_path' nor 'directory' is provided.
     """
+    if output_dir is None:
+        output_dir = Path(".")
+    else:
+        output_dir = Path(output_dir)
     # Initialize logger only if it's not provided
     if logger is None:
-        logger = get_logger("report")
+        _folder = "logs"
+        if output_dir:
+            _folder = output_dir / _folder
+        logger, _ = get_logger("report", folder=_folder)
 
     # Create the config manager object
     config_manager = ConfigManager(logger)
@@ -59,21 +69,27 @@ def get_report(
 
     # Create and run ReportView object based on its type
     if report_type == ReportType.STREAMLIT:
+        base_dir = output_dir / "streamlit_report"
+        sections_dir = base_dir / "sections"
+        static_files_dir = base_dir / "static"
         st_report = StreamlitReportView(
             report=report, report_type=report_type, streamlit_autorun=streamlit_autorun
         )
-        st_report.generate_report()
-        st_report.run_report()
-
+        st_report.generate_report(output_dir=sections_dir, static_dir=static_files_dir)
+        st_report.run_report(output_dir=sections_dir)
     else:
         # Check if Quarto is installed
-        if shutil.which("quarto") is None:
+        if shutil.which("quarto") is None and not hasattr(
+            sys, "_MEIPASS"
+        ):  # ? and not getattr(sys, "frozen", False)
             logger.error(
                 "Quarto is not installed. Please install Quarto before generating this report type."
             )
             raise RuntimeError(
                 "Quarto is not installed. Please install Quarto before generating this report type."
             )
+        base_dir = output_dir / "quarto_report"
+        static_files_dir = base_dir / "static"
         quarto_report = QuartoReportView(report=report, report_type=report_type)
-        quarto_report.generate_report()
-        quarto_report.run_report()
+        quarto_report.generate_report(output_dir=base_dir, static_dir=static_files_dir)
+        quarto_report.run_report(output_dir=base_dir)
