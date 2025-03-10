@@ -512,7 +512,7 @@ include-after-body:
 
                 # Add code to generate network depending on the report type
                 if is_report_static:
-                    plot.save_netwrok_image(networkx_graph, static_plot_path, "png")
+                    plot.save_network_image(networkx_graph, static_plot_path, "png")
                     plot_content.append(self._generate_image_content(static_plot_path))
                 else:
                     plot_content.append(self._generate_plot_code(plot, html_plot_file))
