@@ -157,13 +157,14 @@ app = customtkinter.CTk()
 app.geometry("620x500")
 app.title("VueGen GUI")
 
+row_count = 0
 ##########################################################################################
 # Config or directory input
 ctk_label_config = customtkinter.CTkLabel(
     app,
     text="Add path to config file or directory. Select radio button accordingly",
 )
-ctk_label_config.grid(row=0, column=0, columnspan=2, padx=20, pady=20)
+ctk_label_config.grid(row=row_count, column=0, columnspan=2, padx=20, pady=20)
 is_dir = tk.BooleanVar(value=True)
 callback_radio_config = create_radio_button_callback(is_dir, name="is_dir")
 ctk_radio_config_0 = customtkinter.CTkRadioButton(
@@ -173,7 +174,9 @@ ctk_radio_config_0 = customtkinter.CTkRadioButton(
     variable=is_dir,
     value=False,
 )
-ctk_radio_config_0.grid(row=1, column=0, padx=20, pady=2)
+row_count += 1
+##########################################################################################
+ctk_radio_config_0.grid(row=row_count, column=0, padx=20, pady=2)
 ctk_radio_config_1 = customtkinter.CTkRadioButton(
     app,
     text="Use dir",
@@ -181,7 +184,7 @@ ctk_radio_config_1 = customtkinter.CTkRadioButton(
     variable=is_dir,
     value=True,
 )
-ctk_radio_config_1.grid(row=1, column=1, padx=20, pady=2)
+ctk_radio_config_1.grid(row=row_count, column=1, padx=20, pady=2)
 
 config_path = tk.StringVar(value=str(path_to_dat))
 config_path_entry = customtkinter.CTkEntry(
@@ -189,13 +192,15 @@ config_path_entry = customtkinter.CTkEntry(
     width=400,
     textvariable=config_path,
 )
-config_path_entry.grid(row=2, column=0, columnspan=2, padx=5, pady=10)
+row_count += 1
+##########################################################################################
+config_path_entry.grid(row=row_count, column=0, columnspan=2, padx=5, pady=10)
 select_directory = create_select_directory(config_path)
 select_button = customtkinter.CTkButton(
     app, text="Select Directory", command=select_directory
 )
-select_button.grid(row=2, column=2, columnspan=2, padx=5, pady=10)
-
+select_button.grid(row=row_count, column=2, columnspan=2, padx=5, pady=10)
+row_count += 1
 ##########################################################################################
 # Report type dropdown
 # - get list of report types from Enum
@@ -204,7 +209,9 @@ ctk_label_report = customtkinter.CTkLabel(
     app,
     text="Select type of report to generate (using only streamlit for now)",
 )
-ctk_label_report.grid(row=3, column=0, columnspan=2, padx=20, pady=20)
+ctk_label_report.grid(row=row_count, column=0, columnspan=2, padx=20, pady=20)
+row_count += 1
+##########################################################################################
 report_type = tk.StringVar(value=report_types[0])
 report_dropdown = customtkinter.CTkOptionMenu(
     app,
@@ -212,8 +219,8 @@ report_dropdown = customtkinter.CTkOptionMenu(
     variable=report_type,
     command=optionmenu_callback,
 )
-report_dropdown.grid(row=4, column=0, columnspan=2, padx=20, pady=20)
-
+report_dropdown.grid(row=row_count, column=0, columnspan=2, padx=20, pady=20)
+row_count += 1
 ##########################################################################################
 # Run Streamlit radio button
 run_streamlit = tk.BooleanVar(value=True)
@@ -227,7 +234,7 @@ ctk_radio_st_autorun_1 = customtkinter.CTkRadioButton(
     variable=run_streamlit,
     command=callback_radio_st_run,
 )
-ctk_radio_st_autorun_1.grid(row=5, column=0, padx=20, pady=20)
+ctk_radio_st_autorun_1.grid(row=row_count, column=0, padx=20, pady=20)
 ctk_radio_st_autorun_0 = customtkinter.CTkRadioButton(
     app,
     text="skip starting streamlit",
@@ -235,8 +242,8 @@ ctk_radio_st_autorun_0 = customtkinter.CTkRadioButton(
     variable=run_streamlit,
     command=callback_radio_st_run,
 )
-ctk_radio_st_autorun_0.grid(row=5, column=1, padx=20, pady=20)
-
+ctk_radio_st_autorun_0.grid(row=row_count, column=1, padx=20, pady=20)
+row_count += 1
 ##########################################################################################
 # output directory selection
 # ctk_label_outdir = customtkinter.CTkLabel
@@ -245,20 +252,22 @@ select_output_dir = create_select_directory(output_dir_entry)
 select_output_dir_button = customtkinter.CTkButton(
     app, text="Select Output Directory", command=select_output_dir
 )
-select_output_dir_button.grid(row=6, column=2, columnspan=2, padx=5, pady=10)
+select_output_dir_button.grid(row=row_count, column=2, columnspan=2, padx=5, pady=10)
 
 ctk_entry_outpath = customtkinter.CTkEntry(
     app,
     width=400,
     textvariable=output_dir_entry,
 )
-ctk_entry_outpath.grid(row=6, column=0, columnspan=2, padx=10, pady=10)
+ctk_entry_outpath.grid(row=row_count, column=0, columnspan=2, padx=10, pady=10)
+row_count += 1
+##########################################################################################
 ctk_label_appath = customtkinter.CTkLabel(
     app,
     text=f"App path: {app_path}",
 )
-ctk_label_appath.grid(row=7, column=0, columnspan=2, padx=20, pady=5)
-
+ctk_label_appath.grid(row=row_count, column=0, columnspan=2, padx=20, pady=5)
+row_count += 1
 ##########################################################################################
 # Run VueGen button
 run_vuegen = create_run_vuegen(
@@ -269,8 +278,8 @@ run_button = customtkinter.CTkButton(
     text="Run VueGen",
     command=run_vuegen,
 )
-run_button.grid(row=8, column=0, columnspan=2, padx=20, pady=20)
-
+run_button.grid(row=row_count, column=0, columnspan=2, padx=20, pady=20)
+row_count += 1
 ##########################################################################################
 # Run the app in the mainloop
 app.mainloop()
