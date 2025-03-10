@@ -24,13 +24,17 @@ class QuartoReportView(r.ReportView):
         super().__init__(report=report, report_type=report_type)
         self.BUNDLED_EXECUTION = False
         self.quarto_path = "quarto"
+        # self.env_vars = os.environ.copy()
         if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
             self.report.logger.info("running in a PyInstaller bundle")
             self.BUNDLED_EXECUTION = True
             self.report.logger.debug(f"sys._MEIPASS: {sys._MEIPASS}")
-            self.quarto_path = str(Path(sys._MEIPASS) / "quarto_cli" / "bin" / "quarto")
         else:
             self.report.logger.info("running in a normal Python process")
+
+        self.report.logger.debug("env_vars (QuartoReport): %s", os.environ)
+        self.report.logger.debug(f"PATH: {os.environ['PATH']}")
+        self.report.logger.debug(f"sys.path: {sys.path}")
 
     def generate_report(
         self, output_dir: Path = BASE_DIR, static_dir: Path = STATIC_FILES_DIR
@@ -179,11 +183,11 @@ class QuartoReportView(r.ReportView):
             r.ReportType.ODT,
         ]:
             subprocess.run(
-                [self.quarto_path, "install", "tinytex"],
+                [self.quarto_path, "install", "tinytex", "--no-prompt"],
                 check=True,
             )
             subprocess.run(
-                [self.quarto_path, "install", "chromium"],
+                [self.quarto_path, "install", "chromium", "--no-prompt"],
                 check=True,
             )
         try:

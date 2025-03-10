@@ -19,6 +19,7 @@ optional arguments:
                         report generation.
 """
 
+import os
 import sys
 import tkinter as tk
 from pathlib import Path
@@ -43,7 +44,7 @@ print("app_path:", app_path)
 output_dir = (Path.home() / "vuegen_gen" / "reports").resolve()
 print("output_dir:", output_dir)
 output_dir.mkdir(exist_ok=True, parents=True)
-
+_PATH = f'{os.environ["PATH"]}'
 ##########################################################################################
 # Path to example data dependend on how the GUI is run
 if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
@@ -51,6 +52,10 @@ if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
     path_to_dat = (
         app_path.parent / "example_data/Basic_example_vuegen_demo_notebook"
     ).resolve()
+    quarto_bin_path = os.path.join(sys._MEIPASS, "quarto_cli", "bin")
+    quarto_share_path = os.path.join(sys._MEIPASS, "quarto_cli", "share")
+    _PATH = os.pathsep.join([quarto_bin_path, quarto_share_path, _PATH])
+    os.environ["PATH"] = _PATH
 elif app_path.parent.name == "gui":
     # should be always the case for GUI run from command line
     path_to_dat = (
@@ -63,9 +68,10 @@ elif app_path.parent.name == "gui":
 else:
     path_to_dat = "docs/example_data/Basic_example_vuegen_demo_notebook"
 
-
+print(f"{_PATH = }")
 ##########################################################################################
 # callbacks
+# using main entry point of vuegen
 # def create_run_vuegen(is_dir, config_path, report_type, run_streamlit):
 #     def inner():
 #         args = ["vuegen"]
@@ -88,7 +94,7 @@ else:
 
 
 def create_run_vuegen(
-    is_dir, config_path, report_type, run_streamlit, output_dir_entry
+    is_dir, config_path, report_type, run_streamlit, output_dir_entry, python_dir_entry
 ):
     def inner():
         kwargs = {}
@@ -105,7 +111,21 @@ def create_run_vuegen(
         kwargs["output_dir"] = output_dir_entry.get()
         print("kwargs:")
         pprint(kwargs)
+        # os.environ["PYTHONPATH"] = os.pathsep.join(sys.path)
+        if python_dir_entry.get():
+            # os.environ["PYTHONHOME"] = python_dir_entry.get()
+            os.environ["PATH"] = python_dir_entry.get() + os.pathsep + _PATH
+            if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+                os.environ["PATH"] = os.pathsep.join(
+                    [
+                        quarto_bin_path,
+                        quarto_share_path,
+                        python_dir_entry.get(),
+                        _PATH,
+                    ]
+                )
         try:
+            os.chdir(kwargs["output_dir"])  # Change the working directory
             # Define logger suffix based on report type and name
             logger_suffix = f"{report_type.get()}_report_{str(report_name)}"
 
@@ -114,6 +134,9 @@ def create_run_vuegen(
                 f"{logger_suffix}",
                 folder=(Path(kwargs["output_dir"]) / "logs").as_posix(),
             )
+            kwargs["logger"].info("logfile: %s", log_file)
+            kwargs["logger"].debug("sys.path: %s", sys.path)
+            kwargs["logger"].debug("PATH (in app): %s ", os.environ["PATH"])
             report_generator.get_report(**kwargs)
             messagebox.showinfo(
                 "Success",
@@ -127,7 +150,6 @@ def create_run_vuegen(
                 f"An error occurred: {e}\n\n{stacktrace}"
                 f"\n See logs for more details {log_file}",
             )
-        print_completion_message(report_type.get())
 
     return inner
 
@@ -155,7 +177,7 @@ def create_select_directory(string_var):
 ##########################################################################################
 # APP
 app = customtkinter.CTk()
-app.geometry("620x500")
+app.geometry("620x600")
 app.title("VueGen GUI")
 
 row_count = 0
@@ -206,6 +228,7 @@ row_count += 1
 # Report type dropdown
 # - get list of report types from Enum
 report_types = [report_type.value.lower() for report_type in ReportType]
+# report_types = report_types[:2]  # only streamlit and html for now
 ctk_label_report = customtkinter.CTkLabel(
     app,
     text="Select type of report to generate (using only streamlit for now)",
@@ -247,14 +270,16 @@ ctk_radio_st_autorun_0.grid(row=row_count, column=1, padx=20, pady=20)
 row_count += 1
 ##########################################################################################
 # output directory selection
-# ctk_label_outdir = customtkinter.CTkLabel
+ctk_label_outdir = customtkinter.CTkLabel(app, text="Select output directory:")
+ctk_label_outdir.grid(row=row_count, column=0, columnspan=1, padx=10, pady=5)
+row_count += 1
+##########################################################################################
 output_dir_entry = tk.StringVar(value=str(output_dir))
 select_output_dir = create_select_directory(output_dir_entry)
 select_output_dir_button = customtkinter.CTkButton(
     app, text="Select Output Directory", command=select_output_dir
 )
-select_output_dir_button.grid(row=row_count, column=2, columnspan=2, padx=5, pady=10)
-
+select_output_dir_button.grid(row=row_count, column=2, columnspan=1, padx=5, pady=10)
 ctk_entry_outpath = customtkinter.CTkEntry(
     app,
     width=400,
@@ -263,16 +288,54 @@ ctk_entry_outpath = customtkinter.CTkEntry(
 ctk_entry_outpath.grid(row=row_count, column=0, columnspan=2, padx=10, pady=10)
 row_count += 1
 ##########################################################################################
-ctk_label_appath = customtkinter.CTkLabel(
-    app,
-    text=f"App path: {app_path}",
-)
-ctk_label_appath.grid(row=row_count, column=0, columnspan=2, padx=20, pady=5)
+# Python binary selection
+# ctk_label_python = customtkinter.CTkLabel
+ctk_label_outdir = customtkinter.CTkLabel(app, text="Select Python binary:")
+ctk_label_outdir.grid(row=row_count, column=0, columnspan=1, padx=10, pady=5)
 row_count += 1
+##########################################################################################
+python_dir_entry = tk.StringVar(value="")
+select_python_bin = create_select_directory(python_dir_entry)
+select_python_bin_button = customtkinter.CTkButton(
+    app, text="Select Python binary", command=select_python_bin
+)
+select_python_bin_button.grid(row=row_count, column=2, columnspan=1, padx=5, pady=5)
+
+ctk_entry_python = customtkinter.CTkEntry(
+    app,
+    width=400,
+    textvariable=python_dir_entry,
+)
+ctk_entry_python.grid(row=row_count, column=0, columnspan=2, padx=10, pady=5)
+row_count += 1
+##########################################################################################
+ctk_label_env_path = customtkinter.CTkLabel(app, text="PATH:")
+ctk_label_env_path.grid(row=row_count, column=0, columnspan=1, padx=2, pady=5)
+env_path = tk.StringVar(value=os.environ.get("PATH", "not found"))
+ctk_entry_path_env = customtkinter.CTkEntry(
+    app,
+    width=400,
+    textvariable=env_path,
+)
+ctk_entry_path_env.grid(row=row_count, column=1, columnspan=2, padx=10, pady=5)
+row_count += 1
+##########################################################################################
+# ctk_label_appath = customtkinter.CTkLabel(
+#     app,
+#     text=f"App path: {app_path}",
+#     wraplength=600,
+# )
+# ctk_label_appath.grid(row=row_count, column=0, columnspan=3, padx=10, pady=5)
+# row_count += 1
 ##########################################################################################
 # Run VueGen button
 run_vuegen = create_run_vuegen(
-    is_dir, config_path, report_type, run_streamlit, output_dir_entry
+    is_dir=is_dir,
+    config_path=config_path,
+    report_type=report_type,
+    run_streamlit=run_streamlit,
+    output_dir_entry=output_dir_entry,
+    python_dir_entry=python_dir_entry,
 )
 run_button = customtkinter.CTkButton(
     app,
