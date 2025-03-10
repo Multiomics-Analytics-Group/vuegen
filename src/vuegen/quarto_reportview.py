@@ -168,8 +168,8 @@ class QuartoReportView(r.ReportView):
         """
         # from quarto_cli import run_quarto # entrypoint of quarto-cli not in module?
 
-        file_path_to_qmd = str(Path(output_dir) / f"{self.BASE_DIR}.qmd")
-        args = [self.quarto_path, "render", file_path_to_qmd]
+        file_path_to_qmd = Path(output_dir) / f"{self.BASE_DIR}.qmd"
+        args = [self.quarto_path, "render", str(file_path_to_qmd)]
         self.report.logger.info(
             f"Running '{self.report.title}' '{self.report_type}' report with {args!r}"
         )
@@ -191,8 +191,13 @@ class QuartoReportView(r.ReportView):
                 args,
                 check=True,
             )
+            out_path = file_path_to_qmd.with_suffix(f".{self.report_type.lower()}")
+            if self.report_type in [r.ReportType.REVEALJS, r.ReportType.JUPYTER]:
+                out_path = file_path_to_qmd.with_suffix(".html")
+            if not out_path.exists():
+                raise FileNotFoundError(f"Report file could not be created: {out_path}")
             if self.report_type == r.ReportType.JUPYTER:
-                args = [self.quarto_path, "convert", file_path_to_qmd]
+                args = [self.quarto_path, "convert", str(file_path_to_qmd)]
                 subprocess.run(
                     args,
                     check=True,
@@ -208,11 +213,11 @@ class QuartoReportView(r.ReportView):
                 f"Error running '{self.report.title}' {self.report_type} report: {str(e)}"
             )
             raise
-        except FileNotFoundError as e:
-            self.report.logger.error(
-                f"Quarto is not installed. Please install Quarto to run the report: {str(e)}"
-            )
-            raise
+        # except FileNotFoundError as e:
+        #     self.report.logger.error(
+        #         f"Quarto is not installed. Please install Quarto to run the report: {str(e)}"
+        #     )
+        #     raise
 
     def _create_yaml_header(self) -> str:
         """

@@ -119,6 +119,7 @@ def create_run_vuegen(
                 "Success",
                 "Report generation completed successfully." f"\nLogs at {log_file}",
             )
+            print_completion_message(report_type.get())
         except Exception as e:
             stacktrace = traceback.format_exc()
             messagebox.showerror(
