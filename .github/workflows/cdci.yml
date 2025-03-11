@@ -131,7 +131,7 @@ jobs:
     #   - other-reports
     strategy:
       matrix:
-        python-version: ["3.11"]
+        python-version: ["3.12"]
         os:
           # https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/running-variations-of-jobs-in-a-workflow#example-using-a-multi-dimension-matrix
           # - runner: "ubuntu-latest"
@@ -157,8 +157,9 @@ jobs:
       - name: Build executable
         run: |
           cd gui
-          pyinstaller -n vuegen_gui -D --collect-all pyvis --collect-all streamlit --collect-all st_aggrid --collect-all customtkinter --collect-all quarto_cli --add-data ../docs/example_data/Basic_example_vuegen_demo_notebook:example_data/Basic_example_vuegen_demo_notebook app.py
+          pyinstaller -n vuegen_gui -D --collect-all pyvis --collect-all streamlit --collect-all st_aggrid --collect-all customtkinter --collect-all quarto_cli --collect-all plotly --collect-all _plotly_utils --collect-all pyvis --collect-all pandas --collect-all numpy --collect-all matplotlib --collect-all openpyxl --collect-all xlrd --collect-all nbformat --collect-all nbclient --collect-all altair --collect-all itables --collect-all kaleido --collect-all vl_convert --collect-all yaml --collect-all dataframe_image --collect-all strenum --collect-all jinja2 --collect-all fastjsonschema --collect-all jsonschema --collect-all jsonschema_specifications --collect-all traitlets --collect-all referencing add-data ../docs/example_data/Basic_example_vuegen_demo_notebook:example_data/Basic_example_vuegen_demo_notebook app.py
         # -w -F
+        # replace by spec file once done...
       - name: Upload executable
         uses: actions/upload-artifact@v4
         with:

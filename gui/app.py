@@ -61,9 +61,8 @@ if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
     # os.environ["PYTHONPATH"] = os.pathsep.join(
     #     sys.path
     # )  # ! requires kernel env with same Python env, but does not really seem to help
-    os.environ["PYTHONPATH"] = os.pathsep.join(
-        [sys.path[0], sys._MEIPASS]
-    )  # does not work
+    os.environ["PYTHONPATH"] = sys._MEIPASS
+    # ([[sys.path[0], sys._MEIPASS])  # does not work when built on GitHub Actions
 elif app_path.parent.name == "gui":
     # should be always the case for GUI run from command line
     path_to_dat = (
@@ -321,7 +320,7 @@ row_count += 1
 ##########################################################################################
 ctk_label_env_path = customtkinter.CTkLabel(app, text="PATH:")
 ctk_label_env_path.grid(row=row_count, column=0, columnspan=1, padx=2, pady=5)
-env_path = tk.StringVar(value=os.environ.get("PATH", "not found"))
+env_path = tk.StringVar(value=_PATH)
 ctk_entry_path_env = customtkinter.CTkEntry(
     app,
     width=400,
