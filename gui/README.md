@@ -63,12 +63,7 @@ Windows and macOS specific options:
 
 ## Quarto notebook execution
 
-- add python exe to bundle as suggested [on stackoverflow](https://stackoverflow.com/a/72639099/9684872)
-- use [copy_python_executable.py](copy_python_executable.py) to copy the python executable to the bundle after PyInstaller is done
+- add python exe to bundle as suggested [on stackoverflow](https://stackoverflow.com/a/72639099/9684872) [not this way at least]
 
-Basic workflow for bundle:
+## test shipping a python virtual environment with vuegen installed
 
-1. use quarto (pandoc?) to convert qmd to ipynb
-1. use nbconvert programmatically (see [docs](https://nbconvert.readthedocs.io/en/latest/execute_api.html#example))
-   and the bundled Python executable to execute notebook
-1. use quarto (pandoc?) ot convert executed ipynb to desired format

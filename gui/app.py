@@ -56,6 +56,14 @@ if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
     quarto_share_path = os.path.join(sys._MEIPASS, "quarto_cli", "share")
     _PATH = os.pathsep.join([quarto_bin_path, quarto_share_path, _PATH])
     os.environ["PATH"] = _PATH
+    # This requires that the python version is the same as the one used to create the executable
+    # in the Python environment the kernel is started from for quarto based reports
+    # os.environ["PYTHONPATH"] = os.pathsep.join(
+    #     sys.path
+    # )  # ! requires kernel env with same Python env, but does not really seem to help
+    os.environ["PYTHONPATH"] = os.pathsep.join(
+        [sys.path[0], sys._MEIPASS]
+    )  # does not work
 elif app_path.parent.name == "gui":
     # should be always the case for GUI run from command line
     path_to_dat = (
@@ -111,10 +119,8 @@ def create_run_vuegen(
         kwargs["output_dir"] = output_dir_entry.get()
         print("kwargs:")
         pprint(kwargs)
-        # os.environ["PYTHONPATH"] = os.pathsep.join(sys.path)
+
         if python_dir_entry.get():
-            # os.environ["PYTHONHOME"] = python_dir_entry.get()
-            os.environ["PATH"] = python_dir_entry.get() + os.pathsep + _PATH
             if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
                 os.environ["PATH"] = os.pathsep.join(
                     [
@@ -123,6 +129,10 @@ def create_run_vuegen(
                         python_dir_entry.get(),
                         _PATH,
                     ]
+                )
+            else:
+                messagebox.showwarning(
+                    "warning", "Running locally. Ignoring set Python Path"
                 )
         try:
             os.chdir(kwargs["output_dir"])  # Change the working directory
