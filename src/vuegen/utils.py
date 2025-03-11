@@ -596,27 +596,27 @@ def get_time(incl_time: bool = True, incl_timezone: bool = True) -> str:
     y = str(the_time.year)
     M = str(the_time.month)
     d = str(the_time.day)
-    h = str(the_time.hour)
-    m = str(the_time.minute)
-    s = str(the_time.second)
     # putting date parts into one string
     if incl_time and incl_timezone:
-        fname = "_".join([y + M + d, h + m + s, timezone])
+        fname = the_time.isoformat(sep="_", timespec="seconds") + "_" + timezone
     elif incl_time:
-        fname = "_".join([y + M + d, h + m + s])
+        fname = the_time.isoformat(sep="_", timespec="seconds")
     elif incl_timezone:
-        fname = "_".join([y + M + d, timezone])
+        fname = "_".join([the_time.isoformat(sep="_", timespec="hours")[:-3], timezone])
     else:
         fname = y + M + d
 
+    # optional
+    fname = fname.replace(":", "-")  # remove ':' from hours, minutes, seconds
     # POSTCONDITIONALS
-    parts = fname.split("_")
-    if incl_time and incl_timezone:
-        assert len(parts) == 3, f"time and/or timezone inclusion issue: {fname}"
-    elif incl_time or incl_timezone:
-        assert len(parts) == 2, f"time/timezone inclusion issue: {fname}"
-    else:
-        assert len(parts) == 1, f"time/timezone inclusion issue: {fname}"
+    # ! to delete (was it jused for something?)
+    # parts = fname.split("_")
+    # if incl_time and incl_timezone:
+    #     assert len(parts) == 3, f"time and/or timezone inclusion issue: {fname}"
+    # elif incl_time or incl_timezone:
+    #     assert len(parts) == 2, f"time/timezone inclusion issue: {fname}"
+    # else:
+    #     assert len(parts) == 1, f"time/timezone inclusion issue: {fname}"
 
     return fname
 
@@ -641,7 +641,7 @@ def generate_log_filename(folder: str = "logs", suffix: str = "") -> str:
     except OSError as e:
         raise OSError(f"Error creating directory '{folder}': {e}")
     # MAIN FUNCTION
-    log_filename = get_time(incl_timezone=False) + "_" + suffix + ".log"
+    log_filename = get_time(incl_timezone=True) + "_" + suffix + ".log"
     log_filepath = os.path.join(folder, log_filename)
 
     return log_filepath
