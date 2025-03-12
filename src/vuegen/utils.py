@@ -690,17 +690,22 @@ def init_log(
     else:
         handlers = [file_handler]
 
-    # logger configuration
-    logging.basicConfig(
-        # level=logging.DEBUG,
-        format="[%(asctime)s] %(name)s: %(levelname)s - %(message)s",
-        handlers=handlers,
-    )
-    logging.getLogger("matplotlib.font_manager").disabled = True
-
     # instantiate the logger
     logger = logging.getLogger(logger_id)
     logger.setLevel(logging.DEBUG)
+    # logger configuration
+    # ! logging.basicConfig has no effect if called once anywhere in the code
+    # ! set handlers and format for the logger manually
+    # Reset any existing handlers
+    for handler in logging.root.handlers[:]:
+        logger.removeHandler(handler)
+
+    # Set up the new handlers and format
+    formatter = logging.Formatter("[%(asctime)s] %(name)s: %(levelname)s - %(message)s")
+    for handler in handlers:
+        handler.setFormatter(formatter)
+        logger.addHandler(handler)
+    logging.getLogger("matplotlib.font_manager").disabled = True
 
     return logger
 
