@@ -42,7 +42,7 @@ The VueGen documentation is available at [vuegen.readthedocs.io][vuegen-docs], w
 
 ## Installation
 ### Pip
-Vuegen is available on [PyPI][vuegen-pypi] and can be installed using pip:
+VueGen is available on [PyPI][vuegen-pypi] and can be installed using pip:
 
 ```bash
 pip install vuegen
@@ -59,14 +59,14 @@ pip install -e . # in case your pwd is in the vuegen directory
 > It is recommended to install VueGen inside a virtual environment to manage depenendencies and avoid conflicts with existing packages. You can use the virtual environment manager of your choice, such as `poetry`, `conda`, or `pipenv`.
 
 ### Conda
-Vuegen is also available on [Bioconda][vuegen-conda] and can be installed using conda:
+VueGen is also available on [Bioconda][vuegen-conda] and can be installed using conda:
 
 ```bash
 conda install bioconda::vuegen
 ```
 
 ### Dependencies
-Vuegen uses [Quarto][quarto] to generate various report types. The pip insallation includes quarto using the [quarto-cli Python library][quarto-cli-pypi]. To test if quarto is installed in your computer, run the following command:
+VueGen uses [Quarto][quarto] to generate various report types. The pip insallation includes quarto using the [quarto-cli Python library][quarto-cli-pypi]. To test if quarto is installed in your computer, run the following command:
 
 ```bash
 quarto check
@@ -77,6 +77,9 @@ quarto check
 
 ### Docker
 If you prefer not to install VueGen on your system, a pre-configured Docker container is available. It includes all dependencies, ensuring a fully reproducible execution environment. See the [Execution section](#execution) for details on running VueGen with Docker. The official Docker image is available at [quay.io/dtu_biosustain_dsp/vuegen][vuegen-docker-quay]. 
+
+### Nextflow and nf-core
+VueGen is also available as a [nf-core][nfcore] module, customised for compatibility with the [Nextflow][nextflow] environment. This module is designed to automate report generation from outputs produced by other modules, subworkflows, or pipelines. The code and documentation for the nf-core module are available in the [nf-VueGen repository][nf-vuegen].
 
 ## Execution
 > [!IMPORTANT]
@@ -145,7 +148,7 @@ Once a Streamlit report is generated, it can be deployed as a web application to
 These options provide flexibility depending on whether the goal is online accessibility, lightweight execution, or local application distribution.
 
 ## Credits and acknowledgements
-- Vuegen was developed by the [Multiomics Network Analytics Group (MoNA)][Mona] at the [Novo Nordisk Foundation Center for Biosustainability (DTU Biosustain)][Biosustain].
+- VueGen was developed by the [Multiomics Network Analytics Group (MoNA)][Mona] at the [Novo Nordisk Foundation Center for Biosustainability (DTU Biosustain)][Biosustain].
 - VueGen relies on the work of numerous open-source projects like [Streamlit](streamlit), [Quarto][quarto], and others. A big thank you to their authors for making this possible!
 - The vuegen logo was designed based on an image created by [Scriberia][scriberia] for The [Turing Way Community][turingway], which is shared under a CC-BY licence. The original image can be found at [Zenodo][zenodo-turingway].
 
@@ -191,6 +194,9 @@ We appreciate your feedback! If you have any comments, suggestions, or run into 
 [quarto]: https://quarto.org/
 [quarto-cli-pypi]: https://pypi.org/project/quarto-cli/
 [quarto-cli]: https://quarto.org/docs/get-started/
+[nfcore]: https://nf-co.re/
+[nextflow]: https://www.nextflow.io/
+[nf-vuegen]: https://github.com/Multiomics-Analytics-Group/nf-vuegen/
 [colab_badge]: https://colab.research.google.com/assets/colab-badge.svg
 [colab_link_intro_demo]: https://colab.research.google.com/github/Multiomics-Analytics-Group/vuegen/blob/main/docs/vuegen_basic_case_study.ipynb
 [colab_link_emp_demo]: https://colab.research.google.com/github/Multiomics-Analytics-Group/vuegen/blob/main/docs/vuegen_case_study_earth_microbiome.ipynb
