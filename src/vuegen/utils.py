@@ -514,7 +514,7 @@ def write_yaml_config(yaml_data: dict, directory_path: Path) -> Path:
         raise FileNotFoundError(f"The directory {directory_path} does not exist.")
 
     # Now write the YAML file
-    with open(output_yaml, "w") as yaml_file:
+    with open(output_yaml, "w", encoding="utf-8") as yaml_file:
         yaml.dump(yaml_data, yaml_file, default_flow_style=False, sort_keys=False)
 
     # Return the path to the written file

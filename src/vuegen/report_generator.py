@@ -56,7 +56,8 @@ def get_report(
     if dir_path:
         # Generate configuration from the provided directory
         yaml_data, base_folder_path = config_manager.create_yamlconfig_fromdir(dir_path)
-        config_path = write_yaml_config(yaml_data, base_folder_path)
+        config_path = write_yaml_config(yaml_data, output_dir)
+        logger.info("Configuration file generated at %s", config_path)
 
     # Load the YAML configuration file with the report metadata
     report_config = load_yaml_config(config_path)
