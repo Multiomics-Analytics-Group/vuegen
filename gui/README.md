@@ -67,3 +67,40 @@ Windows and macOS specific options:
 
 ## test shipping a python virtual environment with vuegen installed
 
+## Bundled PyInstaller execution (current status)
+
+1. Can be executed. Streamlit apps can be run (although sometimes not easily terminated)
+2. All quarto based reports need to specify a path to a python environment where python 3.12
+   is installed along `jupyter`
+   - This could be partly replace by a full anaconda distribution on the system.
+   - maybe a self-contained minimal virtual environment for kernel starting can be added later
+   - we could add some logic to make sure a correct path is added.
+
+### Create environment using conda
+
+```bash
+conda create -n vuegen_gui -c conda-forge python=3.12 jupyter
+conda info -e # find environment location
+```
+
+This might for example display the following path for the `vuegen_gui` environment:
+
+```
+/Users/user/miniforge3/envs/vuegen_gui
+```
+
+In the app, set the python environment path to this location, but to the `bin` folder, e.g.
+
+```bash
+/Users/user/miniforge3/envs/vuegen_gui/bin
+```
+
+### virtualenv
+
+- tbc
+
+[virutalenv documentation](https://docs.python.org/3/library/venv.html)
+
+```bash
+python -m venv .venv --copies --clear --prompt vuegenvenv
+```
