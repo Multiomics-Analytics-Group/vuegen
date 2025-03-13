@@ -127,7 +127,9 @@ def create_run_vuegen(
                     [
                         quarto_bin_path,
                         quarto_share_path,
-                        python_dir_entry.get(),
+                        str(
+                            Path(python_dir_entry.get())
+                        ),  # ! check if this return WindowsPaths on Windows
                         _PATH,
                     ]
                 )
@@ -183,7 +185,10 @@ def create_radio_button_callback(value, name="radiobutton"):
 
 def create_select_directory(string_var):
     def select_directory():
-        directory = filedialog.askdirectory(initialdir=string_var.get())
+        inital_dir = string_var.get()
+        if not inital_dir:
+            inital_dir = Path.home()
+        directory = filedialog.askdirectory(initialdir=inital_dir)
         string_var.set(directory)
 
     return select_directory
