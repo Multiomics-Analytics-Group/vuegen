@@ -17,7 +17,7 @@ def get_report(
     dir_path: str = None,
     streamlit_autorun: bool = False,
     output_dir: Path = None,
-) -> None:
+) -> tuple[str, str]:
     """
     Generate and run a report based on the specified engine.
 
@@ -38,6 +38,11 @@ def get_report(
     ------
     ValueError
         If neither 'config_path' nor 'directory' is provided.
+
+    Returns
+    -------
+    tuple[str, str]
+        The path to the generated report and the path to the configuration file.
     """
     if output_dir is None:
         output_dir = Path(".")
@@ -56,6 +61,7 @@ def get_report(
     if dir_path:
         # Generate configuration from the provided directory
         yaml_data, base_folder_path = config_manager.create_yamlconfig_fromdir(dir_path)
+        # yaml_data has under report a title created based on the directory name
         config_path = write_yaml_config(yaml_data, output_dir)
         logger.info("Configuration file generated at %s", config_path)
 
@@ -70,9 +76,9 @@ def get_report(
 
     # Create and run ReportView object based on its type
     if report_type == ReportType.STREAMLIT:
-        base_dir = output_dir / "streamlit_report"
-        sections_dir = base_dir / "sections"
-        static_files_dir = base_dir / "static"
+        report_dir = output_dir / "streamlit_report"
+        sections_dir = report_dir / "sections"
+        static_files_dir = report_dir / "static"
         st_report = StreamlitReportView(
             report=report, report_type=report_type, streamlit_autorun=streamlit_autorun
         )
@@ -89,8 +95,12 @@ def get_report(
             raise RuntimeError(
                 "Quarto is not installed. Please install Quarto before generating this report type."
             )
-        base_dir = output_dir / "quarto_report"
-        static_files_dir = base_dir / "static"
+        report_dir = output_dir / "quarto_report"
+        static_files_dir = report_dir / "static"
         quarto_report = QuartoReportView(report=report, report_type=report_type)
-        quarto_report.generate_report(output_dir=base_dir, static_dir=static_files_dir)
-        quarto_report.run_report(output_dir=base_dir)
+        quarto_report.generate_report(
+            output_dir=report_dir, static_dir=static_files_dir
+        )
+        quarto_report.run_report(output_dir=report_dir)
+    # ? Could be also the path to the report file for quarto based reports
+    return report_dir, config_path

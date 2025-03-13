@@ -507,7 +507,8 @@ def write_yaml_config(yaml_data: dict, directory_path: Path) -> Path:
     assert isinstance(directory_path, Path), "directory_path must be a Path object."
 
     # Generate the output YAML file path based on the folder name
-    output_yaml = directory_path / (directory_path.name + "_config.yaml")
+    _name = yaml_data["report"]["title"].replace(" ", "_").lower()
+    output_yaml = directory_path / f"{_name}_config.yaml"
 
     # Ensure the directory exists (but don't create a new folder)
     if not directory_path.exists():

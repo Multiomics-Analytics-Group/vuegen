@@ -53,6 +53,8 @@ if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
         app_path.parent / "example_data/Basic_example_vuegen_demo_notebook"
     ).resolve()
     quarto_bin_path = os.path.join(sys._MEIPASS, "quarto_cli", "bin")
+    # /.venv/lib/python3.12/site-packages/quarto_cli/bin
+    # source activate .venv/bin/activate
     quarto_share_path = os.path.join(sys._MEIPASS, "quarto_cli", "share")
     _PATH = os.pathsep.join([quarto_bin_path, quarto_share_path, _PATH])
     os.environ["PATH"] = _PATH
@@ -146,10 +148,14 @@ def create_run_vuegen(
             kwargs["logger"].info("logfile: %s", log_file)
             kwargs["logger"].debug("sys.path: %s", sys.path)
             kwargs["logger"].debug("PATH (in app): %s ", os.environ["PATH"])
-            report_generator.get_report(**kwargs)
+            report_dir, gen_config_path = report_generator.get_report(**kwargs)
+            kwargs["logger"].info("Report generated at %s", report_dir)
             messagebox.showinfo(
                 "Success",
-                "Report generation completed successfully." f"\nLogs at {log_file}",
+                "Report generation completed successfully."
+                f"\n\nLogs at:\n{log_file}"
+                f"\n\nReport in folder:\n{report_dir}"
+                f"\n\nConfiguration file at:\n{gen_config_path}",
             )
             print_completion_message(report_type.get())
         except Exception as e:
@@ -245,7 +251,7 @@ ctk_label_report = customtkinter.CTkLabel(
 ctk_label_report.grid(row=row_count, column=0, columnspan=2, padx=20, pady=20)
 row_count += 1
 ##########################################################################################
-report_type = tk.StringVar(value=report_types[0])
+report_type = tk.StringVar(value=report_types[1])
 report_dropdown = customtkinter.CTkOptionMenu(
     app,
     values=report_types,
