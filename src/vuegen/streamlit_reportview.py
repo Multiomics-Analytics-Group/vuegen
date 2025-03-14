@@ -1,9 +1,11 @@
 import os
 import subprocess
+import sys
 from pathlib import Path
 from typing import List
 
 import pandas as pd
+from streamlit.web import cli as stcli
 
 from . import report as r
 from .utils import create_folder, generate_footer, is_url
@@ -27,6 +29,12 @@ class StreamlitReportView(r.WebAppReportView):
     ):
         super().__init__(report=report, report_type=report_type)
         self.streamlit_autorun = streamlit_autorun
+        self.BUNDLED_EXECUTION = False
+        if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+            self.report.logger.info("running in a PyInstaller bundle")
+            self.BUNDLED_EXECUTION = True
+        else:
+            self.report.logger.info("running in a normal Python process")
 
     def generate_report(
         self, output_dir: str = SECTIONS_DIR, static_dir: str = STATIC_FILES_DIR
@@ -136,7 +144,7 @@ report_nav.run()"""
                 )
 
             # Create Python files for each section and its subsections and plots
-            self._generate_sections(output_dir=output_dir)
+            self._generate_sections(output_dir=output_dir, static_dir=static_dir)
         except Exception as e:
             self.report.logger.error(
                 f"An error occurred while generating the report: {str(e)}"
@@ -156,15 +164,34 @@ report_nav.run()"""
             self.report.logger.info(
                 f"Running '{self.report.title}' {self.report_type} report."
             )
+            self.report.logger.debug(
+                f"Running Streamlit report from directory: {output_dir}"
+            )
+            # ! using pyinstaller: vuegen main script as executable, not the Python Interpreter
+            msg = f"{sys.executable = }"
+            self.report.logger.debug(msg)
             try:
-                subprocess.run(
-                    [
+                # ! streamlit  command option is not known in packaged app
+                target_file = os.path.join(output_dir, self.REPORT_MANAG_SCRIPT)
+                self.report.logger.debug(
+                    f"Running Streamlit report from file: {target_file}"
+                )
+                if self.BUNDLED_EXECUTION:
+                    args = [
                         "streamlit",
                         "run",
-                        Path(output_dir) / self.REPORT_MANAG_SCRIPT,
-                    ],
-                    check=True,
-                )
+                        target_file,
+                        "--global.developmentMode=false",
+                    ]
+                    sys.argv = args
+
+                    sys.exit(stcli.main())
+                else:
+                    self.report.logger.debug("Run using subprocess.")
+                    subprocess.run(
+                        [sys.executable, "-m", "streamlit", "run", target_file],
+                        check=True,
+                    )
             except KeyboardInterrupt:
                 print("Streamlit process interrupted.")
             except subprocess.CalledProcessError as e:
@@ -281,7 +308,7 @@ report_nav.run()"""
             self.report.logger.error(f"Error generating the home section: {str(e)}")
             raise
 
-    def _generate_sections(self, output_dir: str) -> None:
+    def _generate_sections(self, output_dir: str, static_dir: str) -> None:
         """
         Generates Python files for each section in the report, including subsections and its components (plots, dataframes, markdown).
 
@@ -289,6 +316,8 @@ report_nav.run()"""
         ----------
         output_dir : str
             The folder where section files will be saved.
+        static_dir : str
+            The folder where the static files will be saved.
         """
         self.report.logger.info("Starting to generate sections for the report.")
 
@@ -315,7 +344,9 @@ report_nav.run()"""
 
                             # Generate content and imports for the subsection
                             subsection_content, subsection_imports = (
-                                self._generate_subsection(subsection)
+                                self._generate_subsection(
+                                    subsection, static_dir=static_dir
+                                )
                             )
 
                             # Flatten the subsection_imports into a single list
@@ -352,7 +383,9 @@ report_nav.run()"""
             self.report.logger.error(f"Error generating sections: {str(e)}")
             raise
 
-    def _generate_subsection(self, subsection) -> tuple[List[str], List[str]]:
+    def _generate_subsection(
+        self, subsection, static_dir
+    ) -> tuple[List[str], List[str]]:
         """
         Generate code to render components (plots, dataframes, markdown) in the given subsection,
         creating imports and content for the subsection based on the component type.
@@ -361,6 +394,8 @@ report_nav.run()"""
         ----------
         subsection : Subsection
             The subsection containing the components.
+        static_dir : str
+            The folder where the static files will be saved.
 
         Returns
         -------
@@ -389,7 +424,9 @@ report_nav.run()"""
 
             # Handle different types of components
             if component.component_type == r.ComponentType.PLOT:
-                subsection_content.extend(self._generate_plot_content(component))
+                subsection_content.extend(
+                    self._generate_plot_content(component, static_dir=static_dir)
+                )
             elif component.component_type == r.ComponentType.DATAFRAME:
                 subsection_content.extend(self._generate_dataframe_content(component))
             # If md files is called "description.md", do not include it in the report
@@ -418,9 +455,7 @@ report_nav.run()"""
         )
         return subsection_content, subsection_imports
 
-    def _generate_plot_content(
-        self, plot, static_dir: str = STATIC_FILES_DIR
-    ) -> List[str]:
+    def _generate_plot_content(self, plot, static_dir: str) -> List[str]:
         """
         Generate content for a plot component based on the plot type (static or interactive).
 
@@ -433,8 +468,8 @@ report_nav.run()"""
         -------
         list : List[str]
             The list of content lines for the plot.
-        static_dir : str, optional
-            The folder where the static files will be saved (default is STATIC_FILES_DIR).
+        static_dir : str
+            The folder where the static files will be saved.
         """
         plot_content = []
         # Add title
@@ -951,4 +986,6 @@ if prompt := st.chat_input("Enter your prompt here:"):
             component_imports.append("df_index = 1")
 
         # Return the list of import statements
+        return component_imports
+
         return component_imports

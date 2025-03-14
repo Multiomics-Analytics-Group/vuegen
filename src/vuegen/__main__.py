@@ -36,10 +36,10 @@ def main():
     logger_suffix = f"{report_type}_report_{str(report_name)}"
 
     # Initialize logger
-    logger = get_logger(f"{logger_suffix}")
-
+    logger, logfile = get_logger(f"{logger_suffix}")
+    logger.info("logfile: %s", logfile)
     # Generate the report
-    report_generator.get_report(
+    _, _ = report_generator.get_report(
         report_type=report_type,
         logger=logger,
         config_path=config_path,
@@ -48,6 +48,7 @@ def main():
     )
 
     # Print completion message
+    # ! Could use now report_dir and config_path as information
     print_completion_message(report_type)
 
 

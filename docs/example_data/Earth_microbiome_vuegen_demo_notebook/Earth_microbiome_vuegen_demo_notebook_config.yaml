@@ -1,0 +1,140 @@
+report:
+  title: Earth Microbiome Vuegen Demo Notebook
+  description: "The Earth Microbiome Project (EMP) is a systematic attempt to characterize\
+    \ global microbial taxonomic and functional diversity for the benefit of the planet\
+    \ and humankind. \n  It aimed to sample the Earth\u2019s microbial communities\
+    \ at an unprecedented scale in order to advance our understanding of the organizing\
+    \ biogeographic principles that govern microbial community structure. \n  The\
+    \ EMP dataset is generated from samples that individual researchers have compiled\
+    \ and contributed to the EMP. \n  The result is both a reference database giving\
+    \ global context to DNA sequence data and a framework for incorporating data from\
+    \ future studies, fostering increasingly complete characterization of Earth\u2019\
+    s microbial diversity.\n  \n  You can find more information about the Earth Microbiome\
+    \ Project at https://earthmicrobiome.org/ and in the [original article](https://www.nature.com/articles/nature24621).\n"
+  graphical_abstract: ''
+  logo: ''
+sections:
+- title: Exploratory Data Analysis
+  description: ''
+  subsections:
+  - title: Sample Exploration
+    description: ''
+    components:
+    - title: Metadata Random Subset
+      file_path: example_data/Earth_microbiome_vuegen_demo_notebook/1_Exploratory_data_analysis/1_sample_exploration/1_metadata_random_subset.csv
+      description: ''
+      caption: ''
+      component_type: DATAFRAME
+      file_format: CSV
+      delimiter: ','
+    - title: Animal Samples Map
+      file_path: example_data/Earth_microbiome_vuegen_demo_notebook/1_Exploratory_data_analysis/1_sample_exploration/2_animal_samples_map.png
+      description: ''
+      caption: ''
+      component_type: PLOT
+      plot_type: STATIC
+    - title: Plant Samples Map
+      file_path: example_data/Earth_microbiome_vuegen_demo_notebook/1_Exploratory_data_analysis/1_sample_exploration/3_plant_samples_map.json
+      description: ''
+      caption: ''
+      component_type: PLOT
+      plot_type: PLOTLY
+    - title: Saline Samples Map
+      file_path: example_data/Earth_microbiome_vuegen_demo_notebook/1_Exploratory_data_analysis/1_sample_exploration/4_saline_samples_map.json
+      description: ''
+      caption: ''
+      component_type: PLOT
+      plot_type: ALTAIR
+- title: Metagenomics
+  description: ''
+  subsections:
+  - title: Alpha Diversity
+    description: ''
+    components:
+    - title: Alpha Diversity Host Associated Samples
+      file_path: example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/1_alpha_diversity/1_alpha_diversity_host_associated_samples.png
+      description: ''
+      caption: ''
+      component_type: PLOT
+      plot_type: STATIC
+    - title: Alpha Diversity Free Living Samples
+      file_path: example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/1_alpha_diversity/2_alpha_diversity_free_living_samples.json
+      description: ''
+      caption: ''
+      component_type: PLOT
+      plot_type: PLOTLY
+  - title: Average Copy Number
+    description: ''
+    components:
+    - title: Average Copy Number Emp Ontology Level2
+      file_path: example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/2_average_copy_number/1_average_copy_number_emp_ontology_level2.png
+      description: ''
+      caption: ''
+      component_type: PLOT
+      plot_type: STATIC
+    - title: Average Copy Number Emp Ontology Level3
+      file_path: example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/2_average_copy_number/2_average_copy_number_emp_ontology_level3.json
+      description: ''
+      caption: ''
+      component_type: PLOT
+      plot_type: PLOTLY
+  - title: Nestedness
+    description: ''
+    components:
+    - title: Nestedness Random Subset
+      file_path: example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/3_nestedness/1_nestedness_random_subset.csv
+      description: ''
+      caption: ''
+      component_type: DATAFRAME
+      file_format: CSV
+      delimiter: ','
+    - title: All Samples
+      file_path: example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/3_nestedness/2_all_samples.json
+      description: ''
+      caption: ''
+      component_type: PLOT
+      plot_type: PLOTLY
+    - title: Plant Samples
+      file_path: example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/3_nestedness/3_plant_samples.json
+      description: ''
+      caption: ''
+      component_type: PLOT
+      plot_type: PLOTLY
+    - title: Animal Samples
+      file_path: example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/3_nestedness/4_animal_samples.png
+      description: ''
+      caption: ''
+      component_type: PLOT
+      plot_type: STATIC
+    - title: Non Saline Samples
+      file_path: example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/3_nestedness/5_non_saline_samples.png
+      description: ''
+      caption: ''
+      component_type: PLOT
+      plot_type: STATIC
+- title: Network Analysis
+  description: ''
+  subsections:
+  - title: Phyla Association Networks
+    description: ''
+    components:
+    - title: Phyla Counts Subset
+      file_path: example_data/Earth_microbiome_vuegen_demo_notebook/3_Network_analysis/1_phyla_association_networks/1_phyla_counts_subset.csv
+      description: ''
+      caption: ''
+      component_type: DATAFRAME
+      file_format: CSV
+      delimiter: ','
+    - title: Phyla Correlation Network With 0.5 Threshold Edgelist
+      file_path: example_data/Earth_microbiome_vuegen_demo_notebook/3_Network_analysis/1_phyla_association_networks/2_phyla_correlation_network_with_0.5_threshold_edgelist.csv
+      description: ''
+      caption: ''
+      component_type: PLOT
+      plot_type: INTERACTIVE_NETWORK
+      csv_network_format: EDGELIST
+    - title: Phyla Correlation Network With 0.5 Threshold
+      file_path: example_data/Earth_microbiome_vuegen_demo_notebook/3_Network_analysis/1_phyla_association_networks/3_phyla_correlation_network_with_0.5_threshold.png
+      description: ''
+      caption: ''
+      component_type: PLOT
+      plot_type: STATIC

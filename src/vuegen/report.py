@@ -277,7 +277,7 @@ class Plot(Component):
                 f"An error occurred while reading the network file: {str(e)}"
             )
 
-    def save_netwrok_image(
+    def save_network_image(
         self, G: nx.Graph, output_file: str, format: str, dpi: int = 300
     ) -> None:
         """
@@ -294,6 +294,7 @@ class Plot(Component):
         dpi : int, optional
             The resolution of the image in dots per inch (default is 300).
         """
+        self.logger.debug("Try to save network as PyVis network: %s.", output_file)
         # Check if the output file path is valid
         if not os.path.isdir(os.path.dirname(output_file)):
             self.logger.error(
@@ -339,6 +340,7 @@ class Plot(Component):
         net : pyvis.network.Network
             A PyVis network object.
         """
+        self.logger.debug("Try to save network as PyVis network: %s.", output_file)
         # Check if the network object and output file path are valid
         if not isinstance(G, nx.Graph):
             self.logger.error(
