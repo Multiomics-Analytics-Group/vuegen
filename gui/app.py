@@ -22,22 +22,22 @@ optional arguments:
 import os
 import sys
 import tkinter as tk
+import traceback
 from pathlib import Path
 from pprint import pprint
+from tkinter import filedialog, messagebox
 
 import customtkinter
+from PIL import Image
+
+from vuegen import report_generator
 
 # from vuegen.__main__ import main
 from vuegen.report import ReportType
-from vuegen.utils import get_logger
+from vuegen.utils import get_logger, print_completion_message
 
 customtkinter.set_appearance_mode("system")
 customtkinter.set_default_color_theme("dark-blue")
-import traceback
-from tkinter import filedialog, messagebox
-
-from vuegen import report_generator
-from vuegen.utils import print_completion_message
 
 app_path = Path(__file__).absolute().resolve()
 print("app_path:", app_path)
@@ -64,41 +64,24 @@ if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
     # )  # ! requires kernel env with same Python env, but does not really seem to help
     os.environ["PYTHONPATH"] = sys._MEIPASS
     # ([[sys.path[0], sys._MEIPASS])  # does not work when built on GitHub Actions
+    logo_path = os.path.join(sys._MEIPASS, "vuegen_logo.png")
 elif app_path.parent.name == "gui":
     # should be always the case for GUI run from command line
     path_to_dat = (
-        app_path.parent
-        / ".."
+        app_path.parent.parent
         / "docs"
         / "example_data"
         / "Basic_example_vuegen_demo_notebook"
     ).resolve()
+    logo_path = (
+        app_path.parent.parent / "docs" / "images" / "vuegen_logo.png"
+    )  # 1000x852 pixels
 else:
     path_to_dat = "docs/example_data/Basic_example_vuegen_demo_notebook"
 
 print(f"{_PATH = }")
 ##########################################################################################
 # callbacks
-# using main entry point of vuegen
-# def create_run_vuegen(is_dir, config_path, report_type, run_streamlit):
-#     def inner():
-#         args = ["vuegen"]
-#         print(f"{is_dir.get() = }")
-#         if is_dir.get():
-#             args.append("--directory")
-#         else:
-#             args.append("--config")
-#         args.append(config_path.get())
-#         args.append("--report_type")
-#         args.append(report_type.get())
-#         print(f"{run_streamlit.get() = }")
-#         if run_streamlit.get():
-#             args.append("--streamlit_autorun")
-#         print("args:", args)
-#         sys.argv = args
-#         main()  # Call the main function from vuegen
-
-#     return inner
 
 
 def create_run_vuegen(
@@ -198,8 +181,16 @@ def create_select_directory(string_var):
 app = customtkinter.CTk()
 app.geometry("620x600")
 app.title("VueGen GUI")
-
 row_count = 0
+##########################################################################################
+# Logo
+_factor = 4
+logo_image = customtkinter.CTkImage(
+    Image.open(logo_path), size=(int(1000 / _factor), int(852 / _factor))
+)
+logo_label = customtkinter.CTkLabel(app, image=logo_image, text="")
+logo_label.grid(row=0, column=0, columnspan=2, padx=10, pady=5)
+row_count += 1
 ##########################################################################################
 # Config or directory input
 ctk_label_config = customtkinter.CTkLabel(

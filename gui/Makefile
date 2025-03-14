@@ -37,6 +37,7 @@ bundle:
 	--collect-all rpds \
 	--collect-all tenacity \
 	--add-data ../docs/example_data/Basic_example_vuegen_demo_notebook:example_data/Basic_example_vuegen_demo_notebook \
+	--add-data ../docs/images/vuegen_logo.png:. \
 	app.py
 
 
