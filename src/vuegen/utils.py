@@ -711,7 +711,7 @@ def init_log(
     return logger
 
 
-def get_logger(log_suffix, folder="logs", display=True) -> tuple[logging.Logger, str]:
+def get_logger(log_suffix, folder="logs", display=True, logger_id='vuegen') -> tuple[logging.Logger, str]:
     """
     Initialize the logger with a log file name that includes an optional suffix.
 
@@ -729,7 +729,7 @@ def get_logger(log_suffix, folder="logs", display=True) -> tuple[logging.Logger,
     log_file = generate_log_filename(folder=folder, suffix=log_suffix)
 
     # Initialize logger
-    logger = init_log(log_file, display=display)
+    logger = init_log(log_file, display=display, logger_id=logger_id)
 
     # Log the path to the log file
     logger.info(f"Path to log file: {log_file}")
