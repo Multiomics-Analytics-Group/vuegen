@@ -56,8 +56,7 @@ if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
     # /.venv/lib/python3.12/site-packages/quarto_cli/bin
     # source activate .venv/bin/activate
     quarto_share_path = os.path.join(sys._MEIPASS, "quarto_cli", "share")
-    _PATH = os.pathsep.join([quarto_bin_path, quarto_share_path, _PATH])
-    os.environ["PATH"] = _PATH
+    os.environ["PATH"] = os.pathsep.join([quarto_bin_path, quarto_share_path, _PATH])
     # This requires that the python version is the same as the one used to create the executable
     # in the Python environment the kernel is started from for quarto based reports
     # os.environ["PYTHONPATH"] = os.pathsep.join(
