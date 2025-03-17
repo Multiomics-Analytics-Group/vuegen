@@ -7,7 +7,7 @@ import networkx as nx
 import pandas as pd
 
 from . import report as r
-from .utils import create_folder, is_url
+from .utils import create_folder, is_url, sort_imports
 
 
 class QuartoReportView(r.ReportView):
@@ -118,7 +118,16 @@ class QuartoReportView(r.ReportView):
             ]
 
             # Remove duplicated imports
-            report_unique_imports = list(set(flattened_report_imports))
+            report_unique_imports = set(flattened_report_imports)
+
+            # ! set leads to random import order
+            # ! separate and sort import statements, separate from setup code
+
+            report_unique_imports, setup_statements = sort_imports(
+                report_unique_imports
+            )
+            report_unique_imports += os.linesep
+            report_unique_imports.extend(setup_statements)
 
             # Format imports
             report_formatted_imports = "\n".join(report_unique_imports)
