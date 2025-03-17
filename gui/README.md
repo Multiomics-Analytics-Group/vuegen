@@ -76,7 +76,18 @@ Windows and macOS specific options:
    - maybe a self-contained minimal virtual environment for kernel starting can be added later
    - we could add some logic to make sure a correct path is added.
 
-### Create environment using conda
+## Using bundle vuegen release
+
+## On Windows
+
+- global quarto and python installations can be used
+- quarto can be shipped with app, but maybe it can be deactivated
+
+## On MacOs
+
+- on MacOs the default paths are not set
+
+#### Create environment using conda
 
 ```bash
 conda create -n vuegen_gui -c conda-forge python=3.12 jupyter
@@ -95,7 +106,7 @@ In the app, set the python environment path to this location, but to the `bin` f
 /Users/user/miniforge3/envs/vuegen_gui/bin
 ```
 
-### virtualenv
+#### virtualenv
 
 - tbc
 

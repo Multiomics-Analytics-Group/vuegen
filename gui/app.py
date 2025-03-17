@@ -28,6 +28,7 @@ from pprint import pprint
 from tkinter import filedialog, messagebox
 
 import customtkinter
+import yaml
 from PIL import Image
 
 from vuegen import report_generator
@@ -45,6 +46,15 @@ output_dir = (Path.home() / "vuegen_gen" / "reports").resolve()
 print("output_dir:", output_dir)
 output_dir.mkdir(exist_ok=True, parents=True)
 _PATH = f'{os.environ["PATH"]}'
+### config path for app
+config_file = Path(Path.home() / ".vuegen_gui" / "config.yaml").resolve()
+if not config_file.exists():
+    config_file.parent.mkdir(exist_ok=True, parents=True)
+    config_app = dict(python_dir_entry="")
+else:
+    with open(config_file, "r", encoding="utf-8") as f:
+        config_app = yaml.safe_load(f)
+hash_config_app = hash(yaml.dump(config_app))
 ##########################################################################################
 # Path to example data dependend on how the GUI is run
 if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
@@ -104,6 +114,8 @@ def create_run_vuegen(
         pprint(kwargs)
 
         if python_dir_entry.get():
+            if python_dir_entry.get() != config_app["python_dir_entry"]:
+                config_app["python_dir_entry"] = python_dir_entry.get()
             if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
                 os.environ["PATH"] = os.pathsep.join(
                     [
@@ -141,7 +153,12 @@ def create_run_vuegen(
                 f"\n\nReport in folder:\n{report_dir}"
                 f"\n\nConfiguration file at:\n{gen_config_path}",
             )
+            global hash_config_app  # ! fix this
             print_completion_message(report_type.get())
+            if hash(yaml.dump(config_app)) != hash_config_app:
+                with open(config_file, "w", encoding="utf-8") as f:
+                    yaml.dump(config_app, f)
+                hash_config_app = hash(yaml.dump(config_app))
         except Exception as e:
             stacktrace = traceback.format_exc()
             messagebox.showerror(
@@ -305,7 +322,7 @@ ctk_label_outdir = customtkinter.CTkLabel(app, text="Select Python binary:")
 ctk_label_outdir.grid(row=row_count, column=0, columnspan=1, padx=10, pady=5)
 row_count += 1
 ##########################################################################################
-python_dir_entry = tk.StringVar(value="")
+python_dir_entry = tk.StringVar(value=config_app["python_dir_entry"])
 select_python_bin = create_select_directory(python_dir_entry)
 select_python_bin_button = customtkinter.CTkButton(
     app, text="Select Python binary", command=select_python_bin
