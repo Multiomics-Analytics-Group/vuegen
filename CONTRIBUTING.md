@@ -33,7 +33,7 @@ Here are the ways you can submit your suggestions and contribute to the project:
    for discussion threads on reported issues and proposed enhancements.
 
 2. **Submitting Changes via Pull Requests:** If you are comfortable using Git and would like to
-   add or modify a functionality, you can submit a **pull request (PR)**. Instructions on how to contribute this way are provided in [Section 4][#4-creating-a-pull-request] of this document.
+   add or modify a functionality, you can submit a **pull request (PR)**. Instructions on how to contribute this way are provided in the next section.
 
 3. **Providing Feedback via Email:** If you don’t have a GitHub account and are
    unfamiliar with Git, you can send feedback via email to [asaru@dtu.dk][contact]. However, using GitHub is preferred, as it allows us to respond more quickly and track discussions openly.
@@ -54,7 +54,7 @@ If you choose to contribute via GitHub, you may want to look at [How to Contribu
 
 ## 5. Credits
 
-This contribution guide was modified under the [Creative Commons Attribution 4.0 International License] from the [Software Carpentry guides][soft-cp-guides].
+This contribution guide was modified under the [Creative Commons Attribution 4.0 International License[ccby] from the [Software Carpentry guides][soft-cp-guides].
 
 [vuegen-repo]: https://github.com/Multiomics-Analytics-Group/vuegen
 [vuegen-docs]: https://vuegen.readthedocs.io/

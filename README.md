@@ -162,7 +162,7 @@ These options provide flexibility depending on whether the goal is online access
 
 ## Contributing
 
-VueGen is an open-source project, and we welcome contributions of all kinds via GitHub issues and pull requests. You can report bugs, suggest improvements, propose new features, or implement changes. Please follow the guidelines in the [CONTRIBUTING.md](CONTRIBUTING.md) file to ensure that your contribution is easily integrated into the project.
+VueGen is an open-source project, and we welcome contributions of all kinds via GitHub issues and pull requests. You can report bugs, suggest improvements, propose new features, or implement changes. Please follow the guidelines in the [CONTRIBUTING](CONTRIBUTING.md) file to ensure that your contribution is easily integrated into the project.
 
 ## Credits and acknowledgements
 
