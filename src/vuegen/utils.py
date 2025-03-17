@@ -14,7 +14,7 @@ except ImportError:
 
 from io import StringIO
 from pathlib import Path
-from typing import Type
+from typing import Iterable, Type
 from urllib.parse import urlparse
 
 import networkx as nx
@@ -24,27 +24,20 @@ from bs4 import BeautifulSoup
 
 
 ## CHECKS
-def check_path(filepath: str) -> bool:
+def check_path(filepath: Path) -> bool:
     """
     Checks if the given file or folder path exists.
 
     Parameters
     ---------
-    filepath : str
+    filepath : Path
         The file or folder path to check.
 
     Returns
     -------
     bool
         True if the path exists, False otherwise.
-
-    Raises
-    ------
-    AssertionError
-        If the filepath is not a valid string.
     """
-    # Assert that the filepath is a string
-    assert isinstance(filepath, str), f"Filepath must be a string: {filepath}"
 
     # Check if the path exists
     return os.path.exists(os.path.abspath(filepath))
@@ -87,13 +80,13 @@ def assert_enum_value(
         )
 
 
-def is_url(filepath: str) -> bool:
+def is_url(filepath: Path) -> bool:
     """
     Check if the provided path is a valid URL.
 
     Parameters
     ----------
-    filepath : str
+    filepath : Path
         The filepath to check.
 
     Returns
@@ -102,17 +95,9 @@ def is_url(filepath: str) -> bool:
         True if the input path is a valid URL, meaning it contains both a scheme
         (e.g., http, https, ftp) and a network location (e.g., example.com).
         Returns False if either the scheme or the network location is missing or invalid.
-
-    Raises
-    ------
-    AssertionError
-        If the filepath is not a valid string.
     """
-    # Assert that the filepath is a string
-    assert isinstance(filepath, str), f"Filepath must be a string: {filepath}"
-
     # Parse the url and return validation
-    parsed_url = urlparse(filepath)
+    parsed_url = urlparse(str(filepath))
     return bool(parsed_url.scheme and parsed_url.netloc)
 
 
@@ -749,22 +734,20 @@ def print_completion_message(report_type: str):
     Prints a formatted completion message after report generation.
     """
     border = "─" * 65  # Creates a separator line
-    print(f"\n{border}\n🎉 Pipeline Execution Complete! 🎉\n")
-
     if report_type == "streamlit":
         print(
             """🚀 Streamlit Report Generated!
 
 📂 All scripts to build the Streamlit app are available at:
-    nf_container_results/streamlit_report/sections
+    streamlit_report/sections
 
 ▶️ To run the Streamlit app, use the following command:
-    streamlit run nf_container_results/streamlit_report/sections/report_manager.py
+    streamlit run streamlit_report/sections/report_manager.py
 
 ✨ You can extend the report by adding new files to the input directory or updating the config file.
 
 🛠️ Advanced users can modify the Python scripts directly in:
-    nf_container_results/streamlit_report/sections
+    streamlit_report/sections
 """
         )
     else:
@@ -772,12 +755,12 @@ def print_completion_message(report_type: str):
             f"""🚀 {report_type.capitalize()} Report Generated!
 
 📂 Your {report_type} report is available at:
-    nf_container_results/quarto_report
+    quarto_report
 
 ✨ You can extend the report by adding new files to the input directory or updating the config file.
 
 🛠️ Advanced users can modify the report template directly in:
-    nf_container_results/quarto_report/quarto_report.qmd
+    quarto_report/quarto_report.qmd
 """
         )
 
@@ -810,8 +793,46 @@ def generate_footer() -> str:
     <a href="https://github.com/Multiomics-Analytics-Group/vuegen" target="_blank">
         <img src="https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/vuegen_logo.svg" alt="VueGen" width="65px">
     </a>
-    | © 2025 <a href="https://github.com/Multiomics-Analytics-Group" target="_blank">
+    | Copyright 2025 <a href="https://github.com/Multiomics-Analytics-Group" target="_blank">
         Multiomics Network Analytics Group (MoNA)
     </a>
 </footer>"""
     return footer
+
+
+def sort_imports(imp: Iterable[str]) -> tuple[list[str], list[str]]:
+    """Separte 'from' and 'import' statements from setup code.
+
+    Parameters
+    ----------
+    imp : Iterable[str]
+        A list of import statements and setup statements.
+
+    Returns
+    -------
+    Tuple[List[str], List[str]]
+        A tuple of two lists: one for import statements and one for setup statements.
+
+    Examples
+    --------
+    >>> imp = [
+    ...     'import logging',
+    ...     'import shutil',
+    ...     'logging.basicConfig(level=logging.INFO)',
+    ...     'import pandas as pd',
+    ...     'import numpy as np',
+    ... ]
+    >>> sort_imports(imp)
+    (['import logging', 'import numpy as np', 'import pandas as pd', 'import shutil
+    ], ['logging.basicConfig(level=logging.INFO)'])
+    """
+    imports_statements, setup_statements = [], []
+    for line in imp:
+        line = line.strip()  # just for safety
+        if line.startswith("from ") or line.startswith("import "):
+            imports_statements.append(line)
+        else:
+            setup_statements.append(line)
+    imports_statements.sort()
+    setup_statements.sort()
+    return imports_statements, setup_statements
