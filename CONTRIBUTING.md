@@ -54,7 +54,7 @@ If you choose to contribute via GitHub, you may want to look at [How to Contribu
 
 ## 5. Credits
 
-This contribution guide was modified under the [Creative Commons Attribution 4.0 International License[ccby] from the [Software Carpentry guides][soft-cp-guides].
+This contribution guide was modified under the [Creative Commons Attribution 4.0 International License][ccby] from the [Software Carpentry guides][soft-cp-guides].
 
 [vuegen-repo]: https://github.com/Multiomics-Analytics-Group/vuegen
 [vuegen-docs]: https://vuegen.readthedocs.io/
