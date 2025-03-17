@@ -282,7 +282,7 @@ include-after-body:
             \\usepackage{hyperref}
             \\clearpairofpagestyles
             \\lofoot{This report was generated with \\href{https://github.com/Multiomics-Analytics-Group/vuegen}{VueGen} | \\copyright{} 2025 \\href{https://github.com/Multiomics-Analytics-Group}{Multiomics Network Analytics Group}}
-            \\rofoot{\pagemark}""",
+            \\rofoot{\\pagemark}""",
             r.ReportType.DOCX: """
   docx:
     toc: false""",
