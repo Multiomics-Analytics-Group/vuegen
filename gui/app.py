@@ -171,7 +171,8 @@ def create_select_directory(string_var):
         if not inital_dir:
             inital_dir = Path.home()
         directory = filedialog.askdirectory(initialdir=inital_dir)
-        string_var.set(directory)
+        if directory:
+            string_var.set(directory)
 
     return select_directory
 
@@ -179,7 +180,7 @@ def create_select_directory(string_var):
 ##########################################################################################
 # APP
 app = customtkinter.CTk()
-app.geometry("620x600")
+app.geometry("620x840")
 app.title("VueGen GUI")
 row_count = 0
 ##########################################################################################
