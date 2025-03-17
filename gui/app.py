@@ -20,6 +20,7 @@ optional arguments:
 """
 
 import os
+import shutil
 import sys
 import tkinter as tk
 import traceback
@@ -59,7 +60,7 @@ hash_config_app = hash(yaml.dump(config_app))
 # Path to example data dependend on how the GUI is run
 if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
     # PyInstaller bundeled case
-    path_to_dat = (
+    path_to_data_in_bundle = (
         app_path.parent / "example_data/Basic_example_vuegen_demo_notebook"
     ).resolve()
     quarto_bin_path = os.path.join(sys._MEIPASS, "quarto_cli", "bin")
@@ -74,10 +75,24 @@ if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
     # )  # ! requires kernel env with same Python env, but does not really seem to help
     os.environ["PYTHONPATH"] = sys._MEIPASS
     # ([[sys.path[0], sys._MEIPASS])  # does not work when built on GitHub Actions
+    path_to_example_data = (
+        output_dir.parent / "example_data" / "Basic_example_vuegen_demo_notebook"
+    ).resolve()
+    # copy example data to vuegen_gen folder in home directory
+    if not path_to_example_data.exists():
+        shutil.copytree(
+            path_to_data_in_bundle,
+            path_to_example_data,
+            # dirs_exist_ok=True,
+        )
+        messagebox.showinfo(
+            "Info",
+            f"Example data copied to {path_to_example_data}",
+        )
     logo_path = os.path.join(sys._MEIPASS, "vuegen_logo.png")
 elif app_path.parent.name == "gui":
     # should be always the case for GUI run from command line
-    path_to_dat = (
+    path_to_example_data = (
         app_path.parent.parent
         / "docs"
         / "example_data"
@@ -87,7 +102,7 @@ elif app_path.parent.name == "gui":
         app_path.parent.parent / "docs" / "images" / "vuegen_logo.png"
     )  # 1000x852 pixels
 else:
-    path_to_dat = "docs/example_data/Basic_example_vuegen_demo_notebook"
+    path_to_example_data = "docs/example_data/Basic_example_vuegen_demo_notebook"
 
 print(f"{_PATH = }")
 ##########################################################################################
@@ -237,7 +252,7 @@ ctk_radio_config_1 = customtkinter.CTkRadioButton(
 )
 ctk_radio_config_1.grid(row=row_count, column=1, padx=20, pady=2)
 
-config_path = tk.StringVar(value=str(path_to_dat))
+config_path = tk.StringVar(value=str(path_to_example_data))
 config_path_entry = customtkinter.CTkEntry(
     app,
     width=400,

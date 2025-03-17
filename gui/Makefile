@@ -36,13 +36,13 @@ bundle:
 	--collect-all referencing \
 	--collect-all rpds \
 	--collect-all tenacity \
+	--collect-all vl_convert \
 	--add-data ../docs/example_data/Basic_example_vuegen_demo_notebook:example_data/Basic_example_vuegen_demo_notebook \
 	--add-data ../docs/images/vuegen_logo.png:. \
 	app.py
 
 
 # jupyter kernel specific:
-# --collect-all vl_convert \
 # --collect-all yaml \
 # --collect-all strenum \
 # --collect-all jinja2 \
