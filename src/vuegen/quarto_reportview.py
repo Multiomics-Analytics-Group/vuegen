@@ -9,7 +9,7 @@ import networkx as nx
 import pandas as pd
 
 from . import report as r
-from .utils import create_folder, is_url
+from .utils import create_folder, is_url, sort_imports
 
 
 class QuartoReportView(r.ReportView):
@@ -136,7 +136,16 @@ class QuartoReportView(r.ReportView):
             ]
 
             # Remove duplicated imports
-            report_unique_imports = list(set(flattened_report_imports))
+            report_unique_imports = set(flattened_report_imports)
+
+            # ! set leads to random import order
+            # ! separate and sort import statements, separate from setup code
+
+            report_unique_imports, setup_statements = sort_imports(
+                report_unique_imports
+            )
+            report_unique_imports += os.linesep
+            report_unique_imports.extend(setup_statements)
 
             # Format imports
             report_formatted_imports = "\n".join(report_unique_imports)
@@ -861,8 +870,9 @@ with open('{(Path("..") / markdown.file_path).as_posix()}', 'r') as markdown_fil
                 r.PlotType.PLOTLY: ["import plotly.io as pio", "import requests"],
             },
             "dataframe": [
+                "init_notebook_mode(all_interactive=True)",  # ! somehow order is random in qmd file
                 "import pandas as pd",
-                "from itables import show",
+                "from itables import show, init_notebook_mode",
                 "import dataframe_image as dfi",
             ],
             "markdown": ["import IPython.display as display", "import requests"],

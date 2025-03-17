@@ -6,11 +6,12 @@
 
 | Information | Links |
 | :--- | :--- |
-| **Package** |[ ![PyPI Latest Release](https://img.shields.io/pypi/v/vuegen.svg)][vuegen-pypi] [![Supported versions](https://img.shields.io/pypi/pyversions/vuegen.svg)][vuegen-pypi] [![Docker Repository on Quay](https://quay.io/repository/dtu_biosustain_dsp/vuegen/status "Docker Repository on Quay")][vuegen-docker-quay] ![License](https://img.shields.io/github/license/Multiomics-Analytics-Group/vuegen)|
-| **Documentation** | [![Docs](https://readthedocs.org/projects/vuegen/badge/?style=flat)][vuegen-docs]|
+| **Package** |[![PyPI Latest Release](https://img.shields.io/pypi/v/vuegen.svg)][vuegen-pypi] [![Conda Latest Release](https://img.shields.io/conda/v/bioconda/vuegen.svg)][vuegen-conda] [![Supported versions](https://img.shields.io/pypi/pyversions/vuegen.svg)][vuegen-pypi] [![Docker Repository on Quay](https://quay.io/repository/dtu_biosustain_dsp/vuegen/status "Docker Repository on Quay")][vuegen-docker-quay] [![License](https://img.shields.io/github/license/Multiomics-Analytics-Group/vuegen)][vuegen-license]|
+| **Documentation** | [![made-with-sphinx-doc](https://img.shields.io/badge/Made%20with-Sphinx-1f425f.svg)](https://www.sphinx-doc.org/) ![Docs](https://readthedocs.org/projects/vuegen/badge/?style=flat) [![View - Documentation](https://img.shields.io/badge/view-Documentation-blue?style=flat)][vuegen-docs]|
 | **Build** | [![CI](https://github.com/Multiomics-Analytics-Group/vuegen/actions/workflows/cdci.yml/badge.svg)][ci-gh-action] [![Docs](https://github.com/Multiomics-Analytics-Group/vuegen/actions/workflows/docs.yml/badge.svg)][ci-docs]|
 | **Examples** | [![HTML5](https://img.shields.io/badge/html5-%23E34F26.svg?style=for-the-badge&logo=html5&logoColor=white)][emp-html-demo] [![Streamlit](https://img.shields.io/badge/Streamlit-%23FE4B4B.svg?style=for-the-badge&logo=streamlit&logoColor=white)][emp-st-demo]|
 | **Discuss on GitHub** | [![GitHub issues](https://img.shields.io/github/issues/Multiomics-Analytics-Group/vuegen)][issues] [![GitHub pull requests](https://img.shields.io/github/issues-pr/Multiomics-Analytics-Group/vuegen)][pulls]|
+| **Cite** | [![DOI:10.1101/2025.03.05.641152](https://img.shields.io/badge/DOI-10.1101/2025.03.05.641152-B31B1B.svg)][vuegen-preprint]|
 
 ## Table of contents:
 - [About the project](#about-the-project)
@@ -19,6 +20,7 @@
 - [Case studies](#case-studies)
 - [Web application deployment](#web-application-deployment)
 - [Credits and acknowledgements](#credits-and-acknowledgements)
+- [Citation](#citation)
 - [Contact and feedback](#contact-and-feedback)
 
 ## About the project
@@ -39,13 +41,14 @@ An extended version of the class diagram with attributes and methods is availabl
 The VueGen documentation is available at [vuegen.readthedocs.io][vuegen-docs], where you can find detailed information of the package’s classes and functions, installation and execution instructions, and case studies to demonstrate its functionality.
 
 ## Installation
-Vuegen is available on [PyPI][vuegen-pypi] and can be installed using pip:
+### Pip
+VueGen is available on [PyPI][vuegen-pypi] and can be installed using pip:
 
 ```bash
 pip install vuegen
 ```
 
-You can also install the package for development from this repository by running the following command:
+You can also install the package for development by cloning this repository and running the following command:
 
 ```bash
 pip install -e path/to/vuegen # specify location 
@@ -55,7 +58,15 @@ pip install -e . # in case your pwd is in the vuegen directory
 > [!TIP]
 > It is recommended to install VueGen inside a virtual environment to manage depenendencies and avoid conflicts with existing packages. You can use the virtual environment manager of your choice, such as `poetry`, `conda`, or `pipenv`.
 
-Vuegen uses [Quarto][quarto] to generate various report types. The pip insallation includes quarto using the [quarto-cli Python library][quarto-cli-pypi]. To test if quarto is installed in your computer, run the following command:
+### Conda
+VueGen is also available on [Bioconda][vuegen-conda] and can be installed using conda:
+
+```bash
+conda install bioconda::vuegen
+```
+
+### Dependencies
+VueGen uses [Quarto][quarto] to generate various report types. The pip insallation includes quarto using the [quarto-cli Python library][quarto-cli-pypi]. To test if quarto is installed in your computer, run the following command:
 
 ```bash
 quarto check
@@ -64,9 +75,16 @@ quarto check
 > [!TIP]
 > If quarto is not installed, you can download the command-line interface from the [Quarto website][quarto-cli] for your operating system.
 
+### Docker
 If you prefer not to install VueGen on your system, a pre-configured Docker container is available. It includes all dependencies, ensuring a fully reproducible execution environment. See the [Execution section](#execution) for details on running VueGen with Docker. The official Docker image is available at [quay.io/dtu_biosustain_dsp/vuegen][vuegen-docker-quay]. 
 
+### Nextflow and nf-core
+VueGen is also available as a [nf-core][nfcore] module, customised for compatibility with the [Nextflow][nextflow] environment. This module is designed to automate report generation from outputs produced by other modules, subworkflows, or pipelines. The code and documentation for the nf-core module are available in the [nf-VueGen repository][nf-vuegen].
+
 ## Execution
+> [!IMPORTANT]
+> Here we use the `Earth_microbiome_vuegen_demo_notebook` directory and the `Earth_microbiome_vuegen_demo_notebook.yaml` configuration file as examples, which are available in the `docs/example_data` and `docs/example_config_files` folders, respectively. Make sure to clone this reposiotry to access these contents, or use your own directory and configuration file.
+
 Run VueGen using a directory with the following command:
 
 ```bash
@@ -79,7 +97,7 @@ vuegen --directory docs/example_data/Earth_microbiome_vuegen_demo_notebook --rep
 It's also possible to provide a configuration file instead of a directory:
 
 ```bash
-vuegen --config docs/example_data/Earth_microbiome_vuegen_demo_notebook/Earth_microbiome_vuegen_demo_notebook_config.yaml --report_type streamlit
+vuegen --config docs/example_config_files/Earth_microbiome_vuegen_demo_notebook.yaml --report_type streamlit
 ```
 
 The current report types supported by VueGen are:
@@ -97,7 +115,7 @@ Instead of installing VueGen locally, you can run it directly from a Docker cont
 
 ```bash
 docker run --rm \
-  -v "$(pwd)docs/example_data/Earth_microbiome_vuegen_demo_notebook:/home/appuser/Earth_microbiome_vuegen_demo_notebook" \
+  -v "$(pwd)/docs/example_data/Earth_microbiome_vuegen_demo_notebook:/home/appuser/Earth_microbiome_vuegen_demo_notebook" \
   -v "$(pwd)/output_docker:/home/appuser/quarto_report" \
   quay.io/dtu_biosustain_dsp/vuegen:docker --directory /home/appuser/Earth_microbiome_vuegen_demo_notebook --report_type streamlit
 ```
@@ -147,16 +165,40 @@ Once a Streamlit report is generated, it can be deployed as a web application to
 These options provide flexibility depending on whether the goal is online accessibility, lightweight execution, or local application distribution.
 
 ## Credits and acknowledgements
-- Vuegen was developed by the [Multiomics Network Analytics Group (MoNA)][Mona] at the [Novo Nordisk Foundation Center for Biosustainability (DTU Biosustain)][Biosustain].
+- VueGen was developed by the [Multiomics Network Analytics Group (MoNA)][Mona] at the [Novo Nordisk Foundation Center for Biosustainability (DTU Biosustain)][Biosustain].
 - VueGen relies on the work of numerous open-source projects like [Streamlit](streamlit), [Quarto][quarto], and others. A big thank you to their authors for making this possible!
 - The vuegen logo was designed based on an image created by [Scriberia][scriberia] for The [Turing Way Community][turingway], which is shared under a CC-BY licence. The original image can be found at [Zenodo][zenodo-turingway].
+
+## Citation
+If you use VueGen in your research or publications, please cite it as follows:
+
+**APA:**
+
+Ayala-Ruano, S., Webel, H., & Santos, A. (2025). *VueGen: Automating the generation of scientific reports*. bioRxiv. https://doi.org/10.1101/2025.03.05.641152
+
+**BibTeX:**
+
+```bibtex
+@article{Ayala-Ruano2025VueGen,
+  author  = {Ayala-Ruano, Sebastian and Webel, Henry and Santos, Alberto},
+  title   = {VueGen: Automating the generation of scientific reports},
+  journal = {bioRxiv},
+  year    = {2025},
+  doi     = {10.1101/2025.03.05.641152},
+  publisher = {Cold Spring Harbor Laboratory},
+  url     = {https://www.biorxiv.org/content/10.1101/2025.03.05.641152},
+  eprint = {https://www.biorxiv.org/content/10.1101/2025.03.05.641152.full.pdf}
+}
+```
 
 ## Contact and feedback
 We appreciate your feedback! If you have any comments, suggestions, or run into issues while using VueGen, feel free to [open an issue][new-issue] in this repository. Your input helps us make VueGen better for everyone. 
 
 [streamlit]: https://streamlit.io/ 
 [vuegen-pypi]: https://pypi.org/project/vuegen/
+[vuegen-conda]: https://anaconda.org/bioconda/vuegen
 [vuegen-docker-quay]: https://quay.io/repository/dtu_biosustain_dsp/vuegen
+[vuegen-license]: https://github.com/Multiomics-Analytics-Group/vuegen/blob/main/LICENSE
 [vuegen-class-diag-att]: https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/vuegen_classdiagram_withattmeth.pdf
 [vuegen-docs]: https://vuegen.readthedocs.io/
 [ci-gh-action]: https://github.com/Multiomics-Analytics-Group/vuegen/actions/workflows/cdci.yml
@@ -165,9 +207,13 @@ We appreciate your feedback! If you have any comments, suggestions, or run into 
 [emp-st-demo]: https://earth-microbiome-vuegen-demo.streamlit.app/
 [issues]: https://github.com/Multiomics-Analytics-Group/vuegen/issues
 [pulls]: https://github.com/Multiomics-Analytics-Group/vuegen/pulls
+[vuegen-preprint]: https://doi.org/10.1101/2025.03.05.641152
 [quarto]: https://quarto.org/
 [quarto-cli-pypi]: https://pypi.org/project/quarto-cli/
 [quarto-cli]: https://quarto.org/docs/get-started/
+[nfcore]: https://nf-co.re/
+[nextflow]: https://www.nextflow.io/
+[nf-vuegen]: https://github.com/Multiomics-Analytics-Group/nf-vuegen/
 [colab_badge]: https://colab.research.google.com/assets/colab-badge.svg
 [colab_link_intro_demo]: https://colab.research.google.com/github/Multiomics-Analytics-Group/vuegen/blob/main/docs/vuegen_basic_case_study.ipynb
 [colab_link_emp_demo]: https://colab.research.google.com/github/Multiomics-Analytics-Group/vuegen/blob/main/docs/vuegen_case_study_earth_microbiome.ipynb
