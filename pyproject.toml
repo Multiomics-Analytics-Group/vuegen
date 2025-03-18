@@ -17,13 +17,13 @@ streamlit-aggrid = "*"
 quarto-cli = "*"
 plotly = "5.15.0"
 pyvis = "^0.3.2"
-pandas = {extras = ["parquet"], version = "^2.2.3"}
+pandas = { extras = ["parquet"], version = "^2.2.3" }
 openpyxl = "^3.1.5"
 xlrd = "^2.0.1"
 nbformat = "^5.10.4"
 nbclient = "^0.10.0"
 matplotlib = "^3.9.2"
-altair = "*"
+altair = { extras = ["save"], version = "*" }
 itables = "^2.2.2"
 kaleido = "0.2.0"
 vl-convert-python = "^1.7.0"
@@ -33,20 +33,20 @@ pyyaml = "^6.0.2"
 
 # optional doc depencencies, follow approach as described here:
 # https://github.com/python-poetry/poetry/issues/2567#issuecomment-646766059
-sphinx = {version="*", optional=true}
-sphinx-book-theme = {version="*", optional=true}
-myst-nb = {version="*", optional=true}
-ipywidgets = {version="*", optional=true}
-sphinx-new-tab-link = {version = "!=0.2.2", optional=true}
-jupytext = {version="*", optional=true}
-customtkinter = {version="*", optional=true}
+sphinx = { version = "*", optional = true }
+sphinx-book-theme = { version = "*", optional = true }
+myst-nb = { version = "*", optional = true }
+ipywidgets = { version = "*", optional = true }
+sphinx-new-tab-link = { version = "!=0.2.2", optional = true }
+jupytext = { version = "*", optional = true }
+customtkinter = { version = "*", optional = true }
 
 [tool.poetry.group.dev.dependencies]
-ipykernel = {version="^6.29.5", optional=true}
+ipykernel = { version = "^6.29.5", optional = true }
 
 [tool.poetry.requires-plugins]
 poetry-dynamic-versioning = { version = ">=1.0.0,<2.0.0", extras = ["plugin"] }
- 
+
 [tool.poetry-dynamic-versioning]
 enable = true
 
@@ -56,7 +56,14 @@ build-backend = "poetry_dynamic_versioning.backend"
 
 # https://stackoverflow.com/a/60990574/9684872
 [tool.poetry.extras]
-docs = ["sphinx", "sphinx-book-theme", "myst-nb", "ipywidgets", "sphinx-new-tab-link", "jupytext"]
+docs = [
+    "sphinx",
+    "sphinx-book-theme",
+    "myst-nb",
+    "ipywidgets",
+    "sphinx-new-tab-link",
+    "jupytext",
+]
 gui = ["customtkinter"]
 
 [tool.poetry.scripts]
