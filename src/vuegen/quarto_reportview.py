@@ -870,10 +870,10 @@ with open('{(Path("..") / markdown.file_path).as_posix()}', 'r') as markdown_fil
                 r.PlotType.PLOTLY: ["import plotly.io as pio", "import requests"],
             },
             "dataframe": [
-                "init_notebook_mode(all_interactive=True)",  # ! somehow order is random in qmd file
                 "import pandas as pd",
                 "from itables import show, init_notebook_mode",
                 "import dataframe_image as dfi",
+                "init_notebook_mode(all_interactive=True)",
             ],
             "markdown": ["import IPython.display as display", "import requests"],
         }
