@@ -14,8 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        # python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
-        python-version: ["3.11"]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
     steps:
       - uses: actions/checkout@v4
       - uses: psf/black@stable
@@ -44,8 +43,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        # python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
-        python-version: ["3.11"]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python ${{ matrix.python-version }}
@@ -126,18 +124,18 @@ jobs:
   build-executable:
     name: Build-exe-${{ matrix.os.label }}
     runs-on: ${{ matrix.os.runner }}
-    # needs:
-    #   - test
-    #   - other-reports
+    needs:
+      - test
+      - other-reports
     strategy:
       matrix:
         python-version: ["3.12"]
         os:
           # https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/running-variations-of-jobs-in-a-workflow#example-using-a-multi-dimension-matrix
-          # - runner: "ubuntu-latest"
-          #   label: "ubuntu-latest_LTS-x64"
-          # - runner: "macos-13"
-          #   label: "macos-13-x64"
+          - runner: "ubuntu-latest"
+            label: "ubuntu-latest_LTS-x64"
+          - runner: "macos-13"
+            label: "macos-13-x64"
           - runner: "macos-15"
             label: "macos-15-arm64"
           - runner: "windows-latest"
@@ -157,7 +155,7 @@ jobs:
       - name: Build executable
         run: |
           cd gui
-          pyinstaller -n vuegen_gui --collect-all pyvis --collect-all streamlit --collect-all st_aggrid --collect-all customtkinter --collect-all quarto_cli --collect-all plotly --collect-all _plotly_utils --collect-all traitlets --collect-all referencing --collect-all rpds --collect-all tenacity --collect-all pyvis --collect-all pandas --collect-all numpy --collect-all matplotlib --collect-all openpyxl --collect-all xlrd --collect-all nbformat --collect-all nbclient --collect-all altair --collect-all itables --collect-all kaleido --collect-all pyarrow --collect-all dataframe_image --collect-all narwhals --collect-all PIL --collect-all vl_convert --add-data ../docs/example_data/Basic_example_vuegen_demo_notebook:example_data/Basic_example_vuegen_demo_notebook --add-data ../docs/images/vuegen_logo.png:. app.py
+          pyinstaller -n vuegen_gui --windowed --collect-all pyvis --collect-all streamlit --collect-all st_aggrid --collect-all customtkinter --collect-all quarto_cli --collect-all plotly --collect-all _plotly_utils --collect-all traitlets --collect-all referencing --collect-all rpds --collect-all tenacity --collect-all pyvis --collect-all pandas --collect-all numpy --collect-all matplotlib --collect-all openpyxl --collect-all xlrd --collect-all nbformat --collect-all nbclient --collect-all altair --collect-all itables --collect-all kaleido --collect-all pyarrow --collect-all dataframe_image --collect-all narwhals --collect-all PIL --collect-all vl_convert --add-data ../docs/example_data/Basic_example_vuegen_demo_notebook:example_data/Basic_example_vuegen_demo_notebook --add-data ../docs/images/vuegen_logo.png:. app.py
         # --windowed only for mac, see:
         # https://pyinstaller.org/en/stable/usage.html#building-macos-app-bundles
         # 'Under macOS, PyInstaller always builds a UNIX executable in dist.'

@@ -67,6 +67,18 @@ Windows and macOS specific options:
 
 ## test shipping a python virtual environment with vuegen installed
 
+- [ ] can we ship a python environment with the app which can be used to launch a kernel?
+
+## Features of the GUI
+
+- select a directory via a file dialog button
+- specify the distination of a config file manually
+- select a report
+- select if streamlit app should be started - has no effect for quarto reports
+- show set PATH
+- select a Python environment for starting jupyter kernels for quarto reports which is cached
+- some message boxes
+
 ## Bundled PyInstaller execution (current status)
 
 1. Can be executed. Streamlit apps can be run (although sometimes not easily terminated)
@@ -78,16 +90,10 @@ Windows and macOS specific options:
 
 ## Using bundle vuegen release
 
-## On Windows
+This should both work on Windows and MacOs, but the paths for environments can be different
+dependent on the system.
 
-- global quarto and python installations can be used
-- quarto can be shipped with app, but maybe it can be deactivated
-
-## On MacOs
-
-- on MacOs the default paths are not set
-
-#### Create environment using conda
+### Create environment using conda
 
 ```bash
 conda create -n vuegen_gui -c conda-forge python=3.12 jupyter
@@ -106,12 +112,58 @@ In the app, set the python environment path to this location, but to the `bin` f
 /Users/user/miniforge3/envs/vuegen_gui/bin
 ```
 
-#### virtualenv
+### virtualenv
 
-- tbc
+Following the
+[Python Packaging User Guide's instructions](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/#create-a-new-virtual-environment)
+you can run the following command to create a new virtual environment.
 
-[virutalenv documentation](https://docs.python.org/3/library/venv.html)
+Install an offical Python version from [python.org/downloads/](https://www.python.org/downloads/)
+
+#### On MacOs
 
 ```bash
+# being in the folder you want to create the environment
+python -m venv .venv
+# if that does not work, try
+# python3 -m venv .venv
+source .venv/bin/activate
+pip install jupyter
+```
+
+#### On Windows
+
+```powershell
+# being in the folder you want to create the environment
+python -m venv .venv
+# if that does not work, try
+# py -m venv .venv
+.venv\Scripts\activate
+```
+
+#### Troubleshooting venv
+
+For more information on the options, see also the
+[virutalenv documentation](https://docs.python.org/3/library/venv.html) in the Python
+standard library documentation.
+
+```
 python -m venv .venv --copies --clear --prompt vuegenvenv
 ```
+
+### On Windows
+
+On windows the default Paths is available in the application. This would allow to use
+the default python installation and a global quarto installation.
+
+to test, one could
+
+- use global quarto and python installations can be used
+- add a deactivate button into app for bundled quarto (so path is not set)
+
+### On MacOs
+
+- on MacOs the default paths are not set, but only the minimal one `/usr/bin:/bin:/usr/sbin:/sbin`,
+  see pyinstaller hints
+  [on path manipulations](https://pyinstaller.org/en/stable/common-issues-and-pitfalls.html#macos)
+- requires to add path to python environment manually
