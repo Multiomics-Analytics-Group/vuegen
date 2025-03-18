@@ -698,7 +698,7 @@ def init_log(
     # ! logging.basicConfig has no effect if called once anywhere in the code
     # ! set handlers and format for the logger manually
     # Reset any existing handlers
-    for handler in logging.root.handlers[:]:
+    for handler in logger.handlers[:]:
         logger.removeHandler(handler)
 
     # Set up the new handlers and format
