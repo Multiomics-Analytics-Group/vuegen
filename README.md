@@ -137,6 +137,9 @@ Streamlit works out of the box as a purely Python based package. For `html` crea
 have a global Python installation with the `jupyter` package installed. `quarto` needs to start
 a kernel for execution. This is also true if you install `quarto` globally on your machine.
 
+More information can be found in the 
+[GUI README](https://github.com/Multiomics-Analytics-Group/vuegen/blob/os_installers/gui/README.md).
+
 ## Case studies
 VueGen’s functionality is demonstrated through two case studies:
 
