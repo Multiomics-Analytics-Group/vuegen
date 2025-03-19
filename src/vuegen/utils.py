@@ -642,7 +642,7 @@ def generate_log_filename(folder: str = "logs", suffix: str = "") -> str:
     except OSError as e:
         raise OSError(f"Error creating directory '{folder}': {e}")
     # MAIN FUNCTION
-    log_filename = get_time(incl_timezone=True) + "_" + suffix + ".log"
+    log_filename = get_time(incl_timezone=False) + "_" + suffix + ".log"
     log_filepath = os.path.join(folder, log_filename)
 
     return log_filepath
