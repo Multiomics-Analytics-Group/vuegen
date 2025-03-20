@@ -1,12 +1,13 @@
-import pandas as pd
-df_index = 1
-import streamlit as st
 from st_aggrid import AgGrid, GridOptionsBuilder
+import pandas as pd
+import streamlit as st
+df_index = 1
 
 st.markdown('''<h3 style='text-align: center; color: #023558;'>All Formats</h3>''', unsafe_allow_html=True)
 st.markdown('''<p style='text-align: center; color: #000000;'>This subsection contains example dataframes.</p>''', unsafe_allow_html=True)
 st.markdown('''<h4 style='text-align: center; color: #2b8cbe;'>Phyla Correlation Network Csv</h4>''', unsafe_allow_html=True)
 df = pd.read_csv('example_data/Basic_example_vuegen_demo_notebook/2_Dataframes/1_All_formats/1_phyla_correlation_network_csv.csv')
+
 
 # Displays a DataFrame using AgGrid with configurable options.
 grid_builder = GridOptionsBuilder.from_dataframe(df)
@@ -30,6 +31,7 @@ df_index += 1
 st.markdown('''<h4 style='text-align: center; color: #2b8cbe;'>Abundance Table Example Xls</h4>''', unsafe_allow_html=True)
 df = pd.read_excel('example_data/Basic_example_vuegen_demo_notebook/2_Dataframes/1_All_formats/2_abundance_table_example_xls.xls')
 
+
 # Displays a DataFrame using AgGrid with configurable options.
 grid_builder = GridOptionsBuilder.from_dataframe(df)
 grid_builder.configure_default_column(editable=True, groupable=True)
@@ -52,6 +54,7 @@ df_index += 1
 st.markdown('''<h4 style='text-align: center; color: #2b8cbe;'>Sample Info Example Txt</h4>''', unsafe_allow_html=True)
 df = pd.read_table('example_data/Basic_example_vuegen_demo_notebook/2_Dataframes/1_All_formats/3_sample_info_example_txt.txt')
 
+
 # Displays a DataFrame using AgGrid with configurable options.
 grid_builder = GridOptionsBuilder.from_dataframe(df)
 grid_builder.configure_default_column(editable=True, groupable=True)
@@ -73,6 +76,7 @@ st.download_button(
 df_index += 1
 st.markdown('''<h4 style='text-align: center; color: #2b8cbe;'>Sample Info Example Parquet</h4>''', unsafe_allow_html=True)
 df = pd.read_parquet('example_data/Basic_example_vuegen_demo_notebook/2_Dataframes/1_All_formats/4_sample_info_example_parquet.parquet')
+
 
 # Displays a DataFrame using AgGrid with configurable options.
 grid_builder = GridOptionsBuilder.from_dataframe(df)
@@ -106,7 +110,7 @@ footer = '''<style type="text/css">
     <a href="https://github.com/Multiomics-Analytics-Group/vuegen" target="_blank">
         <img src="https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/vuegen_logo.svg" alt="VueGen" width="65px">
     </a>
-    | © 2025 <a href="https://github.com/Multiomics-Analytics-Group" target="_blank">
+    | Copyright 2025 <a href="https://github.com/Multiomics-Analytics-Group" target="_blank">
         Multiomics Network Analytics Group (MoNA)
     </a>
 </footer>'''

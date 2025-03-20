@@ -1,7 +1,7 @@
 import altair as alt
+import requests
 import streamlit as st
 import json
-import requests
 
 st.markdown('''<h3 style='text-align: center; color: #023558;'>Interactive Plots</h3>''', unsafe_allow_html=True)
 st.markdown('''<p style='text-align: center; color: #000000;'>Optional description for section.
@@ -53,7 +53,7 @@ footer = '''<style type="text/css">
     <a href="https://github.com/Multiomics-Analytics-Group/vuegen" target="_blank">
         <img src="https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/vuegen_logo.svg" alt="VueGen" width="65px">
     </a>
-    | © 2025 <a href="https://github.com/Multiomics-Analytics-Group" target="_blank">
+    | Copyright 2025 <a href="https://github.com/Multiomics-Analytics-Group" target="_blank">
         Multiomics Network Analytics Group (MoNA)
     </a>
 </footer>'''

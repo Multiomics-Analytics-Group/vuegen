@@ -30,7 +30,7 @@ footer = '''<style type="text/css">
     <a href="https://github.com/Multiomics-Analytics-Group/vuegen" target="_blank">
         <img src="https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/vuegen_logo.svg" alt="VueGen" width="65px">
     </a>
-    | © 2025 <a href="https://github.com/Multiomics-Analytics-Group" target="_blank">
+    | Copyright 2025 <a href="https://github.com/Multiomics-Analytics-Group" target="_blank">
         Multiomics Network Analytics Group (MoNA)
     </a>
 </footer>'''

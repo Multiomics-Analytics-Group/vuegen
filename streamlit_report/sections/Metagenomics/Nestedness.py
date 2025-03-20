@@ -1,13 +1,14 @@
-from st_aggrid import AgGrid, GridOptionsBuilder
-import pandas as pd
 df_index = 1
 import json
+from st_aggrid import AgGrid, GridOptionsBuilder
+import pandas as pd
 import requests
 import streamlit as st
 
 st.markdown('''<h3 style='text-align: center; color: #023558;'>Nestedness</h3>''', unsafe_allow_html=True)
 st.markdown('''<h4 style='text-align: center; color: #2b8cbe;'>Nestedness Random Subset</h4>''', unsafe_allow_html=True)
 df = pd.read_csv('example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/3_nestedness/1_nestedness_random_subset.csv')
+
 
 # Displays a DataFrame using AgGrid with configurable options.
 grid_builder = GridOptionsBuilder.from_dataframe(df)
@@ -61,7 +62,7 @@ footer = '''<style type="text/css">
     <a href="https://github.com/Multiomics-Analytics-Group/vuegen" target="_blank">
         <img src="https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/vuegen_logo.svg" alt="VueGen" width="65px">
     </a>
-    | © 2025 <a href="https://github.com/Multiomics-Analytics-Group" target="_blank">
+    | Copyright 2025 <a href="https://github.com/Multiomics-Analytics-Group" target="_blank">
         Multiomics Network Analytics Group (MoNA)
     </a>
 </footer>'''
