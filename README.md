@@ -41,7 +41,7 @@ Also, the class diagram for the project is presented below to illustrate the arc
 
 An extended version of the class diagram with attributes and methods is available [here][vuegen-class-diag-att].
 
-The VueGen documentation is available at [vuegen.readthedocs.io][vuegen-docs], where you can find detailed information of the package’s classes and functions, installation and execution instructions, and case studies to demonstrate its functionality. 
+The VueGen documentation is available at [vuegen.readthedocs.io][vuegen-docs], where you can find detailed information of the package’s classes and functions, installation and execution instructions, and case studies to demonstrate its functionality.
 
 ## Installation
 
@@ -130,6 +130,26 @@ docker run --rm \
   -v "$(pwd)/output_docker:/home/appuser/quarto_report" \
   quay.io/dtu_biosustain_dsp/vuegen:docker --directory /home/appuser/Earth_microbiome_vuegen_demo_notebook --report_type streamlit
 ```
+
+## GUI
+
+We have a simple GUI for VueGen that can be run locally or through a standalone executable.
+
+```bash
+cd gui
+python app.py
+```
+
+The bundle GUI with the VueGen package is available under the releases. You will need to
+unzip the file and run `vuegen_gui` in the unpacked main folder. Most dependencies are included into
+the bundle under `_internals` using PyInstaller.
+
+Streamlit works out of the box as a purely Python based package. For `html` creation you will have to
+have a global Python installation with the `jupyter` package installed. `quarto` needs to start
+a kernel for execution. This is also true if you install `quarto` globally on your machine.
+
+More information can be found in the 
+[GUI README](https://github.com/Multiomics-Analytics-Group/vuegen/blob/os_installers/gui/README.md).
 
 ## Case studies
 

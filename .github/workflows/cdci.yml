@@ -7,7 +7,7 @@ on:
     branches: [main]
   release:
     types: [published]
-    
+
 jobs:
   test:
     name: Unittests+streamlit
@@ -17,14 +17,16 @@ jobs:
         python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
     steps:
       - uses: actions/checkout@v4
-      - uses: psf/black@stable 
+      - uses: psf/black@stable
+        with:
+          jupyter: true
       - uses: isort/isort-action@v1
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-          cache: 'pip' # caching pip dependencies
-          cache-dependency-path: '**/pyproject.toml'
+          cache: "pip" # caching pip dependencies
+          cache-dependency-path: "**/pyproject.toml"
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -37,7 +39,7 @@ jobs:
           cd docs
           vuegen --directory example_data/Earth_microbiome_vuegen_demo_notebook
           vuegen --config example_data/Earth_microbiome_vuegen_demo_notebook/Earth_microbiome_vuegen_demo_notebook_config.yaml
-  
+
   other-reports:
     name: Integration tests
     runs-on: ubuntu-latest
@@ -50,8 +52,8 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-          cache: 'pip' # caching pip dependencies
-          cache-dependency-path: '**/pyproject.toml'
+          cache: "pip" # caching pip dependencies
+          cache-dependency-path: "**/pyproject.toml"
       - name: Install dependencies
         run: |
           pip install --upgrade pip
@@ -110,7 +112,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-  
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
@@ -120,3 +122,58 @@ jobs:
         run: python -m build
       - name: Publish package distributions to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
+
+  build-executable:
+    name: Build-exe-${{ matrix.os.label }}
+    runs-on: ${{ matrix.os.runner }}
+    needs:
+      - test
+      - other-reports
+    strategy:
+      matrix:
+        python-version: ["3.12"]
+        os:
+          # https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/running-variations-of-jobs-in-a-workflow#example-using-a-multi-dimension-matrix
+          - runner: "macos-13"
+            label: "macos-13-x64"
+          - runner: "macos-15"
+            label: "macos-15-arm64"
+          - runner: "windows-latest"
+            label: "windows-x64"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install VueGen GUI and pyinstaller
+        run: |
+          python -m pip install ".[gui]" pyinstaller
+      - name: Install quarto tools
+        run: |
+          quarto install chromium
+          quarto install tinytex
+      - name: Build executable
+        run: |
+          cd gui
+          pyinstaller -n vuegen_gui --onefile --windowed --collect-all pyvis --collect-all streamlit --collect-all st_aggrid --collect-all customtkinter --collect-all quarto_cli --collect-all plotly --collect-all _plotly_utils --collect-all traitlets --collect-all referencing --collect-all rpds --collect-all tenacity --collect-all pyvis --collect-all pandas --collect-all numpy --collect-all matplotlib --collect-all openpyxl --collect-all xlrd --collect-all nbformat --collect-all nbclient --collect-all altair --collect-all itables --collect-all kaleido --collect-all pyarrow --collect-all dataframe_image --collect-all narwhals --collect-all PIL --collect-all vl_convert --add-data ../docs/example_data/Basic_example_vuegen_demo_notebook:example_data/Basic_example_vuegen_demo_notebook --add-data ../docs/images/vuegen_logo.png:. app.py
+        # --windowed only for mac, see:
+        # https://pyinstaller.org/en/stable/usage.html#building-macos-app-bundles
+        # 'Under macOS, PyInstaller always builds a UNIX executable in dist.'
+        # --onefile --windowed for Windows?
+        # --collect-all yaml --collect-all strenum --collect-all jinja2 --collect-all fastjsonschema --collect-all jsonschema --collect-all jsonschema_specifications
+        # replace by spec file once done...
+      - name: Upload executable
+        uses: actions/upload-artifact@v4
+        with:
+          name: vuegen_gui_${{ matrix.os.label }}
+          path: gui/dist/
+      - name: Upload Executable to a GitHub Release
+        if: startsWith(github.ref, 'refs/tags')
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG_NAME=${GITHUB_REF#refs/tags/}
+          cp 
+          gh release upload "$TAG_NAME" gui/dist/vuegen_gui.*#vuegen_gui_${{ matrix.os.label }}
+        # https://cli.github.com/manual/gh_release_upload
+        # either .app or .exe depending on the OS
