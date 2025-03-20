@@ -173,9 +173,23 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           TAG_NAME=${GITHUB_REF#refs/tags/}
-          TAG_NAME=0.3.0-alpha
+          TAG_NAME=v0.3.0-alpha
           echo "Uploading vuegen_gui_${{ matrix.os.label }} to release $TAG_NAME"
+          echo "Available files in build folder: gui/dist/"
           ls gui/dist/
-          gh release upload "$TAG_NAME" gui/dist/vuegen_gui.app#vuegen_gui_${{ matrix.os.label }}.app
+          echo "Uploading..."
+          gh release upload $TAG_NAME gui/dist/vuegen_gui.app#vuegen_gui_${{ matrix.os.label }}.app
+      - name: Upload Executable to a GitHub Release)
+        if: startsWith(${{ matrix.os.runner }}, 'windows')
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG_NAME=${GITHUB_REF#refs/tags/}
+          TAG_NAME=v0.3.0-alpha
+          echo "Uploading vuegen_gui_${{ matrix.os.label }} to release $TAG_NAME"
+          echo "Available files in build folder: gui/dist/"
+          ls gui/dist/
+          echo "Uploading..."
+          gh release upload $TAG_NAME gui/dist/vuegen_gui.exe#vuegen_gui_${{ matrix.os.label }}.exe
         # https://cli.github.com/manual/gh_release_upload
         # either .app or .exe depending on the OS
