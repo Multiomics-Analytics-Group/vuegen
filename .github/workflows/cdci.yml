@@ -167,7 +167,7 @@ jobs:
         with:
           name: vuegen_gui_${{ matrix.os.label }}
           path: gui/dist/
-      - name: Upload Executable to a GitHub Release)
+      - name: Upload MacOS Executable to a GitHub Release)
         if: startsWith(${{ matrix.os.runner }}, 'macos')
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -177,15 +177,17 @@ jobs:
           echo "Uploading vuegen_gui_${{ matrix.os.label }} to release $TAG_NAME"
           echo "Available files in build folder: gui/dist/"
           ls gui/dist/
+          echo "Zip .app folder"
+          zip -r vuegen_gui_${{ matrix.os.label }}.zip gui/dist/vuegen_gui.app/
           echo "Uploading..."
-          gh release upload $TAG_NAME gui/dist/vuegen_gui.app#vuegen_gui_${{ matrix.os.label }}.app
-      - name: Upload Executable to a GitHub Release)
+          gh release upload $TAG_NAME vuegen_gui_${{ matrix.os.label }}.zip
+      - name: Upload Windows Executable to a GitHub Release
         if: startsWith(${{ matrix.os.runner }}, 'windows')
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          TAG_NAME=${GITHUB_REF#refs/tags/}
-          TAG_NAME=v0.3.0-alpha
+          $TAG_NAME = $env:GITHUB_REF -replace 'refs/tags/', ''
+          $TAG_NAME= v0.3.0-alpha
           echo "Uploading vuegen_gui_${{ matrix.os.label }} to release $TAG_NAME"
           echo "Available files in build folder: gui/dist/"
           ls gui/dist/
