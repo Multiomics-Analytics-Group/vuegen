@@ -594,9 +594,7 @@ def get_time(incl_time: bool = True, incl_timezone: bool = True) -> str:
     the_time = datetime.now()
     timezone = datetime.now().astimezone().tzname()
     # convert date parts to string
-    y = str(the_time.year)
-    M = str(the_time.month)
-    d = str(the_time.day)
+
     # putting date parts into one string
     if incl_time and incl_timezone:
         fname = the_time.isoformat(sep="_", timespec="seconds") + "_" + timezone
@@ -605,19 +603,13 @@ def get_time(incl_time: bool = True, incl_timezone: bool = True) -> str:
     elif incl_timezone:
         fname = "_".join([the_time.isoformat(sep="_", timespec="hours")[:-3], timezone])
     else:
-        fname = y + M + d
+        y = str(the_time.year)
+        m = str(the_time.month)
+        d = str(the_time.day)
+        fname = y + m + d
 
     # optional
     fname = fname.replace(":", "-")  # remove ':' from hours, minutes, seconds
-    # POSTCONDITIONALS
-    # ! to delete (was it jused for something?)
-    # parts = fname.split("_")
-    # if incl_time and incl_timezone:
-    #     assert len(parts) == 3, f"time and/or timezone inclusion issue: {fname}"
-    # elif incl_time or incl_timezone:
-    #     assert len(parts) == 2, f"time/timezone inclusion issue: {fname}"
-    # else:
-    #     assert len(parts) == 1, f"time/timezone inclusion issue: {fname}"
 
     return fname
 
@@ -724,7 +716,7 @@ def get_logger(
 
     Returns
     -------
-    tuple[logging.Logger, str
+    tuple[logging.Logger, str]
         A tuple containing the logger instance and the log file path.
     """
     # Generate log file name
