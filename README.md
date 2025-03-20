@@ -14,16 +14,19 @@
 | **Cite** | [![DOI:10.1101/2025.03.05.641152](https://img.shields.io/badge/DOI-10.1101/2025.03.05.641152-B31B1B.svg)][vuegen-preprint]|
 
 ## Table of contents:
+
 - [About the project](#about-the-project)
 - [Installation](#installation)
 - [Execution](#execution)
 - [Case studies](#case-studies)
 - [Web application deployment](#web-application-deployment)
+- [Contributing](#contributing)
 - [Credits and acknowledgements](#credits-and-acknowledgements)
 - [Citation](#citation)
 - [Contact and feedback](#contact-and-feedback)
 
 ## About the project
+
 VueGen automates the creation of reports based on a directory with plots, dataframes, and other files in different formats. A YAML configuration file is generated from the directory to define the structure of the report. Users can customize the report by modifying the configuration file, or they can create their own configuration file instead of passing a directory as input. 
 
 The configuration file specifies the structure of the report, including sections, subsections, and various components such as plots, dataframes, markdown, html, and API calls. Reports can be generated in various formats, including documents (PDF, HTML, DOCX, ODT), presentations (PPTX, Reveal.js), notebooks (Jupyter) or [Streamlit](streamlit) web applications.
@@ -38,10 +41,15 @@ Also, the class diagram for the project is presented below to illustrate the arc
 
 An extended version of the class diagram with attributes and methods is available [here][vuegen-class-diag-att].
 
-The VueGen documentation is available at [vuegen.readthedocs.io][vuegen-docs], where you can find detailed information of the package’s classes and functions, installation and execution instructions, and case studies to demonstrate its functionality. 
+The VueGen documentation is available at [vuegen.readthedocs.io][vuegen-docs], where you can find detailed information of the package’s classes and functions, installation and execution instructions, and case studies to demonstrate its functionality.
 
 ## Installation
+
+> [!TIP]
+> It is recommended to install VueGen inside a virtual environment to manage depenendencies and avoid conflicts with existing packages. You can use the virtual environment manager of your choice, such as `poetry`, `conda`, or `pipenv`.
+
 ### Pip
+
 VueGen is available on [PyPI][vuegen-pypi] and can be installed using pip:
 
 ```bash
@@ -55,10 +63,8 @@ pip install -e path/to/vuegen # specify location
 pip install -e . # in case your pwd is in the vuegen directory
 ```
 
-> [!TIP]
-> It is recommended to install VueGen inside a virtual environment to manage depenendencies and avoid conflicts with existing packages. You can use the virtual environment manager of your choice, such as `poetry`, `conda`, or `pipenv`.
-
 ### Conda
+
 VueGen is also available on [Bioconda][vuegen-conda] and can be installed using conda:
 
 ```bash
@@ -66,6 +72,7 @@ conda install bioconda::vuegen
 ```
 
 ### Dependencies
+
 VueGen uses [Quarto][quarto] to generate various report types. The pip insallation includes quarto using the [quarto-cli Python library][quarto-cli-pypi]. To test if quarto is installed in your computer, run the following command:
 
 ```bash
@@ -76,12 +83,15 @@ quarto check
 > If quarto is not installed, you can download the command-line interface from the [Quarto website][quarto-cli] for your operating system.
 
 ### Docker
+
 If you prefer not to install VueGen on your system, a pre-configured Docker container is available. It includes all dependencies, ensuring a fully reproducible execution environment. See the [Execution section](#execution) for details on running VueGen with Docker. The official Docker image is available at [quay.io/dtu_biosustain_dsp/vuegen][vuegen-docker-quay]. 
 
 ### Nextflow and nf-core
+
 VueGen is also available as a [nf-core][nfcore] module, customised for compatibility with the [Nextflow][nextflow] environment. This module is designed to automate report generation from outputs produced by other modules, subworkflows, or pipelines. The code and documentation for the nf-core module are available in the [nf-VueGen repository][nf-vuegen].
 
 ## Execution
+
 > [!IMPORTANT]
 > Here we use the `Earth_microbiome_vuegen_demo_notebook` directory and the `Earth_microbiome_vuegen_demo_notebook.yaml` configuration file as examples, which are available in the `docs/example_data` and `docs/example_config_files` folders, respectively. Make sure to clone this reposiotry to access these contents, or use your own directory and configuration file.
 
@@ -111,6 +121,7 @@ The current report types supported by VueGen are:
 * Jupyter
 
 ### Running VueGen with Docker
+
 Instead of installing VueGen locally, you can run it directly from a Docker container with the following command:
 
 ```bash
@@ -120,7 +131,28 @@ docker run --rm \
   quay.io/dtu_biosustain_dsp/vuegen:docker --directory /home/appuser/Earth_microbiome_vuegen_demo_notebook --report_type streamlit
 ```
 
+## GUI
+
+We have a simple GUI for VueGen that can be run locally or through a standalone executable.
+
+```bash
+cd gui
+python app.py
+```
+
+The bundle GUI with the VueGen package is available under the releases. You will need to
+unzip the file and run `vuegen_gui` in the unpacked main folder. Most dependencies are included into
+the bundle under `_internals` using PyInstaller.
+
+Streamlit works out of the box as a purely Python based package. For `html` creation you will have to
+have a global Python installation with the `jupyter` package installed. `quarto` needs to start
+a kernel for execution. This is also true if you install `quarto` globally on your machine.
+
+More information can be found in the 
+[GUI README](https://github.com/Multiomics-Analytics-Group/vuegen/blob/os_installers/gui/README.md).
+
 ## Case studies
+
 VueGen’s functionality is demonstrated through two case studies:
 
 **1. Predefined Directory**
@@ -139,6 +171,7 @@ This advanced case study demonstrates the application of VueGen in a real-world 
 > The EMP case study is available online as [HTML][emp-html-demo] and [Streamlit][emp-st-demo] reports.
 
 ## Web application deployment
+
 Once a Streamlit report is generated, it can be deployed as a web application to make it accessible online. There are multiple ways to achieve this:
 
 * **Streamlit Community Cloud**: Deploy your report easily using [Streamlit Cloud][st-cloud], as demonstrated in the [EMP VueGen Demo][emp-st-demo]. The process involves moving the necessary scripts, data, and a requirements.txt file into a GitHub repository. Then, the app can be deployed via the Streamlit Cloud interface. The deployment example is available in the `streamlit-report-example` branch.
@@ -147,12 +180,18 @@ Once a Streamlit report is generated, it can be deployed as a web application to
 
 These options provide flexibility depending on whether the goal is online accessibility, lightweight execution, or local application distribution.
 
+## Contributing
+
+VueGen is an open-source project, and we welcome contributions of all kinds via GitHub issues and pull requests. You can report bugs, suggest improvements, propose new features, or implement changes. Please follow the guidelines in the [CONTRIBUTING](CONTRIBUTING.md) file to ensure that your contribution is easily integrated into the project.
+
 ## Credits and acknowledgements
+
 - VueGen was developed by the [Multiomics Network Analytics Group (MoNA)][Mona] at the [Novo Nordisk Foundation Center for Biosustainability (DTU Biosustain)][Biosustain].
 - VueGen relies on the work of numerous open-source projects like [Streamlit](streamlit), [Quarto][quarto], and others. A big thank you to their authors for making this possible!
 - The vuegen logo was designed based on an image created by [Scriberia][scriberia] for The [Turing Way Community][turingway], which is shared under a CC-BY licence. The original image can be found at [Zenodo][zenodo-turingway].
 
 ## Citation
+
 If you use VueGen in your research or publications, please cite it as follows:
 
 **APA:**
@@ -175,6 +214,7 @@ Ayala-Ruano, S., Webel, H., & Santos, A. (2025). *VueGen: Automating the generat
 ```
 
 ## Contact and feedback
+
 We appreciate your feedback! If you have any comments, suggestions, or run into issues while using VueGen, feel free to [open an issue][new-issue] in this repository. Your input helps us make VueGen better for everyone. 
 
 [streamlit]: https://streamlit.io/ 
