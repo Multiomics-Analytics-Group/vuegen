@@ -189,8 +189,8 @@ jobs:
         run: |
           $TAG_NAME = $env:GITHUB_REF -replace 'refs/tags/', ''
           echo GITHUB_REF_NAME $GITHUB_REF_NAME
-          $TAG_NAME= $GITHUB_REF_NAME
-          $TAG_NAME= v0.3.0-alpha
+          $TAG_NAME = $GITHUB_REF_NAME
+          $TAG_NAME = 'v0.3.0-alpha'
           echo "Uploading vuegen_gui_${{ matrix.os.label }} to release $TAG_NAME"
           echo "Available files in build folder: gui/dist/"
           ls gui/dist/
