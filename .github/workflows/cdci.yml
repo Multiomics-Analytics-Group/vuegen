@@ -167,13 +167,13 @@ jobs:
         with:
           name: vuegen_gui_${{ matrix.os.label }}
           path: gui/dist/
-      - name: Upload Executable to a GitHub Release
-        if: startsWith(github.ref, 'refs/tags')
+      - name: Upload Executable to a GitHub Release)
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           TAG_NAME=${GITHUB_REF#refs/tags/}
-          cp 
+          TAG_NAME=0.3.0-alpha
+          echo "Uploading vuegen_gui_${{ matrix.os.label }} to release $TAG_NAME"
           gh release upload "$TAG_NAME" gui/dist/vuegen_gui.*#vuegen_gui_${{ matrix.os.label }}
         # https://cli.github.com/manual/gh_release_upload
         # either .app or .exe depending on the OS
