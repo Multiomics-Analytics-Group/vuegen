@@ -187,7 +187,8 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo GITHUB_REF_NAME $GITHUB_REF_NAME
+          echo "GITHUB_REF_NAME in env $env:GITHUB_REF_NAME"
+          $GITHUB_REF_NAME = $env:GITHUB_REF_NAME
           echo "Uploading vuegen_gui_${{ matrix.os.label }} to release $GITHUB_REF_NAME"
           echo "Available files in build folder: gui/dist/"
           ls gui/dist/
