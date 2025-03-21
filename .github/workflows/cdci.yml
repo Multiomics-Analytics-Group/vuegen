@@ -183,14 +183,13 @@ jobs:
           gh release upload $GITHUB_REF_NAME vuegen_gui_${{ matrix.os.label }}.zip
         # .app is folder that needs to be zipped
       - name: Upload Windows Executable to a GitHub Release
-        if: startsWith(matrix.os.runner, 'windows')
+        if: startsWith(matrix.os.runner, 'windows') && startsWith(github.ref, 'refs/tags')
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo GITHUB_REF_NAME in env $env:GITHUB_REF_NAME
+          echo "GITHUB_REF_NAME in env $env:GITHUB_REF_NAME"
           $GITHUB_REF_NAME = $env:GITHUB_REF_NAME
-            echo "Uploading vuegen_gui_${{ matrix.os.label }} to release $GITHUB_REF_NAME"
-          $GITHUB_REF_NAME = 'v0.3.0-beta'
+          echo "Uploading vuegen_gui_${{ matrix.os.label }} to release $GITHUB_REF_NAME"
           echo "Available files in build folder: gui/dist/"
           ls gui/dist/
           echo "Uploading..."
