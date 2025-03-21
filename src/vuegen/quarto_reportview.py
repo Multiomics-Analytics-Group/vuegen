@@ -877,8 +877,16 @@ with open('{(Path("..") / markdown.file_path).as_posix()}', 'r') as markdown_fil
         # Dictionary to hold the imports for each component type
         components_imports = {
             "plot": {
-                r.PlotType.ALTAIR: ["import altair as alt", "import requests", "import json"],
-                r.PlotType.PLOTLY: ["import plotly.io as pio", "import requests", "import json"],
+                r.PlotType.ALTAIR: [
+                    "import altair as alt",
+                    "import requests",
+                    "import json",
+                ],
+                r.PlotType.PLOTLY: [
+                    "import plotly.io as pio",
+                    "import requests",
+                    "import json",
+                ],
             },
             "dataframe": [
                 "import pandas as pd",
