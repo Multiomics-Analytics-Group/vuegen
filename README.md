@@ -18,6 +18,7 @@
 - [About the project](#about-the-project)
 - [Installation](#installation)
 - [Execution](#execution)
+- [GUI](#gui)
 - [Case studies](#case-studies)
 - [Web application deployment](#web-application-deployment)
 - [Contributing](#contributing)
