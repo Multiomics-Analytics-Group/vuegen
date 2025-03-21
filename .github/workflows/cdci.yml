@@ -175,9 +175,10 @@ jobs:
           echo GITHUB_REF_NAME $GITHUB_REF_NAME
           echo "Uploading vuegen_gui_${{ matrix.os.label }} to release $GITHUB_REF_NAME"
           echo "Available files in build folder: gui/dist/"
-          ls gui/dist/
+          cd gui/dist/
+          ls -lh
           echo "Zip .app folder"
-          zip -r vuegen_gui_${{ matrix.os.label }}.zip gui/dist/vuegen_gui.app/
+          zip -r vuegen_gui_${{ matrix.os.label }}.zip vuegen_gui.app/
           echo "Uploading..."
           gh release upload $GITHUB_REF_NAME vuegen_gui_${{ matrix.os.label }}.zip
         # .app is folder that needs to be zipped
