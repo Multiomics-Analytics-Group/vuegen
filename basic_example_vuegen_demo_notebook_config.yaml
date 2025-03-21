@@ -40,6 +40,12 @@ sections:
       plot_type: altair
       title: Saline Metagenomics Samples Map Altair
     - caption: ''
+      component_type: plot
+      description: ''
+      file_path: /home/runner/work/vuegen/vuegen/docs/example_data/Basic_example_vuegen_demo_notebook/1_Plots/1_Interactive_plots/6_plotly_plot_R.json
+      plot_type: plotly
+      title: Plotly Plot R
+    - caption: ''
       component_type: markdown
       description: ''
       file_path: /home/runner/work/vuegen/vuegen/docs/example_data/Basic_example_vuegen_demo_notebook/1_Plots/1_Interactive_plots/description.md

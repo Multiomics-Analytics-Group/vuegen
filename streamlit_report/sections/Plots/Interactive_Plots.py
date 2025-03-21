@@ -1,7 +1,7 @@
-import json
-import altair as alt
 import requests
+import altair as alt
 import streamlit as st
+import json
 
 st.markdown('''<h3 style='text-align: center; color: #023558;'>Interactive Plots</h3>''', unsafe_allow_html=True)
 st.markdown('''<p style='text-align: center; color: #000000;'>Optional description for section.
@@ -10,6 +10,12 @@ st.markdown('''<h4 style='text-align: center; color: #2b8cbe;'>Top Species Plot 
 
 with open('example_data/Basic_example_vuegen_demo_notebook/1_Plots/1_Interactive_plots/1_top_species_plot_by_biome_plotly.json', 'r') as plot_file:
     plot_json = json.load(plot_file)
+
+# Keep only 'data' and 'layout' sections
+plot_json = {key: plot_json[key] for key in plot_json if key in ['data', 'layout']}
+
+# Remove 'frame' section in 'data'
+plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'} for entry in plot_json.get('data', [])]
 st.plotly_chart(plot_json, use_container_width=True)
 
 st.markdown('''<h4 style='text-align: center; color: #2b8cbe;'>Multiline Plot Altair</h4>''', unsafe_allow_html=True)
@@ -24,12 +30,24 @@ st.markdown('''<h4 style='text-align: center; color: #2b8cbe;'>Pie Plot Countrie
 
 with open('example_data/Basic_example_vuegen_demo_notebook/1_Plots/1_Interactive_plots/3_pie_plot_countries_plotly.json', 'r') as plot_file:
     plot_json = json.load(plot_file)
+
+# Keep only 'data' and 'layout' sections
+plot_json = {key: plot_json[key] for key in plot_json if key in ['data', 'layout']}
+
+# Remove 'frame' section in 'data'
+plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'} for entry in plot_json.get('data', [])]
 st.plotly_chart(plot_json, use_container_width=True)
 
 st.markdown('''<h4 style='text-align: center; color: #2b8cbe;'>Pie Plots Biomes Plotly</h4>''', unsafe_allow_html=True)
 
 with open('example_data/Basic_example_vuegen_demo_notebook/1_Plots/1_Interactive_plots/4_pie_plots_biomes_plotly.json', 'r') as plot_file:
     plot_json = json.load(plot_file)
+
+# Keep only 'data' and 'layout' sections
+plot_json = {key: plot_json[key] for key in plot_json if key in ['data', 'layout']}
+
+# Remove 'frame' section in 'data'
+plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'} for entry in plot_json.get('data', [])]
 st.plotly_chart(plot_json, use_container_width=True)
 
 st.markdown('''<h4 style='text-align: center; color: #2b8cbe;'>Saline Metagenomics Samples Map Altair</h4>''', unsafe_allow_html=True)
@@ -39,6 +57,18 @@ with open('example_data/Basic_example_vuegen_demo_notebook/1_Plots/1_Interactive
 
 altair_plot = alt.Chart.from_dict(plot_json)
 st.vega_lite_chart(json.loads(altair_plot.to_json()), use_container_width=True)
+
+st.markdown('''<h4 style='text-align: center; color: #2b8cbe;'>Plotly Plot R</h4>''', unsafe_allow_html=True)
+
+with open('example_data/Basic_example_vuegen_demo_notebook/1_Plots/1_Interactive_plots/6_plotly_plot_R.json', 'r') as plot_file:
+    plot_json = json.load(plot_file)
+
+# Keep only 'data' and 'layout' sections
+plot_json = {key: plot_json[key] for key in plot_json if key in ['data', 'layout']}
+
+# Remove 'frame' section in 'data'
+plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'} for entry in plot_json.get('data', [])]
+st.plotly_chart(plot_json, use_container_width=True)
 
 footer = '''<style type="text/css">
 .footer {

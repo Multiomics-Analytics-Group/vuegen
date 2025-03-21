@@ -1,9 +1,9 @@
 import requests
-import streamlit as st
-from st_aggrid import AgGrid, GridOptionsBuilder
-df_index = 1
 import pandas as pd
+import streamlit as st
 import json
+df_index = 1
+from st_aggrid import AgGrid, GridOptionsBuilder
 
 st.markdown('''<h3 style='text-align: center; color: #023558;'>Nestedness</h3>''', unsafe_allow_html=True)
 st.markdown('''<h4 style='text-align: center; color: #2b8cbe;'>Nestedness Random Subset</h4>''', unsafe_allow_html=True)
@@ -33,12 +33,24 @@ st.markdown('''<h4 style='text-align: center; color: #2b8cbe;'>All Samples</h4>'
 
 with open('example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/3_nestedness/2_all_samples.json', 'r') as plot_file:
     plot_json = json.load(plot_file)
+
+# Keep only 'data' and 'layout' sections
+plot_json = {key: plot_json[key] for key in plot_json if key in ['data', 'layout']}
+
+# Remove 'frame' section in 'data'
+plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'} for entry in plot_json.get('data', [])]
 st.plotly_chart(plot_json, use_container_width=True)
 
 st.markdown('''<h4 style='text-align: center; color: #2b8cbe;'>Plant Samples</h4>''', unsafe_allow_html=True)
 
 with open('example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/3_nestedness/3_plant_samples.json', 'r') as plot_file:
     plot_json = json.load(plot_file)
+
+# Keep only 'data' and 'layout' sections
+plot_json = {key: plot_json[key] for key in plot_json if key in ['data', 'layout']}
+
+# Remove 'frame' section in 'data'
+plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'} for entry in plot_json.get('data', [])]
 st.plotly_chart(plot_json, use_container_width=True)
 
 st.markdown('''<h4 style='text-align: center; color: #2b8cbe;'>Animal Samples</h4>''', unsafe_allow_html=True)

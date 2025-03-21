@@ -1,6 +1,6 @@
+import json
 import requests
 import streamlit as st
-import json
 
 st.markdown('''<h3 style='text-align: center; color: #023558;'>Average Copy Number</h3>''', unsafe_allow_html=True)
 st.markdown('''<h4 style='text-align: center; color: #2b8cbe;'>Average Copy Number Emp Ontology Level2</h4>''', unsafe_allow_html=True)
@@ -11,6 +11,12 @@ st.markdown('''<h4 style='text-align: center; color: #2b8cbe;'>Average Copy Numb
 
 with open('example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/2_average_copy_number/2_average_copy_number_emp_ontology_level3.json', 'r') as plot_file:
     plot_json = json.load(plot_file)
+
+# Keep only 'data' and 'layout' sections
+plot_json = {key: plot_json[key] for key in plot_json if key in ['data', 'layout']}
+
+# Remove 'frame' section in 'data'
+plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'} for entry in plot_json.get('data', [])]
 st.plotly_chart(plot_json, use_container_width=True)
 
 footer = '''<style type="text/css">
