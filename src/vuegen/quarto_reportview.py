@@ -571,14 +571,25 @@ plot_json = response.text\n"""
         else:  # If it's a local file
             plot_code += f"""
 with open('{(Path("..") / plot.file_path).as_posix()}', 'r') as plot_file:
-    plot_json = plot_file.read()\n"""
+    plot_json = json.load(plot_file)\n"""
         # Add specific code for each visualization tool
         if plot.plot_type == r.PlotType.PLOTLY:
             plot_code += """
-fig_plotly = pio.from_json(plot_json)
+# Keep only 'data' and 'layout' sections
+plot_json = {key: plot_json[key] for key in plot_json if key in ['data', 'layout']}\n
+# Remove 'frame' section in 'data'
+plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'} for entry in plot_json.get('data', [])]\n
+# Convert JSON to string
+plot_json_str = json.dumps(plot_json)\n
+# Create the plotly plot
+fig_plotly = pio.from_json(plot_json_str)
 fig_plotly.update_layout(width=950, height=500)\n"""
         elif plot.plot_type == r.PlotType.ALTAIR:
-            plot_code += """fig_altair = alt.Chart.from_json(plot_json).properties(width=900, height=400)"""
+            plot_code += """
+# Convert JSON to string
+plot_json_str = json.dumps(plot_json)\n
+# Create the plotly plot
+fig_altair = alt.Chart.from_json(plot_json_str).properties(width=900, height=400)\n"""
         elif plot.plot_type == r.PlotType.INTERACTIVE_NETWORK:
             # Generate the HTML embedding for interactive networks
             if is_url(plot.file_path) and plot.file_path.endswith(".html"):
@@ -866,8 +877,8 @@ with open('{(Path("..") / markdown.file_path).as_posix()}', 'r') as markdown_fil
         # Dictionary to hold the imports for each component type
         components_imports = {
             "plot": {
-                r.PlotType.ALTAIR: ["import altair as alt", "import requests"],
-                r.PlotType.PLOTLY: ["import plotly.io as pio", "import requests"],
+                r.PlotType.ALTAIR: ["import altair as alt", "import requests", "import json"],
+                r.PlotType.PLOTLY: ["import plotly.io as pio", "import requests", "import json"],
             },
             "dataframe": [
                 "import pandas as pd",

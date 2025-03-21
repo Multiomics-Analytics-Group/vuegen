@@ -570,7 +570,13 @@ with open('{Path(plot.file_path).as_posix()}', 'r') as plot_file:
 
         # Add specific code for each visualization tool
         if plot.plot_type == r.PlotType.PLOTLY:
-            plot_code += "st.plotly_chart(plot_json, use_container_width=True)\n"
+            plot_code += """
+# Keep only 'data' and 'layout' sections
+plot_json = {key: plot_json[key] for key in plot_json if key in ['data', 'layout']}
+
+# Remove 'frame' section in 'data'
+plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'} for entry in plot_json.get('data', [])]
+st.plotly_chart(plot_json, use_container_width=True)\n"""
 
         elif plot.plot_type == r.PlotType.ALTAIR:
             plot_code += """
@@ -986,6 +992,4 @@ if prompt := st.chat_input("Enter your prompt here:"):
             component_imports.append("df_index = 1")
 
         # Return the list of import statements
-        return component_imports
-
         return component_imports
