@@ -1,7 +1,7 @@
-import streamlit as st
-df_index = 1
 import requests
+import streamlit as st
 from st_aggrid import AgGrid, GridOptionsBuilder
+df_index = 1
 import pandas as pd
 
 st.markdown('''<h3 style='text-align: center; color: #023558;'>Phyla Association Networks</h3>''', unsafe_allow_html=True)

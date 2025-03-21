@@ -1,5 +1,5 @@
-import streamlit as st
 import requests
+import streamlit as st
 
 st.markdown('''<h3 style='text-align: center; color: #023558;'>Interactive Networks</h3>''', unsafe_allow_html=True)
 st.markdown('''<p style='text-align: center; color: #000000;'>Optional description for subsection.
