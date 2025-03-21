@@ -39,6 +39,7 @@ include-after-body:
 from itables import show, init_notebook_mode
 import altair as alt
 import dataframe_image as dfi
+import json
 import pandas as pd
 import plotly.io as pio
 import requests
@@ -79,9 +80,19 @@ show(df, classes="display nowrap compact", lengthMenu=[3, 5, 10])
 #| fig-cap: ""
 
 with open('/home/runner/work/vuegen/vuegen/docs/example_data/Earth_microbiome_vuegen_demo_notebook/1_Exploratory_data_analysis/1_sample_exploration/3_plant_samples_map.json', 'r') as plot_file:
-    plot_json = plot_file.read()
+    plot_json = json.load(plot_file)
 
-fig_plotly = pio.from_json(plot_json)
+# Keep only 'data' and 'layout' sections
+plot_json = {key: plot_json[key] for key in plot_json if key in ['data', 'layout']}
+
+# Remove 'frame' section in 'data'
+plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'} for entry in plot_json.get('data', [])]
+
+# Convert JSON to string
+plot_json_str = json.dumps(plot_json)
+
+# Create the plotly plot
+fig_plotly = pio.from_json(plot_json_str)
 fig_plotly.update_layout(width=950, height=500)
 
 fig_plotly.show()
@@ -93,8 +104,14 @@ fig_plotly.show()
 #| fig-cap: ""
 
 with open('/home/runner/work/vuegen/vuegen/docs/example_data/Earth_microbiome_vuegen_demo_notebook/1_Exploratory_data_analysis/1_sample_exploration/4_saline_samples_map.json', 'r') as plot_file:
-    plot_json = plot_file.read()
-fig_altair = alt.Chart.from_json(plot_json).properties(width=900, height=400)
+    plot_json = json.load(plot_file)
+
+# Convert JSON to string
+plot_json_str = json.dumps(plot_json)
+
+# Create the plotly plot
+fig_altair = alt.Chart.from_json(plot_json_str).properties(width=900, height=400)
+
 fig_altair
 ```
 
@@ -116,9 +133,19 @@ This subsection contains the alpha diversity analysis of the EMP dataset.
 #| fig-cap: ""
 
 with open('/home/runner/work/vuegen/vuegen/docs/example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/1_alpha_diversity/2_alpha_diversity_free_living_samples.json', 'r') as plot_file:
-    plot_json = plot_file.read()
+    plot_json = json.load(plot_file)
 
-fig_plotly = pio.from_json(plot_json)
+# Keep only 'data' and 'layout' sections
+plot_json = {key: plot_json[key] for key in plot_json if key in ['data', 'layout']}
+
+# Remove 'frame' section in 'data'
+plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'} for entry in plot_json.get('data', [])]
+
+# Convert JSON to string
+plot_json_str = json.dumps(plot_json)
+
+# Create the plotly plot
+fig_plotly = pio.from_json(plot_json_str)
 fig_plotly.update_layout(width=950, height=500)
 
 fig_plotly.show()
@@ -134,9 +161,19 @@ fig_plotly.show()
 #| fig-cap: ""
 
 with open('/home/runner/work/vuegen/vuegen/docs/example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/2_average_copy_number/2_average_copy_number_emp_ontology_level3.json', 'r') as plot_file:
-    plot_json = plot_file.read()
+    plot_json = json.load(plot_file)
 
-fig_plotly = pio.from_json(plot_json)
+# Keep only 'data' and 'layout' sections
+plot_json = {key: plot_json[key] for key in plot_json if key in ['data', 'layout']}
+
+# Remove 'frame' section in 'data'
+plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'} for entry in plot_json.get('data', [])]
+
+# Convert JSON to string
+plot_json_str = json.dumps(plot_json)
+
+# Create the plotly plot
+fig_plotly = pio.from_json(plot_json_str)
 fig_plotly.update_layout(width=950, height=500)
 
 fig_plotly.show()
@@ -159,9 +196,19 @@ show(df, classes="display nowrap compact", lengthMenu=[3, 5, 10])
 #| fig-cap: ""
 
 with open('/home/runner/work/vuegen/vuegen/docs/example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/3_nestedness/2_all_samples.json', 'r') as plot_file:
-    plot_json = plot_file.read()
+    plot_json = json.load(plot_file)
 
-fig_plotly = pio.from_json(plot_json)
+# Keep only 'data' and 'layout' sections
+plot_json = {key: plot_json[key] for key in plot_json if key in ['data', 'layout']}
+
+# Remove 'frame' section in 'data'
+plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'} for entry in plot_json.get('data', [])]
+
+# Convert JSON to string
+plot_json_str = json.dumps(plot_json)
+
+# Create the plotly plot
+fig_plotly = pio.from_json(plot_json_str)
 fig_plotly.update_layout(width=950, height=500)
 
 fig_plotly.show()
@@ -173,9 +220,19 @@ fig_plotly.show()
 #| fig-cap: ""
 
 with open('/home/runner/work/vuegen/vuegen/docs/example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/3_nestedness/3_plant_samples.json', 'r') as plot_file:
-    plot_json = plot_file.read()
+    plot_json = json.load(plot_file)
 
-fig_plotly = pio.from_json(plot_json)
+# Keep only 'data' and 'layout' sections
+plot_json = {key: plot_json[key] for key in plot_json if key in ['data', 'layout']}
+
+# Remove 'frame' section in 'data'
+plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'} for entry in plot_json.get('data', [])]
+
+# Convert JSON to string
+plot_json_str = json.dumps(plot_json)
+
+# Create the plotly plot
+fig_plotly = pio.from_json(plot_json_str)
 fig_plotly.update_layout(width=950, height=500)
 
 fig_plotly.show()
