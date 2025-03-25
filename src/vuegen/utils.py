@@ -737,15 +737,27 @@ def get_logger(
 
     return logger, log_file
 
-
-def print_completion_message(report_type: str):
+def get_completion_message(report_type: str, config_path: str) -> str:
     """
-    Prints a formatted completion message after report generation.
+    Generate a formatted completion message after report generation.
+
+    Parameters
+    ----------
+    report_type : str
+        The type of report generated (e.g., "streamlit", "html").
+    config_path : str
+        The path to the configuration file used for generating the report.
+
+    Returns
+    -------
+    str
+        A formatted string containing the completion message.
     """
     border = "─" * 65  # Creates a separator line
+    
     if report_type == "streamlit":
-        print(
-            """🚀 Streamlit Report Generated!
+        message = (
+            f"""🚀 Streamlit Report Generated!
 
 📂 All scripts to build the Streamlit app are available at:
     streamlit_report/sections
@@ -757,10 +769,13 @@ def print_completion_message(report_type: str):
 
 🛠️ Advanced users can modify the Python scripts directly in:
     streamlit_report/sections
+
+⚙️ Configuration file used:
+    {config_path}
 """
         )
     else:
-        print(
+        message = (
             f"""🚀 {report_type.capitalize()} Report Generated!
 
 📂 Your {report_type} report is available at:
@@ -770,11 +785,13 @@ def print_completion_message(report_type: str):
 
 🛠️ Advanced users can modify the report template directly in:
     quarto_report/quarto_report.qmd
+
+⚙️ Configuration file used:
+    {config_path}
 """
         )
-
-    print(border)
-
+    
+    return f"{message}\n{border}"
 
 ## REPORT FORMATTING
 def generate_footer() -> str:

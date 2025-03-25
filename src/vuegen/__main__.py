@@ -2,7 +2,7 @@ import sys
 from pathlib import Path
 
 from vuegen import report_generator
-from vuegen.utils import get_logger, get_parser, print_completion_message
+from vuegen.utils import get_logger, get_parser, get_completion_message
 
 
 def main():
@@ -52,8 +52,7 @@ def main():
 
     # Print completion message
     # ! Could use now report_dir and config_path as information
-    print_completion_message(report_type)
-
+    print(get_completion_message(report_type, config_path))
 
 if __name__ == "__main__":
     main()
