@@ -16,6 +16,7 @@ def get_report(
     config_path: str = None,
     dir_path: str = None,
     streamlit_autorun: bool = False,
+    quarto_checks: bool = False,
     output_dir: Path = None,
 ) -> tuple[str, str]:
     """
@@ -97,7 +98,7 @@ def get_report(
             )
         report_dir = output_dir / "quarto_report"
         static_files_dir = report_dir / "static"
-        quarto_report = QuartoReportView(report=report, report_type=report_type)
+        quarto_report = QuartoReportView(report=report, report_type=report_type, checks=quarto_checks)
         quarto_report.generate_report(
             output_dir=report_dir, static_dir=static_files_dir
         )
