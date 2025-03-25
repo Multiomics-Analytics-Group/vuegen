@@ -20,8 +20,14 @@ class QuartoReportView(r.ReportView):
     BASE_DIR = Path("quarto_report")
     STATIC_FILES_DIR = BASE_DIR / "static"
 
-    def __init__(self, report: r.Report, report_type: r.ReportType):
+    def __init__(
+        self, 
+        report: r.Report, 
+        report_type: r.ReportType,
+        quarto_cheks: bool = False,
+    ):
         super().__init__(report=report, report_type=report_type)
+        self.quarto_cheks = quarto_cheks
         self.BUNDLED_EXECUTION = False
         self.quarto_path = "quarto"
         # self.env_vars = os.environ.copy()
@@ -190,7 +196,7 @@ class QuartoReportView(r.ReportView):
             r.ReportType.PDF,
             r.ReportType.DOCX,
             r.ReportType.ODT,
-        ]:
+        ] and self.quarto_cheks:
             subprocess.run(
                 [self.quarto_path, "install", "tinytex", "--no-prompt"],
                 check=True,

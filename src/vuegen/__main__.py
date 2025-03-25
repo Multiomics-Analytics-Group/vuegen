@@ -15,6 +15,7 @@ def main():
     dir_path = args.directory
     report_type = args.report_type
     streamlit_autorun = args.streamlit_autorun
+    quarto_cheks = args.quarto_checks
 
     # Determine the report name for logger suffix
     if config_path:
@@ -38,6 +39,7 @@ def main():
     # Initialize logger
     logger, logfile = get_logger(f"{logger_suffix}")
     logger.info("logfile: %s", logfile)
+    
     # Generate the report
     _, _ = report_generator.get_report(
         report_type=report_type,
@@ -45,6 +47,7 @@ def main():
         config_path=config_path,
         dir_path=dir_path,
         streamlit_autorun=streamlit_autorun,
+        quarto_checks=quarto_cheks,
     )
 
     # Print completion message

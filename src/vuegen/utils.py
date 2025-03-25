@@ -232,6 +232,13 @@ def get_parser(prog_name: str, others: dict = {}) -> argparse.Namespace:
         default=False,
         help="Automatically run the Streamlit app after report generation.",
     )
+    parser.add_argument(
+        "-qt_cheks",
+        "--quarto_cheks",
+        action="store_true",  # Automatically sets True if the flag is passed
+        default=False,
+        help="Check if Quarto is installed and available for report generation.",
+    )
 
     # Parse arguments
     return parser
