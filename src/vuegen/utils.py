@@ -737,6 +737,7 @@ def get_logger(
 
     return logger, log_file
 
+
 def get_completion_message(report_type: str, config_path: str) -> str:
     """
     Generate a formatted completion message after report generation.
@@ -754,10 +755,9 @@ def get_completion_message(report_type: str, config_path: str) -> str:
         A formatted string containing the completion message.
     """
     border = "─" * 65  # Creates a separator line
-    
+
     if report_type == "streamlit":
-        message = (
-            f"""🚀 Streamlit Report Generated!
+        message = f"""🚀 Streamlit Report Generated!
 
 📂 All scripts to build the Streamlit app are available at:
     streamlit_report/sections
@@ -773,10 +773,8 @@ def get_completion_message(report_type: str, config_path: str) -> str:
 ⚙️ Configuration file used:
     {config_path}
 """
-        )
     else:
-        message = (
-            f"""🚀 {report_type.capitalize()} Report Generated!
+        message = f"""🚀 {report_type.capitalize()} Report Generated!
 
 📂 Your {report_type} report is available at:
     quarto_report
@@ -789,9 +787,9 @@ def get_completion_message(report_type: str, config_path: str) -> str:
 ⚙️ Configuration file used:
     {config_path}
 """
-        )
-    
+
     return f"{message}\n{border}"
+
 
 ## REPORT FORMATTING
 def generate_footer() -> str:

@@ -39,7 +39,7 @@ def main():
     # Initialize logger
     logger, logfile = get_logger(f"{logger_suffix}")
     logger.info("logfile: %s", logfile)
-    
+
     # Generate the report
     _, _ = report_generator.get_report(
         report_type=report_type,
@@ -53,6 +53,7 @@ def main():
     # Print completion message
     # ! Could use now report_dir and config_path as information
     print(get_completion_message(report_type, config_path))
+
 
 if __name__ == "__main__":
     main()
