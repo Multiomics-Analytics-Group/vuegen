@@ -98,7 +98,9 @@ def get_report(
             )
         report_dir = output_dir / "quarto_report"
         static_files_dir = report_dir / "static"
-        quarto_report = QuartoReportView(report=report, report_type=report_type, checks=quarto_checks)
+        quarto_report = QuartoReportView(
+            report=report, report_type=report_type, quarto_checks=quarto_checks
+        )
         quarto_report.generate_report(
             output_dir=report_dir, static_dir=static_files_dir
         )
