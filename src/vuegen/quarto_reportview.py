@@ -24,10 +24,10 @@ class QuartoReportView(r.ReportView):
         self,
         report: r.Report,
         report_type: r.ReportType,
-        quarto_cheks: bool = False,
+        quarto_checks: bool = False,
     ):
         super().__init__(report=report, report_type=report_type)
-        self.quarto_cheks = quarto_cheks
+        self.quarto_checks = quarto_checks
         self.BUNDLED_EXECUTION = False
         self.quarto_path = "quarto"
         # self.env_vars = os.environ.copy()
