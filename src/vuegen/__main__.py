@@ -2,7 +2,7 @@ import sys
 from pathlib import Path
 
 from vuegen import report_generator
-from vuegen.utils import get_logger, get_parser, get_completion_message
+from vuegen.utils import get_completion_message, get_logger, get_parser
 
 
 def main():
