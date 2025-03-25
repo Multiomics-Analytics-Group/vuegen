@@ -14,9 +14,9 @@ def main():
     config_path = args.config
     dir_path = args.directory
     report_type = args.report_type
+    output_dir = args.output_directory
     streamlit_autorun = args.streamlit_autorun
     quarto_cheks = args.quarto_checks
-    output_dir = args.output_dir
 
     # Determine the report name for logger suffix
     if config_path:
