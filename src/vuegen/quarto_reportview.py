@@ -219,7 +219,7 @@ class QuartoReportView(r.ReportView):
                     f"{file_path_to_qmd.stem}_revealjs.html"
                 )
             elif self.report_type == r.ReportType.JUPYTER:
-                out_path = file_path_to_qmd.with_suffix(".ipynb")
+                out_path = file_path_to_qmd.with_suffix(".html")
             else:
                 out_path = file_path_to_qmd.with_suffix(f".{self.report_type.lower()}")
             if not out_path.exists():
