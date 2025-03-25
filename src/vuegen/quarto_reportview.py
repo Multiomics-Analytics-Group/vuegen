@@ -210,11 +210,15 @@ class QuartoReportView(r.ReportView):
                 args,
                 check=True,
             )
-            out_path = file_path_to_qmd.with_suffix(f".{self.report_type.lower()}")
-            if self.report_type in [r.ReportType.REVEALJS, r.ReportType.JUPYTER]:
-                out_path = file_path_to_qmd.with_suffix(".html")
+            if self.report_type == r.ReportType.REVEALJS:
+                out_path = file_path_to_qmd.with_name(f"{file_path_to_qmd.stem}_revealjs.html")
+            elif self.report_type == r.ReportType.JUPYTER:
+                out_path = file_path_to_qmd.with_suffix(".ipynb")
+            else:
+                out_path = file_path_to_qmd.with_suffix(f".{self.report_type.lower()}")
             if not out_path.exists():
                 raise FileNotFoundError(f"Report file could not be created: {out_path}")
+            
             if self.report_type == r.ReportType.JUPYTER:
                 args = [self.quarto_path, "convert", str(file_path_to_qmd)]
                 subprocess.run(
