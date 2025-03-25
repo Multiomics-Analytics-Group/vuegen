@@ -72,7 +72,7 @@ jobs:
       - name: quarto pdf report
         run: |
           cd docs
-          vuegen -dir example_data/Earth_microbiome_vuegen_demo_notebook -rt pdf
+          vuegen -dir example_data/Earth_microbiome_vuegen_demo_notebook -rt pdf -qt_checks
           vuegen -c example_data/Earth_microbiome_vuegen_demo_notebook/Earth_microbiome_vuegen_demo_notebook_config.yaml -rt pdf
       - name: quarto docx report
         run: |
