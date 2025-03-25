@@ -226,6 +226,13 @@ def get_parser(prog_name: str, others: dict = {}) -> argparse.Namespace:
         help="Type of the report to generate (streamlit, html, pdf, docx, odt, revealjs, pptx, or jupyter).",
     )
     parser.add_argument(
+        "-output_dir",
+        "--output_directory",
+        type=str,
+        default=None,
+        help="Path to the output directory for the generated report.",
+    )
+    parser.add_argument(
         "-st_autorun",
         "--streamlit_autorun",
         action="store_true",  # Automatically sets True if the flag is passed
@@ -239,7 +246,6 @@ def get_parser(prog_name: str, others: dict = {}) -> argparse.Namespace:
         default=False,
         help="Check if Quarto is installed and available for report generation.",
     )
-
     # Parse arguments
     return parser
 
