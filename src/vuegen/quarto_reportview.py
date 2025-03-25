@@ -199,7 +199,7 @@ class QuartoReportView(r.ReportView):
                 r.ReportType.DOCX,
                 r.ReportType.ODT,
             ]
-            and self.quarto_cheks
+            and self.quarto_checks
         ):
             subprocess.run(
                 [self.quarto_path, "install", "tinytex", "--no-prompt"],
