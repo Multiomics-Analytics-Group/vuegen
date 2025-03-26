@@ -20,8 +20,14 @@ class QuartoReportView(r.ReportView):
     BASE_DIR = Path("quarto_report")
     STATIC_FILES_DIR = BASE_DIR / "static"
 
-    def __init__(self, report: r.Report, report_type: r.ReportType):
+    def __init__(
+        self,
+        report: r.Report,
+        report_type: r.ReportType,
+        quarto_checks: bool = False,
+    ):
         super().__init__(report=report, report_type=report_type)
+        self.quarto_checks = quarto_checks
         self.BUNDLED_EXECUTION = False
         self.quarto_path = "quarto"
         # self.env_vars = os.environ.copy()
@@ -186,11 +192,15 @@ class QuartoReportView(r.ReportView):
         self.report.logger.info(
             f"Running '{self.report.title}' '{self.report_type}' report with {args!r}"
         )
-        if self.report_type in [
-            r.ReportType.PDF,
-            r.ReportType.DOCX,
-            r.ReportType.ODT,
-        ]:
+        if (
+            self.report_type
+            in [
+                r.ReportType.PDF,
+                r.ReportType.DOCX,
+                r.ReportType.ODT,
+            ]
+            and self.quarto_checks
+        ):
             subprocess.run(
                 [self.quarto_path, "install", "tinytex", "--no-prompt"],
                 check=True,
@@ -204,11 +214,17 @@ class QuartoReportView(r.ReportView):
                 args,
                 check=True,
             )
-            out_path = file_path_to_qmd.with_suffix(f".{self.report_type.lower()}")
-            if self.report_type in [r.ReportType.REVEALJS, r.ReportType.JUPYTER]:
+            if self.report_type == r.ReportType.REVEALJS:
+                out_path = file_path_to_qmd.with_name(
+                    f"{file_path_to_qmd.stem}_revealjs.html"
+                )
+            elif self.report_type == r.ReportType.JUPYTER:
                 out_path = file_path_to_qmd.with_suffix(".html")
+            else:
+                out_path = file_path_to_qmd.with_suffix(f".{self.report_type.lower()}")
             if not out_path.exists():
                 raise FileNotFoundError(f"Report file could not be created: {out_path}")
+
             if self.report_type == r.ReportType.JUPYTER:
                 args = [self.quarto_path, "convert", str(file_path_to_qmd)]
                 subprocess.run(

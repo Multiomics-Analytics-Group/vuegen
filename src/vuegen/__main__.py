@@ -2,7 +2,7 @@ import sys
 from pathlib import Path
 
 from vuegen import report_generator
-from vuegen.utils import get_logger, get_parser, print_completion_message
+from vuegen.utils import get_completion_message, get_logger, get_parser
 
 
 def main():
@@ -14,7 +14,9 @@ def main():
     config_path = args.config
     dir_path = args.directory
     report_type = args.report_type
+    output_dir = args.output_directory
     streamlit_autorun = args.streamlit_autorun
+    quarto_cheks = args.quarto_checks
 
     # Determine the report name for logger suffix
     if config_path:
@@ -38,18 +40,21 @@ def main():
     # Initialize logger
     logger, logfile = get_logger(f"{logger_suffix}")
     logger.info("logfile: %s", logfile)
+
     # Generate the report
     _, _ = report_generator.get_report(
         report_type=report_type,
         logger=logger,
         config_path=config_path,
         dir_path=dir_path,
+        output_dir=output_dir,
         streamlit_autorun=streamlit_autorun,
+        quarto_checks=quarto_cheks,
     )
 
     # Print completion message
     # ! Could use now report_dir and config_path as information
-    print_completion_message(report_type)
+    print(get_completion_message(report_type, config_path))
 
 
 if __name__ == "__main__":

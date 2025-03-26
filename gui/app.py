@@ -36,7 +36,7 @@ from vuegen import report_generator
 
 # from vuegen.__main__ import main
 from vuegen.report import ReportType
-from vuegen.utils import get_logger, print_completion_message
+from vuegen.utils import get_completion_message, get_logger
 
 customtkinter.set_appearance_mode("system")
 customtkinter.set_default_color_theme("dark-blue")
@@ -159,6 +159,7 @@ def create_run_vuegen(
             kwargs["logger"].info("logfile: %s", log_file)
             kwargs["logger"].debug("sys.path: %s", sys.path)
             kwargs["logger"].debug("PATH (in app): %s ", os.environ["PATH"])
+            kwargs["quarto_checks"] = True  # for gui check local quarto installation
             report_dir, gen_config_path = report_generator.get_report(**kwargs)
             kwargs["logger"].info("Report generated at %s", report_dir)
             messagebox.showinfo(
@@ -169,7 +170,7 @@ def create_run_vuegen(
                 f"\n\nConfiguration file at:\n{gen_config_path}",
             )
             global hash_config_app  # ! fix this
-            print_completion_message(report_type.get())
+            get_completion_message(report_type.get())
             if hash(yaml.dump(config_app)) != hash_config_app:
                 with open(config_file, "w", encoding="utf-8") as f:
                     yaml.dump(config_app, f)
