@@ -1,9 +1,9 @@
-import requests
-import pandas as pd
+from st_aggrid import AgGrid, GridOptionsBuilder
 import streamlit as st
 import json
+import pandas as pd
 df_index = 1
-from st_aggrid import AgGrid, GridOptionsBuilder
+import requests
 
 st.markdown('''<h3 style='text-align: center; color: #023558;'>Nestedness</h3>''', unsafe_allow_html=True)
 st.markdown('''<h4 style='text-align: center; color: #2b8cbe;'>Nestedness Random Subset</h4>''', unsafe_allow_html=True)
