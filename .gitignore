@@ -118,6 +118,7 @@ logs/
 vuegen/logs/
 streamlit_report/
 quarto_report/
+output_docker/
 
 # VS Code
 .DS_Store

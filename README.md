@@ -129,8 +129,8 @@ Instead of installing VueGen locally, you can run it directly from a Docker cont
 ```bash
 docker run --rm \
   -v "$(pwd)/docs/example_data/Earth_microbiome_vuegen_demo_notebook:/home/appuser/Earth_microbiome_vuegen_demo_notebook" \
-  -v "$(pwd)/output_docker:/home/appuser/quarto_report" \
-  quay.io/dtu_biosustain_dsp/vuegen:docker --directory /home/appuser/Earth_microbiome_vuegen_demo_notebook --report_type streamlit
+  -v "$(pwd)/output_docker:/home/appuser/streamlit_report" \
+  quay.io/dtu_biosustain_dsp/vuegen:v0.3.1-docker --directory /home/appuser/Earth_microbiome_vuegen_demo_notebook --report_type streamlit
 ```
 
 ## GUI
