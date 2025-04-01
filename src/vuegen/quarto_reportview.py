@@ -861,7 +861,7 @@ with open('{(Path("..") / markdown.file_path).as_posix()}', 'r') as markdown_fil
             # Generate path for the DataFrame image
             df_image = Path(static_dir) / f"{dataframe.title.replace(' ', '_')}.png"
             dataframe_content.append(
-                f"df.dfi.export('{Path(df_image).resolve().as_posix()}', max_rows=10, max_cols=5)\n```\n"
+                f"df.dfi.export('{Path(df_image).resolve().as_posix()}', max_rows=10, max_cols=5, table_conversion='matplotlib')\n```\n"
             )
             # Use helper method to add centered image content
             dataframe_content.append(self._generate_image_content(df_image))
