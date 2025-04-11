@@ -12,16 +12,6 @@ from . import report as r
 from .utils import create_folder, generate_footer, is_url
 
 
-def make_valid_identifier(name: str) -> str:
-    """Create a valid Python identifier from a given name.
-
-    Used in streamlit report sections to build structure (pages).
-    """
-    ret = re.sub(r"[^a-zA-Z0-9]", "_", name)
-    if not ret[0].isalpha():
-        ret = "_" + ret
-    return ret
-
 
 class StreamlitReportView(r.WebAppReportView):
     """
