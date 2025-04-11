@@ -561,6 +561,15 @@ class ConfigManager:
         APICall
             An APICall object populated with the provided metadata.
         """
+        request_body = component_data.get("request_body")
+        parsed_body = None
+        if request_body:
+            try:
+                parsed_body = json.loads(request_body)
+            except json.JSONDecodeError as e:
+                self.logger.error(f"Failed to parse request_body JSON: {e}")
+                raise ValueError(f"Invalid JSON in request_body: {e}")
+
         return r.APICall(
             title=component_data["title"],
             logger=self.logger,
@@ -569,7 +578,7 @@ class ConfigManager:
             caption=component_data.get("caption"),
             headers=component_data.get("headers"),
             params=component_data.get("params"),
-            request_body=component_data.get("request_body"),
+            request_body=parsed_body,
         )
 
     def _create_chatbot_component(self, component_data: dict) -> r.ChatBot:
