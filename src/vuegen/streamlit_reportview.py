@@ -10,7 +10,7 @@ from streamlit.web import cli as stcli
 
 from . import report as r
 from .utils import create_folder, generate_footer, is_url
-
+from .utils.variables import make_valid_identifier
 
 
 class StreamlitReportView(r.WebAppReportView):
