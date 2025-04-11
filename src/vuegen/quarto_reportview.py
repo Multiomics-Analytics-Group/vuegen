@@ -1,5 +1,7 @@
+import logging
 import os
 import subprocess
+import sys
 from pathlib import Path
 from typing import List
 
@@ -18,8 +20,27 @@ class QuartoReportView(r.ReportView):
     BASE_DIR = Path("quarto_report")
     STATIC_FILES_DIR = BASE_DIR / "static"
 
-    def __init__(self, report: r.Report, report_type: r.ReportType):
+    def __init__(
+        self,
+        report: r.Report,
+        report_type: r.ReportType,
+        quarto_checks: bool = False,
+    ):
         super().__init__(report=report, report_type=report_type)
+        self.quarto_checks = quarto_checks
+        self.BUNDLED_EXECUTION = False
+        self.quarto_path = "quarto"
+        # self.env_vars = os.environ.copy()
+        if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+            self.report.logger.info("running in a PyInstaller bundle")
+            self.BUNDLED_EXECUTION = True
+            self.report.logger.debug(f"sys._MEIPASS: {sys._MEIPASS}")
+        else:
+            self.report.logger.info("running in a normal Python process")
+
+        self.report.logger.debug("env_vars (QuartoReport): %s", os.environ)
+        self.report.logger.debug(f"PATH: {os.environ['PATH']}")
+        self.report.logger.debug(f"sys.path: {sys.path}")
 
     def generate_report(
         self, output_dir: Path = BASE_DIR, static_dir: Path = STATIC_FILES_DIR
@@ -102,7 +123,10 @@ class QuartoReportView(r.ReportView):
                         # Generate content for the subsection
                         subsection_content, subsection_imports = (
                             self._generate_subsection(
-                                subsection, is_report_static, is_report_revealjs
+                                subsection,
+                                is_report_static,
+                                is_report_revealjs,
+                                static_dir=static_dir,
                             )
                         )
                         qmd_content.extend(subsection_content)
@@ -161,19 +185,54 @@ class QuartoReportView(r.ReportView):
         output_dir : str, optional
             The folder where the report was generated (default is 'sections').
         """
-        try:
+        # from quarto_cli import run_quarto # entrypoint of quarto-cli not in module?
+
+        file_path_to_qmd = Path(output_dir) / f"{self.BASE_DIR}.qmd"
+        args = [self.quarto_path, "render", str(file_path_to_qmd)]
+        self.report.logger.info(
+            f"Running '{self.report.title}' '{self.report_type}' report with {args!r}"
+        )
+        if (
+            self.report_type
+            in [
+                r.ReportType.PDF,
+                r.ReportType.DOCX,
+                r.ReportType.ODT,
+            ]
+            and self.quarto_checks
+        ):
             subprocess.run(
-                ["quarto", "render", str(Path(output_dir) / f"{self.BASE_DIR}.qmd")],
+                [self.quarto_path, "install", "tinytex", "--no-prompt"],
                 check=True,
             )
+            subprocess.run(
+                [self.quarto_path, "install", "chromium", "--no-prompt"],
+                check=True,
+            )
+        try:
+            subprocess.run(
+                args,
+                check=True,
+            )
+            if self.report_type == r.ReportType.REVEALJS:
+                out_path = file_path_to_qmd.with_name(
+                    f"{file_path_to_qmd.stem}_revealjs.html"
+                )
+            elif self.report_type == r.ReportType.JUPYTER:
+                out_path = file_path_to_qmd.with_suffix(".html")
+            else:
+                out_path = file_path_to_qmd.with_suffix(f".{self.report_type.lower()}")
+            if not out_path.exists():
+                raise FileNotFoundError(f"Report file could not be created: {out_path}")
+
             if self.report_type == r.ReportType.JUPYTER:
+                args = [self.quarto_path, "convert", str(file_path_to_qmd)]
                 subprocess.run(
-                    [
-                        "quarto",
-                        "convert",
-                        str(Path(output_dir) / f"{self.BASE_DIR}.qmd"),
-                    ],
+                    args,
                     check=True,
+                )
+                self.report.logger.info(
+                    f"Converted '{self.report.title}' '{self.report_type}' report to Jupyter Notebook after execution"
                 )
             self.report.logger.info(
                 f"'{self.report.title}' '{self.report_type}' report rendered"
@@ -183,11 +242,11 @@ class QuartoReportView(r.ReportView):
                 f"Error running '{self.report.title}' {self.report_type} report: {str(e)}"
             )
             raise
-        except FileNotFoundError as e:
-            self.report.logger.error(
-                f"Quarto is not installed. Please install Quarto to run the report: {str(e)}"
-            )
-            raise
+        # except FileNotFoundError as e:
+        #     self.report.logger.error(
+        #         f"Quarto is not installed. Please install Quarto to run the report: {str(e)}"
+        #     )
+        #     raise
 
     def _create_yaml_header(self) -> str:
         """
@@ -205,6 +264,7 @@ fig-align: center
 execute:
   echo: false
   output: asis
+jupyter: python3
 format:"""
 
         # Define format-specific YAML configurations
@@ -247,7 +307,7 @@ include-after-body:
             \\usepackage{hyperref}
             \\clearpairofpagestyles
             \\lofoot{This report was generated with \\href{https://github.com/Multiomics-Analytics-Group/vuegen}{VueGen} | \\copyright{} 2025 \\href{https://github.com/Multiomics-Analytics-Group}{Multiomics Network Analytics Group}}
-            \\rofoot{\pagemark}""",
+            \\rofoot{\\pagemark}""",
             r.ReportType.DOCX: """
   docx:
     toc: false""",
@@ -330,7 +390,11 @@ include-after-body:
         return yaml_header
 
     def _generate_subsection(
-        self, subsection, is_report_static, is_report_revealjs
+        self,
+        subsection,
+        is_report_static,
+        is_report_revealjs,
+        static_dir: str,
     ) -> tuple[List[str], List[str]]:
         """
         Generate code to render components (plots, dataframes, markdown) in the given subsection,
@@ -344,6 +408,8 @@ include-after-body:
             A boolean indicating whether the report is static or interactive.
         is_report_revealjs : bool
             A boolean indicating whether the report is in revealjs format.
+        static_dir : str
+            The folder where the static files will be saved.
         Returns
         -------
         tuple : (List[str], List[str])
@@ -367,11 +433,15 @@ include-after-body:
 
             if component.component_type == r.ComponentType.PLOT:
                 subsection_content.extend(
-                    self._generate_plot_content(component, is_report_static)
+                    self._generate_plot_content(
+                        component, is_report_static, static_dir=static_dir
+                    )
                 )
             elif component.component_type == r.ComponentType.DATAFRAME:
                 subsection_content.extend(
-                    self._generate_dataframe_content(component, is_report_static)
+                    self._generate_dataframe_content(
+                        component, is_report_static, static_dir=static_dir
+                    )
                 )
             elif (
                 component.component_type == r.ComponentType.MARKDOWN
@@ -397,7 +467,7 @@ include-after-body:
         return subsection_content, subsection_imports
 
     def _generate_plot_content(
-        self, plot, is_report_static, static_dir: str = STATIC_FILES_DIR
+        self, plot, is_report_static, static_dir: str
     ) -> List[str]:
         """
         Generate content for a plot component based on the report type.
@@ -406,8 +476,8 @@ include-after-body:
         ----------
         plot : Plot
             The plot component to generate content for.
-        static_dir : str, optional
-            The folder where the static files will be saved (default is STATIC_FILES_DIR).
+        static_dir : str
+            The folder where the static files will be saved.
 
         Returns
         -------
@@ -467,7 +537,7 @@ include-after-body:
 
                 # Add code to generate network depending on the report type
                 if is_report_static:
-                    plot.save_netwrok_image(networkx_graph, static_plot_path, "png")
+                    plot.save_network_image(networkx_graph, static_plot_path, "png")
                     plot_content.append(self._generate_image_content(static_plot_path))
                 else:
                     plot_content.append(self._generate_plot_code(plot, html_plot_file))
@@ -517,14 +587,25 @@ plot_json = response.text\n"""
         else:  # If it's a local file
             plot_code += f"""
 with open('{(Path("..") / plot.file_path).as_posix()}', 'r') as plot_file:
-    plot_json = plot_file.read()\n"""
+    plot_json = json.load(plot_file)\n"""
         # Add specific code for each visualization tool
         if plot.plot_type == r.PlotType.PLOTLY:
             plot_code += """
-fig_plotly = pio.from_json(plot_json)
+# Keep only 'data' and 'layout' sections
+plot_json = {key: plot_json[key] for key in plot_json if key in ['data', 'layout']}\n
+# Remove 'frame' section in 'data'
+plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'} for entry in plot_json.get('data', [])]\n
+# Convert JSON to string
+plot_json_str = json.dumps(plot_json)\n
+# Create the plotly plot
+fig_plotly = pio.from_json(plot_json_str)
 fig_plotly.update_layout(width=950, height=500)\n"""
         elif plot.plot_type == r.PlotType.ALTAIR:
-            plot_code += """fig_altair = alt.Chart.from_json(plot_json).properties(width=900, height=400)"""
+            plot_code += """
+# Convert JSON to string
+plot_json_str = json.dumps(plot_json)\n
+# Create the plotly plot
+fig_altair = alt.Chart.from_json(plot_json_str).properties(width=900, height=400)\n"""
         elif plot.plot_type == r.PlotType.INTERACTIVE_NETWORK:
             # Generate the HTML embedding for interactive networks
             if is_url(plot.file_path) and plot.file_path.endswith(".html"):
@@ -539,7 +620,9 @@ fig_plotly.update_layout(width=950, height=500)\n"""
 </div>\n"""
         return plot_code
 
-    def _generate_dataframe_content(self, dataframe, is_report_static) -> List[str]:
+    def _generate_dataframe_content(
+        self, dataframe, is_report_static, static_dir: str
+    ) -> List[str]:
         """
         Generate content for a DataFrame component based on the report type.
 
@@ -549,6 +632,8 @@ fig_plotly.update_layout(width=950, height=500)\n"""
             The dataframe component to add to content.
         is_report_static : bool
             A boolean indicating whether the report is static or interactive.
+        static_dir : str
+            The folder where the static files will be saved.
 
         Returns
         -------
@@ -598,7 +683,9 @@ fig_plotly.update_layout(width=950, height=500)\n"""
             )
 
             # Display the dataframe
-            dataframe_content.extend(self._show_dataframe(dataframe, is_report_static))
+            dataframe_content.extend(
+                self._show_dataframe(dataframe, is_report_static, static_dir=static_dir)
+            )
 
         except Exception as e:
             self.report.logger.error(
@@ -750,7 +837,7 @@ with open('{(Path("..") / markdown.file_path).as_posix()}', 'r') as markdown_fil
             )
 
     def _show_dataframe(
-        self, dataframe, is_report_static, static_dir: str = STATIC_FILES_DIR
+        self, dataframe, is_report_static, static_dir: str
     ) -> List[str]:
         """
         Appends either a static image or an interactive representation of a DataFrame to the content list.
@@ -761,8 +848,8 @@ with open('{(Path("..") / markdown.file_path).as_posix()}', 'r') as markdown_fil
             The DataFrame object containing the data to display.
         is_report_static : bool
             Determines if the report is in a static format (e.g., PDF) or interactive (e.g., HTML).
-        static_dir : str, optional
-            The folder where the static files will be saved (default is STATIC_FILES_DIR).
+        static_dir : str
+            The folder where the static files will be saved.
 
         Returns
         -------
@@ -774,7 +861,7 @@ with open('{(Path("..") / markdown.file_path).as_posix()}', 'r') as markdown_fil
             # Generate path for the DataFrame image
             df_image = Path(static_dir) / f"{dataframe.title.replace(' ', '_')}.png"
             dataframe_content.append(
-                f"df.dfi.export('{Path(df_image).resolve().as_posix()}', max_rows=10, max_cols=5)\n```\n"
+                f"df.dfi.export('{Path(df_image).resolve().as_posix()}', max_rows=10, max_cols=5, table_conversion='matplotlib')\n```\n"
             )
             # Use helper method to add centered image content
             dataframe_content.append(self._generate_image_content(df_image))
@@ -806,14 +893,22 @@ with open('{(Path("..") / markdown.file_path).as_posix()}', 'r') as markdown_fil
         # Dictionary to hold the imports for each component type
         components_imports = {
             "plot": {
-                r.PlotType.ALTAIR: ["import altair as alt", "import requests"],
-                r.PlotType.PLOTLY: ["import plotly.io as pio", "import requests"],
+                r.PlotType.ALTAIR: [
+                    "import altair as alt",
+                    "import requests",
+                    "import json",
+                ],
+                r.PlotType.PLOTLY: [
+                    "import plotly.io as pio",
+                    "import requests",
+                    "import json",
+                ],
             },
             "dataframe": [
-                "init_notebook_mode(all_interactive=True)",  # ! somehow order is random in qmd file
                 "import pandas as pd",
                 "from itables import show, init_notebook_mode",
                 "import dataframe_image as dfi",
+                "init_notebook_mode(all_interactive=True)",
             ],
             "markdown": ["import IPython.display as display", "import requests"],
         }
