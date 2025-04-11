@@ -834,7 +834,7 @@ with open('{(Path("..") / html.file_path).as_posix()}', 'r', encoding='utf-8') a
             )
         )
         try:
-            apicall_response = apicall.make_api_request(method="GET")
+            apicall_response = apicall.make_api_request()
             apicall_content.append(f"""st.write({apicall_response})\n""")
         except Exception as e:
             self.report.logger.error(
@@ -851,7 +851,7 @@ with open('{(Path("..") / html.file_path).as_posix()}', 'r', encoding='utf-8') a
             )
 
         self.report.logger.info(
-            f"Successfully generated content for APICall: '{apicall.title}'"
+            f"Successfully generated content for APICall '{apicall.title}' using method '{apicall.method}'"
         )
         return apicall_content
 

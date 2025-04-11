@@ -85,7 +85,7 @@ quarto check
 
 ### Docker
 
-If you prefer not to install VueGen on your system, a pre-configured Docker container is available. It includes all dependencies, ensuring a fully reproducible execution environment. See the [Execution section](#execution) for details on running VueGen with Docker. The official Docker image is available at [quay.io/dtu_biosustain_dsp/vuegen][vuegen-docker-quay].
+If you prefer not to install VueGen on your system, a pre-configured Docker container is available. It includes all dependencies, ensuring a fully reproducible execution environment. See the [Execution section](#execution) for details on running VueGen with Docker. The official Docker images are available at [quay.io/dtu_biosustain_dsp/vuegen][vuegen-docker-quay]. The Dockerfiles to build the images are available [here][docker-folder].
 
 ### Nextflow and nf-core
 
@@ -130,7 +130,7 @@ Instead of installing VueGen locally, you can run it directly from a Docker cont
 docker run --rm \
   -v "$(pwd)/docs/example_data/Earth_microbiome_vuegen_demo_notebook:/home/appuser/Earth_microbiome_vuegen_demo_notebook" \
   -v "$(pwd)/output_docker:/home/appuser/streamlit_report" \
-  quay.io/dtu_biosustain_dsp/vuegen:v0.3.1-docker --directory /home/appuser/Earth_microbiome_vuegen_demo_notebook --report_type streamlit
+  quay.io/dtu_biosustain_dsp/vuegen:v0.3.2-docker --directory /home/appuser/Earth_microbiome_vuegen_demo_notebook --report_type streamlit
 ```
 
 ## GUI
@@ -261,6 +261,7 @@ We appreciate your feedback! If you have any comments, suggestions, or run into 
 [vuegen-pypi]: https://pypi.org/project/vuegen/
 [vuegen-conda]: https://anaconda.org/bioconda/vuegen
 [vuegen-docker-quay]: https://quay.io/repository/dtu_biosustain_dsp/vuegen
+[docker-folder]: https://github.com/Multiomics-Analytics-Group/nf-vuegen/tree/main/Docker
 [vuegen-license]: https://github.com/Multiomics-Analytics-Group/vuegen/blob/main/LICENSE
 [vuegen-class-diag-att]: https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/vuegen_classdiagram_withattmeth.pdf
 [vuegen-docs]: https://vuegen.readthedocs.io/
