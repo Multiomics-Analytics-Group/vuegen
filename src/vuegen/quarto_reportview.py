@@ -20,8 +20,14 @@ class QuartoReportView(r.ReportView):
     BASE_DIR = Path("quarto_report")
     STATIC_FILES_DIR = BASE_DIR / "static"
 
-    def __init__(self, report: r.Report, report_type: r.ReportType):
+    def __init__(
+        self,
+        report: r.Report,
+        report_type: r.ReportType,
+        quarto_checks: bool = False,
+    ):
         super().__init__(report=report, report_type=report_type)
+        self.quarto_checks = quarto_checks
         self.BUNDLED_EXECUTION = False
         self.quarto_path = "quarto"
         # self.env_vars = os.environ.copy()
@@ -186,11 +192,15 @@ class QuartoReportView(r.ReportView):
         self.report.logger.info(
             f"Running '{self.report.title}' '{self.report_type}' report with {args!r}"
         )
-        if self.report_type in [
-            r.ReportType.PDF,
-            r.ReportType.DOCX,
-            r.ReportType.ODT,
-        ]:
+        if (
+            self.report_type
+            in [
+                r.ReportType.PDF,
+                r.ReportType.DOCX,
+                r.ReportType.ODT,
+            ]
+            and self.quarto_checks
+        ):
             subprocess.run(
                 [self.quarto_path, "install", "tinytex", "--no-prompt"],
                 check=True,
@@ -204,11 +214,17 @@ class QuartoReportView(r.ReportView):
                 args,
                 check=True,
             )
-            out_path = file_path_to_qmd.with_suffix(f".{self.report_type.lower()}")
-            if self.report_type in [r.ReportType.REVEALJS, r.ReportType.JUPYTER]:
+            if self.report_type == r.ReportType.REVEALJS:
+                out_path = file_path_to_qmd.with_name(
+                    f"{file_path_to_qmd.stem}_revealjs.html"
+                )
+            elif self.report_type == r.ReportType.JUPYTER:
                 out_path = file_path_to_qmd.with_suffix(".html")
+            else:
+                out_path = file_path_to_qmd.with_suffix(f".{self.report_type.lower()}")
             if not out_path.exists():
                 raise FileNotFoundError(f"Report file could not be created: {out_path}")
+
             if self.report_type == r.ReportType.JUPYTER:
                 args = [self.quarto_path, "convert", str(file_path_to_qmd)]
                 subprocess.run(
@@ -571,14 +587,25 @@ plot_json = response.text\n"""
         else:  # If it's a local file
             plot_code += f"""
 with open('{(Path("..") / plot.file_path).as_posix()}', 'r') as plot_file:
-    plot_json = plot_file.read()\n"""
+    plot_json = json.load(plot_file)\n"""
         # Add specific code for each visualization tool
         if plot.plot_type == r.PlotType.PLOTLY:
             plot_code += """
-fig_plotly = pio.from_json(plot_json)
+# Keep only 'data' and 'layout' sections
+plot_json = {key: plot_json[key] for key in plot_json if key in ['data', 'layout']}\n
+# Remove 'frame' section in 'data'
+plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'} for entry in plot_json.get('data', [])]\n
+# Convert JSON to string
+plot_json_str = json.dumps(plot_json)\n
+# Create the plotly plot
+fig_plotly = pio.from_json(plot_json_str)
 fig_plotly.update_layout(width=950, height=500)\n"""
         elif plot.plot_type == r.PlotType.ALTAIR:
-            plot_code += """fig_altair = alt.Chart.from_json(plot_json).properties(width=900, height=400)"""
+            plot_code += """
+# Convert JSON to string
+plot_json_str = json.dumps(plot_json)\n
+# Create the plotly plot
+fig_altair = alt.Chart.from_json(plot_json_str).properties(width=900, height=400)\n"""
         elif plot.plot_type == r.PlotType.INTERACTIVE_NETWORK:
             # Generate the HTML embedding for interactive networks
             if is_url(plot.file_path) and plot.file_path.endswith(".html"):
@@ -834,7 +861,7 @@ with open('{(Path("..") / markdown.file_path).as_posix()}', 'r') as markdown_fil
             # Generate path for the DataFrame image
             df_image = Path(static_dir) / f"{dataframe.title.replace(' ', '_')}.png"
             dataframe_content.append(
-                f"df.dfi.export('{Path(df_image).resolve().as_posix()}', max_rows=10, max_cols=5)\n```\n"
+                f"df.dfi.export('{Path(df_image).resolve().as_posix()}', max_rows=10, max_cols=5, table_conversion='matplotlib')\n```\n"
             )
             # Use helper method to add centered image content
             dataframe_content.append(self._generate_image_content(df_image))
@@ -866,8 +893,16 @@ with open('{(Path("..") / markdown.file_path).as_posix()}', 'r') as markdown_fil
         # Dictionary to hold the imports for each component type
         components_imports = {
             "plot": {
-                r.PlotType.ALTAIR: ["import altair as alt", "import requests"],
-                r.PlotType.PLOTLY: ["import plotly.io as pio", "import requests"],
+                r.PlotType.ALTAIR: [
+                    "import altair as alt",
+                    "import requests",
+                    "import json",
+                ],
+                r.PlotType.PLOTLY: [
+                    "import plotly.io as pio",
+                    "import requests",
+                    "import json",
+                ],
             },
             "dataframe": [
                 "import pandas as pd",

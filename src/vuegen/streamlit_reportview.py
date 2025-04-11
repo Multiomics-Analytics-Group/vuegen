@@ -1,4 +1,5 @@
 import os
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -9,6 +10,7 @@ from streamlit.web import cli as stcli
 
 from . import report as r
 from .utils import create_folder, generate_footer, is_url
+from .utils.variables import make_valid_identifier
 
 
 class StreamlitReportView(r.WebAppReportView):
@@ -114,7 +116,15 @@ st.set_page_config(layout="wide", page_title="{self.report.title}")"""
                     )
 
                 for subsection in section.subsections:
-                    subsection_name_var = subsection.title.replace(" ", "_")
+                    # ! could add a non-integer to ensure it's a valid identifier
+                    subsection_name_var = make_valid_identifier(subsection.title)
+                    if not subsection_name_var.isidentifier():
+                        self.report.logger.warning(
+                            f"Subsection name '{subsection_name_var}' is not a valid identifier."
+                        )
+                        raise ValueError(
+                            f"Subsection name is not a valid Python identifier: {subsection_name_var}"
+                        )
                     subsection_file_path = (
                         Path(section_name_var) / f"{subsection_name_var}.py"
                     ).as_posix()  # Make sure it's Posix Paths
@@ -336,10 +346,11 @@ report_nav.run()"""
                         )
                         try:
                             # Create subsection file
+                            _subsection_name = make_valid_identifier(subsection.title)
                             subsection_file_path = (
                                 Path(output_dir)
                                 / section_name_var
-                                / f"{subsection.title.replace(' ', '_')}.py"
+                                / f"{_subsection_name}.py"
                             )
 
                             # Generate content and imports for the subsection
@@ -570,7 +581,13 @@ with open('{Path(plot.file_path).as_posix()}', 'r') as plot_file:
 
         # Add specific code for each visualization tool
         if plot.plot_type == r.PlotType.PLOTLY:
-            plot_code += "st.plotly_chart(plot_json, use_container_width=True)\n"
+            plot_code += """
+# Keep only 'data' and 'layout' sections
+plot_json = {key: plot_json[key] for key in plot_json if key in ['data', 'layout']}
+
+# Remove 'frame' section in 'data'
+plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'} for entry in plot_json.get('data', [])]
+st.plotly_chart(plot_json, use_container_width=True)\n"""
 
         elif plot.plot_type == r.PlotType.ALTAIR:
             plot_code += """
@@ -986,6 +1003,4 @@ if prompt := st.chat_input("Enter your prompt here:"):
             component_imports.append("df_index = 1")
 
         # Return the list of import statements
-        return component_imports
-
         return component_imports

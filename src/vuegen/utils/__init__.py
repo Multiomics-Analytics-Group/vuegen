@@ -227,13 +227,26 @@ def get_parser(prog_name: str, others: dict = {}) -> argparse.Namespace:
         help="Type of the report to generate (streamlit, html, pdf, docx, odt, revealjs, pptx, or jupyter).",
     )
     parser.add_argument(
+        "-output_dir",
+        "--output_directory",
+        type=str,
+        default=None,
+        help="Path to the output directory for the generated report.",
+    )
+    parser.add_argument(
         "-st_autorun",
         "--streamlit_autorun",
         action="store_true",  # Automatically sets True if the flag is passed
         default=False,
         help="Automatically run the Streamlit app after report generation.",
     )
-
+    parser.add_argument(
+        "-qt_checks",
+        "--quarto_checks",
+        action="store_true",  # Automatically sets True if the flag is passed
+        default=False,
+        help="Check if Quarto is installed and available for report generation.",
+    )
     # Parse arguments
     return parser
 
@@ -749,13 +762,26 @@ def strip_unicode(text: str) -> str:
     return "".join(c for c in text if ord(c) < 128)
 
 
-def print_completion_message(report_type: str):
+def get_completion_message(report_type: str, config_path: str) -> str:
     """
-    Prints a formatted completion message after report generation.
+    Generate a formatted completion message after report generation.
+
+    Parameters
+    ----------
+    report_type : str
+        The type of report generated (e.g., "streamlit", "html").
+    config_path : str
+        The path to the configuration file used for generating the report.
+
+    Returns
+    -------
+    str
+        A formatted string containing the completion message.
     """
     border = "─" * 65  # Creates a separator line
+
     if report_type == "streamlit":
-        msg = """
+        message = """
 🚀 Streamlit Report Generated!
 
 📂 All scripts to build the Streamlit app are available at:
@@ -768,9 +794,12 @@ def print_completion_message(report_type: str):
 
 🛠️ Advanced users can modify the Python scripts directly in:
     streamlit_report/sections
+
+⚙️ Configuration file used:
+    {config_path}
 """
     else:
-        msg = f"""
+        message = f"""
 🚀 {report_type.capitalize()} Report Generated!
 
 📂 Your {report_type} report is available at:
@@ -780,14 +809,12 @@ def print_completion_message(report_type: str):
 
 🛠️ Advanced users can modify the report template directly in:
     quarto_report/quarto_report.qmd
+
+⚙️ Configuration file used:
+    {config_path}
 """
-    try:
-        print(msg)
-        print(border)
-    except UnicodeEncodeError:
-        msg = strip_unicode(msg)
-        print(msg)
-        print("-" * 65)
+
+    return f"{message}\n{border}"
 
 
 ## REPORT FORMATTING

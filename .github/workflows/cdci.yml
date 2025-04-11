@@ -74,8 +74,8 @@ jobs:
       - name: quarto pdf report
         run: |
           cd docs
-          vuegen -dir example_data/Earth_microbiome_vuegen_demo_notebook -rt pdf
-          vuegen -c example_data/Earth_microbiome_vuegen_demo_notebook/Earth_microbiome_vuegen_demo_notebook_config.yaml -rt pdf
+          vuegen -dir example_data/Earth_microbiome_vuegen_demo_notebook -rt pdf -qt_checks
+          vuegen -c example_data/Earth_microbiome_vuegen_demo_notebook/Earth_microbiome_vuegen_demo_notebook_config.yaml -rt pdf -qt_checks
       - name: quarto docx report
         run: |
           cd docs
@@ -169,13 +169,32 @@ jobs:
         with:
           name: vuegen_gui_${{ matrix.os.label }}
           path: gui/dist/
-      - name: Upload Executable to a GitHub Release
-        if: startsWith(github.ref, 'refs/tags')
+      - name: Upload MacOS Executable to a GitHub Release)
+        if: startsWith(matrix.os.runner, 'macos') && startsWith(github.ref, 'refs/tags')
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          TAG_NAME=${GITHUB_REF#refs/tags/}
-          cp 
-          gh release upload "$TAG_NAME" gui/dist/vuegen_gui.*#vuegen_gui_${{ matrix.os.label }}
+          echo GITHUB_REF_NAME $GITHUB_REF_NAME
+          echo "Uploading vuegen_gui_${{ matrix.os.label }} to release $GITHUB_REF_NAME"
+          echo "Available files in build folder: gui/dist/"
+          cd gui/dist/
+          ls -lh
+          echo "Zip .app folder"
+          zip -r vuegen_gui_${{ matrix.os.label }}.zip vuegen_gui.app/
+          echo "Uploading..."
+          gh release upload $GITHUB_REF_NAME vuegen_gui_${{ matrix.os.label }}.zip
+        # .app is folder that needs to be zipped
+      - name: Upload Windows Executable to a GitHub Release
+        if: startsWith(matrix.os.runner, 'windows') && startsWith(github.ref, 'refs/tags')
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "GITHUB_REF_NAME in env $env:GITHUB_REF_NAME"
+          $GITHUB_REF_NAME = $env:GITHUB_REF_NAME
+          echo "Uploading vuegen_gui_${{ matrix.os.label }} to release $GITHUB_REF_NAME"
+          echo "Available files in build folder: gui/dist/"
+          ls gui/dist/
+          echo "Uploading..."
+          gh release upload $GITHUB_REF_NAME gui/dist/vuegen_gui.exe#vuegen_gui_${{ matrix.os.label }}.exe
         # https://cli.github.com/manual/gh_release_upload
-        # either .app or .exe depending on the OS
+        # .exe is a single file already

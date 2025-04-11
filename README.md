@@ -1,23 +1,24 @@
-![VueGen Logo](https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/vuegen_logo.svg)
------------------
+## ![VueGen Logo](https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/vuegen_logo.svg)
+
 <p align="center">
    VueGen is a Python package that automates the creation of scientific reports.
 </p>
 
-| Information | Links |
-| :--- | :--- |
-| **Package** |[![PyPI Latest Release](https://img.shields.io/pypi/v/vuegen.svg)][vuegen-pypi] [![Conda Latest Release](https://img.shields.io/conda/v/bioconda/vuegen.svg)][vuegen-conda] [![Supported versions](https://img.shields.io/pypi/pyversions/vuegen.svg)][vuegen-pypi] [![Docker Repository on Quay](https://quay.io/repository/dtu_biosustain_dsp/vuegen/status "Docker Repository on Quay")][vuegen-docker-quay] [![License](https://img.shields.io/github/license/Multiomics-Analytics-Group/vuegen)][vuegen-license]|
-| **Documentation** | [![made-with-sphinx-doc](https://img.shields.io/badge/Made%20with-Sphinx-1f425f.svg)](https://www.sphinx-doc.org/) ![Docs](https://readthedocs.org/projects/vuegen/badge/?style=flat) [![View - Documentation](https://img.shields.io/badge/view-Documentation-blue?style=flat)][vuegen-docs]|
-| **Build** | [![CI](https://github.com/Multiomics-Analytics-Group/vuegen/actions/workflows/cdci.yml/badge.svg)][ci-gh-action] [![Docs](https://github.com/Multiomics-Analytics-Group/vuegen/actions/workflows/docs.yml/badge.svg)][ci-docs]|
-| **Examples** | [![HTML5](https://img.shields.io/badge/html5-%23E34F26.svg?style=for-the-badge&logo=html5&logoColor=white)][emp-html-demo] [![Streamlit](https://img.shields.io/badge/Streamlit-%23FE4B4B.svg?style=for-the-badge&logo=streamlit&logoColor=white)][emp-st-demo]|
-| **Discuss on GitHub** | [![GitHub issues](https://img.shields.io/github/issues/Multiomics-Analytics-Group/vuegen)][issues] [![GitHub pull requests](https://img.shields.io/github/issues-pr/Multiomics-Analytics-Group/vuegen)][pulls]|
-| **Cite** | [![DOI:10.1101/2025.03.05.641152](https://img.shields.io/badge/DOI-10.1101/2025.03.05.641152-B31B1B.svg)][vuegen-preprint]|
+| Information           | Links                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| :-------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Package**           | [![PyPI Latest Release](https://img.shields.io/pypi/v/vuegen.svg)][vuegen-pypi] [![Conda Latest Release](https://img.shields.io/conda/v/bioconda/vuegen.svg)][vuegen-conda] [![Supported versions](https://img.shields.io/pypi/pyversions/vuegen.svg)][vuegen-pypi] [![Docker Repository on Quay](https://quay.io/repository/dtu_biosustain_dsp/vuegen/status "Docker Repository on Quay")][vuegen-docker-quay] [![License](https://img.shields.io/github/license/Multiomics-Analytics-Group/vuegen)][vuegen-license] |
+| **Documentation**     | [![made-with-sphinx-doc](https://img.shields.io/badge/Made%20with-Sphinx-1f425f.svg)](https://www.sphinx-doc.org/) ![Docs](https://readthedocs.org/projects/vuegen/badge/?style=flat) [![View - Documentation](https://img.shields.io/badge/view-Documentation-blue?style=flat)][vuegen-docs]                                                                                                                                                                                                                         |
+| **Build**             | [![CI](https://github.com/Multiomics-Analytics-Group/vuegen/actions/workflows/cdci.yml/badge.svg)][ci-gh-action] [![Docs](https://github.com/Multiomics-Analytics-Group/vuegen/actions/workflows/docs.yml/badge.svg)][ci-docs]                                                                                                                                                                                                                                                                                        |
+| **Examples**          | [![HTML5](https://img.shields.io/badge/html5-%23E34F26.svg?style=for-the-badge&logo=html5&logoColor=white)][emp-html-demo] [![Streamlit](https://img.shields.io/badge/Streamlit-%23FE4B4B.svg?style=for-the-badge&logo=streamlit&logoColor=white)][emp-st-demo]                                                                                                                                                                                                                                                       |
+| **Discuss on GitHub** | [![GitHub issues](https://img.shields.io/github/issues/Multiomics-Analytics-Group/vuegen)][issues] [![GitHub pull requests](https://img.shields.io/github/issues-pr/Multiomics-Analytics-Group/vuegen)][pulls]                                                                                                                                                                                                                                                                                                        |
+| **Cite**              | [![DOI:10.1101/2025.03.05.641152](https://img.shields.io/badge/DOI-10.1101/2025.03.05.641152-B31B1B.svg)][vuegen-preprint]                                                                                                                                                                                                                                                                                                                                                                                            |
 
 ## Table of contents:
 
 - [About the project](#about-the-project)
 - [Installation](#installation)
 - [Execution](#execution)
+- [GUI](#gui)
 - [Case studies](#case-studies)
 - [Web application deployment](#web-application-deployment)
 - [Contributing](#contributing)
@@ -27,9 +28,9 @@
 
 ## About the project
 
-VueGen automates the creation of reports based on a directory with plots, dataframes, and other files in different formats. A YAML configuration file is generated from the directory to define the structure of the report. Users can customize the report by modifying the configuration file, or they can create their own configuration file instead of passing a directory as input. 
+**VueGen** is a tool that automates the creation of **reports** from bioinformatics outputs, allowing researchers with minimal coding experience to communicate their results effectively. With VueGen, users can produce reports by simply specifying a directory containing output files, such as plots, tables, networks, Markdown text, HTML components, and API calls, along with the report format. Supported formats include **documents** (PDF, HTML, DOCX, ODT), **presentations** (PPTX, Reveal.js), **Jupyter notebooks**, and [Streamlit][streamlit] **web applications**.
 
-The configuration file specifies the structure of the report, including sections, subsections, and various components such as plots, dataframes, markdown, html, and API calls. Reports can be generated in various formats, including documents (PDF, HTML, DOCX, ODT), presentations (PPTX, Reveal.js), notebooks (Jupyter) or [Streamlit](streamlit) web applications.
+A YAML configuration file is generated from the directory to define the structure of the report. Users can customize the report by modifying the configuration file, or they can create their own configuration file instead of passing a directory as input. The configuration file specifies the structure of the report, including sections, subsections, and various components such as plots, dataframes, markdown, html, and API calls.
 
 An overview of the VueGen workflow is shown in the figure below:
 
@@ -59,7 +60,7 @@ pip install vuegen
 You can also install the package for development by cloning this repository and running the following command:
 
 ```bash
-pip install -e path/to/vuegen # specify location 
+pip install -e path/to/vuegen # specify location
 pip install -e . # in case your pwd is in the vuegen directory
 ```
 
@@ -84,7 +85,7 @@ quarto check
 
 ### Docker
 
-If you prefer not to install VueGen on your system, a pre-configured Docker container is available. It includes all dependencies, ensuring a fully reproducible execution environment. See the [Execution section](#execution) for details on running VueGen with Docker. The official Docker image is available at [quay.io/dtu_biosustain_dsp/vuegen][vuegen-docker-quay]. 
+If you prefer not to install VueGen on your system, a pre-configured Docker container is available. It includes all dependencies, ensuring a fully reproducible execution environment. See the [Execution section](#execution) for details on running VueGen with Docker. The official Docker image is available at [quay.io/dtu_biosustain_dsp/vuegen][vuegen-docker-quay].
 
 ### Nextflow and nf-core
 
@@ -111,14 +112,15 @@ vuegen --config docs/example_config_files/Earth_microbiome_vuegen_demo_notebook.
 ```
 
 The current report types supported by VueGen are:
-* Streamlit
-* HTML
-* PDF
-* DOCX
-* ODT
-* Reveal.js
-* PPTX
-* Jupyter
+
+- Streamlit
+- HTML
+- PDF
+- DOCX
+- ODT
+- Reveal.js
+- PPTX
+- Jupyter
 
 ### Running VueGen with Docker
 
@@ -127,29 +129,67 @@ Instead of installing VueGen locally, you can run it directly from a Docker cont
 ```bash
 docker run --rm \
   -v "$(pwd)/docs/example_data/Earth_microbiome_vuegen_demo_notebook:/home/appuser/Earth_microbiome_vuegen_demo_notebook" \
-  -v "$(pwd)/output_docker:/home/appuser/quarto_report" \
-  quay.io/dtu_biosustain_dsp/vuegen:docker --directory /home/appuser/Earth_microbiome_vuegen_demo_notebook --report_type streamlit
+  -v "$(pwd)/output_docker:/home/appuser/streamlit_report" \
+  quay.io/dtu_biosustain_dsp/vuegen:v0.3.1-docker --directory /home/appuser/Earth_microbiome_vuegen_demo_notebook --report_type streamlit
 ```
 
 ## GUI
 
+### Local GUI
+
 We have a simple GUI for VueGen that can be run locally or through a standalone executable.
+For now you will need to have a copy of this repository.
 
 ```bash
+pip install '.[gui]'
 cd gui
 python app.py
 ```
 
-The bundle GUI with the VueGen package is available under the releases. You will need to
-unzip the file and run `vuegen_gui` in the unpacked main folder. Most dependencies are included into
-the bundle under `_internals` using PyInstaller.
+### Bundled GUI
+
+The **bundle GUI** with the VueGen package is available under the
+[latest releases](https://github.com/Multiomics-Analytics-Group/vuegen/releases/latest).
+You will need to unzip the file and run `vuegen_gui` in the unpacked main folder.
+Most dependencies are included into the bundle using PyInstaller.
 
 Streamlit works out of the box as a purely Python based package. For `html` creation you will have to
-have a global Python installation with the `jupyter` package installed. `quarto` needs to start
+have a Python 3.12 installation with the `jupyter` package installed as `quarto` needs to start
 a kernel for execution. This is also true if you install `quarto` globally on your machine.
 
-More information can be found in the 
-[GUI README](https://github.com/Multiomics-Analytics-Group/vuegen/blob/os_installers/gui/README.md).
+We recommend using miniforge to install Python and the conda package manager:
+
+- [conda-forge.org/download/](https://conda-forge.org/download/)
+
+We continous our example assuming you have installed the `miniforge` distribution for your
+machine (MacOS with arm64/ apple silicon or x86_64/ intel or Windows x86_64). Also download
+the [latest `vuegen_gui` bundle](https://github.com/Multiomics-Analytics-Group/vuegen/releases/latest)
+from the releases page according to your operating system.
+
+```bash
+conda create -n vuegen_gui -c conda-forge python=3.12 jupyter
+conda info -e # find environment location
+```
+
+Find the vuegen_gui path for your local `user`.
+
+On **MacOS** you need to add a `bin` to the path:
+
+```bash
+/Users/user/miniforge3/envs/vuegen_gui/bin
+```
+
+On **Windows** you can use the path as displayed by `conda info -e`:
+
+> Note: On Windows a base installation of miniforge with `jupyter` might work as well as
+> the app can see your entire Path which is not the case on MacOS.
+
+```bash
+C:\Users\user\miniforge3\envs\vuegen_gui
+```
+
+More information regarding the app and builds can be found in the
+[GUI README](https://github.com/Multiomics-Analytics-Group/vuegen/blob/main/gui/README.md).
 
 ## Case studies
 
@@ -157,7 +197,7 @@ VueGen’s functionality is demonstrated through two case studies:
 
 **1. Predefined Directory**
 
-This introductory case study uses a predefined directory with plots, dataframes, Markdown, and HTML components. Users can generate reports in different formats and modify the configuration file to customize the report structure. 
+This introductory case study uses a predefined directory with plots, dataframes, Markdown, and HTML components. Users can generate reports in different formats and modify the configuration file to customize the report structure.
 
 🔗 [![Open in Colab][colab_badge]][colab_link_intro_demo]
 
@@ -174,9 +214,9 @@ This advanced case study demonstrates the application of VueGen in a real-world 
 
 Once a Streamlit report is generated, it can be deployed as a web application to make it accessible online. There are multiple ways to achieve this:
 
-* **Streamlit Community Cloud**: Deploy your report easily using [Streamlit Cloud][st-cloud], as demonstrated in the [EMP VueGen Demo][emp-st-demo]. The process involves moving the necessary scripts, data, and a requirements.txt file into a GitHub repository. Then, the app can be deployed via the Streamlit Cloud interface. The deployment example is available in the `streamlit-report-example` branch.
-* **Standalone Executables**: Convert your Streamlit application into a desktop app by packaging it as an executable file for different operating systems. A detailed explanation of this process can be found in this [Streamlit forum post][st-forum-exe].
-* **Stlite**: Run Streamlit apps directly in the browser with [stlite][stlite], a WebAssembly port of Streamlit powered by Pyodide, eliminating the need for a server. It also allows packaging apps as standalone desktop executables using stlite desktop.
+- **Streamlit Community Cloud**: Deploy your report easily using [Streamlit Cloud][st-cloud], as demonstrated in the [EMP VueGen Demo][emp-st-demo]. The process involves moving the necessary scripts, data, and a requirements.txt file into a GitHub repository. Then, the app can be deployed via the Streamlit Cloud interface. The deployment example is available in the `streamlit-report-example` branch.
+- **Standalone Executables**: Convert your Streamlit application into a desktop app by packaging it as an executable file for different operating systems. A detailed explanation of this process can be found in this [Streamlit forum post][st-forum-exe].
+- **Stlite**: Run Streamlit apps directly in the browser with [stlite][stlite], a WebAssembly port of Streamlit powered by Pyodide, eliminating the need for a server. It also allows packaging apps as standalone desktop executables using stlite desktop.
 
 These options provide flexibility depending on whether the goal is online accessibility, lightweight execution, or local application distribution.
 
@@ -196,7 +236,7 @@ If you use VueGen in your research or publications, please cite it as follows:
 
 **APA:**
 
-Ayala-Ruano, S., Webel, H., & Santos, A. (2025). *VueGen: Automating the generation of scientific reports*. bioRxiv. https://doi.org/10.1101/2025.03.05.641152
+Ayala-Ruano, S., Webel, H., & Santos, A. (2025). _VueGen: Automating the generation of scientific reports_. bioRxiv. https://doi.org/10.1101/2025.03.05.641152
 
 **BibTeX:**
 
@@ -215,9 +255,9 @@ Ayala-Ruano, S., Webel, H., & Santos, A. (2025). *VueGen: Automating the generat
 
 ## Contact and feedback
 
-We appreciate your feedback! If you have any comments, suggestions, or run into issues while using VueGen, feel free to [open an issue][new-issue] in this repository. Your input helps us make VueGen better for everyone. 
+We appreciate your feedback! If you have any comments, suggestions, or run into issues while using VueGen, feel free to [open an issue][new-issue] in this repository. Your input helps us make VueGen better for everyone.
 
-[streamlit]: https://streamlit.io/ 
+[streamlit]: https://streamlit.io/
 [vuegen-pypi]: https://pypi.org/project/vuegen/
 [vuegen-conda]: https://anaconda.org/bioconda/vuegen
 [vuegen-docker-quay]: https://quay.io/repository/dtu_biosustain_dsp/vuegen
@@ -250,5 +290,3 @@ We appreciate your feedback! If you have any comments, suggestions, or run into 
 [turingway]: https://github.com/the-turing-way/the-turing-way
 [zenodo-turingway]: https://zenodo.org/records/3695300
 [new-issue]: https://github.com/Multiomics-Analytics-Group/vuegen/issues/new
-
-
