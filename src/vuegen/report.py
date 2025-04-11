@@ -530,10 +530,14 @@ class APICall(Component):
     ----------
     api_url : str
         The URL of the API to interact with.
+    method : str
+        HTTP method to use for the request ("GET", "POST", or "PUT"). The deafult is "GET".
     headers : Optional[dict]
         Headers to include in the API request (default is None).
     params : Optional[dict]
         Query parameters to include in the API request (default is None).
+    request_body : Optional[dict]
+        The request body for methods like POST or PUT (default is None).
     """
 
     def __init__(
@@ -541,9 +545,11 @@ class APICall(Component):
         title: str,
         logger: logging.Logger,
         api_url: str,
+        method: str = "GET",
         caption: str = None,
         headers: Optional[dict] = None,
         params: Optional[dict] = None,
+        request_body: Optional[dict] = None,
     ):
         super().__init__(
             title=title,
@@ -552,21 +558,14 @@ class APICall(Component):
             caption=caption,
         )
         self.api_url = api_url
+        self.method = method.upper()
         self.headers = headers or {}
         self.params = params or {}
+        self.request_body = request_body or {}
 
-    def make_api_request(
-        self, method: str, request_body: Optional[dict] = None
-    ) -> Optional[dict]:
+    def make_api_request(self) -> Optional[dict]:
         """
         Sends an HTTP request to the specified API and returns the JSON response.
-
-        Parameters
-        ----------
-        method : str
-            HTTP method to use for the request.
-        request_body : Optional[dict], optional
-            The request body for POST or PUT methods (default is None).
 
         Returns
         -------
@@ -574,13 +573,13 @@ class APICall(Component):
             The JSON response from the API, or None if the request fails.
         """
         try:
-            self.logger.info(f"Making {method} request to API: {self.api_url}")
+            self.logger.info(f"Making {self.method} request to API: {self.api_url}")
             response = requests.request(
-                method,
+                self.method,
                 self.api_url,
                 headers=self.headers,
                 params=self.params,
-                json=request_body,
+                json=self.request_body,
             )
             response.raise_for_status()
             self.logger.info(

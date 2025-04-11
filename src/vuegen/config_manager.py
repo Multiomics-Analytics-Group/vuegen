@@ -565,9 +565,11 @@ class ConfigManager:
             title=component_data["title"],
             logger=self.logger,
             api_url=component_data["api_url"],
+            method=component_data["method"],
             caption=component_data.get("caption"),
             headers=component_data.get("headers"),
             params=component_data.get("params"),
+            request_body=component_data.get("request_body"),
         )
 
     def _create_chatbot_component(self, component_data: dict) -> r.ChatBot:
