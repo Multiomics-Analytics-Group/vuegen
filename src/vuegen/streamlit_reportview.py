@@ -854,8 +854,97 @@ with open('{(Path("..") / html.file_path).as_posix()}', 'r', encoding='utf-8') a
             f"Successfully generated content for APICall '{apicall.title}' using method '{apicall.method}'"
         )
         return apicall_content
-
+    
     def _generate_chatbot_content(self, chatbot) -> List[str]:
+        """
+        Generate content for a ChatBot component with exact API requirements.
+        """
+        chatbot_content = []
+
+        # Add title
+        chatbot_content.append(
+            self._format_text(
+                text=chatbot.title, type="header", level=4, color="#2b8cbe"
+            )
+        )
+
+        # Chatbot logic with exact API requirements
+        chatbot_content.append(
+            f"""
+def generate_query(prompt):
+    try:
+        response = requests.post(
+            "{chatbot.api_call.api_url}",
+            json={{"prompt": prompt}},  # Only send the prompt as required
+            headers={chatbot.api_call.headers}
+        )
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        st.error(f"API request failed: {{str(e)}}")
+        if hasattr(e, 'response') and e.response:
+            try:
+                error_details = e.response.json()
+                st.error(f"Error details: {{error_details}}")
+            except ValueError:
+                st.error(f"Response text: {{e.response.text}}")
+        return None
+
+# Chatbot interaction
+if 'messages' not in st.session_state:
+    st.session_state['messages'] = []
+
+# Display chat history
+for message in st.session_state['messages']:
+    with st.chat_message(message['role']):
+        if isinstance(message['content'], dict):
+            st.markdown(message['content'].get('text', ''), unsafe_allow_html=True)
+            if 'links' in message['content']:
+                st.markdown("**Sources:**")
+                for link in message['content']['links']:
+                    st.markdown(f"- [{{link}}]({{link}})")
+            if 'subgraph_pyvis' in message['content']:
+                st.components.v1.html(message['content']['subgraph_pyvis'], height=600)
+        else:
+            st.write(message['content'])
+
+# Handle user input
+if prompt := st.chat_input("Enter your prompt here:"):
+    st.session_state.messages.append({{"role": "user", "content": prompt}})
+    with st.chat_message("user"):
+        st.write(prompt)
+    
+    with st.spinner('Generating answer...'):
+        response = generate_query(prompt)
+        
+        if response:
+            st.session_state.messages.append({{
+                "role": "assistant",
+                "content": response
+            }})
+            with st.chat_message("assistant"):
+                st.markdown(response.get('text', ''), unsafe_allow_html=True)
+                if 'links' in response:
+                    st.markdown("**Sources:**")
+                    for link in response['links']:
+                        st.markdown(f"- [{{link}}]({{link}})")
+                if 'subgraph_pyvis' in response:
+                    st.components.v1.html(response['subgraph_pyvis'], height=600)
+        else:
+            st.error("Failed to get response from API")
+    """
+        )
+
+        if chatbot.caption:
+            chatbot_content.append(
+                self._format_text(
+                    text=chatbot.caption, type="caption", text_align="left"
+                )
+            )
+
+        return chatbot_content
+
+    def _generate_ollama_chatbot_content(self, chatbot) -> List[str]:
         """
         Generate content for a ChatBot component.
 
