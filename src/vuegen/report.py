@@ -561,25 +561,40 @@ class APICall(Component):
         self.method = method.upper()
         self.headers = headers or {}
         self.params = params or {}
+        # NOTE: request_body is usually dynamically set before the call for POST/PUT
+        # but we'll include it here if needed for values from a config file
         self.request_body = request_body or {}
 
-    def make_api_request(self) -> Optional[dict]:
+    def make_api_request(self, dynamic_request_body: Optional[dict] = None) -> Optional[dict]:
         """
         Sends an HTTP request to the specified API and returns the JSON response.
+        It allows overriding the request body dynamically.
+
+        Parameters
+        ----------
+        dynamic_request_body : Optional[dict]
+            A dictionary to use as the JSON request body for this specific call.
+            Overrides the instance's request_body if provided.
 
         Returns
         -------
         response : Optional[dict]
             The JSON response from the API, or None if the request fails.
         """
+        request_body_to_send = dynamic_request_body if dynamic_request_body is not None else self.request_body
         try:
             self.logger.info(f"Making {self.method} request to API: {self.api_url}")
+            self.logger.debug(f"Headers: {self.headers}")
+            self.logger.debug(f"Params: {self.params}")
+            self.logger.debug(f"Request Body: {request_body_to_send}")
+
             response = requests.request(
                 self.method,
                 self.api_url,
                 headers=self.headers,
                 params=self.params,
-                json=self.request_body,
+                # Validate the request body based on the method
+                json=request_body_to_send if self.method in ["POST", "PUT", "PATCH"] and request_body_to_send else None
             )
             response.raise_for_status()
             self.logger.info(
@@ -588,6 +603,17 @@ class APICall(Component):
             return response.json()
         except requests.exceptions.RequestException as e:
             self.logger.error(f"API request failed: {e}")
+            # Attempt to get error details from response body if possible
+            try:
+                error_details = e.response.json() if e.response else str(e)
+                self.logger.error(f"Error details: {error_details}")
+            except json.JSONDecodeError:
+                error_details = e.response.text if e.response else str(e)
+                self.logger.error(f"Error details (non-JSON): {error_details}")
+            return None
+        except json.JSONDecodeError as e:
+            self.logger.error(f"Failed to decode JSON response: {e}")
+            self.logger.error(f"Response text: {response.text}")
             return None
 
 
@@ -629,9 +655,12 @@ class ChatBot(Component):
             title=title,
             logger=logger,
             api_url=api_url,
-            caption=caption,
+            method = "POST",
+            caption=None,
             headers=headers,
             params=params,
+            # Default request_body is empty, it will be set dynamically
+            request_body=None
         )
 
 
