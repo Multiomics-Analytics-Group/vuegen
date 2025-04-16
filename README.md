@@ -210,6 +210,35 @@ This advanced case study demonstrates the application of VueGen in a real-world 
 > [!NOTE]
 > The EMP case study is available online as [HTML][emp-html-demo] and [Streamlit][emp-st-demo] reports.
 
+**3. ChatBot Component**
+
+This case study highlights VueGen’s capability to embed a chatbot component into a report subsection, 
+enabling interactive conversations inside the report.
+
+Two API modes are supported:
+
+- **Ollama-style streaming chat completion**
+If a `model` parameter is specified in the config file, VueGen assumes the chatbot is using Ollama’s [/api/chat endpoint][ollama_chat]. 
+Messages are handled as chat history, and the assistant responses are streamed in real time for a smooth and responsive experience. 
+This mode supports LLMs such as `llama3`, `deepsek`, or `mistral`. 
+
+> [!TIP]
+> See [Ollama’s website][ollama] for more details.
+
+- **Standard prompt-response API**
+If no `model` is provided, VueGen uses a simpler prompt-response flow. 
+A single prompt is sent to an endpoint, and a structured JSON object is expected in return.
+Currently, the response can include:
+  - `text`: the main textual reply
+  - `links`: a list of source URLs (optional)
+  - `HTML content`: an HTML snippet with a Pyvis network visualization (optional)
+
+This response structure is currently customized for an internal knowledge graph assistant, but VueGen is being actively developed 
+to support more flexible and general-purpose response formats in future releases.
+
+> [!NOTE]
+> You can see a [configuration file example][config-chatbot] for the chatbot component in the `docs/example_config_files` folder.
+
 ## Web application deployment
 
 Once a Streamlit report is generated, it can be deployed as a web application to make it accessible online. There are multiple ways to achieve this:
@@ -269,6 +298,9 @@ We appreciate your feedback! If you have any comments, suggestions, or run into 
 [ci-docs]: https://github.com/Multiomics-Analytics-Group/vuegen/actions/workflows/docs.yml
 [emp-html-demo]: https://multiomics-analytics-group.github.io/vuegen/
 [emp-st-demo]: https://earth-microbiome-vuegen-demo.streamlit.app/
+[ollama_chat]: https://github.com/ollama/ollama/blob/main/docs/api.md#generate-a-chat-completion
+[ollama]: https://ollama.com/
+[config-chatbot]: https://github.com/Multiomics-Analytics-Group/vuegen/blob/main/docs/example_config_files/Chatbot_example_config.yaml
 [issues]: https://github.com/Multiomics-Analytics-Group/vuegen/issues
 [pulls]: https://github.com/Multiomics-Analytics-Group/vuegen/pulls
 [vuegen-preprint]: https://doi.org/10.1101/2025.03.05.641152

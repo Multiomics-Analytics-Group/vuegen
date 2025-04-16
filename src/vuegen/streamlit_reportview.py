@@ -758,7 +758,7 @@ with open('{(Path("..") / markdown.file_path).as_posix()}', 'r') as markdown_fil
 
     def _generate_html_content(self, html) -> List[str]:
         """
-        Generate content for an HTML component in a Streamlit app.
+        Generate content for an HTML component. 
 
         Parameters
         ----------
@@ -818,7 +818,8 @@ with open('{(Path("..") / html.file_path).as_posix()}', 'r', encoding='utf-8') a
 
     def _generate_apicall_content(self, apicall) -> List[str]:
         """
-        Generate content for a Markdown component.
+        Generate content for an API component. This method handles the API call and formats 
+        the response for display in the Streamlit app.
 
         Parameters
         ----------
@@ -862,12 +863,23 @@ with open('{(Path("..") / html.file_path).as_posix()}', 'r', encoding='utf-8') a
 
     def _generate_chatbot_content(self, chatbot) -> List[str]:
         """
-        Generate content for a ChatBot component, supporting both standard and Ollama-style APIs.
+        Generate content to render a ChatBot component, supporting standard and Ollama-style streaming APIs.
+
+        This method builds and returns a list of strings, which are later executed to create the chatbot 
+        interface in a Streamlit app. It includes user input handling, API interaction logic, response parsing, 
+        and conditional rendering of text, source links, and HTML subgraphs.
+
+        The function distinguishes between two chatbot modes:
+        - **Ollama-style streaming API**: Identified by the presence of `chatbot.model`. Uses streaming
+        JSON chunks from the server to simulate a real-time response.
+        - **Standard API**: Assumes a simple POST request with a prompt and a full JSON response with text,
+        and other fields like links, HTML graphs, etc.
 
         Parameters
         ----------
         chatbot : ChatBot
-            The ChatBot component to generate content for.
+            The ChatBot component to generate content for, containing configuration such as title, model,
+            API endpoint, headers, and caption.
 
         Returns
         -------
