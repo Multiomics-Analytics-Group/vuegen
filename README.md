@@ -94,7 +94,7 @@ VueGen is also available as a [nf-core][nfcore] module, customised for compatibi
 ## Execution
 
 > [!IMPORTANT]
-> Here we use the `Earth_microbiome_vuegen_demo_notebook` directory and the `Earth_microbiome_vuegen_demo_notebook.yaml` configuration file as examples, which are available in the `docs/example_data` and `docs/example_config_files` folders, respectively. Make sure to clone this reposiotry to access these contents, or use your own directory and configuration file.
+> Here we use the `Earth_microbiome_vuegen_demo_notebook` [directory][emp-dir] and the `Earth_microbiome_vuegen_demo_notebook.yaml` [configuration file][emp-config] as examples, which are available in the `docs/example_data` and `docs/example_config_files` folders, respectively. Make sure to clone this reposiotry to access these contents, or use your own directory and configuration file.
 
 Run VueGen using a directory with the following command:
 
@@ -201,6 +201,9 @@ This introductory case study uses a predefined directory with plots, dataframes,
 
 🔗 [![Open in Colab][colab_badge]][colab_link_intro_demo]
 
+> [!NOTE]
+> The [configuration file][predef-dir-config] is available in the `docs/example_config_files` folder, and the [directory][predef-dir] with example data is in the `docs/example_data` folder.
+
 **2. Earth Microbiome Project Data**
 
 This advanced case study demonstrates the application of VueGen in a real-world scenario using data from the [Earth Microbiome Project (EMP)][emp]. The EMP is an initiative to characterize global microbial taxonomic and functional diversity. The notebook process the EMP data, create plots, dataframes, and other components, and organize outputs within a directory to produce reports. Report content and structure can be adapted by modifying the configuration file. Each report consists of sections on exploratory data analysis, metagenomics, and network analysis.
@@ -209,6 +212,7 @@ This advanced case study demonstrates the application of VueGen in a real-world 
 
 > [!NOTE]
 > The EMP case study is available online as [HTML][emp-html-demo] and [Streamlit][emp-st-demo] reports.
+> The [configuration file][emp-config] is available in the `docs/example_config_files` folder, and the [directory][emp-dir] with example data is in the `docs/example_data` folder.
 
 **3. ChatBot Component**
 
@@ -312,8 +316,12 @@ We appreciate your feedback! If you have any comments, suggestions, or run into 
 [nf-vuegen]: https://github.com/Multiomics-Analytics-Group/nf-vuegen/
 [colab_badge]: https://colab.research.google.com/assets/colab-badge.svg
 [colab_link_intro_demo]: https://colab.research.google.com/github/Multiomics-Analytics-Group/vuegen/blob/main/docs/vuegen_basic_case_study.ipynb
+[predef-dir-config]: https://github.com/Multiomics-Analytics-Group/vuegen/blob/main/docs/example_config_files/Basic_example_vuegen_demo_notebook_config.yaml
+[predef-dir]: https://github.com/Multiomics-Analytics-Group/vuegen/blob/main/docs/example_data/Basic_example_vuegen_demo_notebook
 [colab_link_emp_demo]: https://colab.research.google.com/github/Multiomics-Analytics-Group/vuegen/blob/main/docs/vuegen_case_study_earth_microbiome.ipynb
 [emp]: https://earthmicrobiome.org/
+[emp-config]: https://github.com/Multiomics-Analytics-Group/vuegen/blob/main/docs/example_config_files/Earth_microbiome_vuegen_demo_notebook_config
+[emp-dir]: https://github.com/Multiomics-Analytics-Group/vuegen/blob/main/docs/example_data/Earth_microbiome_vuegen_demo_notebook
 [st-cloud]: https://streamlit.io/cloud
 [stlite]: https://github.com/whitphx/stlite
 [st-forum-exe]: https://discuss.streamlit.io/t/streamlit-deployment-as-an-executable-file-exe-for-windows-macos-and-android/6812
