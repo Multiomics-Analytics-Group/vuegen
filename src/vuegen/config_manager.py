@@ -599,7 +599,7 @@ class ConfigManager:
             title=component_data["title"],
             logger=self.logger,
             api_url=component_data["api_url"],
-            model=component_data["model"],
+            model=component_data.get("model"),
             caption=component_data.get("caption"),
             headers=component_data.get("headers"),
             params=component_data.get("params"),

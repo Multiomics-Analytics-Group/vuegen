@@ -586,7 +586,6 @@ class APICall(Component):
             self.logger.info(f"Making {self.method} request to API: {self.api_url}")
             self.logger.debug(f"Headers: {self.headers}")
             self.logger.debug(f"Params: {self.params}")
-            self.logger.debug(f"Request Body: {request_body_to_send}")
 
             response = requests.request(
                 self.method,
@@ -594,7 +593,7 @@ class APICall(Component):
                 headers=self.headers,
                 params=self.params,
                 # Validate the request body based on the method
-                json=request_body_to_send if self.method in ["POST", "PUT", "PATCH"] and request_body_to_send else None
+                json=request_body_to_send if self.method in ["POST", "PUT", "PATCH"] and request_body_to_send else None,
             )
             response.raise_for_status()
             self.logger.info(
@@ -603,17 +602,6 @@ class APICall(Component):
             return response.json()
         except requests.exceptions.RequestException as e:
             self.logger.error(f"API request failed: {e}")
-            # Attempt to get error details from response body if possible
-            try:
-                error_details = e.response.json() if e.response else str(e)
-                self.logger.error(f"Error details: {error_details}")
-            except json.JSONDecodeError:
-                error_details = e.response.text if e.response else str(e)
-                self.logger.error(f"Error details (non-JSON): {error_details}")
-            return None
-        except json.JSONDecodeError as e:
-            self.logger.error(f"Failed to decode JSON response: {e}")
-            self.logger.error(f"Response text: {response.text}")
             return None
 
 
@@ -624,10 +612,10 @@ class ChatBot(Component):
 
     Attributes
     ----------
-    model : str
-        The language model to use for the chatbot.
     api_call : APICall
         An instance of the APICall class used to interact with the API for fetching chatbot responses.
+    model : Optional[str]
+        The language model to use for the chatbot (default is None).
     headers : Optional[dict]
         Headers to include in the API request (default is None).
     params : Optional[dict]
@@ -639,8 +627,8 @@ class ChatBot(Component):
         title: str,
         logger: logging.Logger,
         api_url: str,
-        model: str,
         caption: str = None,
+        model: Optional[str] = None,
         headers: Optional[dict] = None,
         params: Optional[dict] = None,
     ):
@@ -659,8 +647,6 @@ class ChatBot(Component):
             caption=None,
             headers=headers,
             params=params,
-            # Default request_body is empty, it will be set dynamically
-            request_body=None
         )
 
 
