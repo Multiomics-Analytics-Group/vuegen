@@ -565,7 +565,9 @@ class APICall(Component):
         # but we'll include it here if needed for values from a config file
         self.request_body = request_body or {}
 
-    def make_api_request(self, dynamic_request_body: Optional[dict] = None) -> Optional[dict]:
+    def make_api_request(
+        self, dynamic_request_body: Optional[dict] = None
+    ) -> Optional[dict]:
         """
         Sends an HTTP request to the specified API and returns the JSON response.
         It allows overriding the request body dynamically.
@@ -581,7 +583,11 @@ class APICall(Component):
         response : Optional[dict]
             The JSON response from the API, or None if the request fails.
         """
-        request_body_to_send = dynamic_request_body if dynamic_request_body is not None else self.request_body
+        request_body_to_send = (
+            dynamic_request_body
+            if dynamic_request_body is not None
+            else self.request_body
+        )
         try:
             self.logger.info(f"Making {self.method} request to API: {self.api_url}")
             self.logger.debug(f"Headers: {self.headers}")
@@ -593,7 +599,11 @@ class APICall(Component):
                 headers=self.headers,
                 params=self.params,
                 # Validate the request body based on the method
-                json=request_body_to_send if self.method in ["POST", "PUT", "PATCH"] and request_body_to_send else None,
+                json=(
+                    request_body_to_send
+                    if self.method in ["POST", "PUT", "PATCH"] and request_body_to_send
+                    else None
+                ),
             )
             response.raise_for_status()
             self.logger.info(
@@ -643,7 +653,7 @@ class ChatBot(Component):
             title=title,
             logger=logger,
             api_url=api_url,
-            method = "POST",
+            method="POST",
             caption=None,
             headers=headers,
             params=params,

@@ -859,7 +859,7 @@ with open('{(Path("..") / html.file_path).as_posix()}', 'r', encoding='utf-8') a
             f"Successfully generated content for APICall '{apicall.title}' using method '{apicall.method}'"
         )
         return apicall_content
-        
+
     def _generate_chatbot_content(self, chatbot) -> List[str]:
         """
         Generate content for a ChatBot component, supporting both standard and Ollama-style APIs.
@@ -883,7 +883,7 @@ with open('{(Path("..") / html.file_path).as_posix()}', 'r', encoding='utf-8') a
             )
         )
 
-         # --- Shared code blocks (as strings) ---
+        # --- Shared code blocks (as strings) ---
         init_messages_block = """
 # Init session state
 if 'messages' not in st.session_state:
