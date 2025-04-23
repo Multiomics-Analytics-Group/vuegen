@@ -718,6 +718,7 @@ class Section:
     id: int = field(init=False)
     title: str
     subsections: List["Subsection"] = field(default_factory=list)
+    components: List["Component"] = field(default_factory=list)
     description: Optional[str] = None
 
     def __post_init__(self):

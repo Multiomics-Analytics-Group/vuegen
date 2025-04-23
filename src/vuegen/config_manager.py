@@ -301,12 +301,27 @@ class ConfigManager:
         # Sort sections by their number prefix
         sorted_sections = self._sort_paths_by_numprefix(list(base_dir_path.iterdir()))
 
+        main_section_config = {
+            "title": self._create_title_fromdir("home_components"),
+            "description": "Components added to homepage.",
+            "components": [],
+        }
+        yaml_config["sections"].append(main_section_config)
+
         # Generate sections and subsections config
         for section_dir in sorted_sections:
             if section_dir.is_dir():
                 yaml_config["sections"].append(
                     self._create_sect_config_fromdir(section_dir)
                 )
+            # could be single plots?
+            else:
+                file_in_main_section_dir = section_dir
+                component_config = self._create_component_config_fromfile(
+                    file_in_main_section_dir
+                )
+                if component_config is not None:
+                    main_section_config["components"].append(component_config)
 
         return yaml_config, base_dir_path
 
@@ -371,6 +386,10 @@ class ConfigManager:
             subsections=[],
             description=section_data.get("description"),
         )
+
+        for component_data in section_data.get("components", []):
+            component = self._create_component(component_data)
+            section.components.append(component)
 
         # Create subsections
         for subsection_data in section_data.get("subsections", []):

@@ -127,11 +127,14 @@ st.set_page_config(layout="wide", page_title="{self.report.title}")"""
             report_manag_content.append("\nsections_pages = {}")
 
             # Generate the home page and update the report manager content
+            # ! top level files (compontents) are added to the home page
             self._generate_home_section(
-                output_dir=output_dir, report_manag_content=report_manag_content
+                output_dir=output_dir,
+                report_manag_content=report_manag_content,
+                home_section=self.report.sections[0],
             )
 
-            for section in self.report.sections:
+            for section in self.report.sections[1:]:  # skip home section components
                 # Create a folder for each section
                 subsection_page_vars = []
                 section_name_var = section.title.replace(" ", "_")
@@ -293,7 +296,10 @@ report_nav.run()"""
         return f"""st.markdown('''<{tag} style='text-align: {text_align}; color: {color};'>{text}</{tag}>''', unsafe_allow_html=True)"""
 
     def _generate_home_section(
-        self, output_dir: str, report_manag_content: list
+        self,
+        output_dir: str,
+        report_manag_content: list,
+        home_section: r.Section,
     ) -> None:
         """
         Generates the homepage for the report and updates the report manager content.
@@ -306,6 +312,13 @@ report_nav.run()"""
             A list to store the content that will be written to the report manager file.
         """
         self.report.logger.debug("Processing home section.")
+        all_components = []
+        subsection_imports = []
+        if home_section.components:
+            # some assert on title?
+            all_components, subsection_imports, _ = self._combine_components(
+                home_section.components
+            )
 
         try:
             # Create folder for the home page
@@ -320,6 +333,8 @@ report_nav.run()"""
             # Create the home page content
             home_content = []
             home_content.append(f"import streamlit as st")
+            if subsection_imports:
+                home_content.extend(subsection_imports)
             if self.report.description:
                 home_content.append(
                     self._format_text(text=self.report.description, type="paragraph")
@@ -328,6 +343,10 @@ report_nav.run()"""
                 home_content.append(
                     f"\nst.image('{self.report.graphical_abstract}', use_column_width=True)"
                 )
+
+            # add components content to page (if any)
+            if all_components:
+                home_content.extend(all_components)
 
             # Define the footer variable and add it to the home page content
             home_content.append("footer = '''" + generate_footer() + "'''\n")
@@ -361,7 +380,7 @@ report_nav.run()"""
         self.report.logger.info("Starting to generate sections for the report.")
 
         try:
-            for section in self.report.sections:
+            for section in self.report.sections[1:]:
                 section_name_var = section.title.replace(" ", "_")
                 self.report.logger.debug(
                     f"Processing section '{section.id}': '{section.title}' - {len(section.subsections)} subsection(s)"
