@@ -81,9 +81,12 @@ def get_report(
         sections_dir = report_dir / "sections"
         static_files_dir = report_dir / "static"
         st_report = StreamlitReportView(
-            report=report, report_type=report_type, streamlit_autorun=streamlit_autorun
+            report=report,
+            report_type=report_type,
+            streamlit_autorun=streamlit_autorun,
+            static_dir=static_files_dir,
         )
-        st_report.generate_report(output_dir=sections_dir, static_dir=static_files_dir)
+        st_report.generate_report(output_dir=sections_dir)
         st_report.run_report(output_dir=sections_dir)
     else:
         # Check if Quarto is installed

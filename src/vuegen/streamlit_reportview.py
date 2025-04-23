@@ -37,7 +37,22 @@ class StreamlitReportView(r.WebAppReportView):
         report: r.Report,
         report_type: r.ReportType,
         streamlit_autorun: bool = False,
+        static_dir: str = STATIC_FILES_DIR,
     ):
+        """Initialize ReportView with the report and report type.
+
+        Parameters
+        ----------
+        report : r.Report
+            Report dataclass with all the information to be included in the report.
+            Contains sections data needed to write the report python files.
+        report_type : r.ReportType
+            Enum of report type as definded by the ReportType Enum.
+        streamlit_autorun : bool, optional
+            Wheather streamlit should be started after report generation, by default False
+        static_dir : str, optional
+            The folder where the static files will be saved, by default STATIC_FILES_DIR.
+        """
         super().__init__(report=report, report_type=report_type)
         self.streamlit_autorun = streamlit_autorun
         self.BUNDLED_EXECUTION = False
@@ -56,9 +71,9 @@ class StreamlitReportView(r.WebAppReportView):
             r.ComponentType.CHATBOT: self._generate_chatbot_content,
         }
 
-    def generate_report(
-        self, output_dir: str = SECTIONS_DIR, static_dir: str = STATIC_FILES_DIR
-    ) -> None:
+        self.static_dir = static_dir
+
+    def generate_report(self, output_dir: str = SECTIONS_DIR) -> None:
         """
         Generates the Streamlit report and creates Python files for each section and its subsections and plots.
 
@@ -66,8 +81,6 @@ class StreamlitReportView(r.WebAppReportView):
         ----------
         output_dir : str, optional
             The folder where the generated report files will be saved (default is SECTIONS_DIR).
-        static_dir : str, optional
-            The folder where the static files will be saved (default is STATIC_FILES_DIR).
         """
         self.report.logger.debug(
             f"Generating '{self.report_type}' report in directory: '{output_dir}'"
@@ -80,13 +93,13 @@ class StreamlitReportView(r.WebAppReportView):
             self.report.logger.info(f"Output directory already existed: '{output_dir}'")
 
         # Create the static folder
-        if create_folder(static_dir):
+        if create_folder(self.static_dir):
             self.report.logger.info(
-                f"Created output directory for static content: '{static_dir}'"
+                f"Created output directory for static content: '{self.static_dir}'"
             )
         else:
             self.report.logger.info(
-                f"Output directory for static content already existed: '{static_dir}'"
+                f"Output directory for static content already existed: '{self.static_dir}'"
             )
 
         try:
@@ -172,7 +185,7 @@ report_nav.run()"""
                 )
 
             # Create Python files for each section and its subsections and plots
-            self._generate_sections(output_dir=output_dir, static_dir=static_dir)
+            self._generate_sections(output_dir=output_dir)
         except Exception as e:
             self.report.logger.error(
                 f"An error occurred while generating the report: {str(e)}"
@@ -336,7 +349,7 @@ report_nav.run()"""
             self.report.logger.error(f"Error generating the home section: {str(e)}")
             raise
 
-    def _generate_sections(self, output_dir: str, static_dir: str) -> None:
+    def _generate_sections(self, output_dir: str) -> None:
         """
         Generates Python files for each section in the report, including subsections and its components (plots, dataframes, markdown).
 
@@ -344,8 +357,6 @@ report_nav.run()"""
         ----------
         output_dir : str
             The folder where section files will be saved.
-        static_dir : str
-            The folder where the static files will be saved.
         """
         self.report.logger.info("Starting to generate sections for the report.")
 
@@ -366,7 +377,8 @@ report_nav.run()"""
                 # Iterate through subsections and integrate them into the section file
                 for subsection in section.subsections:
                     self.report.logger.debug(
-                        f"Processing subsection '{subsection.id}': '{subsection.title} - {len(subsection.components)} component(s)'"
+                        f"Processing subsection '{subsection.id}': '{subsection.title} -"
+                        f" {len(subsection.components)} component(s)'"
                     )
                     try:
                         # Create subsection file
@@ -437,8 +449,6 @@ report_nav.run()"""
         ----------
         subsection : Subsection
             The subsection containing the components.
-        static_dir : str
-            The folder where the static files will be saved.
 
         Returns
         -------
@@ -447,10 +457,6 @@ report_nav.run()"""
             - list of imports for the subsection (List[str])
         """
         subsection_content = []
-        subsection_imports = []
-
-        # Track if there's a Chatbot component in this subsection
-        has_chatbot = False
 
         # Add subsection header and description
         subsection_content.append(
@@ -477,7 +483,7 @@ report_nav.run()"""
         )
         return subsection_content, subsection_imports
 
-    def _generate_plot_content(self, plot, static_dir: str) -> List[str]:
+    def _generate_plot_content(self, plot) -> List[str]:
         """
         Generate content for a plot component based on the plot type (static or interactive).
 
@@ -490,8 +496,6 @@ report_nav.run()"""
         -------
         list : List[str]
             The list of content lines for the plot.
-        static_dir : str
-            The folder where the static files will be saved.
         """
         plot_content = []
         # Add title
@@ -517,7 +521,7 @@ report_nav.run()"""
                 else:
                     # Otherwise, create and save a new pyvis network from the netowrkx graph
                     html_plot_file = (
-                        Path(static_dir) / f"{plot.title.replace(' ', '_')}.html"
+                        Path(self.static_dir) / f"{plot.title.replace(' ', '_')}.html"
                     )
                     pyvis_graph = plot.create_and_save_pyvis_network(
                         networkx_graph, html_plot_file
