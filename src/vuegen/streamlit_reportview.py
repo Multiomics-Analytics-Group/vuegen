@@ -13,6 +13,15 @@ from .utils import create_folder, generate_footer, is_url
 from .utils.variables import make_valid_identifier
 
 
+def write_python_file(fpath: str, imports: list[str], contents: list[str]) -> None:
+    with open(fpath, "w", encoding="utf8") as f:
+        # Write imports at the top of the file
+        f.write("\n".join(imports) + "\n\n")
+
+        # Write the subsection content (descriptions, plots)
+        f.write("\n".join(contents))
+
+
 class StreamlitReportView(r.WebAppReportView):
     """
     A Streamlit-based implementation of the WebAppReportView abstract base class.
@@ -37,6 +46,15 @@ class StreamlitReportView(r.WebAppReportView):
             self.BUNDLED_EXECUTION = True
         else:
             self.report.logger.info("running in a normal Python process")
+
+        self.components_fct_map = {
+            r.ComponentType.PLOT: self._generate_plot_content,
+            r.ComponentType.DATAFRAME: self._generate_dataframe_content,
+            r.ComponentType.MARKDOWN: self._generate_markdown_content,
+            r.ComponentType.HTML: self._generate_html_content,
+            r.ComponentType.APICALL: self._generate_apicall_content,
+            r.ComponentType.CHATBOT: self._generate_chatbot_content,
+        }
 
     def generate_report(
         self, output_dir: str = SECTIONS_DIR, static_dir: str = STATIC_FILES_DIR
@@ -338,65 +356,79 @@ report_nav.run()"""
                     f"Processing section '{section.id}': '{section.title}' - {len(section.subsections)} subsection(s)"
                 )
 
-                if section.subsections:
-                    # Iterate through subsections and integrate them into the section file
-                    for subsection in section.subsections:
-                        self.report.logger.debug(
-                            f"Processing subsection '{subsection.id}': '{subsection.title} - {len(subsection.components)} component(s)'"
-                        )
-                        try:
-                            # Create subsection file
-                            _subsection_name = make_valid_identifier(subsection.title)
-                            subsection_file_path = (
-                                Path(output_dir)
-                                / section_name_var
-                                / f"{_subsection_name}.py"
-                            )
-
-                            # Generate content and imports for the subsection
-                            subsection_content, subsection_imports = (
-                                self._generate_subsection(
-                                    subsection, static_dir=static_dir
-                                )
-                            )
-
-                            # Flatten the subsection_imports into a single list
-                            flattened_subsection_imports = [
-                                imp for sublist in subsection_imports for imp in sublist
-                            ]
-
-                            # Remove duplicated imports
-                            unique_imports = list(set(flattened_subsection_imports))
-
-                            # Write everything to the subsection file
-                            with open(subsection_file_path, "w") as subsection_file:
-                                # Write imports at the top of the file
-                                subsection_file.write(
-                                    "\n".join(unique_imports) + "\n\n"
-                                )
-
-                                # Write the subsection content (descriptions, plots)
-                                subsection_file.write("\n".join(subsection_content))
-
-                            self.report.logger.info(
-                                f"Subsection file created: '{subsection_file_path}'"
-                            )
-                        except Exception as subsection_error:
-                            self.report.logger.error(
-                                f"Error processing subsection '{subsection.id}' '{subsection.title}' in section  '{section.id}' '{section.title}': {str(subsection_error)}"
-                            )
-                            raise
-                else:
+                if not section.subsections:
                     self.report.logger.warning(
-                        f"No subsections found in section: '{section.title}'. To show content in the report, add subsections to the section."
+                        f"No subsections found in section: '{section.title}'. "
+                        "To show content in the report, add subsections to the section."
                     )
+                    continue
+
+                # Iterate through subsections and integrate them into the section file
+                for subsection in section.subsections:
+                    self.report.logger.debug(
+                        f"Processing subsection '{subsection.id}': '{subsection.title} - {len(subsection.components)} component(s)'"
+                    )
+                    try:
+                        # Create subsection file
+                        _subsection_name = make_valid_identifier(subsection.title)
+                        subsection_file_path = (
+                            Path(output_dir)
+                            / section_name_var
+                            / f"{_subsection_name}.py"
+                        )
+
+                        # Generate content and imports for the subsection
+                        subsection_content, subsection_imports = (
+                            self._generate_subsection(subsection)
+                        )
+
+                        write_python_file(
+                            fpath=subsection_file_path,
+                            imports=subsection_imports,
+                            contents=subsection_content,
+                        )
+                        self.report.logger.info(
+                            f"Subsection file created: '{subsection_file_path}'"
+                        )
+                    except Exception as subsection_error:
+                        self.report.logger.error(
+                            f"Error processing subsection '{subsection.id}' '{subsection.title}' "
+                            f"in section  '{section.id}' '{section.title}': {str(subsection_error)}"
+                        )
+                        raise
+
         except Exception as e:
             self.report.logger.error(f"Error generating sections: {str(e)}")
             raise
 
-    def _generate_subsection(
-        self, subsection, static_dir
-    ) -> tuple[List[str], List[str]]:
+    def _combine_components(self, components: list[dict]) -> tuple[list, list, bool]:
+        """combine a list of components."""
+
+        all_contents = []
+        all_imports = []
+        has_chatbot = False
+
+        for component in components:
+            # Write imports if not already done
+            component_imports = self._generate_component_imports(component)
+            all_imports.extend(component_imports)
+
+            # Handle different types of components
+            fct = self.components_fct_map.get(component.component_type, None)
+            if fct is None:
+                self.report.logger.warning(
+                    f"Unsupported component type '{component.component_type}' "
+                )
+            else:
+                if component.component_type == r.ComponentType.CHATBOT:
+                    has_chatbot = True
+                content = fct(component)
+                all_contents.extend(content)
+        # remove duplicates and isort
+        all_imports = list(set(all_imports))
+        return all_contents, all_imports, has_chatbot
+
+    def _generate_subsection(self, subsection) -> tuple[List[str], List[str]]:
         """
         Generate code to render components (plots, dataframes, markdown) in the given subsection,
         creating imports and content for the subsection based on the component type.
@@ -430,36 +462,10 @@ report_nav.run()"""
             subsection_content.append(
                 self._format_text(text=subsection.description, type="paragraph")
             )
-
-        for component in subsection.components:
-            # Write imports if not already done
-            component_imports = self._generate_component_imports(component)
-            subsection_imports.append(component_imports)
-
-            # Handle different types of components
-            if component.component_type == r.ComponentType.PLOT:
-                subsection_content.extend(
-                    self._generate_plot_content(component, static_dir=static_dir)
-                )
-            elif component.component_type == r.ComponentType.DATAFRAME:
-                subsection_content.extend(self._generate_dataframe_content(component))
-            # If md files is called "description.md", do not include it in the report
-            elif (
-                component.component_type == r.ComponentType.MARKDOWN
-                and component.title.lower() != "description"
-            ):
-                subsection_content.extend(self._generate_markdown_content(component))
-            elif component.component_type == r.ComponentType.HTML:
-                subsection_content.extend(self._generate_html_content(component))
-            elif component.component_type == r.ComponentType.APICALL:
-                subsection_content.extend(self._generate_apicall_content(component))
-            elif component.component_type == r.ComponentType.CHATBOT:
-                has_chatbot = True
-                subsection_content.extend(self._generate_chatbot_content(component))
-            else:
-                self.report.logger.warning(
-                    f"Unsupported component type '{component.component_type}' in subsection: {subsection.title}"
-                )
+        all_components, subsection_imports, has_chatbot = self._combine_components(
+            subsection.components
+        )
+        subsection_content.extend(all_components)
 
         if not has_chatbot:
             # Define the footer variable and add it to the home page content
