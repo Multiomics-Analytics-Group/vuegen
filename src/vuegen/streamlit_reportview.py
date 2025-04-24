@@ -1,5 +1,4 @@
 import os
-import re
 import subprocess
 import sys
 from pathlib import Path
@@ -148,6 +147,18 @@ st.set_page_config(layout="wide", page_title="{self.report.title}")"""
                     self.report.logger.debug(
                         f"Section directory already existed: {section_dir_path}"
                     )
+                # add an overview page to section of components exist
+                if section.components:
+                    subsection_file_path = (
+                        Path(section_name_var)
+                        / f"0_overview_{section.title.lower()}.py"
+                    ).as_posix()  # Make sure it's Posix Paths
+
+                    # Create a Page object for each subsection and add it to the home page content
+                    report_manag_content.append(
+                        f"{section_name_var}_overview = st.Page('{subsection_file_path}', title='Overview {section.title}')"
+                    )
+                    subsection_page_vars.append(f"{section_name_var}_overview")
 
                 for subsection in section.subsections:
                     # ! could add a non-integer to ensure it's a valid identifier
@@ -386,6 +397,25 @@ report_nav.run()"""
                     f"Processing section '{section.id}': '{section.title}' - {len(section.subsections)} subsection(s)"
                 )
 
+                if section.components:
+                    # add an section overview page
+                    section_content, section_imports, _ = self._combine_components(
+                        section.components
+                    )
+                    _filepath_overview = (
+                        Path(output_dir)
+                        / section_name_var
+                        / f"0_overview_{section.title.lower()}.py"
+                        # ! tighly coupled to generate_report fct:
+                        # ! check how to pass file names
+                    )
+
+                    write_python_file(
+                        fpath=_filepath_overview,
+                        imports=section_imports,
+                        contents=section_content,
+                    )
+
                 if not section.subsections:
                     self.report.logger.warning(
                         f"No subsections found in section: '{section.title}'. "
@@ -394,6 +424,7 @@ report_nav.run()"""
                     continue
 
                 # Iterate through subsections and integrate them into the section file
+                # subsection should have the subsection_file_path as file_path?
                 for subsection in section.subsections:
                     self.report.logger.debug(
                         f"Processing subsection '{subsection.id}': '{subsection.title} -"

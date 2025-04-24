@@ -257,14 +257,25 @@ class ConfigManager:
         )
 
         subsections = []
+        components = []
         for subsection_dir in sorted_subsections:
             if subsection_dir.is_dir():
                 subsections.append(self._create_subsect_config_fromdir(subsection_dir))
+            else:
+                file_in_subsection_dir = (
+                    subsection_dir  # ! maybe take more generic names?
+                )
+                component_config = self._create_component_config_fromfile(
+                    file_in_subsection_dir
+                )
+                if component_config is not None:
+                    components.append(component_config)
 
         section_config = {
             "title": self._create_title_fromdir(section_dir_path.name),
             "description": self._read_description_file(section_dir_path),
             "subsections": subsections,
+            "components": components,
         }
         return section_config
 
