@@ -136,7 +136,9 @@ st.set_page_config(layout="wide", page_title="{self.report.title}")"""
             for section in self.report.sections[1:]:  # skip home section components
                 # Create a folder for each section
                 subsection_page_vars = []
-                section_name_var = section.title.replace(" ", "_")
+                section_name_var = make_valid_identifier(
+                    section.title.replace(" ", "_")
+                )
                 section_dir_path = Path(output_dir) / section_name_var
 
                 if create_folder(section_dir_path):
@@ -151,9 +153,9 @@ st.set_page_config(layout="wide", page_title="{self.report.title}")"""
                 if section.components:
                     subsection_file_path = (
                         Path(section_name_var)
-                        / f"0_overview_{section.title.lower()}.py"
+                        / f"0_overview_{make_valid_identifier(section.title).lower()}.py"
                     ).as_posix()  # Make sure it's Posix Paths
-
+                    section.file_path = subsection_file_path
                     # Create a Page object for each subsection and add it to the home page content
                     report_manag_content.append(
                         f"{section_name_var}_overview = st.Page('{subsection_file_path}', title='Overview {section.title}')"
@@ -173,7 +175,7 @@ st.set_page_config(layout="wide", page_title="{self.report.title}")"""
                     subsection_file_path = (
                         Path(section_name_var) / f"{subsection_name_var}.py"
                     ).as_posix()  # Make sure it's Posix Paths
-
+                    subsection.file_path = subsection_file_path
                     # Create a Page object for each subsection and add it to the home page content
                     report_manag_content.append(
                         f"{subsection_name_var} = st.Page('{subsection_file_path}', title='{subsection.title}')"
@@ -402,16 +404,11 @@ report_nav.run()"""
                     section_content, section_imports, _ = self._combine_components(
                         section.components
                     )
-                    _filepath_overview = (
-                        Path(output_dir)
-                        / section_name_var
-                        / f"0_overview_{section.title.lower()}.py"
-                        # ! tighly coupled to generate_report fct:
-                        # ! check how to pass file names
-                    )
-
+                    assert (
+                        section.file_path is not None
+                    ), "Missing relative file path to overview page in section"
                     write_python_file(
-                        fpath=_filepath_overview,
+                        fpath=Path(output_dir) / section.file_path,
                         imports=section_imports,
                         contents=section_content,
                     )
@@ -433,12 +430,10 @@ report_nav.run()"""
                     try:
                         # Create subsection file
                         _subsection_name = make_valid_identifier(subsection.title)
-                        subsection_file_path = (
-                            Path(output_dir)
-                            / section_name_var
-                            / f"{_subsection_name}.py"
-                        )
-
+                        assert (
+                            subsection.file_path is not None
+                        ), "Missing relative file path to subsection"
+                        subsection_file_path = Path(output_dir) / subsection.file_path
                         # Generate content and imports for the subsection
                         subsection_content, subsection_imports = (
                             self._generate_subsection(subsection)
