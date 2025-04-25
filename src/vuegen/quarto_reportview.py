@@ -1,4 +1,3 @@
-import logging
 import os
 import subprocess
 import sys
@@ -28,12 +27,12 @@ class QuartoReportView(r.ReportView):
     ):
         super().__init__(report=report, report_type=report_type)
         self.quarto_checks = quarto_checks
-        self.BUNDLED_EXECUTION = False
+        # self.BUNDLED_EXECUTION = False
         self.quarto_path = "quarto"
         # self.env_vars = os.environ.copy()
         if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
             self.report.logger.info("running in a PyInstaller bundle")
-            self.BUNDLED_EXECUTION = True
+            # self.BUNDLED_EXECUTION = True
             self.report.logger.debug(f"sys._MEIPASS: {sys._MEIPASS}")
         else:
             self.report.logger.info("running in a normal Python process")
