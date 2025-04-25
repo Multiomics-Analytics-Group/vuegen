@@ -24,9 +24,25 @@ class QuartoReportView(r.ReportView):
         report: r.Report,
         report_type: r.ReportType,
         quarto_checks: bool = False,
+        static_dir: str = STATIC_FILES_DIR,
     ):
+        """_summary_
+
+        Parameters
+        ----------
+        report : r.Report
+            Report dataclass with all the information to be included in the report.
+            Contains sections data needed to write the report python files.
+        report_type : r.ReportType
+            Enum of report type as definded by the ReportType Enum.
+        quarto_checks : bool, optional
+            Whether to test if all quarto dependencies are installed, by default False
+        static_dir : str
+            The folder where the static files will be saved.
+        """
         super().__init__(report=report, report_type=report_type)
         self.quarto_checks = quarto_checks
+        self.static_dir = static_dir
         # self.BUNDLED_EXECUTION = False
         self.quarto_path = "quarto"
         # self.env_vars = os.environ.copy()
@@ -48,9 +64,7 @@ class QuartoReportView(r.ReportView):
             r.ReportType.PPTX,
         }
 
-    def generate_report(
-        self, output_dir: Path = BASE_DIR, static_dir: Path = STATIC_FILES_DIR
-    ) -> None:
+    def generate_report(self, output_dir: Path = BASE_DIR) -> None:
         """
         Generates the qmd file of the quarto report. It creates code for rendering each section and its subsections with all components.
 
@@ -58,8 +72,6 @@ class QuartoReportView(r.ReportView):
         ----------
         output_dir : Path, optional
             The folder where the generated report files will be saved (default is BASE_DIR).
-        static_dir : Path, optional
-            The folder where the static files will be saved (default is STATIC_FILES_DIR).
         """
         self.report.logger.debug(
             f"Generating '{self.report_type}' report in directory: '{output_dir}'"
@@ -74,13 +86,13 @@ class QuartoReportView(r.ReportView):
             )
 
         # Create the static folder
-        if create_folder(static_dir):
+        if create_folder(self.static_dir):
             self.report.logger.info(
-                f"Created output directory for static content: '{static_dir}'"
+                f"Created output directory for static content: '{self.static_dir}'"
             )
         else:
             self.report.logger.info(
-                f"Output directory for static content already existed: '{static_dir}'"
+                f"Output directory for static content already existed: '{self.static_dir}'"
             )
 
         try:
@@ -125,7 +137,6 @@ class QuartoReportView(r.ReportView):
                             self._generate_subsection(
                                 subsection,
                                 is_report_revealjs,
-                                static_dir=static_dir,
                             )
                         )
                         qmd_content.extend(subsection_content)
@@ -392,7 +403,6 @@ include-after-body:
         self,
         subsection,
         is_report_revealjs,
-        static_dir: str,
     ) -> tuple[List[str], List[str]]:
         """
         Generate code to render components (plots, dataframes, markdown) in the given subsection,
@@ -404,8 +414,7 @@ include-after-body:
             The subsection containing the components.
         is_report_revealjs : bool
             A boolean indicating whether the report is in revealjs format.
-        static_dir : str
-            The folder where the static files will be saved.
+
         Returns
         -------
         tuple : (List[str], List[str])
@@ -428,13 +437,9 @@ include-after-body:
             subsection_imports.append(component_imports)
 
             if component.component_type == r.ComponentType.PLOT:
-                subsection_content.extend(
-                    self._generate_plot_content(component, static_dir=static_dir)
-                )
+                subsection_content.extend(self._generate_plot_content(component))
             elif component.component_type == r.ComponentType.DATAFRAME:
-                subsection_content.extend(
-                    self._generate_dataframe_content(component, static_dir=static_dir)
-                )
+                subsection_content.extend(self._generate_dataframe_content(component))
             elif (
                 component.component_type == r.ComponentType.MARKDOWN
                 and component.title.lower() != "description"
@@ -458,7 +463,7 @@ include-after-body:
         )
         return subsection_content, subsection_imports
 
-    def _generate_plot_content(self, plot, static_dir: str) -> List[str]:
+    def _generate_plot_content(self, plot) -> List[str]:
         """
         Generate content for a plot component based on the report type.
 
@@ -466,8 +471,6 @@ include-after-body:
         ----------
         plot : Plot
             The plot component to generate content for.
-        static_dir : str
-            The folder where the static files will be saved.
 
         Returns
         -------
@@ -480,9 +483,13 @@ include-after-body:
 
         # Define plot path
         if self.is_report_static:
-            static_plot_path = Path(static_dir) / f"{plot.title.replace(' ', '_')}.png"
+            static_plot_path = (
+                Path(self.static_dir) / f"{plot.title.replace(' ', '_')}.png"
+            )
         else:
-            html_plot_file = Path(static_dir) / f"{plot.title.replace(' ', '_')}.html"
+            html_plot_file = (
+                Path(self.static_dir) / f"{plot.title.replace(' ', '_')}.html"
+            )
 
         # Add content for the different plot types
         try:
@@ -610,7 +617,7 @@ fig_altair = alt.Chart.from_json(plot_json_str).properties(width=900, height=400
 </div>\n"""
         return plot_code
 
-    def _generate_dataframe_content(self, dataframe, static_dir: str) -> List[str]:
+    def _generate_dataframe_content(self, dataframe) -> List[str]:
         """
         Generate content for a DataFrame component based on the report type.
 
@@ -618,8 +625,6 @@ fig_altair = alt.Chart.from_json(plot_json_str).properties(width=900, height=400
         ----------
         dataframe : DataFrame
             The dataframe component to add to content.
-        static_dir : str
-            The folder where the static files will be saved.
 
         Returns
         -------
@@ -669,9 +674,7 @@ fig_altair = alt.Chart.from_json(plot_json_str).properties(width=900, height=400
             )
 
             # Display the dataframe
-            dataframe_content.extend(
-                self._show_dataframe(dataframe, static_dir=static_dir)
-            )
+            dataframe_content.extend(self._show_dataframe(dataframe))
 
         except Exception as e:
             self.report.logger.error(
@@ -822,7 +825,7 @@ with open('{(Path("..") / markdown.file_path).as_posix()}', 'r') as markdown_fil
                 f"""![](/{src}){{fig-alt={alt_text} width={width} height={height}}}\n"""
             )
 
-    def _show_dataframe(self, dataframe, static_dir: str) -> List[str]:
+    def _show_dataframe(self, dataframe) -> List[str]:
         """
         Appends either a static image or an interactive representation of a DataFrame to the content list.
 
@@ -830,8 +833,6 @@ with open('{(Path("..") / markdown.file_path).as_posix()}', 'r') as markdown_fil
         ----------
         dataframe : DataFrame
             The DataFrame object containing the data to display.
-        static_dir : str
-            The folder where the static files will be saved.
 
         Returns
         -------
@@ -841,7 +842,9 @@ with open('{(Path("..") / markdown.file_path).as_posix()}', 'r') as markdown_fil
         dataframe_content = []
         if self.is_report_static:
             # Generate path for the DataFrame image
-            df_image = Path(static_dir) / f"{dataframe.title.replace(' ', '_')}.png"
+            df_image = (
+                Path(self.static_dir) / f"{dataframe.title.replace(' ', '_')}.png"
+            )
             dataframe_content.append(
                 f"df.dfi.export('{Path(df_image).resolve().as_posix()}', max_rows=10, max_cols=5, table_conversion='matplotlib')\n```\n"
             )
