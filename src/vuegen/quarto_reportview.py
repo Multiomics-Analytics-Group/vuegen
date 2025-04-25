@@ -64,6 +64,13 @@ class QuartoReportView(r.ReportView):
             r.ReportType.PPTX,
         }
 
+        self.components_fct_map = {
+            r.ComponentType.PLOT: self._generate_plot_content,
+            r.ComponentType.DATAFRAME: self._generate_dataframe_content,
+            r.ComponentType.MARKDOWN: self._generate_markdown_content,
+            r.ComponentType.HTML: self._generate_html_content,
+        }
+
     def generate_report(self, output_dir: Path = BASE_DIR) -> None:
         """
         Generates the qmd file of the quarto report. It creates code for rendering each section and its subsections with all components.
@@ -399,6 +406,39 @@ include-after-body:
 
         return yaml_header
 
+    def _combine_components(self, components: list[dict]) -> tuple[list, list]:
+        """combine a list of components."""
+
+        all_contents = []
+        all_imports = []
+
+        for component in components:
+            # Write imports if not already done
+            component_imports = self._generate_component_imports(component)
+            self.report.logger.debug("component_imports: %s", component_imports)
+            all_imports.append(component_imports)  # ! different than for streamlit
+
+            # Handle different types of components
+            fct = self.components_fct_map.get(component.component_type, None)
+            if fct is None:
+                self.report.logger.warning(
+                    f"Unsupported component type '{component.component_type}' "
+                )
+            elif (
+                component.component_type == r.ComponentType.MARKDOWN
+                and component.title.lower() == "description"
+            ):
+                self.report.logger.debug("Skipping description.md markdown of section.")
+            elif (
+                component.component_type == r.ComponentType.HTML
+                and self.is_report_static
+            ):
+                self.report.logger.debug("Skipping HTML component for static report.")
+            else:
+                content = fct(component)
+                all_contents.extend(content)
+        return all_contents, all_imports
+
     def _generate_subsection(
         self,
         subsection,
@@ -422,7 +462,6 @@ include-after-body:
             - list of imports for the subsection (List[str])
         """
         subsection_content = []
-        subsection_imports = []
 
         # Add subsection header and description
         subsection_content.append(f"## {subsection.title}")
@@ -430,30 +469,13 @@ include-after-body:
             subsection_content.append(f"""{subsection.description}\n""")
 
         if is_report_revealjs:
-            subsection_content.append(f"::: {{.panel-tabset}}\n")
+            subsection_content.append("::: {{.panel-tabset}}\n")
 
-        for component in subsection.components:
-            component_imports = self._generate_component_imports(component)
-            subsection_imports.append(component_imports)
-
-            if component.component_type == r.ComponentType.PLOT:
-                subsection_content.extend(self._generate_plot_content(component))
-            elif component.component_type == r.ComponentType.DATAFRAME:
-                subsection_content.extend(self._generate_dataframe_content(component))
-            elif (
-                component.component_type == r.ComponentType.MARKDOWN
-                and component.title.lower() != "description"
-            ):
-                subsection_content.extend(self._generate_markdown_content(component))
-            elif (
-                component.component_type == r.ComponentType.HTML
-                and not self.is_report_static
-            ):
-                subsection_content.extend(self._generate_html_content(component))
-            else:
-                self.report.logger.warning(
-                    f"Unsupported component type '{component.component_type}' in subsection: {subsection.title}"
-                )
+        (
+            all_components,
+            subsection_imports,
+        ) = self._combine_components(subsection.components)
+        subsection_content.extend(all_components)
 
         if is_report_revealjs:
             subsection_content.append(":::\n")
