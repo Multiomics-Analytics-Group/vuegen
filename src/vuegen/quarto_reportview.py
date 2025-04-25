@@ -41,6 +41,13 @@ class QuartoReportView(r.ReportView):
         self.report.logger.debug(f"PATH: {os.environ['PATH']}")
         self.report.logger.debug(f"sys.path: {sys.path}")
 
+        self.is_report_static = self.report_type in {
+            r.ReportType.PDF,
+            r.ReportType.DOCX,
+            r.ReportType.ODT,
+            r.ReportType.PPTX,
+        }
+
     def generate_report(
         self, output_dir: Path = BASE_DIR, static_dir: Path = STATIC_FILES_DIR
     ) -> None:
@@ -78,12 +85,6 @@ class QuartoReportView(r.ReportView):
 
         try:
             # Create variable to check if the report is static or revealjs
-            is_report_static = self.report_type in {
-                r.ReportType.PDF,
-                r.ReportType.DOCX,
-                r.ReportType.ODT,
-                r.ReportType.PPTX,
-            }
             is_report_revealjs = self.report_type == r.ReportType.REVEALJS
 
             # Define the YAML header for the quarto report
@@ -123,7 +124,6 @@ class QuartoReportView(r.ReportView):
                         subsection_content, subsection_imports = (
                             self._generate_subsection(
                                 subsection,
-                                is_report_static,
                                 is_report_revealjs,
                                 static_dir=static_dir,
                             )
@@ -391,7 +391,6 @@ include-after-body:
     def _generate_subsection(
         self,
         subsection,
-        is_report_static,
         is_report_revealjs,
         static_dir: str,
     ) -> tuple[List[str], List[str]]:
@@ -403,8 +402,6 @@ include-after-body:
         ----------
         subsection : Subsection
             The subsection containing the components.
-        is_report_static : bool
-            A boolean indicating whether the report is static or interactive.
         is_report_revealjs : bool
             A boolean indicating whether the report is in revealjs format.
         static_dir : str
@@ -432,15 +429,11 @@ include-after-body:
 
             if component.component_type == r.ComponentType.PLOT:
                 subsection_content.extend(
-                    self._generate_plot_content(
-                        component, is_report_static, static_dir=static_dir
-                    )
+                    self._generate_plot_content(component, static_dir=static_dir)
                 )
             elif component.component_type == r.ComponentType.DATAFRAME:
                 subsection_content.extend(
-                    self._generate_dataframe_content(
-                        component, is_report_static, static_dir=static_dir
-                    )
+                    self._generate_dataframe_content(component, static_dir=static_dir)
                 )
             elif (
                 component.component_type == r.ComponentType.MARKDOWN
@@ -449,7 +442,7 @@ include-after-body:
                 subsection_content.extend(self._generate_markdown_content(component))
             elif (
                 component.component_type == r.ComponentType.HTML
-                and not is_report_static
+                and not self.is_report_static
             ):
                 subsection_content.extend(self._generate_html_content(component))
             else:
@@ -465,9 +458,7 @@ include-after-body:
         )
         return subsection_content, subsection_imports
 
-    def _generate_plot_content(
-        self, plot, is_report_static, static_dir: str
-    ) -> List[str]:
+    def _generate_plot_content(self, plot, static_dir: str) -> List[str]:
         """
         Generate content for a plot component based on the report type.
 
@@ -488,7 +479,7 @@ include-after-body:
         plot_content.append(f"### {plot.title}")
 
         # Define plot path
-        if is_report_static:
+        if self.is_report_static:
             static_plot_path = Path(static_dir) / f"{plot.title.replace(' ', '_')}.png"
         else:
             html_plot_file = Path(static_dir) / f"{plot.title.replace(' ', '_')}.html"
@@ -501,7 +492,7 @@ include-after-body:
                 )
             elif plot.plot_type == r.PlotType.PLOTLY:
                 plot_content.append(self._generate_plot_code(plot))
-                if is_report_static:
+                if self.is_report_static:
                     plot_content.append(
                         f"""fig_plotly.write_image("{static_plot_path.resolve().as_posix()}")\n```\n"""
                     )
@@ -510,7 +501,7 @@ include-after-body:
                     plot_content.append(f"""fig_plotly.show()\n```\n""")
             elif plot.plot_type == r.PlotType.ALTAIR:
                 plot_content.append(self._generate_plot_code(plot))
-                if is_report_static:
+                if self.is_report_static:
                     plot_content.append(
                         f"""fig_altair.save("{static_plot_path.resolve().as_posix()}")\n```\n"""
                     )
@@ -522,7 +513,7 @@ include-after-body:
                 if isinstance(networkx_graph, tuple):
                     # If network_data is a tuple, separate the network and html file path
                     networkx_graph, html_plot_file = networkx_graph
-                elif isinstance(networkx_graph, nx.Graph) and not is_report_static:
+                elif isinstance(networkx_graph, nx.Graph) and not self.is_report_static:
                     # Get the pyvis object and create html
                     pyvis_graph = plot.create_and_save_pyvis_network(
                         networkx_graph, html_plot_file
@@ -535,7 +526,7 @@ include-after-body:
                 plot_content.append(f"**Number of edges:** {num_edges}\n")
 
                 # Add code to generate network depending on the report type
-                if is_report_static:
+                if self.is_report_static:
                     plot.save_network_image(networkx_graph, static_plot_path, "png")
                     plot_content.append(self._generate_image_content(static_plot_path))
                 else:
@@ -619,9 +610,7 @@ fig_altair = alt.Chart.from_json(plot_json_str).properties(width=900, height=400
 </div>\n"""
         return plot_code
 
-    def _generate_dataframe_content(
-        self, dataframe, is_report_static, static_dir: str
-    ) -> List[str]:
+    def _generate_dataframe_content(self, dataframe, static_dir: str) -> List[str]:
         """
         Generate content for a DataFrame component based on the report type.
 
@@ -629,8 +618,6 @@ fig_altair = alt.Chart.from_json(plot_json_str).properties(width=900, height=400
         ----------
         dataframe : DataFrame
             The dataframe component to add to content.
-        is_report_static : bool
-            A boolean indicating whether the report is static or interactive.
         static_dir : str
             The folder where the static files will be saved.
 
@@ -683,7 +670,7 @@ fig_altair = alt.Chart.from_json(plot_json_str).properties(width=900, height=400
 
             # Display the dataframe
             dataframe_content.extend(
-                self._show_dataframe(dataframe, is_report_static, static_dir=static_dir)
+                self._show_dataframe(dataframe, static_dir=static_dir)
             )
 
         except Exception as e:
@@ -835,9 +822,7 @@ with open('{(Path("..") / markdown.file_path).as_posix()}', 'r') as markdown_fil
                 f"""![](/{src}){{fig-alt={alt_text} width={width} height={height}}}\n"""
             )
 
-    def _show_dataframe(
-        self, dataframe, is_report_static, static_dir: str
-    ) -> List[str]:
+    def _show_dataframe(self, dataframe, static_dir: str) -> List[str]:
         """
         Appends either a static image or an interactive representation of a DataFrame to the content list.
 
@@ -845,8 +830,6 @@ with open('{(Path("..") / markdown.file_path).as_posix()}', 'r') as markdown_fil
         ----------
         dataframe : DataFrame
             The DataFrame object containing the data to display.
-        is_report_static : bool
-            Determines if the report is in a static format (e.g., PDF) or interactive (e.g., HTML).
         static_dir : str
             The folder where the static files will be saved.
 
@@ -856,7 +839,7 @@ with open('{(Path("..") / markdown.file_path).as_posix()}', 'r') as markdown_fil
             The list of content lines for the DataFrame.
         """
         dataframe_content = []
-        if is_report_static:
+        if self.is_report_static:
             # Generate path for the DataFrame image
             df_image = Path(static_dir) / f"{dataframe.title.replace(' ', '_')}.png"
             dataframe_content.append(
