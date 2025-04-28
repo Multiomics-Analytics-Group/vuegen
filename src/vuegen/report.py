@@ -530,10 +530,14 @@ class APICall(Component):
     ----------
     api_url : str
         The URL of the API to interact with.
+    method : str
+        HTTP method to use for the request ("GET", "POST", or "PUT"). The deafult is "GET".
     headers : Optional[dict]
         Headers to include in the API request (default is None).
     params : Optional[dict]
         Query parameters to include in the API request (default is None).
+    request_body : Optional[dict]
+        The request body for methods like POST or PUT (default is None).
     """
 
     def __init__(
@@ -541,9 +545,11 @@ class APICall(Component):
         title: str,
         logger: logging.Logger,
         api_url: str,
+        method: str = "GET",
         caption: str = None,
         headers: Optional[dict] = None,
         params: Optional[dict] = None,
+        request_body: Optional[dict] = None,
     ):
         super().__init__(
             title=title,
@@ -552,35 +558,52 @@ class APICall(Component):
             caption=caption,
         )
         self.api_url = api_url
+        self.method = method.upper()
         self.headers = headers or {}
         self.params = params or {}
+        # NOTE: request_body is usually dynamically set before the call for POST/PUT
+        # but we'll include it here if needed for values from a config file
+        self.request_body = request_body or {}
 
     def make_api_request(
-        self, method: str, request_body: Optional[dict] = None
+        self, dynamic_request_body: Optional[dict] = None
     ) -> Optional[dict]:
         """
         Sends an HTTP request to the specified API and returns the JSON response.
+        It allows overriding the request body dynamically.
 
         Parameters
         ----------
-        method : str
-            HTTP method to use for the request.
-        request_body : Optional[dict], optional
-            The request body for POST or PUT methods (default is None).
+        dynamic_request_body : Optional[dict]
+            A dictionary to use as the JSON request body for this specific call.
+            Overrides the instance's request_body if provided.
 
         Returns
         -------
         response : Optional[dict]
             The JSON response from the API, or None if the request fails.
         """
+        request_body_to_send = (
+            dynamic_request_body
+            if dynamic_request_body is not None
+            else self.request_body
+        )
         try:
-            self.logger.info(f"Making {method} request to API: {self.api_url}")
+            self.logger.info(f"Making {self.method} request to API: {self.api_url}")
+            self.logger.debug(f"Headers: {self.headers}")
+            self.logger.debug(f"Params: {self.params}")
+
             response = requests.request(
-                method,
+                self.method,
                 self.api_url,
                 headers=self.headers,
                 params=self.params,
-                json=request_body,
+                # Validate the request body based on the method
+                json=(
+                    request_body_to_send
+                    if self.method in ["POST", "PUT", "PATCH"] and request_body_to_send
+                    else None
+                ),
             )
             response.raise_for_status()
             self.logger.info(
@@ -599,10 +622,10 @@ class ChatBot(Component):
 
     Attributes
     ----------
-    model : str
-        The language model to use for the chatbot.
     api_call : APICall
         An instance of the APICall class used to interact with the API for fetching chatbot responses.
+    model : Optional[str]
+        The language model to use for the chatbot (default is None).
     headers : Optional[dict]
         Headers to include in the API request (default is None).
     params : Optional[dict]
@@ -614,8 +637,8 @@ class ChatBot(Component):
         title: str,
         logger: logging.Logger,
         api_url: str,
-        model: str,
         caption: str = None,
+        model: Optional[str] = None,
         headers: Optional[dict] = None,
         params: Optional[dict] = None,
     ):
@@ -630,7 +653,8 @@ class ChatBot(Component):
             title=title,
             logger=logger,
             api_url=api_url,
-            caption=caption,
+            method="POST",
+            caption=None,
             headers=headers,
             params=params,
         )
