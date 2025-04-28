@@ -78,6 +78,10 @@ class StreamlitReportView(r.WebAppReportView):
             report_manag_content.append(
                 textwrap.dedent(
                     """\
+                    import os
+                    import time
+                    
+                    import psutil                    
                     import streamlit as st
                     """
                 )
@@ -155,8 +159,24 @@ class StreamlitReportView(r.WebAppReportView):
 
             # Add navigation object to the home page content
             report_manag_content.append(
-                f"""report_nav = st.navigation(sections_pages)
-report_nav.run()"""
+                textwrap.dedent(
+                    """\
+                    report_nav = st.navigation(sections_pages)
+                    
+                    # Following https://discuss.streamlit.io/t/close-streamlit-app-with-button-click/35132/5
+                    exit_app = st.sidebar.button("Shut Down App")
+                    if exit_app:
+                        st.toast("Shutting down the app...")
+                        time.sleep(1)
+                        # Terminate streamlit python process
+                        pid = os.getpid()
+                        p = psutil.Process(pid)
+                        p.terminate()
+
+                    
+                    report_nav.run()
+                    """
+                )
             )
 
             # Write the navigation and general content to a Python file
