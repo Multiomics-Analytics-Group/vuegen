@@ -481,7 +481,7 @@ report_nav.run()"""
                     has_chatbot = True
                 content = fct(component)
                 all_contents.extend(content)
-        # remove duplicates and isort
+        # remove duplicates
         all_imports = list(set(all_imports))
         return all_contents, all_imports, has_chatbot
 

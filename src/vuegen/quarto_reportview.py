@@ -183,13 +183,8 @@ class QuartoReportView(r.ReportView):
                         f"No subsections found in section: '{section.title}'. To show content in the report, add subsections to the section."
                     )
 
-            # Flatten the subsection_imports into a single list
-            flattened_report_imports = [
-                imp for sublist in report_imports for imp in sublist
-            ]
-
             # Remove duplicated imports
-            report_unique_imports = set(flattened_report_imports)
+            report_unique_imports = set(report_imports)
 
             # ! set leads to random import order
             # ! separate and sort import statements, separate from setup code
@@ -446,7 +441,7 @@ include-after-body:
             # Write imports if not already done
             component_imports = self._generate_component_imports(component)
             self.report.logger.debug("component_imports: %s", component_imports)
-            all_imports.append(component_imports)  # ! different than for streamlit
+            all_imports.extend(component_imports)
 
             # Handle different types of components
             fct = self.components_fct_map.get(component.component_type, None)
@@ -467,6 +462,8 @@ include-after-body:
             else:
                 content = fct(component)
                 all_contents.extend(content)
+        # remove duplicates
+        all_imports = list(set(all_imports))
         return all_contents, all_imports
 
     def _generate_subsection(
