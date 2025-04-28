@@ -170,7 +170,7 @@ def create_run_vuegen(
                 f"\n\nConfiguration file at:\n{gen_config_path}",
             )
             global hash_config_app  # ! fix this
-            get_completion_message(report_type.get())
+            get_completion_message(report_type.get(), config_path=gen_config_path)
             if hash(yaml.dump(config_app)) != hash_config_app:
                 with open(config_file, "w", encoding="utf-8") as f:
                     yaml.dump(config_app, f)
