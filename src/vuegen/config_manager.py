@@ -316,7 +316,7 @@ class ConfigManager:
         sorted_sections = self._sort_paths_by_numprefix(list(base_dir_path.iterdir()))
 
         main_section_config = {
-            "title": "",  # self._create_title_fromdir("home_components"),
+            "title": "",
             "description": "Components added to homepage.",
             "components": [],
         }

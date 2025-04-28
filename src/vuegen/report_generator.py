@@ -34,6 +34,12 @@ def get_report(
         Path to the directory from which to generate the configuration file.
     streamlit_autorun : bool, optional
         Whether to automatically run the Streamlit report after generation (default is False).
+    quarto_checks : bool, optional
+        Whether to perform checks for Quarto report generation for TeX and Chromium installation
+        (default is False).
+    output_dir : Path, optional
+        The directory where the report folder will be generated.
+        If not provided, the current directory will be used.
 
     Raises
     ------

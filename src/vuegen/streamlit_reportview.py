@@ -394,7 +394,6 @@ report_nav.run()"""
 
         try:
             for section in self.report.sections[1:]:
-                section_name_var = section.title.replace(" ", "_")
                 self.report.logger.debug(
                     f"Processing section '{section.id}': '{section.title}' - {len(section.subsections)} subsection(s)"
                 )
@@ -429,7 +428,6 @@ report_nav.run()"""
                     )
                     try:
                         # Create subsection file
-                        _subsection_name = make_valid_identifier(subsection.title)
                         assert (
                             subsection.file_path is not None
                         ), "Missing relative file path to subsection"
