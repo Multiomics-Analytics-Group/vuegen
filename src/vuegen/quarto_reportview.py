@@ -111,7 +111,9 @@ class QuartoReportView(r.ReportView):
 
             # Create qmd content and imports for the report
             qmd_content = []
-            report_imports = []
+            report_imports = (
+                []
+            )  # only one global import list for a single report (different to streamlit)
 
             # Add description of the report
             if self.report.description:
@@ -122,9 +124,23 @@ class QuartoReportView(r.ReportView):
                 qmd_content.append(
                     self._generate_image_content(self.report.graphical_abstract)
                 )
+            # ? Do we need to handle overview separately?
+            main_section = self.report.sections[0]
+
+            if main_section.components:
+                self.report.logger.debug(
+                    "Adding components of main section folder to the report as overall overview."
+                )
+                qmd_content.append("# General Overview")
+                section_content, section_imports = self._combine_components(
+                    main_section.components
+                )
+                qmd_content.extend(section_content)
+                report_imports.extend(section_imports)
+
             # Add the sections and subsections to the report
             self.report.logger.info("Starting to generate sections for the report.")
-            for section in self.report.sections:
+            for section in self.report.sections[1:]:
                 self.report.logger.debug(
                     f"Processing section: '{section.title}' - {len(section.subsections)} subsection(s)"
                 )
@@ -132,6 +148,18 @@ class QuartoReportView(r.ReportView):
                 qmd_content.append(f"# {section.title}")
                 if section.description:
                     qmd_content.append(f"""{section.description}\n""")
+
+                # Add components of section to the report
+                if section.components:
+                    self.report.logger.debug(
+                        "Adding components of section folder to the report."
+                    )
+                    qmd_content.append(f"## Overview {section.title}".strip())
+                    section_content, section_imports = self._combine_components(
+                        section.components
+                    )
+                    qmd_content.extend(section_content)
+                    report_imports.extend(section_imports)
 
                 if section.subsections:
                     # Iterate through subsections and integrate them into the section file
@@ -147,7 +175,9 @@ class QuartoReportView(r.ReportView):
                             )
                         )
                         qmd_content.extend(subsection_content)
-                        report_imports.extend(subsection_imports)
+                        report_imports.extend(
+                            subsection_imports
+                        )  # even easier as it's global
                 else:
                     self.report.logger.warning(
                         f"No subsections found in section: '{section.title}'. To show content in the report, add subsections to the section."
