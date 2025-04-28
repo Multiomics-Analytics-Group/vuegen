@@ -38,12 +38,13 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx_new_tab_link",
     "myst_nb",
+    "sphinx_copybutton",
 ]
 
 #  https://myst-nb.readthedocs.io/en/latest/computation/execute.html
 nb_execution_mode = "auto"
 
-myst_enable_extensions = ["dollarmath", "amsmath"]
+myst_enable_extensions = ["dollarmath", "amsmath", "colon_fence"]
 
 # Plolty support through require javascript library
 # https://myst-nb.readthedocs.io/en/latest/render/interactive.html#plotly
@@ -98,13 +99,13 @@ intersphinx_mapping = {
 # https://github.com/executablebooks/MyST-NB/blob/master/docs/conf.py
 # html_title = ""
 html_theme = "sphinx_book_theme"
-# html_logo = "_static/logo-wide.svg"
-# html_favicon = "_static/logo-square.svg"
+html_logo = "https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/vuegen_logo.svg"
+html_favicon = "https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/vuegen_logo.svg"
 html_theme_options = {
     "github_url": "https://github.com/Multiomics-Analytics-Group/vuegen",
     "repository_url": "https://github.com/Multiomics-Analytics-Group/vuegen",
     "repository_branch": "main",
-    "home_page_in_toc": True,
+    "home_page_in_toc": False,
     "path_to_docs": "docs",
     "show_navbar_depth": 1,
     "use_edit_page_button": True,

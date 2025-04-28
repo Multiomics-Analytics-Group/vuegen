@@ -1,12 +1,23 @@
-# Overview
-
 <!-- https://myst-parser.readthedocs.io/en/latest/faq/index.html
 #include-a-file-from-outside-the-docs-folder-like-readme-md -->
 
-```{include} ../README.md
-:start-line: 0
+```{include} ./sections_readme/home_page.md
+:caption: VueGen
 :relative-docs: docs
 :relative-images:
+```
+
+```{toctree} 
+:maxdepth: 1
+:caption: Overview
+
+sections_readme/about
+sections_readme/installation
+sections_readme/execution
+sections_readme/gui
+sections_readme/case_studies
+sections_readme/web_app_deploy
+sections_readme/citation
 ```
 
 ```{toctree}
