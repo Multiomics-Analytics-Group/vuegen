@@ -1,7 +1,7 @@
 import os
-import re
 import subprocess
 import sys
+import textwrap
 from pathlib import Path
 from typing import List
 
@@ -75,16 +75,29 @@ class StreamlitReportView(r.WebAppReportView):
             self.report.logger.debug("Processing app navigation code.")
             # Define the Streamlit imports and report manager content
             report_manag_content = []
+            report_manag_content.append(
+                textwrap.dedent(
+                    """\
+                    import streamlit as st
+                    """
+                )
+            )
             if self.report.logo:
                 report_manag_content.append(
-                    f"""import streamlit as st\n
-st.set_page_config(layout="wide", page_title="{self.report.title}", page_icon="{self.report.logo}")
-st.logo("{self.report.logo}")"""
+                    textwrap.dedent(
+                        f"""\
+                        st.set_page_config(layout="wide", page_title="{self.report.title}", page_icon="{self.report.logo}")
+                        st.logo("{self.report.logo}")
+                        """
+                    )
                 )
             else:
                 report_manag_content.append(
-                    f"""import streamlit as st\n
-st.set_page_config(layout="wide", page_title="{self.report.title}")"""
+                    textwrap.dedent(
+                        f"""\
+                        st.set_page_config(layout="wide", page_title="{self.report.title}")
+                        """
+                    )
                 )
             report_manag_content.append(
                 self._format_text(
@@ -147,7 +160,9 @@ report_nav.run()"""
             )
 
             # Write the navigation and general content to a Python file
-            with open(Path(output_dir) / self.REPORT_MANAG_SCRIPT, "w") as nav_manager:
+            with open(
+                Path(output_dir) / self.REPORT_MANAG_SCRIPT, "w", encoding="utf8"
+            ) as nav_manager:
                 nav_manager.write("\n".join(report_manag_content))
                 self.report.logger.info(
                     f"Created app navigation script: {self.REPORT_MANAG_SCRIPT}"
