@@ -145,7 +145,7 @@ class ConfigManager:
             component_config["component_type"] = r.ComponentType.MARKDOWN.value
         else:
             self.logger.error(
-                f"Unsupported file extension: {file_ext}. Skipping file: {file_path}\n"
+                f"Unsupported file extension: {file_ext}. Skipping file: {file_path}"
             )
             return None
 
@@ -227,6 +227,9 @@ class ConfigManager:
                     continue
                 # Add component config to list
                 components.append(component_config)
+            # ! if folder go into folder and pull files out?
+            # nesting level already at point 2
+            # loop of components in a folder
 
         subsection_config = {
             "title": self._create_title_fromdir(subsection_dir_path.name),
@@ -313,7 +316,7 @@ class ConfigManager:
         sorted_sections = self._sort_paths_by_numprefix(list(base_dir_path.iterdir()))
 
         main_section_config = {
-            "title": self._create_title_fromdir("home_components"),
+            "title": "",  # self._create_title_fromdir("home_components"),
             "description": "Components added to homepage.",
             "components": [],
         }
