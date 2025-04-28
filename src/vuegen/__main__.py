@@ -47,6 +47,7 @@ def main():
         output_dir=args.output_directory,
         streamlit_autorun=args.streamlit_autorun,
         quarto_checks=args.quarto_checks,
+        max_depth=args.max_depth,
     )
 
     # Print completion message

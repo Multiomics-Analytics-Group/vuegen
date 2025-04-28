@@ -13,7 +13,7 @@ class ConfigManager:
     Class for handling metadata of reports from YAML config file and creating report objects.
     """
 
-    def __init__(self, logger: Optional[logging.Logger] = None):
+    def __init__(self, logger: Optional[logging.Logger] = None, max_depth: int = 2):
         """
         Initializes the ConfigManager with a logger.
 
@@ -21,10 +21,15 @@ class ConfigManager:
         ----------
         logger : logging.Logger, optional
             A logger instance for the class. If not provided, a default logger will be created.
+        max_depth : int, optional
+            The maximum depth of the directory structure to consider when generating the report
+            config from a directory.
+            The default is 2, which means it will include sections and subsections.
         """
         if logger is None:
             logger, _ = get_logger("report")
         self.logger = logger
+        self.max_depth = max_depth
 
     def _create_title_fromdir(self, file_dirname: str) -> str:
         """
@@ -198,7 +203,7 @@ class ConfigManager:
         return ""
 
     def _create_subsect_config_fromdir(
-        self, subsection_dir_path: Path
+        self, subsection_dir_path: Path, level: int = 2
     ) -> Dict[str, Union[str, List[Dict]]]:
         """
         Creates subsection config from a directory.
@@ -217,7 +222,6 @@ class ConfigManager:
         sorted_files = self._sort_paths_by_numprefix(
             list(subsection_dir_path.iterdir())
         )
-
         components = []
         for file in sorted_files:
             if file.is_file():
@@ -227,9 +231,17 @@ class ConfigManager:
                     continue
                 # Add component config to list
                 components.append(component_config)
-            # ! if folder go into folder and pull files out?
-            # nesting level already at point 2
-            # loop of components in a folder
+            elif file.is_dir():
+                if level > self.max_depth:
+                    self.logger.warning(
+                        "Subsection nesting level exceeded: %s. Skipping.", file.name
+                    )
+                    continue
+                # components are added to subsection
+                # ! Alternatively, one could add (sub-)sections to the subsection
+                # ? Then one could remove differentiation between sections and subsections
+                nested_components = self._create_subsect_config_fromdir(file, level + 1)
+                components.extend(nested_components["components"])
 
         subsection_config = {
             "title": self._create_title_fromdir(subsection_dir_path.name),
