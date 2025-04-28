@@ -83,9 +83,18 @@ quarto check
 > [!TIP]
 > If quarto is not installed, you can download the command-line interface from the [Quarto website][quarto-cli] for your operating system.
 
+For PDF reports, you need to have a LaTeX distribution installed. This can be done with quarto using the following command:
+
+```bash
+quarto install tinytex
+```
+
+> [!TIP]
+> Also, you can add the `--quarto_checks` argument to the VueGen command to check and install the required dependencies automatically.
+
 ### Docker
 
-If you prefer not to install VueGen on your system, a pre-configured Docker container is available. It includes all dependencies, ensuring a fully reproducible execution environment. See the [Execution section](#execution) for details on running VueGen with Docker. The official Docker image is available at [quay.io/dtu_biosustain_dsp/vuegen][vuegen-docker-quay].
+If you prefer not to install VueGen on your system, a pre-configured Docker container is available. It includes all dependencies, ensuring a fully reproducible execution environment. See the [Execution section](#execution) for details on running VueGen with Docker. The official Docker images are available at [quay.io/dtu_biosustain_dsp/vuegen][vuegen-docker-quay]. The Dockerfiles to build the images are available [here][docker-folder].
 
 ### Nextflow and nf-core
 
@@ -94,7 +103,7 @@ VueGen is also available as a [nf-core][nfcore] module, customised for compatibi
 ## Execution
 
 > [!IMPORTANT]
-> Here we use the `Earth_microbiome_vuegen_demo_notebook` directory and the `Earth_microbiome_vuegen_demo_notebook.yaml` configuration file as examples, which are available in the `docs/example_data` and `docs/example_config_files` folders, respectively. Make sure to clone this reposiotry to access these contents, or use your own directory and configuration file.
+> Here we use the `Earth_microbiome_vuegen_demo_notebook` [directory][emp-dir] and the `Earth_microbiome_vuegen_demo_notebook.yaml` [configuration file][emp-config] as examples, which are available in the `docs/example_data` and `docs/example_config_files` folders, respectively. Make sure to clone this reposiotry to access these contents, or use your own directory and configuration file.
 
 Run VueGen using a directory with the following command:
 
@@ -105,11 +114,40 @@ vuegen --directory docs/example_data/Earth_microbiome_vuegen_demo_notebook --rep
 > [!NOTE]
 > By default, the `streamlit_autorun` argument is set to False, but you can use it in case you want to automatically run the streamlit app.
 
+### Folder structure
+
+Your input directory must follow a **nested folder structure**, where first-level folders are treated as **sections** and second-level folders as **subsections**, containing the components (plots, tables, networks, Markdown text, and HTML files).
+
+Here is an example layout:
+```
+report_folder/
+├── section1/
+│   └── subsection1/
+│       ├── table.csv
+│       ├── image1.png
+│       └── chart.json
+├── section2/
+│   ├── subsection1/
+│   │   ├── summary_table.xls
+│   │   └── network_plot.graphml
+│   └── subsection2/
+│       ├── report.html
+│       └── summary.md
+```
+
+> [!WARNING]
+> VueGen currently requires each section to contain at least one subsection folder. Defining only sections (with no subsections) or using deeper nesting levels (i.e., sub-subsections) will result in errors. In upcoming releases, we plan to support more flexible directory structures.
+
+The titles for sections, subsections, and components are extracted from the corresponding folder and file names, and afterward, users can add descriptions, captions, and other details to the configuration file. Component types are inferred from the file extensions and names. 
+The order of sections, subsections, and components can be defined using numerical suffixes in folder and file names.
+
 It's also possible to provide a configuration file instead of a directory:
 
 ```bash
 vuegen --config docs/example_config_files/Earth_microbiome_vuegen_demo_notebook.yaml --report_type streamlit
 ```
+
+If a configuration file is given, users can specify titles and descriptions for sections and subsections, as well as component paths and required attributes, such as file format and delimiter for dataframes, plot types, and other details.
 
 The current report types supported by VueGen are:
 
@@ -130,7 +168,7 @@ Instead of installing VueGen locally, you can run it directly from a Docker cont
 docker run --rm \
   -v "$(pwd)/docs/example_data/Earth_microbiome_vuegen_demo_notebook:/home/appuser/Earth_microbiome_vuegen_demo_notebook" \
   -v "$(pwd)/output_docker:/home/appuser/streamlit_report" \
-  quay.io/dtu_biosustain_dsp/vuegen:v0.3.1-docker --directory /home/appuser/Earth_microbiome_vuegen_demo_notebook --report_type streamlit
+  quay.io/dtu_biosustain_dsp/vuegen:v0.3.2-docker --directory /home/appuser/Earth_microbiome_vuegen_demo_notebook --report_type streamlit
 ```
 
 ## GUI
@@ -201,6 +239,9 @@ This introductory case study uses a predefined directory with plots, dataframes,
 
 🔗 [![Open in Colab][colab_badge]][colab_link_intro_demo]
 
+> [!NOTE]
+> The [configuration file][predef-dir-config] is available in the `docs/example_config_files` folder, and the [directory][predef-dir] with example data is in the `docs/example_data` folder.
+
 **2. Earth Microbiome Project Data**
 
 This advanced case study demonstrates the application of VueGen in a real-world scenario using data from the [Earth Microbiome Project (EMP)][emp]. The EMP is an initiative to characterize global microbial taxonomic and functional diversity. The notebook process the EMP data, create plots, dataframes, and other components, and organize outputs within a directory to produce reports. Report content and structure can be adapted by modifying the configuration file. Each report consists of sections on exploratory data analysis, metagenomics, and network analysis.
@@ -209,6 +250,36 @@ This advanced case study demonstrates the application of VueGen in a real-world 
 
 > [!NOTE]
 > The EMP case study is available online as [HTML][emp-html-demo] and [Streamlit][emp-st-demo] reports.
+> The [configuration file][emp-config] is available in the `docs/example_config_files` folder, and the [directory][emp-dir] with example data is in the `docs/example_data` folder.
+
+**3. ChatBot Component**
+
+This case study highlights VueGen’s capability to embed a chatbot component into a report subsection, 
+enabling interactive conversations inside the report.
+
+Two API modes are supported:
+
+- **Ollama-style streaming chat completion**
+If a `model` parameter is specified in the config file, VueGen assumes the chatbot is using Ollama’s [/api/chat endpoint][ollama_chat]. 
+Messages are handled as chat history, and the assistant responses are streamed in real time for a smooth and responsive experience. 
+This mode supports LLMs such as `llama3`, `deepsek`, or `mistral`. 
+
+> [!TIP]
+> See [Ollama’s website][ollama] for more details.
+
+- **Standard prompt-response API**
+If no `model` is provided, VueGen uses a simpler prompt-response flow. 
+A single prompt is sent to an endpoint, and a structured JSON object is expected in return.
+Currently, the response can include:
+  - `text`: the main textual reply
+  - `links`: a list of source URLs (optional)
+  - `HTML content`: an HTML snippet with a Pyvis network visualization (optional)
+
+This response structure is currently customized for an internal knowledge graph assistant, but VueGen is being actively developed 
+to support more flexible and general-purpose response formats in future releases.
+
+> [!NOTE]
+> You can see a [configuration file example][config-chatbot] for the chatbot component in the `docs/example_config_files` folder.
 
 ## Web application deployment
 
@@ -261,6 +332,7 @@ We appreciate your feedback! If you have any comments, suggestions, or run into 
 [vuegen-pypi]: https://pypi.org/project/vuegen/
 [vuegen-conda]: https://anaconda.org/bioconda/vuegen
 [vuegen-docker-quay]: https://quay.io/repository/dtu_biosustain_dsp/vuegen
+[docker-folder]: https://github.com/Multiomics-Analytics-Group/nf-vuegen/tree/main/Docker
 [vuegen-license]: https://github.com/Multiomics-Analytics-Group/vuegen/blob/main/LICENSE
 [vuegen-class-diag-att]: https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/vuegen_classdiagram_withattmeth.pdf
 [vuegen-docs]: https://vuegen.readthedocs.io/
@@ -268,6 +340,9 @@ We appreciate your feedback! If you have any comments, suggestions, or run into 
 [ci-docs]: https://github.com/Multiomics-Analytics-Group/vuegen/actions/workflows/docs.yml
 [emp-html-demo]: https://multiomics-analytics-group.github.io/vuegen/
 [emp-st-demo]: https://earth-microbiome-vuegen-demo.streamlit.app/
+[ollama_chat]: https://github.com/ollama/ollama/blob/main/docs/api.md#generate-a-chat-completion
+[ollama]: https://ollama.com/
+[config-chatbot]: https://github.com/Multiomics-Analytics-Group/vuegen/blob/main/docs/example_config_files/Chatbot_example_config.yaml
 [issues]: https://github.com/Multiomics-Analytics-Group/vuegen/issues
 [pulls]: https://github.com/Multiomics-Analytics-Group/vuegen/pulls
 [vuegen-preprint]: https://doi.org/10.1101/2025.03.05.641152
@@ -279,8 +354,12 @@ We appreciate your feedback! If you have any comments, suggestions, or run into 
 [nf-vuegen]: https://github.com/Multiomics-Analytics-Group/nf-vuegen/
 [colab_badge]: https://colab.research.google.com/assets/colab-badge.svg
 [colab_link_intro_demo]: https://colab.research.google.com/github/Multiomics-Analytics-Group/vuegen/blob/main/docs/vuegen_basic_case_study.ipynb
+[predef-dir-config]: https://github.com/Multiomics-Analytics-Group/vuegen/blob/main/docs/example_config_files/Basic_example_vuegen_demo_notebook_config.yaml
+[predef-dir]: https://github.com/Multiomics-Analytics-Group/vuegen/blob/main/docs/example_data/Basic_example_vuegen_demo_notebook
 [colab_link_emp_demo]: https://colab.research.google.com/github/Multiomics-Analytics-Group/vuegen/blob/main/docs/vuegen_case_study_earth_microbiome.ipynb
 [emp]: https://earthmicrobiome.org/
+[emp-config]: https://github.com/Multiomics-Analytics-Group/vuegen/blob/main/docs/example_config_files/Earth_microbiome_vuegen_demo_notebook_config
+[emp-dir]: https://github.com/Multiomics-Analytics-Group/vuegen/blob/main/docs/example_data/Earth_microbiome_vuegen_demo_notebook
 [st-cloud]: https://streamlit.io/cloud
 [stlite]: https://github.com/whitphx/stlite
 [st-forum-exe]: https://discuss.streamlit.io/t/streamlit-deployment-as-an-executable-file-exe-for-windows-macos-and-android/6812

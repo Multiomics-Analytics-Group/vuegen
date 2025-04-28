@@ -1,11 +1,44 @@
 report:
   title: APICall example
-  description: An APICall exaple.
+  description: An APICall example.
 sections:
   - title: APICall test
     subsections:
       - title: JSONPlaceholder test
         components:
-          - title: JSONPlaceholder component
+          - title: GET request
             component_type: apicall
             api_url: https://jsonplaceholder.typicode.com/todos/1
+            method: GET
+          - title: POST request
+            component_type: apicall
+            api_url: https://jsonplaceholder.typicode.com/todos
+            method: POST
+            request_body: |
+              {
+                  "userId": 1,
+                  "title": "Go running",
+                  "completed": false
+              }
+          - title: PUT request
+            component_type: apicall
+            api_url: https://jsonplaceholder.typicode.com/todos/10
+            method: PUT
+            request_body: |
+              {
+                  "userId": 1,
+                  "title": "Play the guitar",
+                  "completed": true
+              }
+          - title: PATCH request
+            component_type: apicall
+            api_url: https://jsonplaceholder.typicode.com/todos/10
+            method: PATCH
+            request_body: |
+              {
+                  "title": "Go for a hike"
+              }
+          - title: DELETE request
+            component_type: apicall
+            api_url: https://jsonplaceholder.typicode.com/todos/10
+            method: DELETE

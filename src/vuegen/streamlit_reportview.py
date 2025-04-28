@@ -256,7 +256,7 @@ report_nav.run()"""
         """
         if type == "header":
             tag = f"h{level}"
-        elif type == "paragraph":
+        elif type == "paragraph" or type == "caption":
             tag = "p"
 
         return f"""st.markdown('''<{tag} style='text-align: {text_align}; color: {color};'>{text}</{tag}>''', unsafe_allow_html=True)"""
@@ -417,6 +417,9 @@ report_nav.run()"""
         subsection_content = []
         subsection_imports = []
 
+        # Track if there's a Chatbot component in this subsection
+        has_chatbot = False
+
         # Add subsection header and description
         subsection_content.append(
             self._format_text(
@@ -451,15 +454,17 @@ report_nav.run()"""
             elif component.component_type == r.ComponentType.APICALL:
                 subsection_content.extend(self._generate_apicall_content(component))
             elif component.component_type == r.ComponentType.CHATBOT:
+                has_chatbot = True
                 subsection_content.extend(self._generate_chatbot_content(component))
             else:
                 self.report.logger.warning(
                     f"Unsupported component type '{component.component_type}' in subsection: {subsection.title}"
                 )
 
-        # Define the footer variable and add it to the home page content
-        subsection_content.append("footer = '''" + generate_footer() + "'''\n")
-        subsection_content.append("st.markdown(footer, unsafe_allow_html=True)\n")
+        if not has_chatbot:
+            # Define the footer variable and add it to the home page content
+            subsection_content.append("footer = '''" + generate_footer() + "'''\n")
+            subsection_content.append("st.markdown(footer, unsafe_allow_html=True)\n")
 
         self.report.logger.info(
             f"Generated content and imports for subsection: '{subsection.title}'"
@@ -753,7 +758,7 @@ with open('{(Path("..") / markdown.file_path).as_posix()}', 'r') as markdown_fil
 
     def _generate_html_content(self, html) -> List[str]:
         """
-        Generate content for an HTML component in a Streamlit app.
+        Generate content for an HTML component.
 
         Parameters
         ----------
@@ -813,7 +818,8 @@ with open('{(Path("..") / html.file_path).as_posix()}', 'r', encoding='utf-8') a
 
     def _generate_apicall_content(self, apicall) -> List[str]:
         """
-        Generate content for a Markdown component.
+        Generate content for an API component. This method handles the API call and formats
+        the response for display in the Streamlit app.
 
         Parameters
         ----------
@@ -834,7 +840,7 @@ with open('{(Path("..") / html.file_path).as_posix()}', 'r', encoding='utf-8') a
             )
         )
         try:
-            apicall_response = apicall.make_api_request(method="GET")
+            apicall_response = apicall.make_api_request()
             apicall_content.append(f"""st.write({apicall_response})\n""")
         except Exception as e:
             self.report.logger.error(
@@ -851,18 +857,29 @@ with open('{(Path("..") / html.file_path).as_posix()}', 'r', encoding='utf-8') a
             )
 
         self.report.logger.info(
-            f"Successfully generated content for APICall: '{apicall.title}'"
+            f"Successfully generated content for APICall '{apicall.title}' using method '{apicall.method}'"
         )
         return apicall_content
 
     def _generate_chatbot_content(self, chatbot) -> List[str]:
         """
-        Generate content for a ChatBot component.
+        Generate content to render a ChatBot component, supporting standard and Ollama-style streaming APIs.
+
+        This method builds and returns a list of strings, which are later executed to create the chatbot
+        interface in a Streamlit app. It includes user input handling, API interaction logic, response parsing,
+        and conditional rendering of text, source links, and HTML subgraphs.
+
+        The function distinguishes between two chatbot modes:
+        - **Ollama-style streaming API**: Identified by the presence of `chatbot.model`. Uses streaming
+        JSON chunks from the server to simulate a real-time response.
+        - **Standard API**: Assumes a simple POST request with a prompt and a full JSON response with text,
+        and other fields like links, HTML graphs, etc.
 
         Parameters
         ----------
         chatbot : ChatBot
-            The ChatBot component to generate content for.
+            The ChatBot component to generate content for, containing configuration such as title, model,
+            API endpoint, headers, and caption.
 
         Returns
         -------
@@ -871,16 +888,52 @@ with open('{(Path("..") / html.file_path).as_posix()}', 'r', encoding='utf-8') a
         """
         chatbot_content = []
 
-        # Add title
+        # Add chatbot title as header
         chatbot_content.append(
             self._format_text(
                 text=chatbot.title, type="header", level=4, color="#2b8cbe"
             )
         )
 
-        # Chatbot logic for embedding in the web application
-        chatbot_content.append(
-            f"""
+        # --- Shared code blocks (as strings) ---
+        init_messages_block = """
+# Init session state
+if 'messages' not in st.session_state:
+    st.session_state['messages'] = []
+    """
+
+        render_messages_block = """
+# Display chat history
+for message in st.session_state['messages']:
+    with st.chat_message(message['role']):
+        content = message['content']
+        if isinstance(content, dict):
+            st.markdown(content.get('text', ''), unsafe_allow_html=True)
+            if 'links' in content:
+                st.markdown("**Sources:**")
+                for link in content['links']:
+                    st.markdown(f"- [{link}]({link})")
+            if 'subgraph_pyvis' in content:
+                st.components.v1.html(content['subgraph_pyvis'], height=600)
+        else:
+            st.write(content)
+    """
+
+        handle_prompt_block = """
+# Capture and append new user prompt
+if prompt := st.chat_input("Enter your prompt here:"):
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    with st.chat_message("user"):
+        st.write(prompt)
+    """
+
+        if chatbot.model:
+            # --- Ollama-style streaming chatbot ---
+            chatbot_content.append(
+                f"""
+{init_messages_block}
+
+# Function to send prompt to Ollama API
 def generate_query(messages):
     response = requests.post(
         "{chatbot.api_call.api_url}",
@@ -889,6 +942,7 @@ def generate_query(messages):
     response.raise_for_status()
     return response               
 
+# Parse streaming response from Ollama
 def parse_api_response(response):
     try:
         output = ""
@@ -902,43 +956,82 @@ def parse_api_response(response):
     except Exception as e:
         return {{"role": "assistant", "content": f"Error while processing API response: {{str(e)}}"}}
 
+# Simulated typing effect for responses
 def response_generator(msg_content):
     for word in msg_content.split():
         yield word + " "
         time.sleep(0.1)
     yield "\\n"
 
-# Chatbot interaction in the app
-if 'messages' not in st.session_state:
-    st.session_state['messages'] = []
+{render_messages_block}
 
-# Display chat history
-for message in st.session_state['messages']:
-    with st.chat_message(message['role']):
-        st.write(message['content'])
+{handle_prompt_block}
 
-# Handle new input from the user
-if prompt := st.chat_input("Enter your prompt here:"):
-    # Add user's question to the session state                           
-    st.session_state.messages.append({{"role": "user", "content": prompt}})
-    with st.chat_message("user"):
-        st.write(prompt)
-    
     # Retrieve question and generate answer
     combined = "\\n".join(msg["content"] for msg in st.session_state.messages if msg["role"] == "user")
     messages = [{{"role": "user", "content": combined}}]
     with st.spinner('Generating answer...'):                       
         response = generate_query(messages)
         parsed_response = parse_api_response(response)
-                               
+    
     # Add the assistant's response to the session state and display it
     st.session_state.messages.append(parsed_response)
     with st.chat_message("assistant"):
         st.write_stream(response_generator(parsed_response["content"]))
-    """
-        )
+                """
+            )
+        else:
+            # --- Standard (non-streaming) API chatbot ---
+            chatbot_content.append(
+                f"""
+{init_messages_block}
 
-        # Add caption if available
+# Function to send prompt to standard API
+def generate_query(prompt):
+    try:
+        response = requests.post(
+            "{chatbot.api_call.api_url}",
+            json={{"prompt": prompt}},
+            headers={chatbot.api_call.headers}
+        )
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        st.error(f"API request failed: {{str(e)}}")
+        if hasattr(e, 'response') and e.response:
+            try:
+                error_details = e.response.json()
+                st.error(f"Error details: {{error_details}}")
+            except ValueError:
+                st.error(f"Response text: {{e.response.text}}")
+        return None
+
+{render_messages_block}
+
+{handle_prompt_block}
+
+    with st.spinner('Generating answer...'):
+        response = generate_query(prompt)
+
+        if response:
+            # Append and display assistant response
+            st.session_state.messages.append({{
+                "role": "assistant",
+                "content": response
+            }})
+            with st.chat_message("assistant"):
+                st.markdown(response.get('text', ''), unsafe_allow_html=True)
+                if 'links' in response:
+                    st.markdown("**Sources:**")
+                    for link in response['links']:
+                        st.markdown(f"- [{{link}}]({{link}})")
+                if 'subgraph_pyvis' in response:
+                    st.components.v1.html(response['subgraph_pyvis'], height=600)
+        else:
+            st.error("Failed to get response from API")
+                """
+            )
+
         if chatbot.caption:
             chatbot_content.append(
                 self._format_text(
@@ -946,9 +1039,6 @@ if prompt := st.chat_input("Enter your prompt here:"):
                 )
             )
 
-        self.report.logger.info(
-            f"Successfully generated content for ChatBot: '{chatbot.title}'"
-        )
         return chatbot_content
 
     def _generate_component_imports(self, component: r.Component) -> List[str]:
