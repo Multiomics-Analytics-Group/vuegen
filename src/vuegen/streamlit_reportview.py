@@ -1,5 +1,4 @@
 import os
-import re
 import subprocess
 import sys
 from pathlib import Path
@@ -9,6 +8,7 @@ import pandas as pd
 from streamlit.web import cli as stcli
 
 from . import report as r
+from . import table_utils
 from .utils import create_folder, generate_footer, is_url
 from .utils.variables import make_valid_identifier
 
@@ -630,13 +630,7 @@ st.components.v1.html(html_data, height=net_html_height)\n"""
         )
 
         # Mapping of file extensions to read functions
-        read_function_mapping = {
-            r.DataFrameFormat.CSV.value_with_dot: pd.read_csv,
-            r.DataFrameFormat.PARQUET.value_with_dot: pd.read_parquet,
-            r.DataFrameFormat.TXT.value_with_dot: pd.read_table,
-            r.DataFrameFormat.XLS.value_with_dot: pd.read_excel,
-            r.DataFrameFormat.XLSX.value_with_dot: pd.read_excel,
-        }
+        read_function_mapping = table_utils.read_function_mapping
 
         try:
             # Check if the file extension matches any DataFrameFormat value

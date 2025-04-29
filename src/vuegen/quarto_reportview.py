@@ -1,14 +1,14 @@
-import logging
 import os
 import subprocess
 import sys
+import textwrap
 from pathlib import Path
 from typing import List
 
 import networkx as nx
-import pandas as pd
 
 from . import report as r
+from . import table_utils
 from .utils import create_folder, is_url, sort_imports
 
 
@@ -646,19 +646,23 @@ fig_altair = alt.Chart.from_json(plot_json_str).properties(width=900, height=400
 
         # Append header for DataFrame loading
         dataframe_content.append(
-            f"""```{{python}}
-#| label: '{dataframe.title} {dataframe.id}'
-#| fig-cap: ""
-"""
+            textwrap.dedent(
+                f"""\
+                ```{{python}}
+                #| label: '{dataframe.title} {dataframe.id}'
+                #| fig-cap: ""
+                """
+            )
         )
         # Mapping of file extensions to read functions
-        read_function_mapping = {
-            r.DataFrameFormat.CSV.value_with_dot: pd.read_csv,
-            r.DataFrameFormat.PARQUET.value_with_dot: pd.read_parquet,
-            r.DataFrameFormat.TXT.value_with_dot: pd.read_table,
-            r.DataFrameFormat.XLS.value_with_dot: pd.read_excel,
-            r.DataFrameFormat.XLSX.value_with_dot: pd.read_excel,
-        }
+        read_function_mapping = table_utils.read_function_mapping
+        # {
+        #     r.DataFrameFormat.CSV.value_with_dot: pd.read_csv,
+        #     r.DataFrameFormat.PARQUET.value_with_dot: pd.read_parquet,
+        #     r.DataFrameFormat.TXT.value_with_dot: pd.read_table,
+        #     r.DataFrameFormat.XLS.value_with_dot: pd.read_excel,
+        #     r.DataFrameFormat.XLSX.value_with_dot: pd.read_excel,
+        # }
         try:
             # Check if the file extension matches any DataFrameFormat value
             file_extension = Path(dataframe.file_path).suffix.lower()
@@ -722,28 +726,35 @@ fig_altair = alt.Chart.from_json(plot_json_str).properties(width=900, height=400
         try:
             # Initialize md code with common structure
             markdown_content.append(
-                f"""
-```{{python}}
-#| label: '{markdown.title} {markdown.id}'
-#| fig-cap: ""\n"""
+                textwrap.dedent(
+                    f"""
+                    ```{{python}}
+                    #| label: '{markdown.title} {markdown.id}'
+                    #| fig-cap: ""
+                    """
+                )
             )
             # If the file path is a URL, generate code to fetch content via requests
             if is_url(markdown.file_path):
                 markdown_content.append(
-                    f"""
-response = requests.get('{markdown.file_path}')
-response.raise_for_status()
-markdown_content = response.text\n"""
+                    textwrap.dedent(
+                        f"""\
+                    response = requests.get('{markdown.file_path}')
+                    response.raise_for_status()
+                    markdown_content = response.text
+                    """
+                    )
                 )
             else:  # If it's a local file
                 markdown_content.append(
                     f"""
 with open('{(Path("..") / markdown.file_path).as_posix()}', 'r') as markdown_file:
-    markdown_content = markdown_file.read()\n"""
+    markdown_content = markdown_file.read()
+"""
                 )
 
             # Code to display md content
-            markdown_content.append(f"""display.Markdown(markdown_content)\n```\n""")
+            markdown_content.append("""display.Markdown(markdown_content)\n```\n""")
 
         except Exception as e:
             self.report.logger.error(
@@ -859,12 +870,15 @@ with open('{(Path("..") / markdown.file_path).as_posix()}', 'r') as markdown_fil
         dataframe_content = []
         if is_report_static:
             # Generate path for the DataFrame image
-            df_image = Path(static_dir) / f"{dataframe.title.replace(' ', '_')}.png"
+            fpath_df_image = (
+                Path(static_dir) / f"{dataframe.title.replace(' ', '_')}.png"
+            )
             dataframe_content.append(
-                f"df.dfi.export('{Path(df_image).resolve().as_posix()}', max_rows=10, max_cols=5, table_conversion='matplotlib')\n```\n"
+                f"df.dfi.export('{Path(fpath_df_image).resolve().as_posix()}',"
+                " max_rows=10, max_cols=5, table_conversion='matplotlib')\n```\n"
             )
             # Use helper method to add centered image content
-            dataframe_content.append(self._generate_image_content(df_image))
+            dataframe_content.append(self._generate_image_content(fpath_df_image))
         else:
             # Append code to display the DataFrame interactively
             dataframe_content.append(
