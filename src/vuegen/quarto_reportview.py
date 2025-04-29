@@ -496,7 +496,7 @@ include-after-body:
             subsection_content.append(f"""{subsection.description}\n""")
 
         if is_report_revealjs:
-            subsection_content.append("::: {{.panel-tabset}}\n")
+            subsection_content.append("::: {.panel-tabset}\n")
 
         (
             all_components,
