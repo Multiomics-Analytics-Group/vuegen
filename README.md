@@ -119,6 +119,7 @@ vuegen --directory docs/example_data/Earth_microbiome_vuegen_demo_notebook --rep
 Your input directory must follow a **nested folder structure**, where first-level folders are treated as **sections** and second-level folders as **subsections**, containing the components (plots, tables, networks, Markdown text, and HTML files).
 
 Here is an example layout:
+
 ```
 report_folder/
 ├── section1/
@@ -138,7 +139,7 @@ report_folder/
 > [!WARNING]
 > VueGen currently requires each section to contain at least one subsection folder. Defining only sections (with no subsections) or using deeper nesting levels (i.e., sub-subsections) will result in errors. In upcoming releases, we plan to support more flexible directory structures.
 
-The titles for sections, subsections, and components are extracted from the corresponding folder and file names, and afterward, users can add descriptions, captions, and other details to the configuration file. Component types are inferred from the file extensions and names. 
+The titles for sections, subsections, and components are extracted from the corresponding folder and file names, and afterward, users can add descriptions, captions, and other details to the configuration file. Component types are inferred from the file extensions and names.
 The order of sections, subsections, and components can be defined using numerical suffixes in folder and file names.
 
 It's also possible to provide a configuration file instead of a directory:
@@ -206,6 +207,10 @@ from the releases page according to your operating system.
 
 ```bash
 conda create -n vuegen_gui -c conda-forge python=3.12 jupyter
+# in case you have errors, install vuegen addtionally
+conda activate vuegen_gui
+pip install vuegen
+# list all conda environments to find the location of the environment
 conda info -e # find environment location
 ```
 
@@ -254,28 +259,28 @@ This advanced case study demonstrates the application of VueGen in a real-world 
 
 **3. ChatBot Component**
 
-This case study highlights VueGen’s capability to embed a chatbot component into a report subsection, 
+This case study highlights VueGen’s capability to embed a chatbot component into a report subsection,
 enabling interactive conversations inside the report.
 
 Two API modes are supported:
 
 - **Ollama-style streaming chat completion**
-If a `model` parameter is specified in the config file, VueGen assumes the chatbot is using Ollama’s [/api/chat endpoint][ollama_chat]. 
-Messages are handled as chat history, and the assistant responses are streamed in real time for a smooth and responsive experience. 
-This mode supports LLMs such as `llama3`, `deepsek`, or `mistral`. 
+  If a `model` parameter is specified in the config file, VueGen assumes the chatbot is using Ollama’s [/api/chat endpoint][ollama_chat].
+  Messages are handled as chat history, and the assistant responses are streamed in real time for a smooth and responsive experience.
+  This mode supports LLMs such as `llama3`, `deepsek`, or `mistral`.
 
 > [!TIP]
 > See [Ollama’s website][ollama] for more details.
 
 - **Standard prompt-response API**
-If no `model` is provided, VueGen uses a simpler prompt-response flow. 
-A single prompt is sent to an endpoint, and a structured JSON object is expected in return.
-Currently, the response can include:
+  If no `model` is provided, VueGen uses a simpler prompt-response flow.
+  A single prompt is sent to an endpoint, and a structured JSON object is expected in return.
+  Currently, the response can include:
   - `text`: the main textual reply
   - `links`: a list of source URLs (optional)
   - `HTML content`: an HTML snippet with a Pyvis network visualization (optional)
 
-This response structure is currently customized for an internal knowledge graph assistant, but VueGen is being actively developed 
+This response structure is currently customized for an internal knowledge graph assistant, but VueGen is being actively developed
 to support more flexible and general-purpose response formats in future releases.
 
 > [!NOTE]
