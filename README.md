@@ -206,6 +206,10 @@ from the releases page according to your operating system.
 
 ```bash
 conda create -n vuegen_gui -c conda-forge python=3.12 jupyter
+# in case you have errors, install vuegen addtionally
+conda activate vuegen_gui
+pip install vuegen
+# list all conda environments to find the location of the environment
 conda info -e # find environment location
 ```
 
