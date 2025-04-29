@@ -1,6 +1,3 @@
-# Vuegen Case Study - View HTML Report
+# Earth Microbiome Project Case Study - HTML and Streamlit Example Reports
 
-The stable version of the current `html` report generated in the example notebook
-using `vuegen` can be viewed at
-
-[multiomics-analytics-group.github.io/vuegen/](https://multiomics-analytics-group.github.io/vuegen/)
+The Earth Microbiome Project case study generated in the example notebook using `vuegen` is available online as [HTML](https://multiomics-analytics-group.github.io/vuegen/) and [Streamlit](https://earth-microbiome-vuegen-demo.streamlit.app/) reports.

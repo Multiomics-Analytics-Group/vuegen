@@ -31,7 +31,11 @@ vuegen_demo
 :caption: Building a report
 
 vuegen_basic_case_study
+vuegen_basic_case_study_configfile
 vuegen_case_study_earth_microbiome
+vuegen_case_study_earth_microbiome_configfile
+vuegen_APICall_configfile
+vuegen_Chatbot_configfile
 example_report
 ```
 
