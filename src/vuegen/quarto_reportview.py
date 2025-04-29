@@ -132,10 +132,14 @@ class QuartoReportView(r.ReportView):
                     "Adding components of main section folder to the report as overall overview."
                 )
                 qmd_content.append("# General Overview")
+                if is_report_revealjs:
+                    qmd_content.append("::: {.panel-tabset}\n")
                 section_content, section_imports = self._combine_components(
                     main_section.components
                 )
                 qmd_content.extend(section_content)
+                if is_report_revealjs:
+                    qmd_content.append(":::\n")
                 report_imports.extend(section_imports)
 
             # Add the sections and subsections to the report
@@ -155,11 +159,16 @@ class QuartoReportView(r.ReportView):
                         "Adding components of section folder to the report."
                     )
                     qmd_content.append(f"## Overview {section.title}".strip())
+
+                    if is_report_revealjs:
+                        qmd_content.append("::: {.panel-tabset}\n")
                     section_content, section_imports = self._combine_components(
                         section.components
                     )
                     qmd_content.extend(section_content)
                     report_imports.extend(section_imports)
+                    if is_report_revealjs:
+                        qmd_content.append(":::\n")
 
                 if section.subsections:
                     # Iterate through subsections and integrate them into the section file
