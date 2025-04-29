@@ -679,6 +679,21 @@ fig_altair = alt.Chart.from_json(plot_json_str).properties(width=900, height=400
                 if is_url(dataframe.file_path)
                 else Path("..") / dataframe.file_path
             )
+            sheet_names = None
+            # If the file is an Excel file, get the sheet names
+            if file_extension in [
+                r.DataFrameFormat.XLS.value_with_dot,
+                r.DataFrameFormat.XLSX.value_with_dot,
+            ]:
+                sheet_names = table_utils.get_sheet_names(file_path)
+                if len(sheet_names) > 1:
+                    # If there are multiple sheets, use the first one
+                    self.report.logger.info(
+                        f"Multiple sheets found in the Excel file: {file_path}. "
+                        f"Sheets: {sheet_names}"
+                    )
+                else:
+                    sheet_names = None
 
             # Load the DataFrame using the correct function
             read_function = read_function_mapping[file_extension]
@@ -690,6 +705,30 @@ fig_altair = alt.Chart.from_json(plot_json_str).properties(width=900, height=400
             dataframe_content.extend(
                 self._show_dataframe(dataframe, is_report_static, static_dir=static_dir)
             )
+            # Add further sheets
+            if sheet_names:
+                for sheet_name in sheet_names[1:]:
+                    dataframe_content.append(f"#### {sheet_name}")
+                    dataframe_content.append(
+                        textwrap.dedent(
+                            f"""\
+                    ```{{python}}
+                    #| label: '{dataframe.title} {dataframe.id} {sheet_name}'
+                    #| fig-cap: ""
+                    """
+                        )
+                    )
+                    dataframe_content.append(
+                        f"df = pd.{read_function.__name__}('{file_path.as_posix()}', "
+                        f"sheet_name='{sheet_name}')\n"
+                    )
+                    # Display the dataframe
+                    # ! Probably this still does not work for static reports...
+                    dataframe_content.extend(
+                        self._show_dataframe(
+                            dataframe, is_report_static, static_dir=static_dir
+                        )
+                    )
 
         except Exception as e:
             self.report.logger.error(
