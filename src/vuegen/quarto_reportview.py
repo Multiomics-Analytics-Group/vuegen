@@ -697,6 +697,7 @@ fig_altair = alt.Chart.from_json(plot_json_str).properties(width=900, height=400
             )
             raise
         # Add caption if available
+        # ? Where should this come from?
         if dataframe.caption:
             dataframe_content.append(f">{dataframe.caption}\n")
 
