@@ -137,7 +137,16 @@ if os.environ.get("READTHEDOCS") == "True":
     PROJECT_ROOT = Path(__file__).parent.parent
     PACKAGE_ROOT = PROJECT_ROOT / "src" / "vuegen"
 
+    def run_split_readme(_):
+        print("[conf.py] Splitting README.md into sections...")
+        from split_readme import process_readme
+
+        readme_path = PROJECT_ROOT / "README.md"
+        output_dir = PROJECT_ROOT / "docs" / "sections_readme"
+        process_readme(readme_path, output_dir)
+
     def run_apidoc(_):
+        print("[conf.py] Running sphinx-apidoc...")
         from sphinx.ext import apidoc
 
         apidoc.main(
@@ -155,4 +164,5 @@ if os.environ.get("READTHEDOCS") == "True":
         )
 
     def setup(app):
+        app.connect("builder-inited", run_split_readme)
         app.connect("builder-inited", run_apidoc)

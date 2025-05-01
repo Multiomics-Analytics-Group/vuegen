@@ -52,16 +52,14 @@ def convert_gfm_to_sphinx(content, links):
     return content
 
 
-def process_readme():
-    readme_path = Path(__file__).resolve().parent.parent / "README.md"
-    readme = readme_path.read_text()
+def process_readme(readme_path, output_dir):
+    readme = Path(readme_path).read_text()
 
     # Extract links from README
     links = extract_links_from_readme(readme)
 
-    # Create docs/sections directory
-    output_dir = Path("./sections_readme")
-    output_dir.mkdir(exist_ok=True)
+    # Create output directory
+    output_dir.mkdir(exist_ok=True, parents=True)
 
     for section_title, filename in SECTION_MAPPING.items():
         content = extract_section(readme, section_title)
@@ -76,4 +74,6 @@ def process_readme():
 
 
 if __name__ == "__main__":
-    process_readme()
+    default_readme = Path(__file__).resolve().parent.parent / "README.md"
+    output_sections_readme = Path("./sections_readme")
+    process_readme(default_readme, output_sections_readme)
