@@ -233,7 +233,7 @@ More information regarding the app and builds can be found in the
 
 VueGen’s functionality is demonstrated through two case studies:
 
-**1. Predefined Directory**
+### 1. Predefined Directory
 
 This introductory case study uses a predefined directory with plots, dataframes, Markdown, and HTML components. Users can generate reports in different formats and modify the configuration file to customize the report structure.
 
@@ -242,7 +242,7 @@ This introductory case study uses a predefined directory with plots, dataframes,
 > [!NOTE]
 > The [configuration file][predef-dir-config] is available in the `docs/example_config_files` folder, and the [directory][predef-dir] with example data is in the `docs/example_data` folder.
 
-**2. Earth Microbiome Project Data**
+### 2. Earth Microbiome Project Data
 
 This advanced case study demonstrates the application of VueGen in a real-world scenario using data from the [Earth Microbiome Project (EMP)][emp]. The EMP is an initiative to characterize global microbial taxonomic and functional diversity. The notebook process the EMP data, create plots, dataframes, and other components, and organize outputs within a directory to produce reports. Report content and structure can be adapted by modifying the configuration file. Each report consists of sections on exploratory data analysis, metagenomics, and network analysis.
 
@@ -252,7 +252,7 @@ This advanced case study demonstrates the application of VueGen in a real-world 
 > The EMP case study is available online as [HTML][emp-html-demo] and [Streamlit][emp-st-demo] reports.
 > The [configuration file][emp-config] is available in the `docs/example_config_files` folder, and the [directory][emp-dir] with example data is in the `docs/example_data` folder.
 
-**3. ChatBot Component**
+### 3. ChatBot Component
 
 This case study highlights VueGen’s capability to embed a chatbot component into a report subsection, 
 enabling interactive conversations inside the report.
@@ -285,9 +285,17 @@ to support more flexible and general-purpose response formats in future releases
 
 Once a Streamlit report is generated, it can be deployed as a web application to make it accessible online. There are multiple ways to achieve this:
 
-- **Streamlit Community Cloud**: Deploy your report easily using [Streamlit Cloud][st-cloud], as demonstrated in the [EMP VueGen Demo][emp-st-demo]. The process involves moving the necessary scripts, data, and a requirements.txt file into a GitHub repository. Then, the app can be deployed via the Streamlit Cloud interface. The deployment example is available in the `streamlit-report-example` branch.
-- **Standalone Executables**: Convert your Streamlit application into a desktop app by packaging it as an executable file for different operating systems. A detailed explanation of this process can be found in this [Streamlit forum post][st-forum-exe].
-- **Stlite**: Run Streamlit apps directly in the browser with [stlite][stlite], a WebAssembly port of Streamlit powered by Pyodide, eliminating the need for a server. It also allows packaging apps as standalone desktop executables using stlite desktop.
+### Streamlit Community Cloud 
+
+Deploy your report easily using [Streamlit Cloud][st-cloud], as demonstrated in the [EMP VueGen Demo][emp-st-demo]. The process involves moving the necessary scripts, data, and a requirements.txt file into a GitHub repository. Then, the app can be deployed via the Streamlit Cloud interface. The deployment example is available in the `streamlit-report-example` branch.
+
+### Standalone Executables
+
+Convert your Streamlit application into a desktop app by packaging it as an executable file for different operating systems. A detailed explanation of this process can be found in this [Streamlit forum post][st-forum-exe].
+
+### Stlite
+
+Run Streamlit apps directly in the browser with [stlite][stlite_repo], a WebAssembly port of Streamlit powered by Pyodide, eliminating the need for a server. It also allows packaging apps as standalone desktop executables using stlite desktop.
 
 These options provide flexibility depending on whether the goal is online accessibility, lightweight execution, or local application distribution.
 
@@ -361,7 +369,7 @@ We appreciate your feedback! If you have any comments, suggestions, or run into 
 [emp-config]: https://github.com/Multiomics-Analytics-Group/vuegen/blob/main/docs/example_config_files/Earth_microbiome_vuegen_demo_notebook_config
 [emp-dir]: https://github.com/Multiomics-Analytics-Group/vuegen/blob/main/docs/example_data/Earth_microbiome_vuegen_demo_notebook
 [st-cloud]: https://streamlit.io/cloud
-[stlite]: https://github.com/whitphx/stlite
+[stlite_repo]: https://github.com/whitphx/stlite
 [st-forum-exe]: https://discuss.streamlit.io/t/streamlit-deployment-as-an-executable-file-exe-for-windows-macos-and-android/6812
 [Mona]: https://multiomics-analytics-group.github.io/
 [Biosustain]: https://www.biosustain.dtu.dk/
