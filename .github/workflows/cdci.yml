@@ -1,4 +1,4 @@
-name: Python package
+name: CICD Python Package
 
 on:
   push:
