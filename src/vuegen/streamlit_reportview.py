@@ -1,7 +1,7 @@
 import os
-import re
 import subprocess
 import sys
+import textwrap
 from pathlib import Path
 from typing import List
 
@@ -75,16 +75,33 @@ class StreamlitReportView(r.WebAppReportView):
             self.report.logger.debug("Processing app navigation code.")
             # Define the Streamlit imports and report manager content
             report_manag_content = []
+            report_manag_content.append(
+                textwrap.dedent(
+                    """\
+                    import os
+                    import time
+                    
+                    import psutil                    
+                    import streamlit as st
+                    """
+                )
+            )
             if self.report.logo:
                 report_manag_content.append(
-                    f"""import streamlit as st\n
-st.set_page_config(layout="wide", page_title="{self.report.title}", page_icon="{self.report.logo}")
-st.logo("{self.report.logo}")"""
+                    textwrap.dedent(
+                        f"""\
+                        st.set_page_config(layout="wide", page_title="{self.report.title}", page_icon="{self.report.logo}")
+                        st.logo("{self.report.logo}")
+                        """
+                    )
                 )
             else:
                 report_manag_content.append(
-                    f"""import streamlit as st\n
-st.set_page_config(layout="wide", page_title="{self.report.title}")"""
+                    textwrap.dedent(
+                        f"""\
+                        st.set_page_config(layout="wide", page_title="{self.report.title}")
+                        """
+                    )
                 )
             report_manag_content.append(
                 self._format_text(
@@ -142,12 +159,30 @@ st.set_page_config(layout="wide", page_title="{self.report.title}")"""
 
             # Add navigation object to the home page content
             report_manag_content.append(
-                f"""report_nav = st.navigation(sections_pages)
-report_nav.run()"""
+                textwrap.dedent(
+                    """\
+                    report_nav = st.navigation(sections_pages)
+                    
+                    # Following https://discuss.streamlit.io/t/close-streamlit-app-with-button-click/35132/5
+                    exit_app = st.sidebar.button("Shut Down App", icon=":material/power_off:", use_container_width=True)
+                    if exit_app:
+                        st.toast("Shutting down the app...")
+                        time.sleep(1)
+                        # Terminate streamlit python process
+                        pid = os.getpid()
+                        p = psutil.Process(pid)
+                        p.terminate()
+
+                    
+                    report_nav.run()
+                    """
+                )
             )
 
             # Write the navigation and general content to a Python file
-            with open(Path(output_dir) / self.REPORT_MANAG_SCRIPT, "w") as nav_manager:
+            with open(
+                Path(output_dir) / self.REPORT_MANAG_SCRIPT, "w", encoding="utf8"
+            ) as nav_manager:
                 nav_manager.write("\n".join(report_manag_content))
                 self.report.logger.info(
                     f"Created app navigation script: {self.REPORT_MANAG_SCRIPT}"
