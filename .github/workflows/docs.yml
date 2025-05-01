@@ -1,4 +1,4 @@
-name: Test documentation building, and publish report to GitHub Pages
+name: Docs and Report Examples
 
 on:
   push:
@@ -10,7 +10,7 @@ on:
     
 jobs:
   test:
-    name: Test
+    name: Test docs and report examples
     runs-on: ubuntu-latest
     strategy:
       matrix:
