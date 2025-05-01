@@ -52,6 +52,20 @@ def convert_gfm_to_sphinx(content, links):
     return content
 
 
+def decrease_header_levels(content):
+    """Decrease each Markdown header by one level."""
+    lines = content.splitlines()
+    new_lines = []
+    for line in lines:
+        if re.match(r"^(#{2,6})\s", line):
+            num_hashes = len(line.split()[0])
+            new_line = "#" * (num_hashes - 1) + line[num_hashes:]
+            new_lines.append(new_line)
+        else:
+            new_lines.append(line)
+    return "\n".join(new_lines)
+
+
 def process_readme(readme_path, output_dir):
     readme = Path(readme_path).read_text()
 
@@ -67,6 +81,7 @@ def process_readme(readme_path, output_dir):
             myst_content = (
                 f"## {section_title}\n\n{convert_gfm_to_sphinx(content, links)}"
             )
+            myst_content = decrease_header_levels(myst_content)
             (output_dir / filename).write_text(myst_content)
             print(f"Generated {filename}")
         else:
