@@ -98,7 +98,7 @@ If you prefer not to install VueGen on your system, a pre-configured Docker cont
 
 ### Nextflow and nf-core
 
-VueGen is also available as a [nf-core][nfcore] module, customised for compatibility with the [Nextflow][nextflow] environment. This module is designed to automate report generation from outputs produced by other modules, subworkflows, or pipelines. The code and documentation for the nf-core module are available in the [nf-VueGen repository][nf-vuegen].
+VueGen is also available as a [nf-core][nfcore] module, customised for compatibility with the [Nextflow][nextflow] environment. This module is designed to automate report generation from outputs produced by other modules, subworkflows, or pipelines. You can read the offical documentation for the nf-core module [here](nf-vuegen-nf-core). Also, the source code and detailed documentation are available in the [nf-VueGen repository][nf-vuegen].
 
 ## Execution
 
@@ -255,7 +255,8 @@ This advanced case study demonstrates the application of VueGen in a real-world 
 ### 3. ChatBot Component
 
 This case study highlights VueGen’s capability to embed a chatbot component into a report subsection, 
-enabling interactive conversations inside the report.
+enabling interactive conversations inside the report. This component is streamlit-specific and is not 
+available for other report types.
 
 Two API modes are supported:
 
@@ -360,6 +361,7 @@ We appreciate your feedback! If you have any comments, suggestions, or run into 
 [nfcore]: https://nf-co.re/
 [nextflow]: https://www.nextflow.io/
 [nf-vuegen]: https://github.com/Multiomics-Analytics-Group/nf-vuegen/
+[nf-vuegen-nf-core]: https://nf-co.re/modules/vuegen/
 [colab_badge]: https://colab.research.google.com/assets/colab-badge.svg
 [colab_link_intro_demo]: https://colab.research.google.com/github/Multiomics-Analytics-Group/vuegen/blob/main/docs/vuegen_basic_case_study.ipynb
 [predef-dir-config]: https://github.com/Multiomics-Analytics-Group/vuegen/blob/main/docs/example_config_files/Basic_example_vuegen_demo_notebook_config.yaml
