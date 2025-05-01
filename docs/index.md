@@ -17,7 +17,10 @@ sections_readme/execution
 sections_readme/gui
 sections_readme/case_studies
 sections_readme/web_app_deploy
+sections_readme/contributing
 sections_readme/citation
+sections_readme/credits
+sections_readme/contact
 ```
 
 ```{toctree}

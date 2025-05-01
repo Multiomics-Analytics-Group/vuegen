@@ -12,6 +12,7 @@ SECTION_MAPPING = {
     "Web application deployment": "web_app_deploy.md",
     "Citation": "citation.md",
     "Credits and acknowledgements": "credits.md",
+    "Contact and feedback": "contact.md",
 }
 
 
@@ -66,6 +67,22 @@ def decrease_header_levels(content):
     return "\n".join(new_lines)
 
 
+def clean_trailing_links(content):
+    """Remove trailing links and clean up extra empty lines."""
+    # Remove [label]: link style
+    content = re.sub(r"^\[.+?\]:\s+\S+$", "", content, flags=re.MULTILINE)
+    # Remove (url): url style
+    content = re.sub(
+        r"^\(https?://[^\s)]+\):\s*https?://[^\s)]+$", "", content, flags=re.MULTILINE
+    )
+    content = re.sub(
+        r"^\(mailto:[^\s)]+\):\s*mailto:[^\s)]+$", "", content, flags=re.MULTILINE
+    )
+    # Remove empty lines
+    content = re.sub(r"\n{2,}", "\n\n", content).strip()
+    return content
+
+
 def process_readme(readme_path, output_dir):
     readme = Path(readme_path).read_text()
 
@@ -81,11 +98,31 @@ def process_readme(readme_path, output_dir):
             myst_content = (
                 f"## {section_title}\n\n{convert_gfm_to_sphinx(content, links)}"
             )
+            if filename.lower() == "contact.md":
+                myst_content = clean_trailing_links(myst_content)
             myst_content = decrease_header_levels(myst_content)
             (output_dir / filename).write_text(myst_content)
             print(f"Generated {filename}")
         else:
             print(f"Warning: Section '{section_title}' not found in README")
+
+    # Include CONTRIBUTING.md with its own link references
+    contrib_path = readme_path.parent / "CONTRIBUTING.md"
+    if contrib_path.exists():
+        raw_contrib = contrib_path.read_text()
+        contrib_links = extract_links_from_readme(raw_contrib)
+
+        # Convert content
+        contrib_converted = convert_gfm_to_sphinx(raw_contrib, contrib_links)
+
+        # Remove trailing link definitions
+        contrib_converted = clean_trailing_links(contrib_converted)
+
+        # Write output
+        (output_dir / "contributing.md").write_text(contrib_converted)
+        print("Generated contributing.md")
+    else:
+        print("Warning: CONTRIBUTING.md not found")
 
 
 if __name__ == "__main__":
