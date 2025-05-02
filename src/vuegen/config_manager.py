@@ -145,7 +145,7 @@ class ConfigManager:
             component_config["component_type"] = r.ComponentType.MARKDOWN.value
         else:
             self.logger.error(
-                f"Unsupported file extension: {file_ext}. Skipping file: {file_path}\n"
+                f"Unsupported file extension: {file_ext}. Skipping file: {file_path}"
             )
             return None
 
@@ -227,6 +227,9 @@ class ConfigManager:
                     continue
                 # Add component config to list
                 components.append(component_config)
+            # ! if folder go into folder and pull files out?
+            # nesting level already at point 2
+            # loop of components in a folder
 
         subsection_config = {
             "title": self._create_title_fromdir(subsection_dir_path.name),
@@ -257,14 +260,25 @@ class ConfigManager:
         )
 
         subsections = []
+        components = []
         for subsection_dir in sorted_subsections:
             if subsection_dir.is_dir():
                 subsections.append(self._create_subsect_config_fromdir(subsection_dir))
+            else:
+                file_in_subsection_dir = (
+                    subsection_dir  # ! maybe take more generic names?
+                )
+                component_config = self._create_component_config_fromfile(
+                    file_in_subsection_dir
+                )
+                if component_config is not None:
+                    components.append(component_config)
 
         section_config = {
             "title": self._create_title_fromdir(section_dir_path.name),
             "description": self._read_description_file(section_dir_path),
             "subsections": subsections,
+            "components": components,
         }
         return section_config
 
@@ -301,12 +315,27 @@ class ConfigManager:
         # Sort sections by their number prefix
         sorted_sections = self._sort_paths_by_numprefix(list(base_dir_path.iterdir()))
 
+        main_section_config = {
+            "title": "",  # self._create_title_fromdir("home_components"),
+            "description": "Components added to homepage.",
+            "components": [],
+        }
+        yaml_config["sections"].append(main_section_config)
+
         # Generate sections and subsections config
         for section_dir in sorted_sections:
             if section_dir.is_dir():
                 yaml_config["sections"].append(
                     self._create_sect_config_fromdir(section_dir)
                 )
+            # could be single plots?
+            else:
+                file_in_main_section_dir = section_dir
+                component_config = self._create_component_config_fromfile(
+                    file_in_main_section_dir
+                )
+                if component_config is not None:
+                    main_section_config["components"].append(component_config)
 
         return yaml_config, base_dir_path
 
@@ -371,6 +400,10 @@ class ConfigManager:
             subsections=[],
             description=section_data.get("description"),
         )
+
+        for component_data in section_data.get("components", []):
+            component = self._create_component(component_data)
+            section.components.append(component)
 
         # Create subsections
         for subsection_data in section_data.get("subsections", []):

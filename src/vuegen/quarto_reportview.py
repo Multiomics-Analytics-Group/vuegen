@@ -1,4 +1,3 @@
-import logging
 import os
 import subprocess
 import sys
@@ -25,15 +24,31 @@ class QuartoReportView(r.ReportView):
         report: r.Report,
         report_type: r.ReportType,
         quarto_checks: bool = False,
+        static_dir: str = STATIC_FILES_DIR,
     ):
+        """_summary_
+
+        Parameters
+        ----------
+        report : r.Report
+            Report dataclass with all the information to be included in the report.
+            Contains sections data needed to write the report python files.
+        report_type : r.ReportType
+            Enum of report type as definded by the ReportType Enum.
+        quarto_checks : bool, optional
+            Whether to test if all quarto dependencies are installed, by default False
+        static_dir : str
+            The folder where the static files will be saved.
+        """
         super().__init__(report=report, report_type=report_type)
         self.quarto_checks = quarto_checks
-        self.BUNDLED_EXECUTION = False
+        self.static_dir = static_dir
+        # self.BUNDLED_EXECUTION = False
         self.quarto_path = "quarto"
         # self.env_vars = os.environ.copy()
         if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
             self.report.logger.info("running in a PyInstaller bundle")
-            self.BUNDLED_EXECUTION = True
+            # self.BUNDLED_EXECUTION = True
             self.report.logger.debug(f"sys._MEIPASS: {sys._MEIPASS}")
         else:
             self.report.logger.info("running in a normal Python process")
@@ -42,9 +57,21 @@ class QuartoReportView(r.ReportView):
         self.report.logger.debug(f"PATH: {os.environ['PATH']}")
         self.report.logger.debug(f"sys.path: {sys.path}")
 
-    def generate_report(
-        self, output_dir: Path = BASE_DIR, static_dir: Path = STATIC_FILES_DIR
-    ) -> None:
+        self.is_report_static = self.report_type in {
+            r.ReportType.PDF,
+            r.ReportType.DOCX,
+            r.ReportType.ODT,
+            r.ReportType.PPTX,
+        }
+
+        self.components_fct_map = {
+            r.ComponentType.PLOT: self._generate_plot_content,
+            r.ComponentType.DATAFRAME: self._generate_dataframe_content,
+            r.ComponentType.MARKDOWN: self._generate_markdown_content,
+            r.ComponentType.HTML: self._generate_html_content,
+        }
+
+    def generate_report(self, output_dir: Path = BASE_DIR) -> None:
         """
         Generates the qmd file of the quarto report. It creates code for rendering each section and its subsections with all components.
 
@@ -52,8 +79,6 @@ class QuartoReportView(r.ReportView):
         ----------
         output_dir : Path, optional
             The folder where the generated report files will be saved (default is BASE_DIR).
-        static_dir : Path, optional
-            The folder where the static files will be saved (default is STATIC_FILES_DIR).
         """
         self.report.logger.debug(
             f"Generating '{self.report_type}' report in directory: '{output_dir}'"
@@ -68,23 +93,17 @@ class QuartoReportView(r.ReportView):
             )
 
         # Create the static folder
-        if create_folder(static_dir):
+        if create_folder(self.static_dir):
             self.report.logger.info(
-                f"Created output directory for static content: '{static_dir}'"
+                f"Created output directory for static content: '{self.static_dir}'"
             )
         else:
             self.report.logger.info(
-                f"Output directory for static content already existed: '{static_dir}'"
+                f"Output directory for static content already existed: '{self.static_dir}'"
             )
 
         try:
             # Create variable to check if the report is static or revealjs
-            is_report_static = self.report_type in {
-                r.ReportType.PDF,
-                r.ReportType.DOCX,
-                r.ReportType.ODT,
-                r.ReportType.PPTX,
-            }
             is_report_revealjs = self.report_type == r.ReportType.REVEALJS
 
             # Define the YAML header for the quarto report
@@ -92,7 +111,9 @@ class QuartoReportView(r.ReportView):
 
             # Create qmd content and imports for the report
             qmd_content = []
-            report_imports = []
+            report_imports = (
+                []
+            )  # only one global import list for a single report (different to streamlit)
 
             # Add description of the report
             if self.report.description:
@@ -103,9 +124,35 @@ class QuartoReportView(r.ReportView):
                 qmd_content.append(
                     self._generate_image_content(self.report.graphical_abstract)
                 )
+            # ? Do we need to handle overview separately?
+            main_section = self.report.sections[0]
+
+            # ! description can be a Markdown component, but it is treated differently
+            # ! It won't be added to the section content.
+            if main_section.components:
+                self.report.logger.debug(
+                    "Adding components of main section folder to the report as overall overview."
+                )
+                section_content, section_imports = self._combine_components(
+                    main_section.components
+                )
+                if section_content:
+                    qmd_content.append("# General Overview")
+
+                    if is_report_revealjs:
+                        # Add tabset for revealjs
+                        section_content = [
+                            "::: {.panel-tabset}\n",
+                            *section_content,
+                            ":::",
+                        ]
+                    qmd_content.extend(section_content)
+
+                report_imports.extend(section_imports)
+
             # Add the sections and subsections to the report
             self.report.logger.info("Starting to generate sections for the report.")
-            for section in self.report.sections:
+            for section in self.report.sections[1:]:
                 self.report.logger.debug(
                     f"Processing section: '{section.title}' - {len(section.subsections)} subsection(s)"
                 )
@@ -113,6 +160,30 @@ class QuartoReportView(r.ReportView):
                 qmd_content.append(f"# {section.title}")
                 if section.description:
                     qmd_content.append(f"""{section.description}\n""")
+
+                # Add components of section to the report
+                # ! description can be a Markdown component, but it is treated differently
+                # ! It won't be added to the section content.
+                if section.components:
+                    self.report.logger.debug(
+                        "Adding components of section folder to the report."
+                    )
+                    section_content, section_imports = self._combine_components(
+                        section.components
+                    )
+                    if section_content:
+                        qmd_content.append(f"## Overview {section.title}".strip())
+
+                        if is_report_revealjs:
+                            # Add tabset for revealjs
+                            section_content = [
+                                "::: {.panel-tabset}\n",
+                                *section_content,
+                                ":::",
+                            ]
+                        qmd_content.extend(section_content)
+
+                    report_imports.extend(section_imports)
 
                 if section.subsections:
                     # Iterate through subsections and integrate them into the section file
@@ -124,25 +195,20 @@ class QuartoReportView(r.ReportView):
                         subsection_content, subsection_imports = (
                             self._generate_subsection(
                                 subsection,
-                                is_report_static,
                                 is_report_revealjs,
-                                static_dir=static_dir,
                             )
                         )
                         qmd_content.extend(subsection_content)
-                        report_imports.extend(subsection_imports)
+                        report_imports.extend(
+                            subsection_imports
+                        )  # even easier as it's global
                 else:
                     self.report.logger.warning(
                         f"No subsections found in section: '{section.title}'. To show content in the report, add subsections to the section."
                     )
 
-            # Flatten the subsection_imports into a single list
-            flattened_report_imports = [
-                imp for sublist in report_imports for imp in sublist
-            ]
-
             # Remove duplicated imports
-            report_unique_imports = set(flattened_report_imports)
+            report_unique_imports = set(report_imports)
 
             # ! set leads to random import order
             # ! separate and sort import statements, separate from setup code
@@ -389,12 +455,45 @@ include-after-body:
 
         return yaml_header
 
+    def _combine_components(self, components: list[dict]) -> tuple[list, list]:
+        """combine a list of components."""
+
+        all_contents = []
+        all_imports = []
+
+        for component in components:
+            # Write imports if not already done
+            component_imports = self._generate_component_imports(component)
+            self.report.logger.debug("component_imports: %s", component_imports)
+            all_imports.extend(component_imports)
+
+            # Handle different types of components
+            fct = self.components_fct_map.get(component.component_type, None)
+            if fct is None:
+                self.report.logger.warning(
+                    f"Unsupported component type '{component.component_type}' "
+                )
+            elif (
+                component.component_type == r.ComponentType.MARKDOWN
+                and component.title.lower() == "description"
+            ):
+                self.report.logger.debug("Skipping description.md markdown of section.")
+            elif (
+                component.component_type == r.ComponentType.HTML
+                and self.is_report_static
+            ):
+                self.report.logger.debug("Skipping HTML component for static report.")
+            else:
+                content = fct(component)
+                all_contents.extend(content)
+        # remove duplicates
+        all_imports = list(set(all_imports))
+        return all_contents, all_imports
+
     def _generate_subsection(
         self,
         subsection,
-        is_report_static,
         is_report_revealjs,
-        static_dir: str,
     ) -> tuple[List[str], List[str]]:
         """
         Generate code to render components (plots, dataframes, markdown) in the given subsection,
@@ -404,12 +503,9 @@ include-after-body:
         ----------
         subsection : Subsection
             The subsection containing the components.
-        is_report_static : bool
-            A boolean indicating whether the report is static or interactive.
         is_report_revealjs : bool
             A boolean indicating whether the report is in revealjs format.
-        static_dir : str
-            The folder where the static files will be saved.
+
         Returns
         -------
         tuple : (List[str], List[str])
@@ -417,7 +513,6 @@ include-after-body:
             - list of imports for the subsection (List[str])
         """
         subsection_content = []
-        subsection_imports = []
 
         # Add subsection header and description
         subsection_content.append(f"## {subsection.title}")
@@ -425,38 +520,13 @@ include-after-body:
             subsection_content.append(f"""{subsection.description}\n""")
 
         if is_report_revealjs:
-            subsection_content.append(f"::: {{.panel-tabset}}\n")
+            subsection_content.append("::: {.panel-tabset}\n")
 
-        for component in subsection.components:
-            component_imports = self._generate_component_imports(component)
-            subsection_imports.append(component_imports)
-
-            if component.component_type == r.ComponentType.PLOT:
-                subsection_content.extend(
-                    self._generate_plot_content(
-                        component, is_report_static, static_dir=static_dir
-                    )
-                )
-            elif component.component_type == r.ComponentType.DATAFRAME:
-                subsection_content.extend(
-                    self._generate_dataframe_content(
-                        component, is_report_static, static_dir=static_dir
-                    )
-                )
-            elif (
-                component.component_type == r.ComponentType.MARKDOWN
-                and component.title.lower() != "description"
-            ):
-                subsection_content.extend(self._generate_markdown_content(component))
-            elif (
-                component.component_type == r.ComponentType.HTML
-                and not is_report_static
-            ):
-                subsection_content.extend(self._generate_html_content(component))
-            else:
-                self.report.logger.warning(
-                    f"Unsupported component type '{component.component_type}' in subsection: {subsection.title}"
-                )
+        (
+            all_components,
+            subsection_imports,
+        ) = self._combine_components(subsection.components)
+        subsection_content.extend(all_components)
 
         if is_report_revealjs:
             subsection_content.append(":::\n")
@@ -466,9 +536,7 @@ include-after-body:
         )
         return subsection_content, subsection_imports
 
-    def _generate_plot_content(
-        self, plot, is_report_static, static_dir: str
-    ) -> List[str]:
+    def _generate_plot_content(self, plot) -> List[str]:
         """
         Generate content for a plot component based on the report type.
 
@@ -476,8 +544,6 @@ include-after-body:
         ----------
         plot : Plot
             The plot component to generate content for.
-        static_dir : str
-            The folder where the static files will be saved.
 
         Returns
         -------
@@ -489,10 +555,14 @@ include-after-body:
         plot_content.append(f"### {plot.title}")
 
         # Define plot path
-        if is_report_static:
-            static_plot_path = Path(static_dir) / f"{plot.title.replace(' ', '_')}.png"
+        if self.is_report_static:
+            static_plot_path = (
+                Path(self.static_dir) / f"{plot.title.replace(' ', '_')}.png"
+            )
         else:
-            html_plot_file = Path(static_dir) / f"{plot.title.replace(' ', '_')}.html"
+            html_plot_file = (
+                Path(self.static_dir) / f"{plot.title.replace(' ', '_')}.html"
+            )
 
         # Add content for the different plot types
         try:
@@ -502,7 +572,7 @@ include-after-body:
                 )
             elif plot.plot_type == r.PlotType.PLOTLY:
                 plot_content.append(self._generate_plot_code(plot))
-                if is_report_static:
+                if self.is_report_static:
                     plot_content.append(
                         f"""fig_plotly.write_image("{static_plot_path.resolve().as_posix()}")\n```\n"""
                     )
@@ -511,7 +581,7 @@ include-after-body:
                     plot_content.append(f"""fig_plotly.show()\n```\n""")
             elif plot.plot_type == r.PlotType.ALTAIR:
                 plot_content.append(self._generate_plot_code(plot))
-                if is_report_static:
+                if self.is_report_static:
                     plot_content.append(
                         f"""fig_altair.save("{static_plot_path.resolve().as_posix()}")\n```\n"""
                     )
@@ -523,7 +593,7 @@ include-after-body:
                 if isinstance(networkx_graph, tuple):
                     # If network_data is a tuple, separate the network and html file path
                     networkx_graph, html_plot_file = networkx_graph
-                elif isinstance(networkx_graph, nx.Graph) and not is_report_static:
+                elif isinstance(networkx_graph, nx.Graph) and not self.is_report_static:
                     # Get the pyvis object and create html
                     pyvis_graph = plot.create_and_save_pyvis_network(
                         networkx_graph, html_plot_file
@@ -536,7 +606,7 @@ include-after-body:
                 plot_content.append(f"**Number of edges:** {num_edges}\n")
 
                 # Add code to generate network depending on the report type
-                if is_report_static:
+                if self.is_report_static:
                     plot.save_network_image(networkx_graph, static_plot_path, "png")
                     plot_content.append(self._generate_image_content(static_plot_path))
                 else:
@@ -620,9 +690,7 @@ fig_altair = alt.Chart.from_json(plot_json_str).properties(width=900, height=400
 </div>\n"""
         return plot_code
 
-    def _generate_dataframe_content(
-        self, dataframe, is_report_static, static_dir: str
-    ) -> List[str]:
+    def _generate_dataframe_content(self, dataframe) -> List[str]:
         """
         Generate content for a DataFrame component based on the report type.
 
@@ -630,10 +698,6 @@ fig_altair = alt.Chart.from_json(plot_json_str).properties(width=900, height=400
         ----------
         dataframe : DataFrame
             The dataframe component to add to content.
-        is_report_static : bool
-            A boolean indicating whether the report is static or interactive.
-        static_dir : str
-            The folder where the static files will be saved.
 
         Returns
         -------
@@ -683,9 +747,7 @@ fig_altair = alt.Chart.from_json(plot_json_str).properties(width=900, height=400
             )
 
             # Display the dataframe
-            dataframe_content.extend(
-                self._show_dataframe(dataframe, is_report_static, static_dir=static_dir)
-            )
+            dataframe_content.extend(self._show_dataframe(dataframe))
 
         except Exception as e:
             self.report.logger.error(
@@ -836,9 +898,7 @@ with open('{(Path("..") / markdown.file_path).as_posix()}', 'r') as markdown_fil
                 f"""![](/{src}){{fig-alt={alt_text} width={width} height={height}}}\n"""
             )
 
-    def _show_dataframe(
-        self, dataframe, is_report_static, static_dir: str
-    ) -> List[str]:
+    def _show_dataframe(self, dataframe) -> List[str]:
         """
         Appends either a static image or an interactive representation of a DataFrame to the content list.
 
@@ -846,10 +906,6 @@ with open('{(Path("..") / markdown.file_path).as_posix()}', 'r') as markdown_fil
         ----------
         dataframe : DataFrame
             The DataFrame object containing the data to display.
-        is_report_static : bool
-            Determines if the report is in a static format (e.g., PDF) or interactive (e.g., HTML).
-        static_dir : str
-            The folder where the static files will be saved.
 
         Returns
         -------
@@ -857,9 +913,11 @@ with open('{(Path("..") / markdown.file_path).as_posix()}', 'r') as markdown_fil
             The list of content lines for the DataFrame.
         """
         dataframe_content = []
-        if is_report_static:
+        if self.is_report_static:
             # Generate path for the DataFrame image
-            df_image = Path(static_dir) / f"{dataframe.title.replace(' ', '_')}.png"
+            df_image = (
+                Path(self.static_dir) / f"{dataframe.title.replace(' ', '_')}.png"
+            )
             dataframe_content.append(
                 f"df.dfi.export('{Path(df_image).resolve().as_posix()}', max_rows=10, max_cols=5, table_conversion='matplotlib')\n```\n"
             )
