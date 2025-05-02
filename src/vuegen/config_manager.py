@@ -285,11 +285,21 @@ class ConfigManager:
                 )
                 if component_config is not None:
                     components.append(component_config)
+            else:
+                file_in_subsection_dir = (
+                    subsection_dir  # ! maybe take more generic names?
+                )
+                component_config = self._create_component_config_fromfile(
+                    file_in_subsection_dir
+                )
+                if component_config is not None:
+                    components.append(component_config)
 
         section_config = {
             "title": self._create_title_fromdir(section_dir_path.name),
             "description": self._read_description_file(section_dir_path),
             "subsections": subsections,
+            "components": components,
             "components": components,
         }
         return section_config

@@ -127,15 +127,27 @@ class QuartoReportView(r.ReportView):
             # ? Do we need to handle overview separately?
             main_section = self.report.sections[0]
 
+            # ! description can be a Markdown component, but it is treated differently
+            # ! It won't be added to the section content.
             if main_section.components:
                 self.report.logger.debug(
                     "Adding components of main section folder to the report as overall overview."
                 )
-                qmd_content.append("# General Overview")
                 section_content, section_imports = self._combine_components(
                     main_section.components
                 )
-                qmd_content.extend(section_content)
+                if section_content:
+                    qmd_content.append("# General Overview")
+
+                    if is_report_revealjs:
+                        # Add tabset for revealjs
+                        section_content = [
+                            "::: {.panel-tabset}\n",
+                            *section_content,
+                            ":::",
+                        ]
+                    qmd_content.extend(section_content)
+
                 report_imports.extend(section_imports)
 
             # Add the sections and subsections to the report
@@ -150,15 +162,27 @@ class QuartoReportView(r.ReportView):
                     qmd_content.append(f"""{section.description}\n""")
 
                 # Add components of section to the report
+                # ! description can be a Markdown component, but it is treated differently
+                # ! It won't be added to the section content.
                 if section.components:
                     self.report.logger.debug(
                         "Adding components of section folder to the report."
                     )
-                    qmd_content.append(f"## Overview {section.title}".strip())
                     section_content, section_imports = self._combine_components(
                         section.components
                     )
-                    qmd_content.extend(section_content)
+                    if section_content:
+                        qmd_content.append(f"## Overview {section.title}".strip())
+
+                        if is_report_revealjs:
+                            # Add tabset for revealjs
+                            section_content = [
+                                "::: {.panel-tabset}\n",
+                                *section_content,
+                                ":::",
+                            ]
+                        qmd_content.extend(section_content)
+
                     report_imports.extend(section_imports)
 
                 if section.subsections:
@@ -496,7 +520,7 @@ include-after-body:
             subsection_content.append(f"""{subsection.description}\n""")
 
         if is_report_revealjs:
-            subsection_content.append("::: {{.panel-tabset}}\n")
+            subsection_content.append("::: {.panel-tabset}\n")
 
         (
             all_components,
