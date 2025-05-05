@@ -40,6 +40,7 @@ ipywidgets = { version = "*", optional = true }
 sphinx-new-tab-link = { version = "!=0.2.2", optional = true }
 jupytext = { version = "*", optional = true }
 customtkinter = { version = "*", optional = true }
+sphinx-copybutton = { version = "*", optional = true }
 
 [tool.poetry.group.dev.dependencies]
 ipykernel = { version = "^6.29.5", optional = true }
@@ -63,6 +64,7 @@ docs = [
     "ipywidgets",
     "sphinx-new-tab-link",
     "jupytext",
+    "sphinx-copybutton",
 ]
 gui = ["customtkinter"]
 

@@ -37,6 +37,7 @@ bundle:
 	--collect-all rpds \
 	--collect-all tenacity \
 	--collect-all vl_convert \
+	--collect-all typing-extensions \
 	--add-data ../docs/example_data/Basic_example_vuegen_demo_notebook:example_data/Basic_example_vuegen_demo_notebook \
 	--add-data ../docs/images/vuegen_logo.png:. \
 	app.py
@@ -80,7 +81,6 @@ bundle:
 # --collect-all urllib3 \
 # --collect-all uri-template \
 # --collect-all tzdata \
-# --collect-all typing-extensions\
 # --collect-all types-python-dateutil \
 # --collect-all traitlets \
 # --collect-all tornado \

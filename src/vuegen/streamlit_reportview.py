@@ -1,7 +1,7 @@
 import os
-import re
 import subprocess
 import sys
+import textwrap
 from pathlib import Path
 from typing import List
 
@@ -11,6 +11,15 @@ from streamlit.web import cli as stcli
 from . import report as r
 from .utils import create_folder, generate_footer, is_url
 from .utils.variables import make_valid_identifier
+
+
+def write_python_file(fpath: str, imports: list[str], contents: list[str]) -> None:
+    with open(fpath, "w", encoding="utf8") as f:
+        # Write imports at the top of the file
+        f.write("\n".join(imports) + "\n\n")
+
+        # Write the subsection content (descriptions, plots)
+        f.write("\n".join(contents))
 
 
 class StreamlitReportView(r.WebAppReportView):
@@ -28,7 +37,22 @@ class StreamlitReportView(r.WebAppReportView):
         report: r.Report,
         report_type: r.ReportType,
         streamlit_autorun: bool = False,
+        static_dir: str = STATIC_FILES_DIR,
     ):
+        """Initialize ReportView with the report and report type.
+
+        Parameters
+        ----------
+        report : r.Report
+            Report dataclass with all the information to be included in the report.
+            Contains sections data needed to write the report python files.
+        report_type : r.ReportType
+            Enum of report type as definded by the ReportType Enum.
+        streamlit_autorun : bool, optional
+            Wheather streamlit should be started after report generation, by default False
+        static_dir : str, optional
+            The folder where the static files will be saved, by default STATIC_FILES_DIR.
+        """
         super().__init__(report=report, report_type=report_type)
         self.streamlit_autorun = streamlit_autorun
         self.BUNDLED_EXECUTION = False
@@ -38,9 +62,18 @@ class StreamlitReportView(r.WebAppReportView):
         else:
             self.report.logger.info("running in a normal Python process")
 
-    def generate_report(
-        self, output_dir: str = SECTIONS_DIR, static_dir: str = STATIC_FILES_DIR
-    ) -> None:
+        self.components_fct_map = {
+            r.ComponentType.PLOT: self._generate_plot_content,
+            r.ComponentType.DATAFRAME: self._generate_dataframe_content,
+            r.ComponentType.MARKDOWN: self._generate_markdown_content,
+            r.ComponentType.HTML: self._generate_html_content,
+            r.ComponentType.APICALL: self._generate_apicall_content,
+            r.ComponentType.CHATBOT: self._generate_chatbot_content,
+        }
+
+        self.static_dir = static_dir
+
+    def generate_report(self, output_dir: str = SECTIONS_DIR) -> None:
         """
         Generates the Streamlit report and creates Python files for each section and its subsections and plots.
 
@@ -48,8 +81,6 @@ class StreamlitReportView(r.WebAppReportView):
         ----------
         output_dir : str, optional
             The folder where the generated report files will be saved (default is SECTIONS_DIR).
-        static_dir : str, optional
-            The folder where the static files will be saved (default is STATIC_FILES_DIR).
         """
         self.report.logger.debug(
             f"Generating '{self.report_type}' report in directory: '{output_dir}'"
@@ -62,29 +93,46 @@ class StreamlitReportView(r.WebAppReportView):
             self.report.logger.info(f"Output directory already existed: '{output_dir}'")
 
         # Create the static folder
-        if create_folder(static_dir):
+        if create_folder(self.static_dir):
             self.report.logger.info(
-                f"Created output directory for static content: '{static_dir}'"
+                f"Created output directory for static content: '{self.static_dir}'"
             )
         else:
             self.report.logger.info(
-                f"Output directory for static content already existed: '{static_dir}'"
+                f"Output directory for static content already existed: '{self.static_dir}'"
             )
 
         try:
             self.report.logger.debug("Processing app navigation code.")
             # Define the Streamlit imports and report manager content
             report_manag_content = []
+            report_manag_content.append(
+                textwrap.dedent(
+                    """\
+                    import os
+                    import time
+                    
+                    import psutil                    
+                    import streamlit as st
+                    """
+                )
+            )
             if self.report.logo:
                 report_manag_content.append(
-                    f"""import streamlit as st\n
-st.set_page_config(layout="wide", page_title="{self.report.title}", page_icon="{self.report.logo}")
-st.logo("{self.report.logo}")"""
+                    textwrap.dedent(
+                        f"""\
+                        st.set_page_config(layout="wide", page_title="{self.report.title}", page_icon="{self.report.logo}")
+                        st.logo("{self.report.logo}")
+                        """
+                    )
                 )
             else:
                 report_manag_content.append(
-                    f"""import streamlit as st\n
-st.set_page_config(layout="wide", page_title="{self.report.title}")"""
+                    textwrap.dedent(
+                        f"""\
+                        st.set_page_config(layout="wide", page_title="{self.report.title}")
+                        """
+                    )
                 )
             report_manag_content.append(
                 self._format_text(
@@ -96,14 +144,19 @@ st.set_page_config(layout="wide", page_title="{self.report.title}")"""
             report_manag_content.append("\nsections_pages = {}")
 
             # Generate the home page and update the report manager content
+            # ! top level files (compontents) are added to the home page
             self._generate_home_section(
-                output_dir=output_dir, report_manag_content=report_manag_content
+                output_dir=output_dir,
+                report_manag_content=report_manag_content,
+                home_section=self.report.sections[0],
             )
 
-            for section in self.report.sections:
+            for section in self.report.sections[1:]:  # skip home section components
                 # Create a folder for each section
                 subsection_page_vars = []
-                section_name_var = section.title.replace(" ", "_")
+                section_name_var = make_valid_identifier(
+                    section.title.replace(" ", "_")
+                )
                 section_dir_path = Path(output_dir) / section_name_var
 
                 if create_folder(section_dir_path):
@@ -114,6 +167,18 @@ st.set_page_config(layout="wide", page_title="{self.report.title}")"""
                     self.report.logger.debug(
                         f"Section directory already existed: {section_dir_path}"
                     )
+                # add an overview page to section of components exist
+                if section.components:
+                    subsection_file_path = (
+                        Path(section_name_var)
+                        / f"0_overview_{make_valid_identifier(section.title).lower()}.py"
+                    ).as_posix()  # Make sure it's Posix Paths
+                    section.file_path = subsection_file_path
+                    # Create a Page object for each subsection and add it to the home page content
+                    report_manag_content.append(
+                        f"{section_name_var}_overview = st.Page('{subsection_file_path}', title='Overview {section.title}')"
+                    )
+                    subsection_page_vars.append(f"{section_name_var}_overview")
 
                 for subsection in section.subsections:
                     # ! could add a non-integer to ensure it's a valid identifier
@@ -128,7 +193,7 @@ st.set_page_config(layout="wide", page_title="{self.report.title}")"""
                     subsection_file_path = (
                         Path(section_name_var) / f"{subsection_name_var}.py"
                     ).as_posix()  # Make sure it's Posix Paths
-
+                    subsection.file_path = subsection_file_path
                     # Create a Page object for each subsection and add it to the home page content
                     report_manag_content.append(
                         f"{subsection_name_var} = st.Page('{subsection_file_path}', title='{subsection.title}')"
@@ -142,19 +207,37 @@ st.set_page_config(layout="wide", page_title="{self.report.title}")"""
 
             # Add navigation object to the home page content
             report_manag_content.append(
-                f"""report_nav = st.navigation(sections_pages)
-report_nav.run()"""
+                textwrap.dedent(
+                    """\
+                    report_nav = st.navigation(sections_pages)
+                    
+                    # Following https://discuss.streamlit.io/t/close-streamlit-app-with-button-click/35132/5
+                    exit_app = st.sidebar.button("Shut Down App", icon=":material/power_off:", use_container_width=True)
+                    if exit_app:
+                        st.toast("Shutting down the app...")
+                        time.sleep(1)
+                        # Terminate streamlit python process
+                        pid = os.getpid()
+                        p = psutil.Process(pid)
+                        p.terminate()
+
+                    
+                    report_nav.run()
+                    """
+                )
             )
 
             # Write the navigation and general content to a Python file
-            with open(Path(output_dir) / self.REPORT_MANAG_SCRIPT, "w") as nav_manager:
+            with open(
+                Path(output_dir) / self.REPORT_MANAG_SCRIPT, "w", encoding="utf8"
+            ) as nav_manager:
                 nav_manager.write("\n".join(report_manag_content))
                 self.report.logger.info(
                     f"Created app navigation script: {self.REPORT_MANAG_SCRIPT}"
                 )
 
             # Create Python files for each section and its subsections and plots
-            self._generate_sections(output_dir=output_dir, static_dir=static_dir)
+            self._generate_sections(output_dir=output_dir)
         except Exception as e:
             self.report.logger.error(
                 f"An error occurred while generating the report: {str(e)}"
@@ -262,7 +345,10 @@ report_nav.run()"""
         return f"""st.markdown('''<{tag} style='text-align: {text_align}; color: {color};'>{text}</{tag}>''', unsafe_allow_html=True)"""
 
     def _generate_home_section(
-        self, output_dir: str, report_manag_content: list
+        self,
+        output_dir: str,
+        report_manag_content: list,
+        home_section: r.Section,
     ) -> None:
         """
         Generates the homepage for the report and updates the report manager content.
@@ -275,6 +361,13 @@ report_nav.run()"""
             A list to store the content that will be written to the report manager file.
         """
         self.report.logger.debug("Processing home section.")
+        all_components = []
+        subsection_imports = []
+        if home_section.components:
+            # some assert on title?
+            all_components, subsection_imports, _ = self._combine_components(
+                home_section.components
+            )
 
         try:
             # Create folder for the home page
@@ -289,6 +382,8 @@ report_nav.run()"""
             # Create the home page content
             home_content = []
             home_content.append(f"import streamlit as st")
+            if subsection_imports:
+                home_content.extend(subsection_imports)
             if self.report.description:
                 home_content.append(
                     self._format_text(text=self.report.description, type="paragraph")
@@ -297,6 +392,10 @@ report_nav.run()"""
                 home_content.append(
                     f"\nst.image('{self.report.graphical_abstract}', use_column_width=True)"
                 )
+
+            # add components content to page (if any)
+            if all_components:
+                home_content.extend(all_components)
 
             # Define the footer variable and add it to the home page content
             home_content.append("footer = '''" + generate_footer() + "'''\n")
@@ -318,7 +417,7 @@ report_nav.run()"""
             self.report.logger.error(f"Error generating the home section: {str(e)}")
             raise
 
-    def _generate_sections(self, output_dir: str, static_dir: str) -> None:
+    def _generate_sections(self, output_dir: str) -> None:
         """
         Generates Python files for each section in the report, including subsections and its components (plots, dataframes, markdown).
 
@@ -326,77 +425,103 @@ report_nav.run()"""
         ----------
         output_dir : str
             The folder where section files will be saved.
-        static_dir : str
-            The folder where the static files will be saved.
         """
         self.report.logger.info("Starting to generate sections for the report.")
 
         try:
-            for section in self.report.sections:
+            for section in self.report.sections[1:]:
                 section_name_var = section.title.replace(" ", "_")
                 self.report.logger.debug(
                     f"Processing section '{section.id}': '{section.title}' - {len(section.subsections)} subsection(s)"
                 )
 
-                if section.subsections:
-                    # Iterate through subsections and integrate them into the section file
-                    for subsection in section.subsections:
-                        self.report.logger.debug(
-                            f"Processing subsection '{subsection.id}': '{subsection.title} - {len(subsection.components)} component(s)'"
-                        )
-                        try:
-                            # Create subsection file
-                            _subsection_name = make_valid_identifier(subsection.title)
-                            subsection_file_path = (
-                                Path(output_dir)
-                                / section_name_var
-                                / f"{_subsection_name}.py"
-                            )
-
-                            # Generate content and imports for the subsection
-                            subsection_content, subsection_imports = (
-                                self._generate_subsection(
-                                    subsection, static_dir=static_dir
-                                )
-                            )
-
-                            # Flatten the subsection_imports into a single list
-                            flattened_subsection_imports = [
-                                imp for sublist in subsection_imports for imp in sublist
-                            ]
-
-                            # Remove duplicated imports
-                            unique_imports = list(set(flattened_subsection_imports))
-
-                            # Write everything to the subsection file
-                            with open(subsection_file_path, "w") as subsection_file:
-                                # Write imports at the top of the file
-                                subsection_file.write(
-                                    "\n".join(unique_imports) + "\n\n"
-                                )
-
-                                # Write the subsection content (descriptions, plots)
-                                subsection_file.write("\n".join(subsection_content))
-
-                            self.report.logger.info(
-                                f"Subsection file created: '{subsection_file_path}'"
-                            )
-                        except Exception as subsection_error:
-                            self.report.logger.error(
-                                f"Error processing subsection '{subsection.id}' '{subsection.title}' in section  '{section.id}' '{section.title}': {str(subsection_error)}"
-                            )
-                            raise
-                else:
-                    self.report.logger.warning(
-                        f"No subsections found in section: '{section.title}'. To show content in the report, add subsections to the section."
+                if section.components:
+                    # add an section overview page
+                    section_content, section_imports, _ = self._combine_components(
+                        section.components
                     )
+                    assert (
+                        section.file_path is not None
+                    ), "Missing relative file path to overview page in section"
+                    write_python_file(
+                        fpath=Path(output_dir) / section.file_path,
+                        imports=section_imports,
+                        contents=section_content,
+                    )
+
+                if not section.subsections:
+                    self.report.logger.warning(
+                        f"No subsections found in section: '{section.title}'. "
+                        "To show content in the report, add subsections to the section."
+                    )
+                    continue
+
+                # Iterate through subsections and integrate them into the section file
+                # subsection should have the subsection_file_path as file_path?
+                for subsection in section.subsections:
+                    self.report.logger.debug(
+                        f"Processing subsection '{subsection.id}': '{subsection.title} -"
+                        f" {len(subsection.components)} component(s)'"
+                    )
+                    try:
+                        # Create subsection file
+                        _subsection_name = make_valid_identifier(subsection.title)
+                        assert (
+                            subsection.file_path is not None
+                        ), "Missing relative file path to subsection"
+                        subsection_file_path = Path(output_dir) / subsection.file_path
+                        # Generate content and imports for the subsection
+                        subsection_content, subsection_imports = (
+                            self._generate_subsection(subsection)
+                        )
+
+                        write_python_file(
+                            fpath=subsection_file_path,
+                            imports=subsection_imports,
+                            contents=subsection_content,
+                        )
+                        self.report.logger.info(
+                            f"Subsection file created: '{subsection_file_path}'"
+                        )
+                    except Exception as subsection_error:
+                        self.report.logger.error(
+                            f"Error processing subsection '{subsection.id}' '{subsection.title}' "
+                            f"in section  '{section.id}' '{section.title}': {str(subsection_error)}"
+                        )
+                        raise
+
         except Exception as e:
             self.report.logger.error(f"Error generating sections: {str(e)}")
             raise
 
-    def _generate_subsection(
-        self, subsection, static_dir
-    ) -> tuple[List[str], List[str]]:
+    def _combine_components(self, components: list[dict]) -> tuple[list, list, bool]:
+        """combine a list of components."""
+
+        all_contents = []
+        all_imports = []
+        has_chatbot = False
+
+        for component in components:
+            # Write imports if not already done
+            component_imports = self._generate_component_imports(component)
+            all_imports.extend(component_imports)
+
+            # Handle different types of components
+            fct = self.components_fct_map.get(component.component_type, None)
+            if fct is None:
+                self.report.logger.warning(
+                    f"Unsupported component type '{component.component_type}' "
+                )
+            else:
+                if component.component_type == r.ComponentType.CHATBOT:
+                    has_chatbot = True
+                content = fct(component)
+                all_contents.extend(content)
+        # remove duplicates
+        all_imports = list(set(all_imports))
+        return all_contents, all_imports, has_chatbot
+
+    def _generate_subsection(self, subsection) -> tuple[List[str], List[str]]:
         """
         Generate code to render components (plots, dataframes, markdown) in the given subsection,
         creating imports and content for the subsection based on the component type.
@@ -405,8 +530,6 @@ report_nav.run()"""
         ----------
         subsection : Subsection
             The subsection containing the components.
-        static_dir : str
-            The folder where the static files will be saved.
 
         Returns
         -------
@@ -415,10 +538,6 @@ report_nav.run()"""
             - list of imports for the subsection (List[str])
         """
         subsection_content = []
-        subsection_imports = []
-
-        # Track if there's a Chatbot component in this subsection
-        has_chatbot = False
 
         # Add subsection header and description
         subsection_content.append(
@@ -430,36 +549,10 @@ report_nav.run()"""
             subsection_content.append(
                 self._format_text(text=subsection.description, type="paragraph")
             )
-
-        for component in subsection.components:
-            # Write imports if not already done
-            component_imports = self._generate_component_imports(component)
-            subsection_imports.append(component_imports)
-
-            # Handle different types of components
-            if component.component_type == r.ComponentType.PLOT:
-                subsection_content.extend(
-                    self._generate_plot_content(component, static_dir=static_dir)
-                )
-            elif component.component_type == r.ComponentType.DATAFRAME:
-                subsection_content.extend(self._generate_dataframe_content(component))
-            # If md files is called "description.md", do not include it in the report
-            elif (
-                component.component_type == r.ComponentType.MARKDOWN
-                and component.title.lower() != "description"
-            ):
-                subsection_content.extend(self._generate_markdown_content(component))
-            elif component.component_type == r.ComponentType.HTML:
-                subsection_content.extend(self._generate_html_content(component))
-            elif component.component_type == r.ComponentType.APICALL:
-                subsection_content.extend(self._generate_apicall_content(component))
-            elif component.component_type == r.ComponentType.CHATBOT:
-                has_chatbot = True
-                subsection_content.extend(self._generate_chatbot_content(component))
-            else:
-                self.report.logger.warning(
-                    f"Unsupported component type '{component.component_type}' in subsection: {subsection.title}"
-                )
+        all_components, subsection_imports, has_chatbot = self._combine_components(
+            subsection.components
+        )
+        subsection_content.extend(all_components)
 
         if not has_chatbot:
             # Define the footer variable and add it to the home page content
@@ -471,7 +564,7 @@ report_nav.run()"""
         )
         return subsection_content, subsection_imports
 
-    def _generate_plot_content(self, plot, static_dir: str) -> List[str]:
+    def _generate_plot_content(self, plot) -> List[str]:
         """
         Generate content for a plot component based on the plot type (static or interactive).
 
@@ -484,8 +577,6 @@ report_nav.run()"""
         -------
         list : List[str]
             The list of content lines for the plot.
-        static_dir : str
-            The folder where the static files will be saved.
         """
         plot_content = []
         # Add title
@@ -511,7 +602,7 @@ report_nav.run()"""
                 else:
                     # Otherwise, create and save a new pyvis network from the netowrkx graph
                     html_plot_file = (
-                        Path(static_dir) / f"{plot.title.replace(' ', '_')}.html"
+                        Path(self.static_dir) / f"{plot.title.replace(' ', '_')}.html"
                     )
                     pyvis_graph = plot.create_and_save_pyvis_network(
                         networkx_graph, html_plot_file
