@@ -296,7 +296,7 @@ class StreamlitReportView(r.WebAppReportView):
                 f"All the scripts to build the Streamlit app are available at {output_dir}"
             )
             self.report.logger.info(
-                f"To run the Streamlit app, use the following command:"
+                "To run the Streamlit app, use the following command:"
             )
             self.report.logger.info(
                 f"streamlit run {Path(output_dir) / self.REPORT_MANAG_SCRIPT}"
@@ -381,7 +381,7 @@ class StreamlitReportView(r.WebAppReportView):
 
             # Create the home page content
             home_content = []
-            home_content.append(f"import streamlit as st")
+            home_content.append("import streamlit as st")
             if subsection_imports:
                 home_content.extend(subsection_imports)
             if self.report.description:
@@ -409,9 +409,9 @@ class StreamlitReportView(r.WebAppReportView):
 
             # Add the home page to the report manager content
             report_manag_content.append(
-                f"homepage = st.Page('Home/Homepage.py', title='Homepage')"  # ! here Posix Path is hardcoded
+                "homepage = st.Page('Home/Homepage.py', title='Homepage')"  # ! here Posix Path is hardcoded
             )
-            report_manag_content.append(f"sections_pages['Home'] = [homepage]\n")
+            report_manag_content.append("sections_pages['Home'] = [homepage]\n")
             self.report.logger.info("Home page added to the report manager content.")
         except Exception as e:
             self.report.logger.error(f"Error generating the home section: {str(e)}")
@@ -602,11 +602,11 @@ class StreamlitReportView(r.WebAppReportView):
                     html_plot_file = (
                         Path(self.static_dir) / f"{plot.title.replace(' ', '_')}.html"
                     )
-                    pyvis_graph = plot.create_and_save_pyvis_network(
+                    _ = plot.create_and_save_pyvis_network(
                         networkx_graph, html_plot_file
                     )
 
-                # Add number of nodes and edges to the plor conetnt
+                # Add number of nodes and edges to the plot content
                 num_nodes = networkx_graph.number_of_nodes()
                 num_edges = networkx_graph.number_of_edges()
 
