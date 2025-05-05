@@ -578,7 +578,7 @@ include-after-body:
                     )
                     plot_content.append(self._generate_image_content(static_plot_path))
                 else:
-                    plot_content.append(f"""fig_plotly.show()\n```\n""")
+                    plot_content.append("""fig_plotly.show()\n```\n""")
             elif plot.plot_type == r.PlotType.ALTAIR:
                 plot_content.append(self._generate_plot_code(plot))
                 if self.is_report_static:
@@ -587,7 +587,7 @@ include-after-body:
                     )
                     plot_content.append(self._generate_image_content(static_plot_path))
                 else:
-                    plot_content.append(f"""fig_altair\n```\n""")
+                    plot_content.append("""fig_altair\n```\n""")
             elif plot.plot_type == r.PlotType.INTERACTIVE_NETWORK:
                 networkx_graph = plot.read_network()
                 if isinstance(networkx_graph, tuple):
@@ -595,7 +595,7 @@ include-after-body:
                     networkx_graph, html_plot_file = networkx_graph
                 elif isinstance(networkx_graph, nx.Graph) and not self.is_report_static:
                     # Get the pyvis object and create html
-                    pyvis_graph = plot.create_and_save_pyvis_network(
+                    _ = plot.create_and_save_pyvis_network(
                         networkx_graph, html_plot_file
                     )
 
@@ -805,7 +805,7 @@ with open('{(Path("..") / markdown.file_path).as_posix()}', 'r') as markdown_fil
                 )
 
             # Code to display md content
-            markdown_content.append(f"""display.Markdown(markdown_content)\n```\n""")
+            markdown_content.append("""display.Markdown(markdown_content)\n```\n""")
 
         except Exception as e:
             self.report.logger.error(
@@ -926,7 +926,7 @@ with open('{(Path("..") / markdown.file_path).as_posix()}', 'r') as markdown_fil
         else:
             # Append code to display the DataFrame interactively
             dataframe_content.append(
-                f"""show(df, classes="display nowrap compact", lengthMenu=[3, 5, 10])\n```\n"""
+                """show(df, classes="display nowrap compact", lengthMenu=[3, 5, 10])\n```\n"""
             )
 
         return dataframe_content
