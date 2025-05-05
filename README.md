@@ -250,9 +250,7 @@ will have to have a **Python 3.12** installation with the `jupyter` package inst
 a kernel for execution. This is also true if you install `quarto` globally on your machine.
 
 > [!TIP]
-> It is advisable to create a virtual environment to manage depenendencies and avoid conflicts with existing packages. 
-You can use the virtual environment manager of your choice, such as `poetry`, `conda`, or `pipenv`. 
-We recommend using [miniforge][conda-download] to install Python and the `conda` package manager.
+> It is advisable to create a virtual environment to manage depenendencies and avoid conflicts with existing packages. You can use the virtual environment manager of your choice, such as `poetry`, `conda`, or `pipenv`. We recommend using [miniforge][conda-download] to install Python and the `conda` package manager.
 
 We assume you have installed the `miniforge` distribution for your machine (MacOS with arm64/ apple silicon 
 or x86_64/ intel or Windows x86_64). Also, download the 
@@ -272,8 +270,7 @@ conda activate vuegen_gui
 ```
 
 > [!WARNING]
-> If you have errors with the `vuegen` package, you can install it separately using pip, 
-as explained in the installation section.
+> If you have errors with the `vuegen` package, you can install it separately using pip, as explained in the installation section.
 
 Now, you can list all conda environments to find the location of the `vuegen_gui` environment:
 
@@ -294,11 +291,9 @@ C:\Users\user\miniforge3\envs\vuegen_gui
 ```
 
 > [!NOTE]
-> On Windows a base installation of miniforge with `jupyter` might work because
-the app can see your entire Path, which is not the case on MacOS.
+> On Windows a base installation of miniforge with `jupyter` might work because the app can see your entire Path, which is not the case on MacOS.
 
-More information regarding the app and builds can be found in the
-[GUI README][gui-readme].
+More information regarding the app and builds can be found in the [GUI README][gui-readme].
 
 ## Case studies
 
