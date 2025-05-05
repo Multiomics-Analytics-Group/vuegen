@@ -464,7 +464,6 @@ class StreamlitReportView(r.WebAppReportView):
                     )
                     try:
                         # Create subsection file
-                        _subsection_name = make_valid_identifier(subsection.title)
                         assert (
                             subsection.file_path is not None
                         ), "Missing relative file path to subsection"

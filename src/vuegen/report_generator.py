@@ -18,6 +18,7 @@ def get_report(
     streamlit_autorun: bool = False,
     quarto_checks: bool = False,
     output_dir: Path = None,
+    max_depth: int = 2,  # section and subsection folders
 ) -> tuple[str, str]:
     """
     Generate and run a report based on the specified engine.
@@ -34,6 +35,16 @@ def get_report(
         Path to the directory from which to generate the configuration file.
     streamlit_autorun : bool, optional
         Whether to automatically run the Streamlit report after generation (default is False).
+    quarto_checks : bool, optional
+        Whether to perform checks for Quarto report generation for TeX and Chromium installation
+        (default is False).
+    output_dir : Path, optional
+        The directory where the report folder will be generated.
+        If not provided, the current directory will be used.
+    max_depth : int, optional
+        The maximum depth of the directory structure to consider when generating the report.
+        The default is 2, which means it will include sections and subsections. The parater
+        is only used when 'dir_path' is used.
 
     Raises
     ------
@@ -57,7 +68,7 @@ def get_report(
         logger, _ = get_logger("report", folder=_folder)
 
     # Create the config manager object
-    config_manager = ConfigManager(logger)
+    config_manager = ConfigManager(logger, max_depth=max_depth)
 
     if dir_path:
         # Generate configuration from the provided directory
