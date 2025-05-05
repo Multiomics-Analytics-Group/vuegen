@@ -232,7 +232,7 @@ class ConfigManager:
                 # Add component config to list
                 components.append(component_config)
             elif file.is_dir():
-                if level > self.max_depth:
+                if level >= self.max_depth:
                     self.logger.warning(
                         "Subsection nesting level exceeded: %s. Skipping.", file.name
                     )
