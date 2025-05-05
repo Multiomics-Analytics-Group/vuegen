@@ -5,6 +5,7 @@ import json
 import logging
 import os
 import sys
+import unicodedata
 from datetime import datetime
 
 try:
@@ -754,6 +755,23 @@ def get_logger(
     return logger, log_file
 
 
+def strip_unicode(text: str) -> str:
+    """
+    Strip Unicode characters from the given text.
+
+    Parameters
+    ----------
+    text : str
+        The input text from which to strip Unicode characters.
+
+    Returns
+    -------
+    str
+        The text with Unicode characters removed.
+    """
+    return "".join(c for c in text if ord(c) < 128)
+
+
 def get_completion_message(report_type: str, config_path: str) -> str:
     """
     Generate a formatted completion message after report generation.
@@ -773,7 +791,8 @@ def get_completion_message(report_type: str, config_path: str) -> str:
     border = "─" * 65  # Creates a separator line
 
     if report_type == "streamlit":
-        message = f"""🚀 Streamlit Report Generated!
+        message = """
+🚀 Streamlit Report Generated!
 
 📂 All scripts to build the Streamlit app are available at:
     streamlit_report/sections
@@ -790,7 +809,8 @@ def get_completion_message(report_type: str, config_path: str) -> str:
     {config_path}
 """
     else:
-        message = f"""🚀 {report_type.capitalize()} Report Generated!
+        message = f"""
+🚀 {report_type.capitalize()} Report Generated!
 
 📂 Your {report_type} report is available at:
     quarto_report
