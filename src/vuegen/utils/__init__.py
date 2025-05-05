@@ -246,6 +246,16 @@ def get_parser(prog_name: str, others: dict = {}) -> argparse.Namespace:
         default=False,
         help="Check if Quarto is installed and available for report generation.",
     )
+    parser.add_argument(
+        "-mdep",
+        "--max_depth",
+        type=int,
+        default=2,
+        help=(
+            "Maximum depth for the recursive search of files in the input directory. "
+            "Ignored if a config file is provided."
+        ),
+    )
     # Parse arguments
     return parser
 
