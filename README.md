@@ -104,7 +104,14 @@ If you prefer not to install VueGen on your system, a pre-configured Docker cont
 
 ### Nextflow and nf-core
 
-VueGen is also available as a [nf-core][nfcore] module, customised for compatibility with the [Nextflow][nextflow] environment. This module is designed to automate report generation from outputs produced by other modules, subworkflows, or pipelines. You can read the offical documentation for the nf-core module [here][nf-vuegen-nf-core]. Also, the source code and additional details are available in the [nf-VueGen repository][nf-vuegen].
+VueGen is also available as a [nf-core][nfcore] module, customised for compatibility with the [Nextflow][nextflow] environment. This module is designed to automate report generation from outputs produced by other modules, subworkflows, or pipelines. Asumming that you have `nextflow` and `nf-core` installed, you can use the following command to install the nf-core module:
+
+```bash
+nf-core modules install vuegen
+```
+
+> [!NOTE]
+> You can read the offical documentation for the nf-core module [here][nf-vuegen-nf-core]. Also, the source code and additional details are available in the [nf-VueGen repository][nf-vuegen].
 
 ## Execution
 
@@ -176,6 +183,42 @@ docker run --rm \
   -v "$(pwd)/output_docker:/home/appuser/streamlit_report" \
   quay.io/dtu_biosustain_dsp/vuegen:v0.3.2-docker --directory /home/appuser/Earth_microbiome_vuegen_demo_notebook --report_type streamlit
 ```
+
+### Running VueGen with Nextflow and nf-core
+
+To run VueGen as a nf-core module, you should create a Nextflow pipeline and include the VueGen module in your workflow. Here is a `main.nf` example:
+
+```groovy
+#!/usr/bin/env nextflow
+include { VUEGEN } from './modules/nf-core/vuegen/'
+
+workflow {
+    // Create a channel for the report type
+    report_type_ch = Channel.value(params.report_type)
+
+    // Handle configuration file and directory inputs
+    if (params.config) {
+        file_ch = Channel.fromPath(params.config)
+        input_type_ch = Channel.value('config')
+        output_ch = VUEGEN(input_type_ch, file_ch, report_type_ch)
+
+    } else if (params.directory) {
+        dir_ch = Channel.fromPath(params.directory, type: 'dir', followLinks: true)
+        input_type_ch = Channel.value('directory')
+        output_ch = VUEGEN(input_type_ch, dir_ch, report_type_ch)
+
+    }
+}
+```
+
+You can run the pipeline with the following command:
+
+```bash
+nextflow run main.nf --directory docs/example_data/Basic_example_vuegen_demo_notebook --report_type html
+```
+
+> [!NOTE]
+> You can read the offical documentation for the nf-core module [here][nf-vuegen-nf-core]. Also, the source code and additional details are available in the [nf-VueGen repository][nf-vuegen].
 
 ## GUI
 
