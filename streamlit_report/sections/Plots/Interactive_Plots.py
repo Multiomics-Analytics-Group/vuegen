@@ -1,7 +1,7 @@
-import json
 import streamlit as st
-import altair as alt
+import json
 import requests
+import altair as alt
 
 st.markdown('''<h3 style='text-align: center; color: #023558;'>Interactive Plots</h3>''', unsafe_allow_html=True)
 st.markdown('''<p style='text-align: center; color: #000000;'>Optional description for section.
@@ -69,6 +69,13 @@ plot_json = {key: plot_json[key] for key in plot_json if key in ['data', 'layout
 # Remove 'frame' section in 'data'
 plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'} for entry in plot_json.get('data', [])]
 st.plotly_chart(plot_json, use_container_width=True)
+
+st.markdown('''<h4 style='text-align: center; color: #2b8cbe;'>Description</h4>''', unsafe_allow_html=True)
+
+with open('example_data/Basic_example_vuegen_demo_notebook/1_Plots/1_Interactive_plots/description.md', 'r') as markdown_file:
+    markdown_content = markdown_file.read()
+
+st.markdown(markdown_content, unsafe_allow_html=True)
 
 footer = '''<style type="text/css">
 .footer {

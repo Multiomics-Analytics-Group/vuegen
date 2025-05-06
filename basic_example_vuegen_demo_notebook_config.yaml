@@ -6,7 +6,16 @@ report:
   logo: https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/vuegen_logo.svg
   title: Basic Example Vuegen Demo Notebook
 sections:
-- description: This section contains example plots
+- components:
+  - caption: ''
+    component_type: markdown
+    description: ''
+    file_path: /home/runner/work/vuegen/vuegen/docs/example_data/Basic_example_vuegen_demo_notebook/description.md
+    title: Description
+  description: Components added to homepage.
+  title: ''
+- components: []
+  description: This section contains example plots
   subsections:
   - components:
     - caption: ''
@@ -85,7 +94,8 @@ sections:
     description: ''
     title: Static Plots
   title: Plots
-- description: ''
+- components: []
+  description: ''
   subsections:
   - components:
     - caption: ''
@@ -117,7 +127,8 @@ sections:
     description: This subsection contains example dataframes.
     title: All Formats
   title: Dataframes
-- description: ''
+- components: []
+  description: ''
   subsections:
   - components:
     - caption: ''
@@ -145,7 +156,8 @@ sections:
     description: ''
     title: Static Networks
   title: Networks
-- description: ''
+- components: []
+  description: ''
   subsections:
   - components:
     - caption: ''
@@ -167,7 +179,8 @@ sections:
     description: ''
     title: All Html
   title: Html
-- description: ''
+- components: []
+  description: ''
   subsections:
   - components:
     - caption: ''

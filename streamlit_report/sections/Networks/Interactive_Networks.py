@@ -19,6 +19,13 @@ net_html_height = 1200 if control_layout else 630
 # Load HTML into HTML component for display on Streamlit
 st.components.v1.html(html_data, height=net_html_height)
 
+st.markdown('''<h4 style='text-align: center; color: #2b8cbe;'>Description</h4>''', unsafe_allow_html=True)
+
+with open('example_data/Basic_example_vuegen_demo_notebook/3_Networks/1_Interactive_networks/description.md', 'r') as markdown_file:
+    markdown_content = markdown_file.read()
+
+st.markdown(markdown_content, unsafe_allow_html=True)
+
 footer = '''<style type="text/css">
 .footer {
     position: relative;

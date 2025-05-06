@@ -14,7 +14,16 @@ report:
   logo: https://raw.githubusercontent.com/ElDeveloper/cogs220/master/emp-logo.svg
   title: Earth Microbiome Vuegen Demo Notebook
 sections:
-- description: This section contains the exploratory data analysis of the Earth Microbiome
+- components:
+  - caption: ''
+    component_type: markdown
+    description: ''
+    file_path: /home/runner/work/vuegen/vuegen/docs/example_data/Earth_microbiome_vuegen_demo_notebook/description.md
+    title: Description
+  description: Components added to homepage.
+  title: ''
+- components: []
+  description: This section contains the exploratory data analysis of the Earth Microbiome
     Project (EMP) dataset.
   subsections:
   - components:
@@ -54,7 +63,8 @@ sections:
     description: ''
     title: Sample Exploration
   title: Exploratory Data Analysis
-- description: ''
+- components: []
+  description: ''
   subsections:
   - components:
     - caption: ''
@@ -133,7 +143,8 @@ sections:
       dataset.
     title: Shanon entropy analysis
   title: Metagenomics
-- description: ''
+- components: []
+  description: ''
   subsections:
   - components:
     - caption: ''
