@@ -17,16 +17,7 @@ sections_readme/execution
 sections_readme/gui
 sections_readme/case_studies
 sections_readme/web_app_deploy
-sections_readme/contributing
 sections_readme/citation
-sections_readme/credits
-sections_readme/contact
-```
-
-```{toctree}
-:maxdepth: 2
-
-vuegen_demo
 ```
 
 ```{toctree}
@@ -50,9 +41,18 @@ vuegen_Chatbot_configfile
 reference/vuegen
 ```
 
+```{toctree} 
+:maxdepth: 1
+:caption: Project Support
+
+sections_readme/contributing
+sections_readme/credits
+sections_readme/contact
+```
+
 ```{toctree}
 :maxdepth: 1
-:caption: MISC:
+:caption: Extra Materials
 :hidden:
 
 README.md
