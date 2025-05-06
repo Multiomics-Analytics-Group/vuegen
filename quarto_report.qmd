@@ -37,6 +37,7 @@ include-after-body:
 ```{python}
 #| label: 'Imports'
 from itables import show, init_notebook_mode
+import IPython.display as display
 import altair as alt
 import dataframe_image as dfi
 import json
