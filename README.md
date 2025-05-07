@@ -263,14 +263,20 @@ You can create a new conda environment with Python 3.12 and the `jupyter` and `v
 conda create -n vuegen_gui -c conda-forge -c bioconda python=3.12 jupyter vuegen
 ```
 
+> [!WARNING]
+> If you have errors with the `vuegen` package, you can install it separately using pip, as explained in the installation section.
+>
+> ```
+> conda create -n vuegen_gui -c conda-forge -c bioconda python=3.12 jupyter
+> conda activate vuegen_gui
+> pip install vuegen
+> ```
+
 Then, activate the environment:
 
 ```bash
 conda activate vuegen_gui
 ```
-
-> [!WARNING]
-> If you have errors with the `vuegen` package, you can install it separately using pip, as explained in the installation section.
 
 Now, you can list all conda environments to find the location of the `vuegen_gui` environment:
 
