@@ -1,6 +1,7 @@
 import os
 import subprocess
 import sys
+import textwrap
 from pathlib import Path
 from typing import List
 
@@ -641,13 +642,40 @@ st.components.v1.html(html_data, height=net_html_height)\n"""
                 self.report.logger.error(
                     f"Unsupported file extension: {file_extension}. Supported extensions are: {', '.join(fmt.value for fmt in r.DataFrameFormat)}."
                 )
+                # ? Does this skip the execution step?
+
+            if file_extension in [
+                r.DataFrameFormat.XLS.value_with_dot,
+                r.DataFrameFormat.XLSX.value_with_dot,
+            ]:
+                dataframe_content.append("selected_sheet = 0")
+                sheet_names = table_utils.get_sheet_names(dataframe.file_path)
+                if len(sheet_names) > 1:
+                    # If there are multiple sheets, ask the user to select one
+
+                    dataframe_content.append(
+                        textwrap.dedent(
+                            f"""\
+                        sheet_names = table_utils.get_sheet_names("{dataframe.file_path}")
+                        selected_sheet = st.selectbox("Select a sheet to display", options=sheet_names)
+                        """
+                        )
+                    )
 
             # Load the DataFrame using the correct function
             read_function = read_function_mapping[file_extension]
-            dataframe_content.append(
-                f"""df = pd.{read_function.__name__}('{dataframe.file_path}')\n"""
-            )
-
+            if file_extension in [
+                r.DataFrameFormat.XLS.value_with_dot,
+                r.DataFrameFormat.XLSX.value_with_dot,
+            ]:
+                dataframe_content.append(
+                    f"""df = pd.{read_function.__name__}('{dataframe.file_path}', sheet_name=selected_sheet)\n"""
+                )
+            else:
+                dataframe_content.append(
+                    f"""df = pd.{read_function.__name__}('{dataframe.file_path}')\n"""
+                )
+            # ! iterate over sheets in DataFrame
             # Displays a DataFrame using AgGrid with configurable options.
             dataframe_content.append(
                 """
@@ -1065,6 +1093,7 @@ def generate_query(prompt):
             "dataframe": [
                 "import pandas as pd",
                 "from st_aggrid import AgGrid, GridOptionsBuilder",
+                "from vuegen import table_utils",
             ],
             "markdown": ["import requests"],
             "chatbot": ["import time", "import json", "import requests"],
