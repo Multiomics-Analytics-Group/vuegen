@@ -260,7 +260,7 @@ from the releases page according to your operating system.
 You can create a new conda environment with Python 3.12 and the `jupyter` and `vuegen` package:
 
 ```bash
-conda create -n vuegen_gui -c conda-forge python=3.12 jupyter vuegen
+conda create -n vuegen_gui -c conda-forge -c bioconda python=3.12 jupyter vuegen
 ```
 
 Then, activate the environment:
