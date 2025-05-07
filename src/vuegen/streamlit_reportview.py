@@ -642,7 +642,8 @@ st.components.v1.html(html_data, height=net_html_height)\n"""
                 self.report.logger.error(
                     f"Unsupported file extension: {file_extension}. Supported extensions are: {', '.join(fmt.value for fmt in r.DataFrameFormat)}."
                 )
-                # ? Does this skip the execution step?
+                # return []  # Skip execution if unsupported file extension
+                # Should it not return here? Can we even call the method with an unsupported file extension?
 
             if file_extension in [
                 r.DataFrameFormat.XLS.value_with_dot,
