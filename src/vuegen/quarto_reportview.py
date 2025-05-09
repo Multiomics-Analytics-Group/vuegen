@@ -8,7 +8,7 @@ import networkx as nx
 import pandas as pd
 
 from . import report as r
-from .utils import create_folder, is_url, sort_imports, get_relative_file_path
+from .utils import create_folder, get_relative_file_path, is_url, sort_imports
 
 
 class QuartoReportView(r.ReportView):
@@ -846,7 +846,7 @@ with open('{md_rel_path.as_posix()}', 'r') as markdown_file:
                 Path(self.static_dir) / f"{dataframe.title.replace(' ', '_')}.png"
             )
             dataframe_content.append(
-                f"df.dfi.export('{Path(df_image).relative_to("quarto_report").as_posix()}', max_rows=10, max_cols=5, table_conversion='matplotlib')\n```\n"
+                f"df.dfi.export('{Path(df_image).relative_to('quarto_report').as_posix()}', max_rows=10, max_cols=5, table_conversion='matplotlib')\n```\n"
             )
             # Use helper method to add centered image content
             dataframe_content.append(self._generate_image_content(df_image))

@@ -9,7 +9,7 @@ import pandas as pd
 from streamlit.web import cli as stcli
 
 from . import report as r
-from .utils import create_folder, generate_footer, is_url, get_relative_file_path
+from .utils import create_folder, generate_footer, get_relative_file_path, is_url
 from .utils.variables import make_valid_identifier
 
 
