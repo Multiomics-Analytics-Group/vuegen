@@ -585,8 +585,14 @@ class StreamlitReportView(r.WebAppReportView):
         # Add content for the different plot types
         try:
             if plot.plot_type == r.PlotType.STATIC:
+                try:
+                    plot_rel_path = Path(plot.file_path).relative_to(Path.cwd())
+                except ValueError:
+                    plot_rel_path = (
+                        Path(plot.file_path).resolve().relative_to(Path.cwd().resolve())
+                    )
                 plot_content.append(
-                    f"\nst.image('{Path(plot.file_path).relative_to(Path.cwd()).as_posix()}', caption='{plot.caption}', use_column_width=True)\n"
+                    f"\nst.image('{plot_rel_path.as_posix()}', caption='{plot.caption}', use_column_width=True)\n"
                 )
             elif plot.plot_type == r.PlotType.PLOTLY:
                 plot_content.append(self._generate_plot_code(plot))
