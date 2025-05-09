@@ -586,7 +586,7 @@ class StreamlitReportView(r.WebAppReportView):
         try:
             if plot.plot_type == r.PlotType.STATIC:
                 plot_content.append(
-                    f"\nst.image('{plot.file_path}', caption='{plot.caption}', use_column_width=True)\n"
+                    f"\nst.image('{Path(plot.file_path).relative_to(Path.cwd()).as_posix()}', caption='{plot.caption}', use_column_width=True)\n"
                 )
             elif plot.plot_type == r.PlotType.PLOTLY:
                 plot_content.append(self._generate_plot_code(plot))
@@ -601,7 +601,7 @@ class StreamlitReportView(r.WebAppReportView):
                     # Otherwise, create and save a new pyvis network from the netowrkx graph
                     html_plot_file = (
                         Path(self.static_dir) / f"{plot.title.replace(' ', '_')}.html"
-                    )
+                    ).resolve()
                     _ = plot.create_and_save_pyvis_network(
                         networkx_graph, html_plot_file
                     )
@@ -616,13 +616,13 @@ class StreamlitReportView(r.WebAppReportView):
                         f"""
 response = requests.get('{html_plot_file}')
 response.raise_for_status()
-html_data = response.text\n"""
+html_content = response.text\n"""
                     )
                 else:
                     plot_content.append(
                         f"""
-with open('{html_plot_file}', 'r') as f:
-    html_data = f.read()\n"""
+with open('{Path(html_plot_file).relative_to(Path.cwd())}', 'r') as html_file:
+    html_content = html_file.read()\n"""
                     )
 
                 # Append the code for additional information (nodes and edges count)
@@ -670,7 +670,7 @@ response.raise_for_status()
 plot_json = json.loads(response.text)\n"""
         else:  # If it's a local file
             plot_code = f"""
-with open('{Path(plot.file_path).as_posix()}', 'r') as plot_file:
+with open('{Path(plot.file_path).relative_to(Path.cwd()).as_posix()}', 'r') as plot_file:
     plot_json = json.load(plot_file)\n"""
 
         # Add specific code for each visualization tool
@@ -693,7 +693,7 @@ st.vega_lite_chart(json.loads(altair_plot.to_json()), use_container_width=True)\
 control_layout = st.checkbox('Add panel to control layout', value=True)
 net_html_height = 1200 if control_layout else 630
 # Load HTML into HTML component for display on Streamlit
-st.components.v1.html(html_data, height=net_html_height)\n"""
+st.components.v1.html(html_content, height=net_html_height)\n"""
         return plot_code
 
     def _generate_dataframe_content(self, dataframe) -> List[str]:
@@ -740,7 +740,7 @@ st.components.v1.html(html_data, height=net_html_height)\n"""
             # Load the DataFrame using the correct function
             read_function = read_function_mapping[file_extension]
             dataframe_content.append(
-                f"""df = pd.{read_function.__name__}('{dataframe.file_path}')\n"""
+                f"""df = pd.{read_function.__name__}('{Path(dataframe.file_path).relative_to(Path.cwd()).as_posix()}')\n"""
             )
 
             # Displays a DataFrame using AgGrid with configurable options.
@@ -819,7 +819,7 @@ markdown_content = response.text\n"""
             else:  # If it's a local file
                 markdown_content.append(
                     f"""
-with open('{(Path("..") / markdown.file_path).as_posix()}', 'r') as markdown_file:
+with open('{Path(markdown.file_path).relative_to(Path.cwd()).as_posix()}', 'r') as markdown_file:
     markdown_content = markdown_file.read()\n"""
                 )
             # Code to display md content
@@ -879,7 +879,7 @@ html_content = response.text\n"""
                 # If it's a local file
                 html_content.append(
                     f"""
-with open('{(Path("..") / html.file_path).as_posix()}', 'r', encoding='utf-8') as html_file:
+with open('{Path(html.file_path).relative_to(Path.cwd()).as_posix()}', 'r', encoding='utf-8') as html_file:
     html_content = html_file.read()\n"""
                 )
 
