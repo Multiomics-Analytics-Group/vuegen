@@ -53,9 +53,9 @@ jobs:
       #     path: docs/_build/
 
       # --- Streamlit example deployment ---
-      - name: Fix Absolute Paths in Streamlit Scripts
-        run: |
-          find docs/streamlit_report/sections -type f -name "*.py" -exec sed -i 's|/home/runner/work/vuegen/vuegen/docs/||g' {} +
+      #- name: Fix Absolute Paths in Streamlit Scripts
+      #  run: |
+      #    find docs/streamlit_report/sections -type f -name "*.py" -exec sed -i 's|/home/runner/work/vuegen/vuegen/docs/||g' {} +
       - name: Publish Streamlit report to streamlit-example branch
         if: startsWith(github.ref, 'refs/tags')
         uses: peaceiris/actions-gh-pages@v4
