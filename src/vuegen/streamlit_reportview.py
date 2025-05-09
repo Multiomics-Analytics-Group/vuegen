@@ -675,8 +675,14 @@ response = requests.get('{plot.file_path}')
 response.raise_for_status()
 plot_json = json.loads(response.text)\n"""
         else:  # If it's a local file
+            try:
+                plot_rel_path = Path(plot.file_path).relative_to(Path.cwd())
+            except ValueError:
+                plot_rel_path = (
+                    Path(plot.file_path).resolve().relative_to(Path.cwd().resolve())
+                )
             plot_code = f"""
-with open('{Path(plot.file_path).relative_to(Path.cwd()).as_posix()}', 'r') as plot_file:
+with open('{plot_rel_path.as_posix()}', 'r') as plot_file:
     plot_json = json.load(plot_file)\n"""
 
         # Add specific code for each visualization tool
@@ -745,8 +751,16 @@ st.components.v1.html(html_content, height=net_html_height)\n"""
 
             # Load the DataFrame using the correct function
             read_function = read_function_mapping[file_extension]
+            try:
+                df_rel_path = Path(dataframe.file_path).relative_to(Path.cwd())
+            except ValueError:
+                df_rel_path = (
+                    Path(dataframe.file_path)
+                    .resolve()
+                    .relative_to(Path.cwd().resolve())
+                )
             dataframe_content.append(
-                f"""df = pd.{read_function.__name__}('{Path(dataframe.file_path).relative_to(Path.cwd()).as_posix()}')\n"""
+                f"""df = pd.{read_function.__name__}('{df_rel_path.as_posix()}')\n"""
             )
 
             # Displays a DataFrame using AgGrid with configurable options.
@@ -823,9 +837,17 @@ response.raise_for_status()
 markdown_content = response.text\n"""
                 )
             else:  # If it's a local file
+                try:
+                    md_rel_path = Path(markdown.file_path).relative_to(Path.cwd())
+                except ValueError:
+                    md_rel_path = (
+                        Path(markdown.file_path)
+                        .resolve()
+                        .relative_to(Path.cwd().resolve())
+                    )
                 markdown_content.append(
                     f"""
-with open('{Path(markdown.file_path).relative_to(Path.cwd()).as_posix()}', 'r') as markdown_file:
+with open('{md_rel_path.as_posix()}', 'r') as markdown_file:
     markdown_content = markdown_file.read()\n"""
                 )
             # Code to display md content
@@ -881,11 +903,16 @@ response = requests.get('{html.file_path}')
 response.raise_for_status()
 html_content = response.text\n"""
                 )
-            else:
-                # If it's a local file
+            else:  # If it's a local file
+                try:
+                    html_rel_path = Path(html.file_path).relative_to(Path.cwd())
+                except ValueError:
+                    html_rel_path = (
+                        Path(html.file_path).resolve().relative_to(Path.cwd().resolve())
+                    )
                 html_content.append(
                     f"""
-with open('{Path(html.file_path).relative_to(Path.cwd()).as_posix()}', 'r', encoding='utf-8') as html_file:
+with open('{html_rel_path.as_posix()}', 'r', encoding='utf-8') as html_file:
     html_content = html_file.read()\n"""
                 )
 
