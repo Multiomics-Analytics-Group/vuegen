@@ -8,7 +8,7 @@ import networkx as nx
 import pandas as pd
 
 from . import report as r
-from .utils import create_folder, is_url, sort_imports
+from .utils import create_folder, is_url, sort_imports, get_relative_file_path
 
 
 class QuartoReportView(r.ReportView):
@@ -574,7 +574,7 @@ include-after-body:
                 plot_content.append(self._generate_plot_code(plot))
                 if self.is_report_static:
                     plot_content.append(
-                        f"""fig_plotly.write_image("{static_plot_path.resolve().as_posix()}")\n```\n"""
+                        f"""fig_plotly.write_image("{static_plot_path.relative_to("quarto_report").as_posix()}")\n```\n"""
                     )
                     plot_content.append(self._generate_image_content(static_plot_path))
                 else:
@@ -583,7 +583,7 @@ include-after-body:
                 plot_content.append(self._generate_plot_code(plot))
                 if self.is_report_static:
                     plot_content.append(
-                        f"""fig_altair.save("{static_plot_path.resolve().as_posix()}")\n```\n"""
+                        f"""fig_altair.save("{static_plot_path.relative_to("quarto_report").as_posix()}")\n```\n"""
                     )
                     plot_content.append(self._generate_image_content(static_plot_path))
                 else:
@@ -655,8 +655,9 @@ response = requests.get('{plot.file_path}')
 response.raise_for_status()
 plot_json = response.text\n"""
         else:  # If it's a local file
+            plot_rel_path = get_relative_file_path(plot.file_path, base_path="..")
             plot_code += f"""
-with open('{(Path("..") / plot.file_path).as_posix()}', 'r') as plot_file:
+with open('{plot_rel_path.as_posix()}', 'r') as plot_file:
     plot_json = json.load(plot_file)\n"""
         # Add specific code for each visualization tool
         if plot.plot_type == r.PlotType.PLOTLY:
@@ -734,16 +735,17 @@ fig_altair = alt.Chart.from_json(plot_json_str).properties(width=900, height=400
                 )
 
             # Build the file path (URL or local file)
-            file_path = (
-                dataframe.file_path
-                if is_url(dataframe.file_path)
-                else Path("..") / dataframe.file_path
-            )
+            if is_url(dataframe.file_path):
+                df_file_path = dataframe.file_path
+            else:
+                df_file_path = get_relative_file_path(
+                    dataframe.file_path, base_path=".."
+                )
 
             # Load the DataFrame using the correct function
             read_function = read_function_mapping[file_extension]
             dataframe_content.append(
-                f"""df = pd.{read_function.__name__}('{file_path.as_posix()}')\n"""
+                f"""df = pd.{read_function.__name__}('{df_file_path.as_posix()}')\n"""
             )
 
             # Display the dataframe
@@ -798,9 +800,10 @@ response.raise_for_status()
 markdown_content = response.text\n"""
                 )
             else:  # If it's a local file
+                md_rel_path = get_relative_file_path(markdown.file_path, base_path="..")
                 markdown_content.append(
                     f"""
-with open('{(Path("..") / markdown.file_path).as_posix()}', 'r') as markdown_file:
+with open('{md_rel_path.as_posix()}', 'r') as markdown_file:
     markdown_content = markdown_file.read()\n"""
                 )
 
@@ -821,6 +824,39 @@ with open('{(Path("..") / markdown.file_path).as_posix()}', 'r') as markdown_fil
             f"Successfully generated content for Markdown: '{markdown.title}'"
         )
         return markdown_content
+
+    def _show_dataframe(self, dataframe) -> List[str]:
+        """
+        Appends either a static image or an interactive representation of a DataFrame to the content list.
+
+        Parameters
+        ----------
+        dataframe : DataFrame
+            The DataFrame object containing the data to display.
+
+        Returns
+        -------
+        list : List[str]
+            The list of content lines for the DataFrame.
+        """
+        dataframe_content = []
+        if self.is_report_static:
+            # Generate path for the DataFrame image
+            df_image = (
+                Path(self.static_dir) / f"{dataframe.title.replace(' ', '_')}.png"
+            )
+            dataframe_content.append(
+                f"df.dfi.export('{Path(df_image).relative_to("quarto_report").as_posix()}', max_rows=10, max_cols=5, table_conversion='matplotlib')\n```\n"
+            )
+            # Use helper method to add centered image content
+            dataframe_content.append(self._generate_image_content(df_image))
+        else:
+            # Append code to display the DataFrame interactively
+            dataframe_content.append(
+                """show(df, classes="display nowrap compact", lengthMenu=[3, 5, 10])\n```\n"""
+            )
+
+        return dataframe_content
 
     def _generate_html_content(self, html) -> List[str]:
         """
@@ -843,14 +879,13 @@ with open('{(Path("..") / markdown.file_path).as_posix()}', 'r') as markdown_fil
 
         try:
             # Embed the HTML in an iframe
-            iframe_src = (
-                html.file_path
-                if is_url(html.file_path)
-                else Path("..") / html.file_path
-            )
+            if is_url(html.file_path):
+                html_file_path = html.file_path
+            else:
+                html_file_path = get_relative_file_path(html.file_path, base_path="..")
             iframe_code = f"""
 <div style="text-align: center;">
-<iframe src="{iframe_src}" alt="{html.title}" width="800px" height="630px"></iframe>
+<iframe src="{html_file_path.as_posix()}" alt="{html.title}" width="800px" height="630px"></iframe>
 </div>\n"""
             html_content.append(iframe_code)
 
@@ -889,47 +924,10 @@ with open('{(Path("..") / markdown.file_path).as_posix()}', 'r') as markdown_fil
         """
         if is_url(image_path):
             src = image_path
-            return (
-                f"""![]({src}){{fig-alt={alt_text} width={width} height={height}}}\n"""
-            )
         else:
-            src = Path(image_path).resolve()
-            return (
-                f"""![](/{src}){{fig-alt={alt_text} width={width} height={height}}}\n"""
-            )
+            src = get_relative_file_path(image_path, base_path="..")
 
-    def _show_dataframe(self, dataframe) -> List[str]:
-        """
-        Appends either a static image or an interactive representation of a DataFrame to the content list.
-
-        Parameters
-        ----------
-        dataframe : DataFrame
-            The DataFrame object containing the data to display.
-
-        Returns
-        -------
-        list : List[str]
-            The list of content lines for the DataFrame.
-        """
-        dataframe_content = []
-        if self.is_report_static:
-            # Generate path for the DataFrame image
-            df_image = (
-                Path(self.static_dir) / f"{dataframe.title.replace(' ', '_')}.png"
-            )
-            dataframe_content.append(
-                f"df.dfi.export('{Path(df_image).resolve().as_posix()}', max_rows=10, max_cols=5, table_conversion='matplotlib')\n```\n"
-            )
-            # Use helper method to add centered image content
-            dataframe_content.append(self._generate_image_content(df_image))
-        else:
-            # Append code to display the DataFrame interactively
-            dataframe_content.append(
-                """show(df, classes="display nowrap compact", lengthMenu=[3, 5, 10])\n```\n"""
-            )
-
-        return dataframe_content
+        return f"""![]({src.as_posix()}){{fig-alt={alt_text} width={width} height={height}}}\n"""
 
     def _generate_component_imports(self, component: r.Component) -> List[str]:
         """

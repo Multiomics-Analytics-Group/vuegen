@@ -9,7 +9,7 @@ import pandas as pd
 from streamlit.web import cli as stcli
 
 from . import report as r
-from .utils import create_folder, generate_footer, is_url
+from .utils import create_folder, generate_footer, is_url, get_relative_file_path
 from .utils.variables import make_valid_identifier
 
 
@@ -585,12 +585,7 @@ class StreamlitReportView(r.WebAppReportView):
         # Add content for the different plot types
         try:
             if plot.plot_type == r.PlotType.STATIC:
-                try:
-                    plot_rel_path = Path(plot.file_path).relative_to(Path.cwd())
-                except ValueError:
-                    plot_rel_path = (
-                        Path(plot.file_path).resolve().relative_to(Path.cwd().resolve())
-                    )
+                plot_rel_path = get_relative_file_path(plot.file_path)
                 plot_content.append(
                     f"\nst.image('{plot_rel_path.as_posix()}', caption='{plot.caption}', use_column_width=True)\n"
                 )
@@ -675,12 +670,7 @@ response = requests.get('{plot.file_path}')
 response.raise_for_status()
 plot_json = json.loads(response.text)\n"""
         else:  # If it's a local file
-            try:
-                plot_rel_path = Path(plot.file_path).relative_to(Path.cwd())
-            except ValueError:
-                plot_rel_path = (
-                    Path(plot.file_path).resolve().relative_to(Path.cwd().resolve())
-                )
+            plot_rel_path = get_relative_file_path(plot.file_path)
             plot_code = f"""
 with open('{plot_rel_path.as_posix()}', 'r') as plot_file:
     plot_json = json.load(plot_file)\n"""
@@ -751,16 +741,14 @@ st.components.v1.html(html_content, height=net_html_height)\n"""
 
             # Load the DataFrame using the correct function
             read_function = read_function_mapping[file_extension]
-            try:
-                df_rel_path = Path(dataframe.file_path).relative_to(Path.cwd())
-            except ValueError:
-                df_rel_path = (
-                    Path(dataframe.file_path)
-                    .resolve()
-                    .relative_to(Path.cwd().resolve())
-                )
+
+            # Build the file path (URL or local file)
+            if is_url(dataframe.file_path):
+                df_file_path = dataframe.file_path
+            else:
+                df_file_path = get_relative_file_path(dataframe.file_path)
             dataframe_content.append(
-                f"""df = pd.{read_function.__name__}('{df_rel_path.as_posix()}')\n"""
+                f"""df = pd.{read_function.__name__}('{df_file_path.as_posix()}')\n"""
             )
 
             # Displays a DataFrame using AgGrid with configurable options.
@@ -837,14 +825,7 @@ response.raise_for_status()
 markdown_content = response.text\n"""
                 )
             else:  # If it's a local file
-                try:
-                    md_rel_path = Path(markdown.file_path).relative_to(Path.cwd())
-                except ValueError:
-                    md_rel_path = (
-                        Path(markdown.file_path)
-                        .resolve()
-                        .relative_to(Path.cwd().resolve())
-                    )
+                md_rel_path = get_relative_file_path(markdown.file_path)
                 markdown_content.append(
                     f"""
 with open('{md_rel_path.as_posix()}', 'r') as markdown_file:
@@ -904,12 +885,7 @@ response.raise_for_status()
 html_content = response.text\n"""
                 )
             else:  # If it's a local file
-                try:
-                    html_rel_path = Path(html.file_path).relative_to(Path.cwd())
-                except ValueError:
-                    html_rel_path = (
-                        Path(html.file_path).resolve().relative_to(Path.cwd().resolve())
-                    )
+                html_rel_path = get_relative_file_path(html.file_path)
                 html_content.append(
                     f"""
 with open('{html_rel_path.as_posix()}', 'r', encoding='utf-8') as html_file:

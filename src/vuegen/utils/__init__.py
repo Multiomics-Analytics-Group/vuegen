@@ -174,6 +174,38 @@ def create_folder(directory_path: str, is_nested: bool = False) -> bool:
         raise OSError(f"Error creating directory '{directory_path}': {e}")
 
 
+def get_relative_file_path(file_path: str, base_path: str = "") -> Path:
+    """
+    Returns the relative file path of a given file with respect to
+    the current working directory (CWD).
+
+    This method will resolve the absolute path of the given file and
+    return a relative path with respect to the directory where the script is
+    being executed. Optionally, a base path can be added (e.g., "../").
+
+    Parameters
+    ----------
+    file_path : str
+        The full file path to be converted to a relative path.
+    base_path : str, optional
+        The base path to be prepended to the relative path, default is an empty string.
+
+    Returns
+    -------
+    Path
+        The file path relative to the CWD.
+    """
+    try:
+        rel_path = Path(file_path).relative_to(Path.cwd())
+    except ValueError:
+        rel_path = Path(file_path).resolve().relative_to(Path.cwd().resolve())
+
+    if base_path:
+        rel_path = Path(base_path) / rel_path
+
+    return rel_path
+
+
 def get_parser(prog_name: str, others: dict = {}) -> argparse.Namespace:
     """
     Initiates argparse.ArgumentParser() and adds common arguments.
