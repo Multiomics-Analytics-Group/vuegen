@@ -365,6 +365,7 @@ include-after-body:
             r.ReportType.PDF: """
   pdf:
     toc: false
+    fig-align: center
     margin:
       - bottom=40mm
     include-in-header: 
@@ -568,7 +569,7 @@ include-after-body:
         try:
             if plot.plot_type == r.PlotType.STATIC:
                 plot_content.append(
-                    self._generate_image_content(plot.file_path, width=950)
+                    self._generate_image_content(plot.file_path, width="95%")
                 )
             elif plot.plot_type == r.PlotType.PLOTLY:
                 plot_content.append(self._generate_plot_code(plot))
@@ -901,7 +902,7 @@ with open('{md_rel_path.as_posix()}', 'r') as markdown_file:
         return html_content
 
     def _generate_image_content(
-        self, image_path: str, alt_text: str = "", width: int = 650, height: int = 400
+        self, image_path: str, alt_text: str = "", width: str = "95%"
     ) -> str:
         """
         Adds an image to the content list in an HTML format with a specified width and height.
@@ -927,7 +928,7 @@ with open('{md_rel_path.as_posix()}', 'r') as markdown_file:
         else:
             src = get_relative_file_path(image_path, base_path="..").as_posix()
 
-        return f"""![]({src}){{fig-alt={alt_text} width={width} height={height}}}\n"""
+        return f"""![]({src}){{fig-alt={alt_text} width={width}}}\n"""
 
     def _generate_component_imports(self, component: r.Component) -> List[str]:
         """
