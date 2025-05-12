@@ -569,7 +569,7 @@ include-after-body:
         try:
             if plot.plot_type == r.PlotType.STATIC:
                 plot_content.append(
-                    self._generate_image_content(plot.file_path, width="95%")
+                    self._generate_image_content(plot.file_path, width="90%")
                 )
             elif plot.plot_type == r.PlotType.PLOTLY:
                 plot_content.append(self._generate_plot_code(plot))
@@ -671,13 +671,13 @@ plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'} for entry 
 plot_json_str = json.dumps(plot_json)\n
 # Create the plotly plot
 fig_plotly = pio.from_json(plot_json_str)
-fig_plotly.update_layout(width=950, height=500)\n"""
+fig_plotly.update_layout(autosize=False, width=950, height=400, margin=dict(b=50, t=50, l=50, r=50))\n"""
         elif plot.plot_type == r.PlotType.ALTAIR:
             plot_code += """
 # Convert JSON to string
 plot_json_str = json.dumps(plot_json)\n
 # Create the plotly plot
-fig_altair = alt.Chart.from_json(plot_json_str).properties(width=900, height=400)\n"""
+fig_altair = alt.Chart.from_json(plot_json_str).properties(width=900, height=370)\n"""
         elif plot.plot_type == r.PlotType.INTERACTIVE_NETWORK:
             # Generate the HTML embedding for interactive networks
             if is_url(plot.file_path) and plot.file_path.endswith(".html"):
@@ -886,7 +886,7 @@ with open('{md_rel_path.as_posix()}', 'r') as markdown_file:
                 html_file_path = get_relative_file_path(html.file_path, base_path="..")
             iframe_code = f"""
 <div style="text-align: center;">
-<iframe src="{html_file_path.as_posix()}" alt="{html.title}" width="800px" height="630px"></iframe>
+<iframe src="{html_file_path.as_posix()}" alt="{html.title}" width="950px" height="530px"></iframe>
 </div>\n"""
             html_content.append(iframe_code)
 
@@ -902,7 +902,7 @@ with open('{md_rel_path.as_posix()}', 'r') as markdown_file:
         return html_content
 
     def _generate_image_content(
-        self, image_path: str, alt_text: str = "", width: str = "95%"
+        self, image_path: str, alt_text: str = "", width: str = "90%"
     ) -> str:
         """
         Adds an image to the content list in an HTML format with a specified width and height.

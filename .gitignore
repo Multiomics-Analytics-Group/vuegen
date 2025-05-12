@@ -128,5 +128,5 @@ docs/images/UML_diagrams/
 docs/images/Graphical_abstract/
 docs/images/Nfcore_module_figure
 docs/presentations/
-./basic_example_vuegen_demo_notebook_config.yaml
-./earth_microbiome_vuegen_demo_notebook_config.yaml
+basic_example_vuegen_demo_notebook_config.yaml
+earth_microbiome_vuegen_demo_notebook_config.yaml
