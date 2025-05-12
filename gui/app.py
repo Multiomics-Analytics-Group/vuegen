@@ -135,7 +135,7 @@ def create_run_vuegen(
             kwargs["max_depth"] = int(max_depth.get())
         print("kwargs:")
         pprint(kwargs)
-
+        global config_app
         if python_dir_entry.get():
             if python_dir_entry.get() != config_app["python_dir_entry"]:
                 config_app["python_dir_entry"] = python_dir_entry.get()

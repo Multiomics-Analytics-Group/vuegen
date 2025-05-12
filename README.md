@@ -7,7 +7,7 @@
 | Information           | Links                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | :-------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Package**           | [![PyPI Latest Release](https://img.shields.io/pypi/v/vuegen.svg)][vuegen-pypi] [![Conda Latest Release](https://img.shields.io/conda/v/bioconda/vuegen.svg)][vuegen-conda] [![Supported versions](https://img.shields.io/pypi/pyversions/vuegen.svg)][vuegen-pypi] [![Docker Repository on Quay](https://quay.io/repository/dtu_biosustain_dsp/vuegen/status "Docker Repository on Quay")][vuegen-docker-quay] [![License](https://img.shields.io/github/license/Multiomics-Analytics-Group/vuegen)][vuegen-license] |
-| **Documentation**     | [![View - Documentation](https://img.shields.io/badge/view-Documentation-blue?style=flat)][vuegen-docs] [![made-with-sphinx-doc](https://img.shields.io/badge/Made%20with-Sphinx-1f425f.svg)](https://www.sphinx-doc.org/) ![Docs](https://readthedocs.org/projects/vuegen/badge/?style=flat)                                                                                                                                                                                                                           |
+| **Documentation**     | [![View - Documentation](https://img.shields.io/badge/view-Documentation-blue?style=flat)][vuegen-docs] [![made-with-sphinx-doc](https://img.shields.io/badge/Made%20with-Sphinx-1f425f.svg)](https://www.sphinx-doc.org/) ![Docs](https://readthedocs.org/projects/vuegen/badge/?style=flat)                                                                                                                                                                                                                         |
 | **Build**             | [![CI](https://github.com/Multiomics-Analytics-Group/vuegen/actions/workflows/cdci.yml/badge.svg)][ci-gh-action] [![Docs](https://github.com/Multiomics-Analytics-Group/vuegen/actions/workflows/docs.yml/badge.svg)][ci-docs]                                                                                                                                                                                                                                                                                        |
 | **Examples**          | [![HTML5](https://img.shields.io/badge/html5-%23E34F26.svg?style=for-the-badge&logo=html5&logoColor=white)][emp-html-demo] [![Streamlit](https://img.shields.io/badge/Streamlit-%23FE4B4B.svg?style=for-the-badge&logo=streamlit&logoColor=white)][emp-st-demo]                                                                                                                                                                                                                                                       |
 | **Discuss on GitHub** | [![GitHub issues](https://img.shields.io/github/issues/Multiomics-Analytics-Group/vuegen)][issues] [![GitHub pull requests](https://img.shields.io/github/issues-pr/Multiomics-Analytics-Group/vuegen)][pulls]                                                                                                                                                                                                                                                                                                        |
@@ -129,7 +129,7 @@ vuegen --directory docs/example_data/Earth_microbiome_vuegen_demo_notebook --rep
 
 ### Folder structure
 
-Your input directory should follow a **nested folder structure**, where first-level folders are treated as **sections** and second-level folders as **subsections**, containing the components (plots, tables, networks, Markdown text, and HTML files). If the component files are in the first-level folders, an `overview` subsection will be created automatically. 
+Your input directory should follow a **nested folder structure**, where first-level folders are treated as **sections** and second-level folders as **subsections**, containing the components (plots, tables, networks, Markdown text, and HTML files). If the component files are in the first-level folders, an `overview` subsection will be created automatically.
 
 Here is an example layout:
 
@@ -245,32 +245,38 @@ The **bundle GUI** with the VueGen package is available under the
 You will need to unzip the file and run `vuegen_gui` in the unpacked main folder.
 Most dependencies are included into the bundle using [PyInstaller][pyinstaller].
 
-Streamlit works out of the box as a purely Python based package. For the rest of report types you 
+Streamlit works out of the box as a purely Python based package. For the rest of report types you
 will have to have a **Python 3.12** installation with the `jupyter` package installed, as `quarto` needs to start
 a kernel for execution. This is also true if you install `quarto` globally on your machine.
 
 > [!TIP]
 > It is advisable to create a virtual environment to manage depenendencies and avoid conflicts with existing packages. You can use the virtual environment manager of your choice, such as `poetry`, `conda`, or `pipenv`. We recommend using [miniforge][conda-download] to install Python and the `conda` package manager.
 
-We assume you have installed the `miniforge` distribution for your machine (MacOS with arm64/ apple silicon 
-or x86_64/ intel or Windows x86_64). Also, download the 
+We assume you have installed the `miniforge` distribution for your machine (MacOS with arm64/ apple silicon
+or x86_64/ intel or Windows x86_64). Also, download the
 [latest `vuegen_gui` bundle](https://github.com/Multiomics-Analytics-Group/vuegen/releases/latest)
 from the releases page according to your operating system.
 
 You can create a new conda environment with Python 3.12 and the `jupyter` and `vuegen` package:
 
 ```bash
-conda create -n vuegen_gui -c conda-forge python=3.12 jupyter vuegen
+conda create -n vuegen_gui -c conda-forge -c bioconda python=3.12 jupyter vuegen
 ```
+
+> [!WARNING]
+> If you have errors with the `vuegen` package, you can install it separately using pip, as explained in the installation section.
+>
+> ```
+> conda create -n vuegen_gui -c conda-forge -c bioconda python=3.12 jupyter
+> conda activate vuegen_gui
+> pip install vuegen
+> ```
 
 Then, activate the environment:
 
 ```bash
 conda activate vuegen_gui
 ```
-
-> [!WARNING]
-> If you have errors with the `vuegen` package, you can install it separately using pip, as explained in the installation section.
 
 Now, you can list all conda environments to find the location of the `vuegen_gui` environment:
 
@@ -320,10 +326,9 @@ This advanced case study demonstrates the application of VueGen in a real-world 
 
 ### 3. ChatBot Component
 
-This case study highlights VueGen’s capability to embed a chatbot component into a report subsection, 
-enabling interactive conversations inside the report. This component is streamlit-specific and is not 
+This case study highlights VueGen’s capability to embed a chatbot component into a report subsection,
+enabling interactive conversations inside the report. This component is streamlit-specific and is not
 available for other report types.
-
 
 Two API modes are supported:
 
@@ -353,7 +358,7 @@ to support more flexible and general-purpose response formats in future releases
 
 Once a Streamlit report is generated, it can be deployed as a web application to make it accessible online. There are multiple ways to achieve this:
 
-### Streamlit Community Cloud 
+### Streamlit Community Cloud
 
 Deploy your report easily using [Streamlit Cloud][st-cloud], as demonstrated in the [EMP VueGen Demo][emp-st-demo]. The process involves moving the necessary scripts, data, and a requirements.txt file into a GitHub repository. Then, the app can be deployed via the Streamlit Cloud interface. The deployment example is available in the `streamlit-report-example` branch.
 
