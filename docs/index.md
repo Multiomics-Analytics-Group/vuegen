@@ -35,7 +35,7 @@ vuegen_Chatbot_configfile
 
 ```{toctree}
 :maxdepth: 2
-:caption: Modules
+:caption: API Reference
 :hidden:
 
 reference/vuegen
