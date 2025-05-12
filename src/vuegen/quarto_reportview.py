@@ -925,9 +925,9 @@ with open('{md_rel_path.as_posix()}', 'r') as markdown_file:
         if is_url(image_path):
             src = image_path
         else:
-            src = get_relative_file_path(image_path, base_path="..")
+            src = get_relative_file_path(image_path, base_path="..").as_posix()
 
-        return f"""![]({src.as_posix()}){{fig-alt={alt_text} width={width} height={height}}}\n"""
+        return f"""![]({src}){{fig-alt={alt_text} width={width} height={height}}}\n"""
 
     def _generate_component_imports(self, component: r.Component) -> List[str]:
         """
