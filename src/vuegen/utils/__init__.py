@@ -195,10 +195,7 @@ def get_relative_file_path(file_path: str, base_path: str = "") -> Path:
     Path
         The file path relative to the CWD.
     """
-    try:
-        rel_path = Path(file_path).relative_to(Path.cwd())
-    except ValueError:
-        rel_path = Path(file_path).resolve().relative_to(Path.cwd().resolve())
+    rel_path = Path(file_path).resolve().relative_to(Path.cwd().resolve())
 
     if base_path:
         rel_path = Path(base_path) / rel_path
