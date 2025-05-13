@@ -60,6 +60,14 @@ def get_report(
         output_dir = Path(".")
     else:
         output_dir = Path(output_dir)
+        if output_dir.is_file():
+            raise ValueError(
+                "The output_dir parameter should be a directory, not a file."
+            )
+        if not output_dir.exists():
+            logger.info("Creating output directory: %s", output_dir)
+            output_dir.mkdir(parents=True, exist_ok=True)
+
     # Initialize logger only if it's not provided
     if logger is None:
         _folder = "logs"
