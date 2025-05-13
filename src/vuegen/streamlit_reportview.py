@@ -9,7 +9,7 @@ import pandas as pd
 from streamlit.web import cli as stcli
 
 from . import report as r
-from .utils import create_folder, generate_footer, is_url
+from .utils import create_folder, generate_footer, get_relative_file_path, is_url
 from .utils.variables import make_valid_identifier
 
 
@@ -585,8 +585,9 @@ class StreamlitReportView(r.WebAppReportView):
         # Add content for the different plot types
         try:
             if plot.plot_type == r.PlotType.STATIC:
+                plot_rel_path = get_relative_file_path(plot.file_path)
                 plot_content.append(
-                    f"\nst.image('{plot.file_path}', caption='{plot.caption}', use_column_width=True)\n"
+                    f"\nst.image('{plot_rel_path.as_posix()}', caption='{plot.caption}', use_column_width=True)\n"
                 )
             elif plot.plot_type == r.PlotType.PLOTLY:
                 plot_content.append(self._generate_plot_code(plot))
@@ -601,7 +602,7 @@ class StreamlitReportView(r.WebAppReportView):
                     # Otherwise, create and save a new pyvis network from the netowrkx graph
                     html_plot_file = (
                         Path(self.static_dir) / f"{plot.title.replace(' ', '_')}.html"
-                    )
+                    ).resolve()
                     _ = plot.create_and_save_pyvis_network(
                         networkx_graph, html_plot_file
                     )
@@ -616,13 +617,13 @@ class StreamlitReportView(r.WebAppReportView):
                         f"""
 response = requests.get('{html_plot_file}')
 response.raise_for_status()
-html_data = response.text\n"""
+html_content = response.text\n"""
                     )
                 else:
                     plot_content.append(
                         f"""
-with open('{html_plot_file}', 'r') as f:
-    html_data = f.read()\n"""
+with open('{Path(html_plot_file).relative_to(Path.cwd())}', 'r') as html_file:
+    html_content = html_file.read()\n"""
                     )
 
                 # Append the code for additional information (nodes and edges count)
@@ -669,8 +670,9 @@ response = requests.get('{plot.file_path}')
 response.raise_for_status()
 plot_json = json.loads(response.text)\n"""
         else:  # If it's a local file
+            plot_rel_path = get_relative_file_path(plot.file_path)
             plot_code = f"""
-with open('{Path(plot.file_path).as_posix()}', 'r') as plot_file:
+with open('{plot_rel_path.as_posix()}', 'r') as plot_file:
     plot_json = json.load(plot_file)\n"""
 
         # Add specific code for each visualization tool
@@ -693,7 +695,7 @@ st.vega_lite_chart(json.loads(altair_plot.to_json()), use_container_width=True)\
 control_layout = st.checkbox('Add panel to control layout', value=True)
 net_html_height = 1200 if control_layout else 630
 # Load HTML into HTML component for display on Streamlit
-st.components.v1.html(html_data, height=net_html_height)\n"""
+st.components.v1.html(html_content, height=net_html_height)\n"""
         return plot_code
 
     def _generate_dataframe_content(self, dataframe) -> List[str]:
@@ -739,8 +741,14 @@ st.components.v1.html(html_data, height=net_html_height)\n"""
 
             # Load the DataFrame using the correct function
             read_function = read_function_mapping[file_extension]
+
+            # Build the file path (URL or local file)
+            if is_url(dataframe.file_path):
+                df_file_path = dataframe.file_path
+            else:
+                df_file_path = get_relative_file_path(dataframe.file_path)
             dataframe_content.append(
-                f"""df = pd.{read_function.__name__}('{dataframe.file_path}')\n"""
+                f"""df = pd.{read_function.__name__}('{df_file_path.as_posix()}')\n"""
             )
 
             # Displays a DataFrame using AgGrid with configurable options.
@@ -817,9 +825,10 @@ response.raise_for_status()
 markdown_content = response.text\n"""
                 )
             else:  # If it's a local file
+                md_rel_path = get_relative_file_path(markdown.file_path)
                 markdown_content.append(
                     f"""
-with open('{(Path("..") / markdown.file_path).as_posix()}', 'r') as markdown_file:
+with open('{md_rel_path.as_posix()}', 'r') as markdown_file:
     markdown_content = markdown_file.read()\n"""
                 )
             # Code to display md content
@@ -875,11 +884,11 @@ response = requests.get('{html.file_path}')
 response.raise_for_status()
 html_content = response.text\n"""
                 )
-            else:
-                # If it's a local file
+            else:  # If it's a local file
+                html_rel_path = get_relative_file_path(html.file_path)
                 html_content.append(
                     f"""
-with open('{(Path("..") / html.file_path).as_posix()}', 'r', encoding='utf-8') as html_file:
+with open('{html_rel_path.as_posix()}', 'r', encoding='utf-8') as html_file:
     html_content = html_file.read()\n"""
                 )
 
