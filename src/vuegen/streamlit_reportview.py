@@ -756,13 +756,13 @@ st.components.v1.html(html_content, height=net_html_height)\n"""
                 """
 # Displays a DataFrame using AgGrid with configurable options.
 grid_builder = GridOptionsBuilder.from_dataframe(df)
-grid_builder.configure_default_column(editable=True, groupable=True)
+grid_builder.configure_default_column(editable=True, groupable=True, filter=True)
 grid_builder.configure_side_bar(filters_panel=True, columns_panel=True)
 grid_builder.configure_selection(selection_mode="multiple")
 grid_builder.configure_pagination(enabled=True, paginationAutoPageSize=False, paginationPageSize=20)
 grid_options = grid_builder.build()
 
-AgGrid(df, gridOptions=grid_options)
+AgGrid(df, gridOptions=grid_options, enable_enterprise_modules=True)
 
 # Button to download the df
 df_csv = df.to_csv(sep=',', header=True, index=False).encode('utf-8')
