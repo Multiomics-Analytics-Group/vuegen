@@ -18,6 +18,7 @@ def get_report(
     streamlit_autorun: bool = False,
     quarto_checks: bool = False,
     output_dir: Path = None,
+    max_depth: int = 2,  # section and subsection folders
 ) -> tuple[str, str]:
     """
     Generate and run a report based on the specified engine.
@@ -34,6 +35,16 @@ def get_report(
         Path to the directory from which to generate the configuration file.
     streamlit_autorun : bool, optional
         Whether to automatically run the Streamlit report after generation (default is False).
+    quarto_checks : bool, optional
+        Whether to perform checks for Quarto report generation for TeX and Chromium installation
+        (default is False).
+    output_dir : Path, optional
+        The directory where the report folder will be generated.
+        If not provided, the current directory will be used.
+    max_depth : int, optional
+        The maximum depth of the directory structure to consider when generating the report.
+        The default is 2, which means it will include sections and subsections. The parater
+        is only used when 'dir_path' is used.
 
     Raises
     ------
@@ -49,6 +60,14 @@ def get_report(
         output_dir = Path(".")
     else:
         output_dir = Path(output_dir)
+        if output_dir.is_file():
+            raise ValueError(
+                "The output_dir parameter should be a directory, not a file."
+            )
+        if not output_dir.exists():
+            logger.info("Creating output directory: %s", output_dir)
+            output_dir.mkdir(parents=True, exist_ok=True)
+
     # Initialize logger only if it's not provided
     if logger is None:
         _folder = "logs"
@@ -57,7 +76,7 @@ def get_report(
         logger, _ = get_logger("report", folder=_folder)
 
     # Create the config manager object
-    config_manager = ConfigManager(logger)
+    config_manager = ConfigManager(logger, max_depth=max_depth)
 
     if dir_path:
         # Generate configuration from the provided directory
@@ -81,9 +100,12 @@ def get_report(
         sections_dir = report_dir / "sections"
         static_files_dir = report_dir / "static"
         st_report = StreamlitReportView(
-            report=report, report_type=report_type, streamlit_autorun=streamlit_autorun
+            report=report,
+            report_type=report_type,
+            streamlit_autorun=streamlit_autorun,
+            static_dir=static_files_dir,
         )
-        st_report.generate_report(output_dir=sections_dir, static_dir=static_files_dir)
+        st_report.generate_report(output_dir=sections_dir)
         st_report.run_report(output_dir=sections_dir)
     else:
         # Check if Quarto is installed
@@ -99,11 +121,12 @@ def get_report(
         report_dir = output_dir / "quarto_report"
         static_files_dir = report_dir / "static"
         quarto_report = QuartoReportView(
-            report=report, report_type=report_type, quarto_checks=quarto_checks
+            report=report,
+            report_type=report_type,
+            quarto_checks=quarto_checks,
+            static_dir=static_files_dir,
         )
-        quarto_report.generate_report(
-            output_dir=report_dir, static_dir=static_files_dir
-        )
+        quarto_report.generate_report(output_dir=report_dir)
         quarto_report.run_report(output_dir=report_dir)
     # ? Could be also the path to the report file for quarto based reports
     return report_dir, config_path

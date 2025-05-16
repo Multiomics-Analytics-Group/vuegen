@@ -1,4 +1,3 @@
-import json
 import logging
 import os
 from abc import ABC, abstractmethod
@@ -678,6 +677,9 @@ class Subsection:
         A list of components within the subsection.
     description : str, optional
         A description of the subsection (default is None).
+    file_path : str, optional
+        Relative file path to the section file in sections folder.
+        Used for building reports (default is None).
     """
 
     _id_counter: ClassVar[int] = 0
@@ -685,6 +687,7 @@ class Subsection:
     title: str
     components: List["Component"] = field(default_factory=list)
     description: Optional[str] = None
+    file_path: Optional[str] = None
 
     def __post_init__(self):
         self.id = self._generate_id()
@@ -695,6 +698,7 @@ class Subsection:
         return cls._id_counter
 
 
+# ? Section is a subclass of Subsection (adding subsections). Destinction might not be necessary
 @dataclass
 class Section:
     """
@@ -710,15 +714,22 @@ class Section:
         Title of the section.
     subsections : List[Subsection]
         A list of subsections within the section.
+    components : List[Component]
+        A list of components within the subsection.
     description : str, optional
         A description of the section (default is None).
+    file_path : str, optional
+        Relative file path to the section file in sections folder.
+        Used for building reports (default is None).
     """
 
     _id_counter: ClassVar[int] = 0
     id: int = field(init=False)
     title: str
     subsections: List["Subsection"] = field(default_factory=list)
+    components: List["Component"] = field(default_factory=list)
     description: Optional[str] = None
+    file_path: Optional[str] = None
 
     def __post_init__(self):
         self.id = self._generate_id()

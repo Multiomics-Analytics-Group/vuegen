@@ -110,7 +110,13 @@ print(f"{_PATH = }")
 
 
 def create_run_vuegen(
-    is_dir, config_path, report_type, run_streamlit, output_dir_entry, python_dir_entry
+    is_dir,
+    config_path,
+    report_type,
+    run_streamlit,
+    output_dir_entry,
+    python_dir_entry,
+    max_depth: int,
 ):
     def inner():
         kwargs = {}
@@ -125,9 +131,11 @@ def create_run_vuegen(
         print(f"{run_streamlit.get() = }")
         kwargs["streamlit_autorun"] = run_streamlit.get()
         kwargs["output_dir"] = output_dir_entry.get()
+        if max_depth.get():
+            kwargs["max_depth"] = int(max_depth.get())
         print("kwargs:")
         pprint(kwargs)
-
+        global config_app
         if python_dir_entry.get():
             if python_dir_entry.get() != config_app["python_dir_entry"]:
                 config_app["python_dir_entry"] = python_dir_entry.get()
@@ -146,6 +154,16 @@ def create_run_vuegen(
                 messagebox.showwarning(
                     "warning", "Running locally. Ignoring set Python Path"
                 )
+        if kwargs["max_depth"] < 2:
+            messagebox.showwarning(
+                "warning", "Maximum depth must be at least 2. Setting to 2."
+            )
+            kwargs["max_depth"] = 2
+        elif kwargs["max_depth"] > 9:
+            messagebox.showwarning(
+                "warning", "Maximum depth must be at most 9. Setting to 9."
+            )
+            kwargs["max_depth"] = 9
         try:
             os.chdir(kwargs["output_dir"])  # Change the working directory
             # Define logger suffix based on report type and name
@@ -170,7 +188,7 @@ def create_run_vuegen(
                 f"\n\nConfiguration file at:\n{gen_config_path}",
             )
             global hash_config_app  # ! fix this
-            get_completion_message(report_type.get())
+            get_completion_message(report_type.get(), config_path=gen_config_path)
             if hash(yaml.dump(config_app)) != hash_config_app:
                 with open(config_file, "w", encoding="utf-8") as f:
                     yaml.dump(config_app, f)
@@ -316,6 +334,40 @@ row_count += 1
 # output directory selection
 ctk_label_outdir = customtkinter.CTkLabel(app, text="Select output directory:")
 ctk_label_outdir.grid(row=row_count, column=0, columnspan=1, padx=10, pady=5)
+CTK_ENTRY_MAX_DEPTH_DEFAULT = 2
+# Maximum Depth input
+ctk_label_max_depth = customtkinter.CTkLabel(
+    app,
+    text=f"Maximum Depth: (default {CTK_ENTRY_MAX_DEPTH_DEFAULT})",
+)
+ctk_label_max_depth.grid(
+    row=row_count, column=1, columnspan=1, padx=10, pady=5, sticky="e"
+)
+
+
+max_depth = tk.IntVar(value=CTK_ENTRY_MAX_DEPTH_DEFAULT)
+
+
+def slider_event(value):
+    max_depth.set(value)
+    ctk_label_max_depth.configure(text=f"Maximum Depth: {int(value)}")
+
+
+ctk_entry_max_depth = customtkinter.CTkSlider(
+    app,
+    from_=2,
+    to=9,
+    variable=max_depth,
+    width=150,
+    command=slider_event,
+    number_of_steps=7,
+)
+ctk_entry_max_depth.set(
+    CTK_ENTRY_MAX_DEPTH_DEFAULT
+)  # Set the initial value of the slider
+ctk_entry_max_depth.grid(
+    row=row_count, column=2, columnspan=1, padx=10, pady=5, sticky="w"
+)
 row_count += 1
 ##########################################################################################
 output_dir_entry = tk.StringVar(value=str(output_dir))
@@ -380,6 +432,7 @@ run_vuegen = create_run_vuegen(
     run_streamlit=run_streamlit,
     output_dir_entry=output_dir_entry,
     python_dir_entry=python_dir_entry,
+    max_depth=max_depth,
 )
 run_button = customtkinter.CTkButton(
     app,
