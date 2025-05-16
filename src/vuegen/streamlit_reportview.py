@@ -5,10 +5,10 @@ import textwrap
 from pathlib import Path
 from typing import List
 
-import pandas as pd
 from streamlit.web import cli as stcli
 
 from . import report as r
+from . import table_utils
 from .utils import create_folder, generate_footer, get_relative_file_path, is_url
 from .utils.variables import make_valid_identifier
 
@@ -721,13 +721,7 @@ st.components.v1.html(html_content, height=net_html_height)\n"""
         )
 
         # Mapping of file extensions to read functions
-        read_function_mapping = {
-            r.DataFrameFormat.CSV.value_with_dot: pd.read_csv,
-            r.DataFrameFormat.PARQUET.value_with_dot: pd.read_parquet,
-            r.DataFrameFormat.TXT.value_with_dot: pd.read_table,
-            r.DataFrameFormat.XLS.value_with_dot: pd.read_excel,
-            r.DataFrameFormat.XLSX.value_with_dot: pd.read_excel,
-        }
+        read_function_mapping = table_utils.read_function_mapping
 
         try:
             # Check if the file extension matches any DataFrameFormat value
@@ -738,19 +732,47 @@ st.components.v1.html(html_content, height=net_html_height)\n"""
                 self.report.logger.error(
                     f"Unsupported file extension: {file_extension}. Supported extensions are: {', '.join(fmt.value for fmt in r.DataFrameFormat)}."
                 )
-
-            # Load the DataFrame using the correct function
-            read_function = read_function_mapping[file_extension]
+                # return []  # Skip execution if unsupported file extension
+                # Should it not return here? Can we even call the method with an unsupported file extension?
 
             # Build the file path (URL or local file)
             if is_url(dataframe.file_path):
                 df_file_path = dataframe.file_path
             else:
                 df_file_path = get_relative_file_path(dataframe.file_path)
-            dataframe_content.append(
-                f"""df = pd.{read_function.__name__}('{df_file_path.as_posix()}')\n"""
-            )
 
+            if file_extension in [
+                r.DataFrameFormat.XLS.value_with_dot,
+                r.DataFrameFormat.XLSX.value_with_dot,
+            ]:
+                dataframe_content.append("selected_sheet = 0")
+                sheet_names = table_utils.get_sheet_names(dataframe.file_path)
+                if len(sheet_names) > 1:
+                    # If there are multiple sheets, ask the user to select one
+
+                    dataframe_content.append(
+                        textwrap.dedent(
+                            f"""\
+                        sheet_names = table_utils.get_sheet_names("{dataframe.file_path}")
+                        selected_sheet = st.selectbox("Select a sheet to display", options=sheet_names)
+                        """
+                        )
+                    )
+
+            # Load the DataFrame using the correct function
+            read_function = read_function_mapping[file_extension]
+            if file_extension in [
+                r.DataFrameFormat.XLS.value_with_dot,
+                r.DataFrameFormat.XLSX.value_with_dot,
+            ]:
+                dataframe_content.append(
+                    f"""df = pd.{read_function.__name__}('{dataframe.file_path}', sheet_name=selected_sheet)\n"""
+                )
+            else:
+                dataframe_content.append(
+                    f"""df = pd.{read_function.__name__}('{df_file_path.as_posix()}')\n"""
+                )
+            # ! Alternative to select box: iterate over sheets in DataFrame
             # Displays a DataFrame using AgGrid with configurable options.
             dataframe_content.append(
                 """
@@ -1169,6 +1191,7 @@ def generate_query(prompt):
             "dataframe": [
                 "import pandas as pd",
                 "from st_aggrid import AgGrid, GridOptionsBuilder",
+                "from vuegen import table_utils",
             ],
             "markdown": ["import requests"],
             "chatbot": ["import time", "import json", "import requests"],

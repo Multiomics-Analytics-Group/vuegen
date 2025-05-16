@@ -74,7 +74,7 @@ class ConfigManager:
             file_path.resolve().as_posix()
         )  # ! needs to be posix for all OS support
         component_config["description"] = ""
-        component_config["caption"] = ""
+        component_config["caption"] = ""  # ? It is not populated here
 
         # Infer component config
         if file_ext in [
