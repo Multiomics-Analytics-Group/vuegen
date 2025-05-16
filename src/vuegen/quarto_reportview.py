@@ -745,7 +745,7 @@ fig_altair = alt.Chart.from_json(plot_json_str).properties(width=900, height=370
                 df_file_path = dataframe.file_path
             else:
                 df_file_path = get_relative_file_path(
-                    dataframe.file_path, base_path=".."
+                    dataframe.file_path,
                 )
             sheet_names = None
             # If the file is an Excel file, get the sheet names
@@ -763,6 +763,13 @@ fig_altair = alt.Chart.from_json(plot_json_str).properties(width=900, height=370
                 else:
                     sheet_names = None
 
+            # Build the file path (URL or local file)
+            if is_url(dataframe.file_path):
+                df_file_path = dataframe.file_path
+            else:
+                df_file_path = get_relative_file_path(
+                    dataframe.file_path, base_path=".."
+                )
             # Load the DataFrame using the correct function
             read_function = read_function_mapping[file_extension]
             dataframe_content.append(
