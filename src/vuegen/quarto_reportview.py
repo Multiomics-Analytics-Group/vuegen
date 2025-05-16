@@ -864,7 +864,6 @@ with open('{md_rel_path.as_posix()}', 'r') as markdown_file:
 
             # Code to display md content
             markdown_content.append("""display.Markdown(markdown_content)\n```\n""")
-            markdown_content.append("""display.Markdown(markdown_content)\n```\n""")
 
         except Exception as e:
             self.report.logger.error(
@@ -899,7 +898,7 @@ with open('{md_rel_path.as_posix()}', 'r') as markdown_file:
         if self.is_report_static:
             # Generate path for the DataFrame image
             fpath_df_image = (
-                Path(static_dir) / f"{dataframe.title.replace(' ', '_')}.png"
+                Path(self.static_dir) / f"{dataframe.title.replace(' ', '_')}.png"
             )
             dataframe_content.append(
                 f"df.dfi.export('{Path(fpath_df_image).relative_to('quarto_report').as_posix()}',"
@@ -910,7 +909,7 @@ with open('{md_rel_path.as_posix()}', 'r') as markdown_file:
         else:
             # Append code to display the DataFrame interactively
             dataframe_content.append(
-                f"""show(df, classes="display nowrap compact", lengthMenu=[3, 5, 10])\n```\n"""
+                """show(df, classes="display nowrap compact", lengthMenu=[3, 5, 10])\n```\n"""
             )
 
         return dataframe_content

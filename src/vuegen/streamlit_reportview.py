@@ -5,7 +5,6 @@ import textwrap
 from pathlib import Path
 from typing import List
 
-import pandas as pd
 from streamlit.web import cli as stcli
 
 from . import report as r
