@@ -39,7 +39,6 @@ include-after-body:
 from itables import show, init_notebook_mode
 import IPython.display as display
 import altair as alt
-import dataframe_image as dfi
 import json
 import pandas as pd
 import plotly.io as pio
@@ -56,7 +55,7 @@ The Earth Microbiome Project (EMP) is a systematic attempt to characterize globa
   
   You can find more information about the Earth Microbiome Project at https://earthmicrobiome.org/ and in the [original article](https://www.nature.com/articles/nature24621).
 
-![](https://raw.githubusercontent.com/ElDeveloper/cogs220/master/emp-logo.svg){fig-alt= width=650 height=400}
+![](https://raw.githubusercontent.com/ElDeveloper/cogs220/master/emp-logo.svg){fig-alt= width=90%}
 
 # Exploratory Data Analysis
 This section contains the exploratory data analysis of the Earth Microbiome Project (EMP) dataset.
@@ -67,20 +66,20 @@ This section contains the exploratory data analysis of the Earth Microbiome Proj
 #| label: 'Metadata Random Subset 10'
 #| fig-cap: ""
 
-df = pd.read_csv('/home/runner/work/vuegen/vuegen/docs/example_data/Earth_microbiome_vuegen_demo_notebook/1_Exploratory_data_analysis/1_sample_exploration/1_metadata_random_subset.csv')
+df = pd.read_csv('../example_data/Earth_microbiome_vuegen_demo_notebook/1_Exploratory_data_analysis/1_sample_exploration/1_metadata_random_subset.csv')
 
 show(df, classes="display nowrap compact", lengthMenu=[3, 5, 10])
 ```
 
 ### Animal Samples Map
-![](//home/runner/work/vuegen/vuegen/docs/example_data/Earth_microbiome_vuegen_demo_notebook/1_Exploratory_data_analysis/1_sample_exploration/2_animal_samples_map.png){fig-alt= width=950 height=400}
+![](../example_data/Earth_microbiome_vuegen_demo_notebook/1_Exploratory_data_analysis/1_sample_exploration/2_animal_samples_map.png){fig-alt= width=90%}
 
 ### Plant Samples Map
 ```{python}
 #| label: 'Plant Samples Map 43'
 #| fig-cap: ""
 
-with open('/home/runner/work/vuegen/vuegen/docs/example_data/Earth_microbiome_vuegen_demo_notebook/1_Exploratory_data_analysis/1_sample_exploration/3_plant_samples_map.json', 'r') as plot_file:
+with open('../example_data/Earth_microbiome_vuegen_demo_notebook/1_Exploratory_data_analysis/1_sample_exploration/3_plant_samples_map.json', 'r') as plot_file:
     plot_json = json.load(plot_file)
 
 # Keep only 'data' and 'layout' sections
@@ -94,7 +93,7 @@ plot_json_str = json.dumps(plot_json)
 
 # Create the plotly plot
 fig_plotly = pio.from_json(plot_json_str)
-fig_plotly.update_layout(width=950, height=500)
+fig_plotly.update_layout(autosize=False, width=950, height=400, margin=dict(b=50, t=50, l=50, r=50))
 
 fig_plotly.show()
 ```
@@ -104,20 +103,20 @@ fig_plotly.show()
 #| label: 'Saline Samples Map 44'
 #| fig-cap: ""
 
-with open('/home/runner/work/vuegen/vuegen/docs/example_data/Earth_microbiome_vuegen_demo_notebook/1_Exploratory_data_analysis/1_sample_exploration/4_saline_samples_map.json', 'r') as plot_file:
+with open('../example_data/Earth_microbiome_vuegen_demo_notebook/1_Exploratory_data_analysis/1_sample_exploration/4_saline_samples_map.json', 'r') as plot_file:
     plot_json = json.load(plot_file)
 
 # Convert JSON to string
 plot_json_str = json.dumps(plot_json)
 
 # Create the plotly plot
-fig_altair = alt.Chart.from_json(plot_json_str).properties(width=900, height=400)
+fig_altair = alt.Chart.from_json(plot_json_str).properties(width=900, height=370)
 
 fig_altair
 ```
 
 ### Physicochemical properties of the EMP samples
-![](https://raw.githubusercontent.com/biocore/emp/master/methods/images/figureED1_physicochemical.png){fig-alt= width=950 height=400}
+![](https://raw.githubusercontent.com/biocore/emp/master/methods/images/figureED1_physicochemical.png){fig-alt= width=90%}
 
 >Pairwise scatter plots of available physicochemical metadat are shown for temperature, salinity, oxygen, and pH, and for phosphate, nitrate, and ammonium
 
@@ -126,14 +125,14 @@ fig_altair
 This subsection contains the alpha diversity analysis of the EMP dataset.
 
 ### Alpha Diversity Host Associated Samples
-![](//home/runner/work/vuegen/vuegen/docs/example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/1_alpha_diversity/1_alpha_diversity_host_associated_samples.png){fig-alt= width=950 height=400}
+![](../example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/1_alpha_diversity/1_alpha_diversity_host_associated_samples.png){fig-alt= width=90%}
 
 ### Alpha Diversity Free Living Samples
 ```{python}
 #| label: 'Alpha Diversity Free Living Samples 47'
 #| fig-cap: ""
 
-with open('/home/runner/work/vuegen/vuegen/docs/example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/1_alpha_diversity/2_alpha_diversity_free_living_samples.json', 'r') as plot_file:
+with open('../example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/1_alpha_diversity/2_alpha_diversity_free_living_samples.json', 'r') as plot_file:
     plot_json = json.load(plot_file)
 
 # Keep only 'data' and 'layout' sections
@@ -147,21 +146,21 @@ plot_json_str = json.dumps(plot_json)
 
 # Create the plotly plot
 fig_plotly = pio.from_json(plot_json_str)
-fig_plotly.update_layout(width=950, height=500)
+fig_plotly.update_layout(autosize=False, width=950, height=400, margin=dict(b=50, t=50, l=50, r=50))
 
 fig_plotly.show()
 ```
 
 ## Average Copy Number
 ### Average Copy Number Emp Ontology Level2
-![](//home/runner/work/vuegen/vuegen/docs/example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/2_average_copy_number/1_average_copy_number_emp_ontology_level2.png){fig-alt= width=950 height=400}
+![](../example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/2_average_copy_number/1_average_copy_number_emp_ontology_level2.png){fig-alt= width=90%}
 
 ### Average Copy Number Emp Ontology Level3
 ```{python}
 #| label: 'Average Copy Number Emp Ontology Level3 49'
 #| fig-cap: ""
 
-with open('/home/runner/work/vuegen/vuegen/docs/example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/2_average_copy_number/2_average_copy_number_emp_ontology_level3.json', 'r') as plot_file:
+with open('../example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/2_average_copy_number/2_average_copy_number_emp_ontology_level3.json', 'r') as plot_file:
     plot_json = json.load(plot_file)
 
 # Keep only 'data' and 'layout' sections
@@ -175,7 +174,7 @@ plot_json_str = json.dumps(plot_json)
 
 # Create the plotly plot
 fig_plotly = pio.from_json(plot_json_str)
-fig_plotly.update_layout(width=950, height=500)
+fig_plotly.update_layout(autosize=False, width=950, height=400, margin=dict(b=50, t=50, l=50, r=50))
 
 fig_plotly.show()
 ```
@@ -186,7 +185,7 @@ fig_plotly.show()
 #| label: 'Nestedness Random Subset 11'
 #| fig-cap: ""
 
-df = pd.read_csv('/home/runner/work/vuegen/vuegen/docs/example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/3_nestedness/1_nestedness_random_subset.csv')
+df = pd.read_csv('../example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/3_nestedness/1_nestedness_random_subset.csv')
 
 show(df, classes="display nowrap compact", lengthMenu=[3, 5, 10])
 ```
@@ -196,7 +195,7 @@ show(df, classes="display nowrap compact", lengthMenu=[3, 5, 10])
 #| label: 'All Samples 50'
 #| fig-cap: ""
 
-with open('/home/runner/work/vuegen/vuegen/docs/example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/3_nestedness/2_all_samples.json', 'r') as plot_file:
+with open('../example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/3_nestedness/2_all_samples.json', 'r') as plot_file:
     plot_json = json.load(plot_file)
 
 # Keep only 'data' and 'layout' sections
@@ -210,7 +209,7 @@ plot_json_str = json.dumps(plot_json)
 
 # Create the plotly plot
 fig_plotly = pio.from_json(plot_json_str)
-fig_plotly.update_layout(width=950, height=500)
+fig_plotly.update_layout(autosize=False, width=950, height=400, margin=dict(b=50, t=50, l=50, r=50))
 
 fig_plotly.show()
 ```
@@ -220,7 +219,7 @@ fig_plotly.show()
 #| label: 'Plant Samples 51'
 #| fig-cap: ""
 
-with open('/home/runner/work/vuegen/vuegen/docs/example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/3_nestedness/3_plant_samples.json', 'r') as plot_file:
+with open('../example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/3_nestedness/3_plant_samples.json', 'r') as plot_file:
     plot_json = json.load(plot_file)
 
 # Keep only 'data' and 'layout' sections
@@ -234,22 +233,22 @@ plot_json_str = json.dumps(plot_json)
 
 # Create the plotly plot
 fig_plotly = pio.from_json(plot_json_str)
-fig_plotly.update_layout(width=950, height=500)
+fig_plotly.update_layout(autosize=False, width=950, height=400, margin=dict(b=50, t=50, l=50, r=50))
 
 fig_plotly.show()
 ```
 
 ### Animal Samples
-![](//home/runner/work/vuegen/vuegen/docs/example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/3_nestedness/4_animal_samples.png){fig-alt= width=950 height=400}
+![](../example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/3_nestedness/4_animal_samples.png){fig-alt= width=90%}
 
 ### Non Saline Samples
-![](//home/runner/work/vuegen/vuegen/docs/example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/3_nestedness/5_non_saline_samples.png){fig-alt= width=950 height=400}
+![](../example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/3_nestedness/5_non_saline_samples.png){fig-alt= width=90%}
 
 ## Shanon entropy analysis
 This subsection contains the Shannon entropy analysis of the EMP dataset.
 
 ### Specificity of sequences and higher taxonomic groups for environment
-![](https://raw.githubusercontent.com/biocore/emp/master/methods/images/figure4_entropy.png){fig-alt= width=950 height=400}
+![](https://raw.githubusercontent.com/biocore/emp/master/methods/images/figure4_entropy.png){fig-alt= width=90%}
 
 >a) Environment distribution in all genera and 400 randomly chosen tag sequence. b) and c) Shannon entropy within each taxonomic group.
 
@@ -260,7 +259,7 @@ This subsection contains the Shannon entropy analysis of the EMP dataset.
 #| label: 'Phyla Counts Subset 12'
 #| fig-cap: ""
 
-df = pd.read_csv('/home/runner/work/vuegen/vuegen/docs/example_data/Earth_microbiome_vuegen_demo_notebook/3_Network_analysis/1_phyla_association_networks/1_phyla_counts_subset.csv')
+df = pd.read_csv('../example_data/Earth_microbiome_vuegen_demo_notebook/3_Network_analysis/1_phyla_association_networks/1_phyla_counts_subset.csv')
 
 show(df, classes="display nowrap compact", lengthMenu=[3, 5, 10])
 ```
@@ -276,4 +275,4 @@ show(df, classes="display nowrap compact", lengthMenu=[3, 5, 10])
 </div>
 
 ### Phyla Correlation Network With 0.5 Threshold
-![](//home/runner/work/vuegen/vuegen/docs/example_data/Earth_microbiome_vuegen_demo_notebook/3_Network_analysis/1_phyla_association_networks/3_phyla_correlation_network_with_0.5_threshold.png){fig-alt= width=950 height=400}
+![](../example_data/Earth_microbiome_vuegen_demo_notebook/3_Network_analysis/1_phyla_association_networks/3_phyla_correlation_network_with_0.5_threshold.png){fig-alt= width=90%}
