@@ -1,8 +1,9 @@
-df_index = 1
-import requests
-from st_aggrid import AgGrid, GridOptionsBuilder
+from vuegen import table_utils
 import pandas as pd
+import requests
+df_index = 1
 import streamlit as st
+from st_aggrid import AgGrid, GridOptionsBuilder
 
 st.markdown('''<h3 style='text-align: center; color: #023558;'>Phyla Association Networks</h3>''', unsafe_allow_html=True)
 st.markdown('''<h4 style='text-align: center; color: #2b8cbe;'>Phyla Counts Subset</h4>''', unsafe_allow_html=True)
@@ -11,13 +12,13 @@ df = pd.read_csv('example_data/Earth_microbiome_vuegen_demo_notebook/3_Network_a
 
 # Displays a DataFrame using AgGrid with configurable options.
 grid_builder = GridOptionsBuilder.from_dataframe(df)
-grid_builder.configure_default_column(editable=True, groupable=True)
+grid_builder.configure_default_column(editable=True, groupable=True, filter=True)
 grid_builder.configure_side_bar(filters_panel=True, columns_panel=True)
 grid_builder.configure_selection(selection_mode="multiple")
 grid_builder.configure_pagination(enabled=True, paginationAutoPageSize=False, paginationPageSize=20)
 grid_options = grid_builder.build()
 
-AgGrid(df, gridOptions=grid_options)
+AgGrid(df, gridOptions=grid_options, enable_enterprise_modules=True)
 
 # Button to download the df
 df_csv = df.to_csv(sep=',', header=True, index=False).encode('utf-8')
@@ -30,8 +31,8 @@ st.download_button(
 df_index += 1
 st.markdown('''<h4 style='text-align: center; color: #2b8cbe;'>Phyla Correlation Network With 0.5 Threshold Edgelist</h4>''', unsafe_allow_html=True)
 
-with open('streamlit_report/static/Phyla_Correlation_Network_With_0.5_Threshold_Edgelist.html', 'r') as f:
-    html_data = f.read()
+with open('streamlit_report/static/Phyla_Correlation_Network_With_0.5_Threshold_Edgelist.html', 'r') as html_file:
+    html_content = html_file.read()
 
 
 st.markdown(f"<p style='text-align: center; color: black;'> <b>Number of nodes:</b> 33 </p>", unsafe_allow_html=True)
@@ -41,7 +42,7 @@ st.markdown(f"<p style='text-align: center; color: black;'> <b>Number of relatio
 control_layout = st.checkbox('Add panel to control layout', value=True)
 net_html_height = 1200 if control_layout else 630
 # Load HTML into HTML component for display on Streamlit
-st.components.v1.html(html_data, height=net_html_height)
+st.components.v1.html(html_content, height=net_html_height)
 
 st.markdown('''<h4 style='text-align: center; color: #2b8cbe;'>Phyla Correlation Network With 0.5 Threshold</h4>''', unsafe_allow_html=True)
 

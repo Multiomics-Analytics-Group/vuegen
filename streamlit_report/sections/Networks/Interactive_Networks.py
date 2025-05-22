@@ -1,13 +1,13 @@
-import streamlit as st
 import requests
+import streamlit as st
 
 st.markdown('''<h3 style='text-align: center; color: #023558;'>Interactive Networks</h3>''', unsafe_allow_html=True)
 st.markdown('''<p style='text-align: center; color: #000000;'>Optional description for subsection.
 </p>''', unsafe_allow_html=True)
 st.markdown('''<h4 style='text-align: center; color: #2b8cbe;'>Man Example</h4>''', unsafe_allow_html=True)
 
-with open('streamlit_report/static/Man_Example.html', 'r') as f:
-    html_data = f.read()
+with open('streamlit_report/static/Man_Example.html', 'r') as html_file:
+    html_content = html_file.read()
 
 
 st.markdown(f"<p style='text-align: center; color: black;'> <b>Number of nodes:</b> 9 </p>", unsafe_allow_html=True)
@@ -17,7 +17,7 @@ st.markdown(f"<p style='text-align: center; color: black;'> <b>Number of relatio
 control_layout = st.checkbox('Add panel to control layout', value=True)
 net_html_height = 1200 if control_layout else 630
 # Load HTML into HTML component for display on Streamlit
-st.components.v1.html(html_data, height=net_html_height)
+st.components.v1.html(html_content, height=net_html_height)
 
 st.markdown('''<h4 style='text-align: center; color: #2b8cbe;'>Description</h4>''', unsafe_allow_html=True)
 

@@ -15,7 +15,7 @@ st.image('example_data/Basic_example_vuegen_demo_notebook/1_Plots/2_Static_plots
 
 st.markdown('''<h4 style='text-align: center; color: #2b8cbe;'>Graphical overview of VueGen’s workflow and components</h4>''', unsafe_allow_html=True)
 
-st.image('https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/vuegen_graph_abstract.png', caption='The diagram illustrates the processing pipeline of VueGen, starting from either a directory or a YAML configuration file. Reports consist of hierarchical sections and subsections, each containing various components such as plots, dataframes, Markdown, HTML, and data retrieved via API calls.', use_column_width=True)
+st.image('https:/raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/vuegen_graph_abstract.png', caption='The diagram illustrates the processing pipeline of VueGen, starting from either a directory or a YAML configuration file. Reports consist of hierarchical sections and subsections, each containing various components such as plots, dataframes, Markdown, HTML, and data retrieved via API calls.', use_column_width=True)
 
 footer = '''<style type="text/css">
 .footer {

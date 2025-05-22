@@ -1,6 +1,6 @@
+import requests
 import streamlit as st
 import json
-import requests
 import altair as alt
 
 st.markdown('''<h3 style='text-align: center; color: #023558;'>Interactive Plots</h3>''', unsafe_allow_html=True)

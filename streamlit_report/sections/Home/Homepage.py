@@ -1,6 +1,6 @@
 import streamlit as st
-import requests
 import streamlit as st
+import requests
 st.markdown('''<p style='text-align: center; color: #000000;'>The Earth Microbiome Project (EMP) is a systematic attempt to characterize global microbial taxonomic and functional diversity for the benefit of the planet and humankind. 
   It aimed to sample the Earth’s microbial communities at an unprecedented scale in order to advance our understanding of the organizing biogeographic principles that govern microbial community structure. 
   The EMP dataset is generated from samples that individual researchers have compiled and contributed to the EMP. 

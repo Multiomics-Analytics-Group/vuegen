@@ -1,10 +1,11 @@
-import json
-df_index = 1
+from vuegen import table_utils
 import altair as alt
-import requests
-from st_aggrid import AgGrid, GridOptionsBuilder
 import pandas as pd
+import requests
+df_index = 1
 import streamlit as st
+from st_aggrid import AgGrid, GridOptionsBuilder
+import json
 
 st.markdown('''<h3 style='text-align: center; color: #023558;'>Sample Exploration</h3>''', unsafe_allow_html=True)
 st.markdown('''<h4 style='text-align: center; color: #2b8cbe;'>Metadata Random Subset</h4>''', unsafe_allow_html=True)
@@ -13,13 +14,13 @@ df = pd.read_csv('example_data/Earth_microbiome_vuegen_demo_notebook/1_Explorato
 
 # Displays a DataFrame using AgGrid with configurable options.
 grid_builder = GridOptionsBuilder.from_dataframe(df)
-grid_builder.configure_default_column(editable=True, groupable=True)
+grid_builder.configure_default_column(editable=True, groupable=True, filter=True)
 grid_builder.configure_side_bar(filters_panel=True, columns_panel=True)
 grid_builder.configure_selection(selection_mode="multiple")
 grid_builder.configure_pagination(enabled=True, paginationAutoPageSize=False, paginationPageSize=20)
 grid_options = grid_builder.build()
 
-AgGrid(df, gridOptions=grid_options)
+AgGrid(df, gridOptions=grid_options, enable_enterprise_modules=True)
 
 # Button to download the df
 df_csv = df.to_csv(sep=',', header=True, index=False).encode('utf-8')
@@ -56,7 +57,7 @@ st.vega_lite_chart(json.loads(altair_plot.to_json()), use_container_width=True)
 
 st.markdown('''<h4 style='text-align: center; color: #2b8cbe;'>Physicochemical properties of the EMP samples</h4>''', unsafe_allow_html=True)
 
-st.image('https://raw.githubusercontent.com/biocore/emp/master/methods/images/figureED1_physicochemical.png', caption='Pairwise scatter plots of available physicochemical metadat are shown for temperature, salinity, oxygen, and pH, and for phosphate, nitrate, and ammonium', use_column_width=True)
+st.image('https:/raw.githubusercontent.com/biocore/emp/master/methods/images/figureED1_physicochemical.png', caption='Pairwise scatter plots of available physicochemical metadat are shown for temperature, salinity, oxygen, and pH, and for phosphate, nitrate, and ammonium', use_column_width=True)
 
 footer = '''<style type="text/css">
 .footer {

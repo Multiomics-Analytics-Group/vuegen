@@ -124,6 +124,12 @@ sections:
       file_format: parquet
       file_path: /home/runner/work/vuegen/vuegen/docs/example_data/Basic_example_vuegen_demo_notebook/2_Dataframes/1_All_formats/4_sample_info_example_parquet.parquet
       title: Sample Info Example Parquet
+    - caption: ''
+      component_type: dataframe
+      description: ''
+      file_format: xlsx
+      file_path: /home/runner/work/vuegen/vuegen/docs/example_data/Basic_example_vuegen_demo_notebook/2_Dataframes/1_All_formats/5_example_xlsx.xlsx
+      title: Example Xlsx
     description: This subsection contains example dataframes.
     title: All Formats
   title: Dataframes
