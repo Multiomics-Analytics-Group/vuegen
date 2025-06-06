@@ -75,7 +75,7 @@ pip install -e .
 VueGen is also available on [Bioconda][vuegen-conda] and can be installed using conda:
 
 ```bash
-conda install bioconda::vuegen
+conda install -c bioconda -c conda-forge vuegen
 ```
 
 ### Dependencies
@@ -332,7 +332,7 @@ available for other report types.
 
 Two API modes are supported:
 
-- **Ollama-style streaming chat completion**
+- **Ollama-style streaming chat completion:**
   If a `model` parameter is specified in the config file, VueGen assumes the chatbot is using Ollama’s [/api/chat endpoint][ollama_chat].
   Messages are handled as chat history, and the assistant responses are streamed in real time for a smooth and responsive experience.
   This mode supports LLMs such as `llama3`, `deepsek`, or `mistral`.
@@ -340,7 +340,7 @@ Two API modes are supported:
 > [!TIP]
 > See [Ollama’s website][ollama] for more details.
 
-- **Standard prompt-response API**
+- **Standard prompt-response API:**
   If no `model` is provided, VueGen uses a simpler prompt-response flow.
   A single prompt is sent to an endpoint, and a structured JSON object is expected in return.
   Currently, the response can include:
