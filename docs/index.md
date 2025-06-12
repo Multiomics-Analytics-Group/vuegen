@@ -26,11 +26,13 @@ sections_readme/citation
 
 vuegen_basic_case_study
 vuegen_basic_case_study_configfile
-vuegen_case_study_earth_microbiome
-vuegen_case_study_earth_microbiome_configfile
+vuegen_earth_microbiome_case_study
+vuegen_earth_microbiome_case_study_configfile
 example_report
-vuegen_APICall_configfile
-vuegen_Chatbot_configfile
+vuegen_apicall_case_study
+vuegen_apicall_case_study_configfile
+vuegen_chatbot_case_study
+vuegen_chatbot_case_study_configfile
 ```
 
 ```{toctree}
