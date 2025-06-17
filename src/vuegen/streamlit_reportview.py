@@ -360,7 +360,7 @@ class StreamlitReportView(r.WebAppReportView):
         report_manag_content : list
             A list to store the content that will be written to the report manager file.
         """
-        self.report.logger.debug("Processing home section."))
+        self.report.logger.debug("Processing home section.")
 
         try:
             # Create folder for the home page
