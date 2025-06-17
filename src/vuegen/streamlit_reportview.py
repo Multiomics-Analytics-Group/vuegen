@@ -145,41 +145,14 @@ class StreamlitReportView(r.WebAppReportView):
 
             # Generate the home page and update the report manager content
             # ! top level files (compontents) are added to the home page
-            home_section = self.report.sections[0]
             self._generate_home_section(
                 output_dir=output_dir,
                 report_manag_content=report_manag_content,
-                home_section=home_section,
             )
             # ! move this into the _generate_home_section method
             subsection_page_vars = []
 
-            for subsection in home_section.subsections:
-                # ! could add a non-integer to ensure it's a valid identifier
-                subsection_name_var = make_valid_identifier(subsection.title)
-                if not subsection_name_var.isidentifier():
-                    self.report.logger.warning(
-                        f"Subsection name '{subsection_name_var}' is not a valid identifier."
-                    )
-                    raise ValueError(
-                        f"Subsection name is not a valid Python identifier: {subsection_name_var}"
-                    )
-                subsection_file_path = (
-                    Path("Home") / f"{subsection_name_var}.py"
-                ).as_posix()  # Make sure it's Posix Paths
-                subsection.file_path = subsection_file_path
-                # Create a Page object for each subsection and add it to the home page content
-                report_manag_content.append(
-                    f"{subsection_name_var} = st.Page('{subsection_file_path}', title='{subsection.title}')"
-                )
-                subsection_page_vars.append(subsection_name_var)
-
-            # Add all subsection Page objects to the corresponding section
-            report_manag_content.append(
-                f"sections_pages['Home'] = [homepage,{', '.join(subsection_page_vars)}]\n"
-            )
-
-            for section in self.report.sections[1:]:  # skip home section components
+            for section in self.report.sections:  # skip home section components
                 # Create a folder for each section
                 subsection_page_vars = []
                 section_name_var = make_valid_identifier(
@@ -376,7 +349,6 @@ class StreamlitReportView(r.WebAppReportView):
         self,
         output_dir: str,
         report_manag_content: list,
-        home_section: r.Section,
     ) -> None:
         """
         Generates the homepage for the report and updates the report manager content.
@@ -388,14 +360,7 @@ class StreamlitReportView(r.WebAppReportView):
         report_manag_content : list
             A list to store the content that will be written to the report manager file.
         """
-        self.report.logger.debug("Processing home section.")
-        all_components = []
-        subsection_imports = []
-        if home_section.components:
-            # some assert on title?
-            all_components, subsection_imports, _ = self._combine_components(
-                home_section.components
-            )
+        self.report.logger.debug("Processing home section."))
 
         try:
             # Create folder for the home page
@@ -410,8 +375,6 @@ class StreamlitReportView(r.WebAppReportView):
             # Create the home page content
             home_content = []
             home_content.append("import streamlit as st")
-            if subsection_imports:
-                home_content.extend(subsection_imports)
             if self.report.description:
                 home_content.append(
                     self._format_text(text=self.report.description, type="paragraph")
@@ -422,8 +385,6 @@ class StreamlitReportView(r.WebAppReportView):
                 )
 
             # add components content to page (if any)
-            if all_components:
-                home_content.extend(all_components)
 
             # Define the footer variable and add it to the home page content
             home_content.append("footer = '''" + generate_footer() + "'''\n")
@@ -456,12 +417,11 @@ class StreamlitReportView(r.WebAppReportView):
         """
         self.report.logger.info("Starting to generate sections for the report.")
         try:
-            for section_no, section in enumerate(self.report.sections):
+            for section in self.report.sections:
                 self.report.logger.debug(
                     f"Processing section '{section.id}': '{section.title}' - {len(section.subsections)} subsection(s)"
                 )
-                # ! skip first section components as it's predefined as homepage
-                if section_no and section.components:
+                if section.components:
                     # add an section overview page
                     section_content, section_imports, _ = self._combine_components(
                         section.components
