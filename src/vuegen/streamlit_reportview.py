@@ -1,3 +1,7 @@
+"""
+StreamlitReportView class for generating Streamlit reports based on a configuration file.
+"""
+
 import os
 import subprocess
 import sys
@@ -14,6 +18,7 @@ from .utils.variables import make_valid_identifier
 
 
 def write_python_file(fpath: str, imports: list[str], contents: list[str]) -> None:
+    """Write a Python file with the given imports and contents."""
     with open(fpath, "w", encoding="utf8") as f:
         # Write imports at the top of the file
         f.write("\n".join(imports) + "\n\n")
@@ -75,12 +80,14 @@ class StreamlitReportView(r.WebAppReportView):
 
     def generate_report(self, output_dir: str = SECTIONS_DIR) -> None:
         """
-        Generates the Streamlit report and creates Python files for each section and its subsections and plots.
+        Generates the Streamlit report and creates Python files for each section
+        and its subsections and plots.
 
         Parameters
         ----------
         output_dir : str, optional
-            The folder where the generated report files will be saved (default is SECTIONS_DIR).
+            The folder where the generated report files will be saved
+            (default is SECTIONS_DIR).
         """
         self.report.logger.debug(
             f"Generating '{self.report_type}' report in directory: '{output_dir}'"
@@ -167,14 +174,17 @@ class StreamlitReportView(r.WebAppReportView):
                     self.report.logger.debug(
                         f"Section directory already existed: {section_dir_path}"
                     )
-                # add an overview page to section of components exist
+                # add an overview page to section for it's section components
+                # they will be written when the components are parsed
+                # using `_generate_sections`
                 if section.components:
                     subsection_file_path = (
                         Path(section_name_var)
                         / f"0_overview_{make_valid_identifier(section.title).lower()}.py"
                     ).as_posix()  # Make sure it's Posix Paths
                     section.file_path = subsection_file_path
-                    # Create a Page object for each subsection and add it to the home page content
+                    # Create a Page object for each subsection and
+                    # add it to the home page content
                     report_manag_content.append(
                         f"{section_name_var}_overview = st.Page('{subsection_file_path}', title='Overview {section.title}')"
                     )
@@ -194,7 +204,8 @@ class StreamlitReportView(r.WebAppReportView):
                         Path(section_name_var) / f"{subsection_name_var}.py"
                     ).as_posix()  # Make sure it's Posix Paths
                     subsection.file_path = subsection_file_path
-                    # Create a Page object for each subsection and add it to the home page content
+                    # Create a Page object for each subsection and
+                    # add it to the home page content
                     report_manag_content.append(
                         f"{subsection_name_var} = st.Page('{subsection_file_path}', title='{subsection.title}')"
                     )
@@ -411,7 +422,8 @@ class StreamlitReportView(r.WebAppReportView):
 
             # Add the home page to the report manager content
             report_manag_content.append(
-                "homepage = st.Page('Home/Homepage.py', title='Homepage')"  # ! here Posix Path is hardcoded
+                # ! here Posix Path is hardcoded
+                "homepage = st.Page('Home/Homepage.py', title='Homepage')"
             )
             report_manag_content.append("sections_pages['Home'] = [homepage]\n")
             self.report.logger.info("Home page added to the report manager content.")
@@ -421,7 +433,8 @@ class StreamlitReportView(r.WebAppReportView):
 
     def _generate_sections(self, output_dir: str) -> None:
         """
-        Generates Python files for each section in the report, including subsections and its components (plots, dataframes, markdown).
+        Generates Python files for each section in the report, including subsections
+        and its components (plots, dataframes, markdown).
 
         Parameters
         ----------
@@ -458,7 +471,9 @@ class StreamlitReportView(r.WebAppReportView):
                     continue
 
                 # Iterate through subsections and integrate them into the section file
-                # subsection should have the subsection_file_path as file_path?
+                # ! subsection should have the subsection_file_path as file_path,
+                # ! which is set when parsing the config in the main generate_sections
+                # ! method
                 for subsection in section.subsections:
                     self.report.logger.debug(
                         f"Processing subsection '{subsection.id}': '{subsection.title} -"
@@ -603,7 +618,8 @@ class StreamlitReportView(r.WebAppReportView):
                     # If network_data is a tuple, separate the network and html file path
                     networkx_graph, html_plot_file = networkx_graph
                 else:
-                    # Otherwise, create and save a new pyvis network from the netowrkx graph
+                    # Otherwise,
+                    # create and save a new pyvis network from the netowrkx graph
                     html_plot_file = (
                         Path(self.static_dir) / f"{plot.title.replace(' ', '_')}.html"
                     ).resolve()
@@ -737,7 +753,8 @@ st.components.v1.html(html_content, height=net_html_height)\n"""
                     f"Unsupported file extension: {file_extension}. Supported extensions are: {', '.join(fmt.value for fmt in r.DataFrameFormat)}."
                 )
                 # return []  # Skip execution if unsupported file extension
-                # Should it not return here? Can we even call the method with an unsupported file extension?
+                # Should it not return here?
+                # Can we even call the method with an unsupported file extension?
 
             # Build the file path (URL or local file)
             if is_url(dataframe.file_path):
@@ -1067,7 +1084,7 @@ def generate_query(messages):
         json={{"model": "{chatbot.model}", "messages": messages, "stream": True}},
     )
     response.raise_for_status()
-    return response               
+    return response
 
 # Parse streaming response from Ollama
 def parse_api_response(response):
