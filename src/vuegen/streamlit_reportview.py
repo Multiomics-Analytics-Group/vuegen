@@ -119,8 +119,8 @@ class StreamlitReportView(r.WebAppReportView):
                     """\
                     import os
                     import time
-                    
-                    import psutil                    
+
+                    import psutil
                     import streamlit as st
                     """
                 )
@@ -129,7 +129,10 @@ class StreamlitReportView(r.WebAppReportView):
                 report_manag_content.append(
                     textwrap.dedent(
                         f"""\
-                        st.set_page_config(layout="wide", page_title="{self.report.title}", page_icon="{self.report.logo}")
+                        st.set_page_config(layout="wide",
+                                           page_title="{self.report.title}",
+                                           page_icon="{self.report.logo}"
+                        )
                         st.logo("{self.report.logo}")
                         """
                     )
@@ -138,7 +141,8 @@ class StreamlitReportView(r.WebAppReportView):
                 report_manag_content.append(
                     textwrap.dedent(
                         f"""\
-                        st.set_page_config(layout="wide", page_title="{self.report.title}")
+                        st.set_page_config(layout="wide",
+                                           page_title="{self.report.title}")
                         """
                     )
                 )
@@ -227,9 +231,12 @@ class StreamlitReportView(r.WebAppReportView):
                 textwrap.dedent(
                     """\
                     report_nav = st.navigation(sections_pages)
-                    
-                    # Following https://discuss.streamlit.io/t/close-streamlit-app-with-button-click/35132/5
-                    exit_app = st.sidebar.button("Shut Down App", icon=":material/power_off:", use_container_width=True)
+
+                    # Following https://discuss.streamlit.io/t/\
+close-streamlit-app-with-button-click/35132/5
+                    exit_app = st.sidebar.button("Shut Down App",
+                                                 icon=":material/power_off:",
+                                                 use_container_width=True)
                     if exit_app:
                         st.toast("Shutting down the app...")
                         time.sleep(1)
@@ -238,7 +245,7 @@ class StreamlitReportView(r.WebAppReportView):
                         p = psutil.Process(pid)
                         p.terminate()
 
-                    
+
                     report_nav.run()
                     """
                 )
@@ -367,7 +374,17 @@ class StreamlitReportView(r.WebAppReportView):
             raise ValueError(
                 f"Unsupported text type: {type}. Supported types are 'header', "
                 "'paragraph', and 'caption'."
-            )
+
+        return textwrap.dedent(
+            f"""
+            st.markdown(
+                (
+                    "<{tag} style='text-align: {text_align}; "
+                    "color: {color};'>{text}</{tag}>"
+                ),
+                unsafe_allow_html=True)
+            """
+        )
 
     def _generate_home_section(
         self,
@@ -665,9 +682,16 @@ with open('{Path(html_plot_file).relative_to(Path.cwd())}', 'r') as html_file:
 
                 # Append the code for additional information (nodes and edges count)
                 plot_content.append(
-                    f"""
-st.markdown(f"<p style='text-align: center; color: black;'> <b>Number of nodes:</b> {num_nodes} </p>", unsafe_allow_html=True)
-st.markdown(f"<p style='text-align: center; color: black;'> <b>Number of relationships:</b> {num_edges} </p>", unsafe_allow_html=True)\n"""
+                    textwrap.dedent(
+                        f"""
+                        st.markdown(("<p style='text-align: center; color: black;'> "
+                                    f"<b>Number of nodes:</b> {num_nodes} </p>"),
+                                    unsafe_allow_html=True)
+                        st.markdown(("<p style='text-align: center; color: black;'>"
+                                    f" <b>Number of relationships:</b> {num_edges} </p>"),
+                                    unsafe_allow_html=True)
+                        """
+                    )
                 )
 
                 # Add the specific code for visualization
@@ -703,37 +727,51 @@ st.markdown(f"<p style='text-align: center; color: black;'> <b>Number of relatio
         """
         # If the file path is a URL, generate code to fetch content via requests
         if is_url(plot.file_path):
-            plot_code = f"""
-response = requests.get('{plot.file_path}')
-response.raise_for_status()
-plot_json = json.loads(response.text)\n"""
+            plot_code = textwrap.dedent(
+                f"""
+                response = requests.get('{plot.file_path}')
+                response.raise_for_status()
+                plot_json = json.loads(response.text)\n"""
+            )
         else:  # If it's a local file
             plot_rel_path = get_relative_file_path(plot.file_path)
-            plot_code = f"""
-with open('{plot_rel_path.as_posix()}', 'r') as plot_file:
-    plot_json = json.load(plot_file)\n"""
+            plot_code = textwrap.dedent(
+                f"""
+                with open('{plot_rel_path.as_posix()}', 'r') as plot_file:
+                    plot_json = json.load(plot_file)\n"""
+            )
 
         # Add specific code for each visualization tool
         if plot.plot_type == r.PlotType.PLOTLY:
-            plot_code += """
-# Keep only 'data' and 'layout' sections
-plot_json = {key: plot_json[key] for key in plot_json if key in ['data', 'layout']}
+            plot_code += textwrap.dedent(
+                """
+                # Keep only 'data' and 'layout' sections
+                plot_json = {key: plot_json[key] for key in plot_json
+                                                 if key in ['data', 'layout']}
 
-# Remove 'frame' section in 'data'
-plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'} for entry in plot_json.get('data', [])]
-st.plotly_chart(plot_json, use_container_width=True)\n"""
+                # Remove 'frame' section in 'data'
+                plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'}
+                                                for entry in plot_json.get('data', [])]
+                st.plotly_chart(plot_json, use_container_width=True)\n"""
+            )
 
         elif plot.plot_type == r.PlotType.ALTAIR:
-            plot_code += """
-altair_plot = alt.Chart.from_dict(plot_json)
-st.vega_lite_chart(json.loads(altair_plot.to_json()), use_container_width=True)\n"""
+            plot_code += textwrap.dedent(
+                """
+                altair_plot = alt.Chart.from_dict(plot_json)
+                st.vega_lite_chart(json.loads(altair_plot.to_json()),
+                                   use_container_width=True)\n"""
+            )
 
         elif plot.plot_type == r.PlotType.INTERACTIVE_NETWORK:
-            plot_code = """# Streamlit checkbox for controlling the layout
-control_layout = st.checkbox('Add panel to control layout', value=True)
-net_html_height = 1200 if control_layout else 630
-# Load HTML into HTML component for display on Streamlit
-st.components.v1.html(html_content, height=net_html_height)\n"""
+            plot_code = textwrap.dedent(
+                """\
+                # Streamlit checkbox for controlling the layout
+                control_layout = st.checkbox('Add panel to control layout', value=True)
+                net_html_height = 1200 if control_layout else 630
+                # Load HTML into HTML component for display on Streamlit
+                st.components.v1.html(html_content, height=net_html_height)\n"""
+            )
         return plot_code
 
     def _generate_dataframe_content(self, dataframe) -> List[str]:
@@ -796,7 +834,8 @@ st.components.v1.html(html_content, height=net_html_height)\n"""
                         textwrap.dedent(
                             f"""\
                         sheet_names = table_utils.get_sheet_names("{dataframe.file_path}")
-                        selected_sheet = st.selectbox("Select a sheet to display", options=sheet_names)
+                        selected_sheet = st.selectbox("Select a sheet to display",
+                                                        options=sheet_names)
                         """
                         )
                     )
@@ -818,26 +857,35 @@ st.components.v1.html(html_content, height=net_html_height)\n"""
             # ! Alternative to select box: iterate over sheets in DataFrame
             # Displays a DataFrame using AgGrid with configurable options.
             dataframe_content.append(
-                """
-# Displays a DataFrame using AgGrid with configurable options.
-grid_builder = GridOptionsBuilder.from_dataframe(df)
-grid_builder.configure_default_column(editable=True, groupable=True, filter=True)
-grid_builder.configure_side_bar(filters_panel=True, columns_panel=True)
-grid_builder.configure_selection(selection_mode="multiple")
-grid_builder.configure_pagination(enabled=True, paginationAutoPageSize=False, paginationPageSize=20)
-grid_options = grid_builder.build()
+                textwrap.dedent(
+                    """
+                    # Displays a DataFrame using AgGrid with configurable options.
+                    grid_builder = GridOptionsBuilder.from_dataframe(df)
+                    grid_builder.configure_default_column(editable=True,
+                                                          groupable=True,
+                                                          filter=True,
+                    )
+                    grid_builder.configure_side_bar(filters_panel=True,
+                                                    columns_panel=True)
+                    grid_builder.configure_selection(selection_mode="multiple")
+                    grid_builder.configure_pagination(enabled=True,
+                                                    paginationAutoPageSize=False,
+                                                    paginationPageSize=20,
+                    )
+                    grid_options = grid_builder.build()
 
-AgGrid(df, gridOptions=grid_options, enable_enterprise_modules=True)
+                    AgGrid(df, gridOptions=grid_options, enable_enterprise_modules=True)
 
-# Button to download the df
-df_csv = df.to_csv(sep=',', header=True, index=False).encode('utf-8')
-st.download_button(
-    label="Download dataframe as CSV",
-    data=df_csv,
-    file_name=f"dataframe_{df_index}.csv",
-    mime='text/csv',
-    key=f"download_button_{df_index}")
-df_index += 1"""
+                    # Button to download the df
+                    df_csv = df.to_csv(sep=',', header=True, index=False).encode('utf-8')
+                    st.download_button(
+                        label="Download dataframe as CSV",
+                        data=df_csv,
+                        file_name=f"dataframe_{df_index}.csv",
+                        mime='text/csv',
+                        key=f"download_button_{df_index}")
+                    df_index += 1"""
+                )
             )
         except Exception as e:
             self.report.logger.error(
