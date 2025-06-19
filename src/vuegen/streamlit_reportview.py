@@ -106,7 +106,8 @@ class StreamlitReportView(r.WebAppReportView):
             )
         else:
             self.report.logger.info(
-                f"Output directory for static content already existed: '{self.static_dir}'"
+                "Output directory for static content already existed: "
+                f"{self.static_dir}"
             )
 
         try:
@@ -186,7 +187,8 @@ class StreamlitReportView(r.WebAppReportView):
                     # Create a Page object for each subsection and
                     # add it to the home page content
                     report_manag_content.append(
-                        f"{section_name_var}_overview = st.Page('{subsection_file_path}', title='Overview {section.title}')"
+                        f"{section_name_var}_overview = st.Page('{subsection_file_path}'"
+                        f", title='Overview {section.title}')"
                     )
                     subsection_page_vars.append(f"{section_name_var}_overview")
 
@@ -195,10 +197,12 @@ class StreamlitReportView(r.WebAppReportView):
                     subsection_name_var = make_valid_identifier(subsection.title)
                     if not subsection_name_var.isidentifier():
                         self.report.logger.warning(
-                            f"Subsection name '{subsection_name_var}' is not a valid identifier."
+                            f"Subsection name '{subsection_name_var}' "
+                            " is not a valid identifier."
                         )
                         raise ValueError(
-                            f"Subsection name is not a valid Python identifier: {subsection_name_var}"
+                            "Subsection name is not a valid Python identifier: "
+                            f"{subsection_name_var}"
                         )
                     subsection_file_path = (
                         Path(section_name_var) / f"{subsection_name_var}.py"
@@ -207,13 +211,15 @@ class StreamlitReportView(r.WebAppReportView):
                     # Create a Page object for each subsection and
                     # add it to the home page content
                     report_manag_content.append(
-                        f"{subsection_name_var} = st.Page('{subsection_file_path}', title='{subsection.title}')"
+                        f"{subsection_name_var} = st.Page('{subsection_file_path}', "
+                        f"title='{subsection.title}')"
                     )
                     subsection_page_vars.append(subsection_name_var)
 
                 # Add all subsection Page objects to the corresponding section
                 report_manag_content.append(
-                    f"sections_pages['{section.title}'] = [{', '.join(subsection_page_vars)}]\n"
+                    f"sections_pages['{section.title}'] = "
+                    f"[{', '.join(subsection_page_vars)}]\n"
                 )
 
             # Add navigation object to the home page content
@@ -305,7 +311,8 @@ class StreamlitReportView(r.WebAppReportView):
         else:
             # If autorun is False, print instructions for manual execution
             self.report.logger.info(
-                f"All the scripts to build the Streamlit app are available at {output_dir}"
+                "All the scripts to build the Streamlit app are available at "
+                f"{output_dir}"
             )
             self.report.logger.info(
                 "To run the Streamlit app, use the following command:"
@@ -314,8 +321,9 @@ class StreamlitReportView(r.WebAppReportView):
                 f"streamlit run {Path(output_dir) / self.REPORT_MANAG_SCRIPT}"
             )
             msg = (
-                f"\nAll the scripts to build the Streamlit app are available at: {output_dir}\n\n"
-                f"To run the Streamlit app, use the following command:\n\n"
+                "\nAll the scripts to build the Streamlit app are available at: "
+                f"{output_dir}\n\n"
+                "To run the Streamlit app, use the following command:\n\n"
                 f"\tstreamlit run {Path(output_dir) / self.REPORT_MANAG_SCRIPT}"
             )
             print(msg)
@@ -403,7 +411,8 @@ class StreamlitReportView(r.WebAppReportView):
                 )
             if self.report.graphical_abstract:
                 home_content.append(
-                    f"\nst.image('{self.report.graphical_abstract}', use_column_width=True)"
+                    f"\nst.image('{self.report.graphical_abstract}', "
+                    "use_column_width=True)"
                 )
 
             # add components content to page (if any)
@@ -446,7 +455,8 @@ class StreamlitReportView(r.WebAppReportView):
         try:
             for section in self.report.sections[1:]:
                 self.report.logger.debug(
-                    f"Processing section '{section.id}': '{section.title}' - {len(section.subsections)} subsection(s)"
+                    f"Processing section '{section.id}': '{section.title}' - "
+                    f"{len(section.subsections)} subsection(s)"
                 )
 
                 if section.components:
@@ -500,8 +510,10 @@ class StreamlitReportView(r.WebAppReportView):
                         )
                     except Exception as subsection_error:
                         self.report.logger.error(
-                            f"Error processing subsection '{subsection.id}' '{subsection.title}' "
-                            f"in section  '{section.id}' '{section.title}': {str(subsection_error)}"
+                            f"Error processing subsection '{subsection.id}'"
+                            f" '{subsection.title}' "
+                            f"in section  '{section.id}' '{section.title}':"
+                            f" {str(subsection_error)}"
                         )
                         raise
 
@@ -606,7 +618,8 @@ class StreamlitReportView(r.WebAppReportView):
             if plot.plot_type == r.PlotType.STATIC:
                 plot_rel_path = get_relative_file_path(plot.file_path)
                 plot_content.append(
-                    f"\nst.image('{plot_rel_path.as_posix()}', caption='{plot.caption}', use_column_width=True)\n"
+                    f"\nst.image('{plot_rel_path.as_posix()}', "
+                    f" caption='{plot.caption}', use_column_width=True)\n"
                 )
             elif plot.plot_type == r.PlotType.PLOTLY:
                 plot_content.append(self._generate_plot_code(plot))
@@ -659,7 +672,8 @@ st.markdown(f"<p style='text-align: center; color: black;'> <b>Number of relatio
                 self.report.logger.warning(f"Unsupported plot type: {plot.plot_type}")
         except Exception as e:
             self.report.logger.error(
-                f"Error generating content for '{plot.plot_type}' plot '{plot.id}' '{plot.title}': {str(e)}"
+                f"Error generating content for '{plot.plot_type}' plot '{plot.id}' "
+                f"'{plot.title}': {str(e)}"
             )
             raise
 
@@ -750,7 +764,10 @@ st.components.v1.html(html_content, height=net_html_height)\n"""
                 file_extension == fmt.value_with_dot for fmt in r.DataFrameFormat
             ):
                 self.report.logger.error(
-                    f"Unsupported file extension: {file_extension}. Supported extensions are: {', '.join(fmt.value for fmt in r.DataFrameFormat)}."
+                    f"Unsupported file extension: {file_extension}. "
+                    "Supported extensions are: {}.".format(
+                        ", ".join(fmt.value for fmt in r.DataFrameFormat)
+                    )
                 )
                 # return []  # Skip execution if unsupported file extension
                 # Should it not return here?
@@ -787,7 +804,8 @@ st.components.v1.html(html_content, height=net_html_height)\n"""
                 r.DataFrameFormat.XLSX.value_with_dot,
             ]:
                 dataframe_content.append(
-                    f"""df = pd.{read_function.__name__}('{dataframe.file_path}', sheet_name=selected_sheet)\n"""
+                    f"df = pd.{read_function.__name__}('{dataframe.file_path}',"
+                    " sheet_name=selected_sheet)\n"
                 )
             else:
                 dataframe_content.append(
@@ -819,7 +837,8 @@ df_index += 1"""
             )
         except Exception as e:
             self.report.logger.error(
-                f"Error generating content for DataFrame: {dataframe.title}. Error: {str(e)}"
+                f"Error generating content for DataFrame: {dataframe.title}. "
+                f"Error: {str(e)}"
             )
             raise
 
@@ -880,7 +899,8 @@ with open('{md_rel_path.as_posix()}', 'r') as markdown_file:
             )
         except Exception as e:
             self.report.logger.error(
-                f"Error generating content for Markdown: {markdown.title}. Error: {str(e)}"
+                f"Error generating content for Markdown: {markdown.title}. "
+                f"Error: {str(e)}"
             )
             raise
 
@@ -998,7 +1018,8 @@ with open('{html_rel_path.as_posix()}', 'r', encoding='utf-8') as html_file:
             )
 
         self.report.logger.info(
-            f"Successfully generated content for APICall '{apicall.title}' using method '{apicall.method}'"
+            f"Successfully generated content for APICall '{apicall.title}' "
+            f"using method '{apicall.method}'"
         )
         return apicall_content
 
