@@ -358,12 +358,16 @@ class StreamlitReportView(r.WebAppReportView):
         str
             A formatted markdown string for the specified text.
         """
+        tag = ""
         if type == "header":
             tag = f"h{level}"
         elif type == "paragraph" or type == "caption":
             tag = "p"
-
-        return f"""st.markdown('''<{tag} style='text-align: {text_align}; color: {color};'>{text}</{tag}>''', unsafe_allow_html=True)"""
+        else:
+            raise ValueError(
+                f"Unsupported text type: {type}. Supported types are 'header', "
+                "'paragraph', and 'caption'."
+            )
 
     def _generate_home_section(
         self,
