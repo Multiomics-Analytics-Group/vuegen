@@ -429,7 +429,7 @@ class StreamlitReportView(r.WebAppReportView):
 
             # Write the home page content to a Python file
             home_page_path = Path(home_dir_path) / "Homepage.py"
-            with open(home_page_path, "w") as home_page:
+            with open(home_page_path, "w", encoding="utf-8") as home_page:
                 home_page.write("\n".join(home_content))
             self.report.logger.info(f"Home page content written to '{home_page_path}'.")
 
