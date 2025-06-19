@@ -365,7 +365,6 @@ close-streamlit-app-with-button-click/35132/5
         str
             A formatted markdown string for the specified text.
         """
-        tag = ""
         if type == "header":
             tag = f"h{level}"
         elif type == "paragraph" or type == "caption":
@@ -374,6 +373,9 @@ close-streamlit-app-with-button-click/35132/5
             raise ValueError(
                 f"Unsupported text type: {type}. Supported types are 'header', "
                 "'paragraph', and 'caption'."
+            )
+
+        text = text.strip()  # get rid of new lines
 
         return textwrap.dedent(
             f"""
