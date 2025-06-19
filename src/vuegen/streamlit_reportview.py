@@ -60,10 +60,10 @@ class StreamlitReportView(r.WebAppReportView):
         """
         super().__init__(report=report, report_type=report_type)
         self.streamlit_autorun = streamlit_autorun
-        self.BUNDLED_EXECUTION = False
+        self.bundled_execution = False
         if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
             self.report.logger.info("running in a PyInstaller bundle")
-            self.BUNDLED_EXECUTION = True
+            self.bundled_execution = True
         else:
             self.report.logger.info("running in a normal Python process")
 
@@ -287,7 +287,7 @@ class StreamlitReportView(r.WebAppReportView):
                 self.report.logger.debug(
                     f"Running Streamlit report from file: {target_file}"
                 )
-                if self.BUNDLED_EXECUTION:
+                if self.bundled_execution:
                     args = [
                         "streamlit",
                         "run",
