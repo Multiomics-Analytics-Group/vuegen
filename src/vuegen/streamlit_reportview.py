@@ -260,7 +260,8 @@ class StreamlitReportView(r.WebAppReportView):
             self.report.logger.debug(
                 f"Running Streamlit report from directory: {output_dir}"
             )
-            # ! using pyinstaller: vuegen main script as executable, not the Python Interpreter
+            # ! using pyinstaller: vuegen main script as executable,
+            # ! not the Python Interpreter
             msg = f"{sys.executable = }"
             self.report.logger.debug(msg)
             try:
@@ -326,7 +327,8 @@ class StreamlitReportView(r.WebAppReportView):
         type : str
             The type of the text (e.g., 'header', 'paragraph').
         level : int, optional
-            If the text is a header, the level of the header (e.g., 1 for h1, 2 for h2, etc.).
+            If the text is a header, the level of the header
+            (e.g., 1 for h1, 2 for h2, etc.).
         color : str, optional
             The color of the header text.
         text_align : str, optional
@@ -521,8 +523,9 @@ class StreamlitReportView(r.WebAppReportView):
 
     def _generate_subsection(self, subsection) -> tuple[List[str], List[str]]:
         """
-        Generate code to render components (plots, dataframes, markdown) in the given subsection,
-        creating imports and content for the subsection based on the component type.
+        Generate code to render components (plots, dataframes, markdown) in the given
+        subsection, creating imports and content for the subsection based on the
+        component type.
 
         Parameters
         ----------
@@ -564,7 +567,8 @@ class StreamlitReportView(r.WebAppReportView):
 
     def _generate_plot_content(self, plot) -> List[str]:
         """
-        Generate content for a plot component based on the plot type (static or interactive).
+        Generate content for a plot component based on the plot type
+        (static or interactive).
 
         Parameters
         ----------
@@ -938,8 +942,8 @@ with open('{html_rel_path.as_posix()}', 'r', encoding='utf-8') as html_file:
 
     def _generate_apicall_content(self, apicall) -> List[str]:
         """
-        Generate content for an API component. This method handles the API call and formats
-        the response for display in the Streamlit app.
+        Generate content for an API component. This method handles the API call and
+        formats the response for display in the Streamlit app.
 
         Parameters
         ----------
@@ -983,23 +987,26 @@ with open('{html_rel_path.as_posix()}', 'r', encoding='utf-8') as html_file:
 
     def _generate_chatbot_content(self, chatbot) -> List[str]:
         """
-        Generate content to render a ChatBot component, supporting standard and Ollama-style streaming APIs.
+        Generate content to render a ChatBot component, supporting standard and
+        Ollama-style streaming APIs.
 
-        This method builds and returns a list of strings, which are later executed to create the chatbot
-        interface in a Streamlit app. It includes user input handling, API interaction logic, response parsing,
+        This method builds and returns a list of strings, which are later executed to
+        create the chatbot interface in a Streamlit app. It includes user input handling,
+        API interaction logic, response parsing,
         and conditional rendering of text, source links, and HTML subgraphs.
 
         The function distinguishes between two chatbot modes:
-        - **Ollama-style streaming API**: Identified by the presence of `chatbot.model`. Uses streaming
-        JSON chunks from the server to simulate a real-time response.
-        - **Standard API**: Assumes a simple POST request with a prompt and a full JSON response with text,
+        - **Ollama-style streaming API**: Identified by the presence of `chatbot.model`.
+          Uses streaming JSON chunks from the server to simulate a real-time response.
+        - **Standard API**: Assumes a simple POST request with a prompt and a full JSON
+          response with text,
         and other fields like links, HTML graphs, etc.
 
         Parameters
         ----------
         chatbot : ChatBot
-            The ChatBot component to generate content for, containing configuration such as title, model,
-            API endpoint, headers, and caption.
+            The ChatBot component to generate content for, containing configuration such
+            as title, model, API endpoint, headers, and caption.
 
         Returns
         -------
@@ -1074,7 +1081,8 @@ def parse_api_response(response):
                 return {{"role": "assistant", "content": output}}
             output += body.get("message", {{}}).get("content", "")
     except Exception as e:
-        return {{"role": "assistant", "content": f"Error while processing API response: {{str(e)}}"}}
+        return {{"role": "assistant", "content":
+                f"Error while processing API response: {{str(e)}}"}}
 
 # Simulated typing effect for responses
 def response_generator(msg_content):
@@ -1088,12 +1096,13 @@ def response_generator(msg_content):
 {handle_prompt_block}
 
     # Retrieve question and generate answer
-    combined = "\\n".join(msg["content"] for msg in st.session_state.messages if msg["role"] == "user")
+    combined = "\\n".join(msg["content"] for msg in st.session_state.messages
+                                                    if msg["role"] == "user")
     messages = [{{"role": "user", "content": combined}}]
-    with st.spinner('Generating answer...'):                       
+    with st.spinner('Generating answer...'):       
         response = generate_query(messages)
         parsed_response = parse_api_response(response)
-    
+
     # Add the assistant's response to the session state and display it
     st.session_state.messages.append(parsed_response)
     with st.chat_message("assistant"):
@@ -1168,7 +1177,8 @@ def generate_query(prompt):
         Parameters
         ----------
         component : r.Component
-            The component for which to generate the required imports. The component can be of type:
+            The component for which to generate the required imports.
+            The component can be of type:
             - PLOT
             - DATAFRAME
 
