@@ -316,6 +316,7 @@ class ConfigManager:
         # Generate the YAML config
         yaml_config = {
             "report": {
+                # This will be used for the home section of a report
                 "title": self._create_title_fromdir(base_dir_path.name),
                 "description": self._read_description_file(base_dir_path),
                 "graphical_abstract": "",
@@ -328,10 +329,11 @@ class ConfigManager:
         sorted_sections = self._sort_paths_by_numprefix(list(base_dir_path.iterdir()))
 
         main_section_config = {
-            "title": "",
-            "description": "Components added to homepage.",
+            "title": self._create_title_fromdir(base_dir_path.name),
+            "description": "Components added to main report folder.",
             "components": [],
         }
+        # treat it as any other section.
         yaml_config["sections"].append(main_section_config)
 
         # Generate sections and subsections config
