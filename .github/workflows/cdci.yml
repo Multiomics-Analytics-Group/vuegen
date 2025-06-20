@@ -19,9 +19,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: psf/black@stable
-        with:
-          jupyter: true
       - uses: isort/isort-action@v1
+        with:
+          # ! should be removed once all imports are correctly sorted
+          sort-paths: |
+            src
+            another_folder
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
@@ -67,6 +70,7 @@ jobs:
         run: |
           cd docs
           vuegen -dir example_data/Earth_microbiome_vuegen_demo_notebook
+          # here we are testing that the generated config from the -dir call works
           vuegen -c example_data/Earth_microbiome_vuegen_demo_notebook/Earth_microbiome_vuegen_demo_notebook_config.yaml
       # repeat for easier inspection on GitHub:
       - name: quarto html report
