@@ -104,6 +104,16 @@ jobs:
           cd docs
           vuegen -dir example_data/Earth_microbiome_vuegen_demo_notebook -rt jupyter
           vuegen -c example_data/Earth_microbiome_vuegen_demo_notebook/Earth_microbiome_vuegen_demo_notebook_config.yaml -rt jupyter
+      - name: check for changes in report files
+        run: |
+          # write streamlit report to test folder 
+          vuegen -dir docs/example_data/Basic_example_vuegen_demo_notebook -output_dir tests/report_examples/Basic_example_vuegen_demo_notebook
+          # Check for changes
+          if git diff tests/report_examples | grep .; then
+            echo "Error: One or more protected files have been modified."
+            exit 1
+          fi
+
 
   publish:
     name: Publish package to PyPI
