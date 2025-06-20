@@ -1,6 +1,5 @@
-import streamlit as st
-import streamlit as st
 import requests
+import streamlit as st
 st.markdown('''<p style='text-align: center; color: #000000;'>A general description of the report.
 </p>''', unsafe_allow_html=True)
 st.markdown('''<h4 style='text-align: center; color: #2b8cbe;'>Description</h4>''', unsafe_allow_html=True)
