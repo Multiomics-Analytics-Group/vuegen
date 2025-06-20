@@ -116,7 +116,7 @@ cython_debug/
 # Temporary files
 logs/
 vuegen/logs/
-streamlit_report/
+./streamlit_report/
 !tests/report_examples
 quarto_report/
 output_docker/
