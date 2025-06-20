@@ -19,6 +19,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: psf/black@stable
+        with:
+          # ! for now (format output files of vuegen for streamlit)
+          src: "./src"  
       - uses: isort/isort-action@v1
         with:
           # ! should be removed once all imports are correctly sorted
