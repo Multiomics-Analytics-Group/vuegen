@@ -22,9 +22,7 @@ jobs:
       - uses: isort/isort-action@v1
         with:
           # ! should be removed once all imports are correctly sorted
-          sort-paths: |
-            src
-            another_folder
+          sort-paths: src
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
