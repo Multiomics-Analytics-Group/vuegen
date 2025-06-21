@@ -74,3 +74,6 @@ vuegen = "vuegen.__main__:main"
 
 [tool.isort]
 profile = "black"
+
+[tool.jupytext]
+formats = "ipynb,py:percent"

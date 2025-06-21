@@ -87,15 +87,17 @@ class DataFrameFormat(StrEnum):
 @dataclass
 class Component:
     """
-    Base class for different components in a report subsection. It encapsulates elements like
-    plots, dataframes, markdown, or apicalls, providing a consistent structure for report generation.
+    Base class for different components in a report subsection. It encapsulates elements
+    like plots, dataframes, markdown, or apicalls,
+    providing a consistent structure for report generation.
 
     Attributes
     ----------
     _id_counter : ClassVar[int]
         Class-level counter for unique IDs.
     id : int
-        Unique identifier for the component, assigned automatically when an object is created.
+        Unique identifier for the component, assigned automatically
+        when an object is created.
     title : str
         Title of the component.
     component_type : ComponentType
@@ -103,7 +105,8 @@ class Component:
     logger : logging.Logger
         Logger object for tracking warnings, errors, and info messages.
     file_path : Optional[str]
-        Path to the file associated with the component (e.g., plot JSON file, image file, csv file, etc.).
+        Path to the file associated with the component
+        (e.g., plot JSON file, image file, csv file, etc.).
     caption : Optional[str]
         Caption providing additional context about the component (default: None).
     """
@@ -134,7 +137,8 @@ class Plot(Component):
     plot_type : PlotType
         The type of the plot (INTERACTIVE or STATIC).
     csv_network_format : CSVNetworkFormat, optional
-        The format of the CSV file for network plots (EDGELIST or ADJLIST) (default is None).
+        The format of the CSV file for network plots (EDGELIST or ADJLIST)
+        (default is None).
     """
 
     def __init__(
@@ -265,7 +269,8 @@ class Plot(Component):
                         f"Unsupported format for CSV/TXT file: {self.csv_network_format}."
                     )
 
-            # Handle other formats using the mapping and return the NetworkX graph object from the specified network file
+            # Handle other formats using the mapping and return the NetworkX graph object
+            # from the specified network file
             G = file_extension_map[file_extension](file_stream)
             G = self._add_size_attribute(G)
             self.logger.info(f"Successfully read network from file: {self.file_path}.")
@@ -393,7 +398,8 @@ class Plot(Component):
 
     def _add_size_attribute(self, G: nx.Graph) -> nx.Graph:
         """
-        Adds a 'size' attribute to the nodes of a NetworkX graph based on their degree centrality.
+        Adds a 'size' attribute to the nodes of a NetworkX graph
+        based on their degree centrality.
 
         Parameters
         ----------
@@ -445,9 +451,11 @@ class DataFrame(Component):
     Attributes
     ----------
     file_format : DataFrameFormat
-        The format of the file from which the DataFrame is loaded (e.g., CSV, TXT, PARQUET).
+        The format of the file from which the DataFrame is loaded
+        (e.g., CSV, TXT, PARQUET).
     delimiter : Optional[str]
-        The delimiter to use if the file is a delimited text format (e.g., ';', '\t', etc).
+        The delimiter to use if the file is a delimited text format
+        (e.g., ';', '\t', etc).
     """
 
     def __init__(
@@ -530,7 +538,8 @@ class APICall(Component):
     api_url : str
         The URL of the API to interact with.
     method : str
-        HTTP method to use for the request ("GET", "POST", or "PUT"). The deafult is "GET".
+        HTTP method to use for the request ("GET", "POST", or "PUT").
+        The deafult is "GET".
     headers : Optional[dict]
         Headers to include in the API request (default is None).
     params : Optional[dict]
@@ -617,12 +626,14 @@ class APICall(Component):
 class ChatBot(Component):
     """
     A component for creating a ChatBot that interacts with an API.
-    This component uses an APICall instance to send requests to the chatbot API and receive responses.
+    This component uses an APICall instance to send requests
+    to the chatbot API and receive responses.
 
     Attributes
     ----------
     api_call : APICall
-        An instance of the APICall class used to interact with the API for fetching chatbot responses.
+        An instance of the APICall class used to interact
+        with the API for fetching chatbot responses.
     model : Optional[str]
         The language model to use for the chatbot (default is None).
     headers : Optional[dict]
@@ -670,7 +681,8 @@ class Subsection:
     _id_counter : ClassVar[int]
         Class-level counter for unique IDs.
     id : int
-        Unique identifier for the subsection, assigned automatically when an object is created.
+        Unique identifier for the subsection, assigned automatically
+        when an object is created.
     title : str
         Title of the subsection.
     components : List[Component]
@@ -709,7 +721,8 @@ class Section:
     _id_counter : ClassVar[int]
         Class-level counter for unique IDs.
     id : int
-        Unique identifier for the section, assigned automatically when an object is created.
+        Unique identifier for the section, assigned automatically
+        when an object is created.
     title : str
         Title of the section.
     subsections : List[Subsection]
@@ -798,7 +811,8 @@ class ReportView(ABC):
         Parameters
         ----------
         output_dir : str, optional
-            The folder where the generated report files will be saved (default is 'sections').
+            The folder where the generated report files will be saved
+            (default is 'sections').
         """
         pass
 
@@ -822,7 +836,8 @@ class ReportView(ABC):
         Parameters
         ----------
         component : r.Component
-            The component for which to generate the required imports. The component can be of type:
+            The component for which to generate the required imports.
+            The component can be of type:
             - PLOT
             - DATAFRAME
             - MARKDOWN
@@ -852,7 +867,8 @@ class WebAppReportView(ReportView):
         type : str
             The type of the text (e.g., 'header', 'paragraph').
         level : int, optional
-            If the text is a header, the level of the header (e.g., 1 for h1, 2 for h2, etc.).
+            If the text is a header, the level of the header
+            (e.g., 1 for h1, 2 for h2, etc.).
         color : str, optional
             The color of the header text.
 
@@ -884,8 +900,9 @@ class WebAppReportView(ReportView):
         self, subsection: Subsection
     ) -> tuple[List[str], List[str]]:
         """
-        Generate code to render components (plots, dataframes, markdown) in the given subsection,
-        creating imports and content for the subsection based on the component type.
+        Generate code to render components (plots, dataframes, markdown) in the given
+        subsection, creating imports and content for the subsection based on
+        the component type.
 
         Parameters
         ----------
