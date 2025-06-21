@@ -30,10 +30,10 @@ st.download_button(
 df_index += 1
 st.markdown('''<h4 style='text-align: center; color: #2b8cbe;'>Abundance Table Example Xls</h4>''', unsafe_allow_html=True)
 selected_sheet = 0
-sheet_names = table_utils.get_sheet_names("/home/runner/work/vuegen/vuegen/docs/example_data/Basic_example_vuegen_demo_notebook/2_Dataframes/1_All_formats/2_abundance_table_example_xls.xls")
+sheet_names = table_utils.get_sheet_names("docs/example_data/Basic_example_vuegen_demo_notebook/2_Dataframes/1_All_formats/2_abundance_table_example_xls.xls")
 selected_sheet = st.selectbox("Select a sheet to display", options=sheet_names)
 
-df = pd.read_excel('/home/runner/work/vuegen/vuegen/docs/example_data/Basic_example_vuegen_demo_notebook/2_Dataframes/1_All_formats/2_abundance_table_example_xls.xls', sheet_name=selected_sheet)
+df = pd.read_excel('docs/example_data/Basic_example_vuegen_demo_notebook/2_Dataframes/1_All_formats/2_abundance_table_example_xls.xls', sheet_name=selected_sheet)
 
 
 # Displays a DataFrame using AgGrid with configurable options.
@@ -103,7 +103,7 @@ st.download_button(
 df_index += 1
 st.markdown('''<h4 style='text-align: center; color: #2b8cbe;'>Example Xlsx</h4>''', unsafe_allow_html=True)
 selected_sheet = 0
-df = pd.read_excel('/home/runner/work/vuegen/vuegen/docs/example_data/Basic_example_vuegen_demo_notebook/2_Dataframes/1_All_formats/5_example_xlsx.xlsx', sheet_name=selected_sheet)
+df = pd.read_excel('docs/example_data/Basic_example_vuegen_demo_notebook/2_Dataframes/1_All_formats/5_example_xlsx.xlsx', sheet_name=selected_sheet)
 
 
 # Displays a DataFrame using AgGrid with configurable options.
