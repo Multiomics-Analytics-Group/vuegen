@@ -13,7 +13,13 @@ from streamlit.web import cli as stcli
 
 from . import report as r
 from . import table_utils
-from .utils import create_folder, generate_footer, get_relative_file_path, is_url
+from .utils import (
+    create_folder,
+    generate_footer,
+    get_relative_file_path,
+    is_url,
+    sort_imports,
+)
 from .utils.variables import make_valid_identifier
 
 
@@ -412,7 +418,6 @@ close-streamlit-app-with-button-click/35132/5
             all_components, subsection_imports, _ = self._combine_components(
                 home_section.components
             )
-
         try:
             # Create folder for the home page
             home_dir_path = Path(output_dir) / "Home"
@@ -425,9 +430,11 @@ close-streamlit-app-with-button-click/35132/5
 
             # Create the home page content
             home_content = []
-            home_content.append("import streamlit as st")
-            if subsection_imports:
-                home_content.extend(subsection_imports)
+            subsection_imports.append("import streamlit as st")
+            subsection_imports = set(subsection_imports)
+            subsection_imports, _ = sort_imports(subsection_imports)
+
+            home_content.extend(subsection_imports)
             if self.report.description:
                 home_content.append(
                     self._format_text(text=self.report.description, type="paragraph")
@@ -569,6 +576,8 @@ close-streamlit-app-with-button-click/35132/5
                 all_contents.extend(content)
         # remove duplicates
         all_imports = list(set(all_imports))
+        all_imports, setup_statements = sort_imports(all_imports)
+        all_imports.extend(setup_statements)
         return all_contents, all_imports, has_chatbot
 
     def _generate_subsection(self, subsection) -> tuple[List[str], List[str]]:
