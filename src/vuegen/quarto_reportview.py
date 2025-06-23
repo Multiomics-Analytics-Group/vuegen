@@ -559,6 +559,7 @@ include-after-body:
 
         # Define plot path
         if self.is_report_static:
+            # ? should that be in the output folder
             static_plot_path = (
                 Path(self.static_dir) / f"{plot.title.replace(' ', '_')}.png"
             ).absolute()
@@ -592,7 +593,7 @@ include-after-body:
                 else:
                     plot_content.append("""fig_altair\n```\n""")
             elif plot.plot_type == r.PlotType.INTERACTIVE_NETWORK:
-                networkx_graph = plot.read_network()
+                networkx_graph = plot.read_network()  # ? what does this do?
                 if isinstance(networkx_graph, tuple):
                     # If network_data is a tuple, separate the network and html file path
                     networkx_graph, html_plot_file = networkx_graph
@@ -602,7 +603,7 @@ include-after-body:
                         networkx_graph, html_plot_file
                     )
 
-                # Add number of nodes and edges to the plor conetnt
+                # Add number of nodes and edges to the plot content
                 num_nodes = networkx_graph.number_of_nodes()
                 num_edges = networkx_graph.number_of_edges()
                 plot_content.append(f"**Number of nodes:** {num_nodes}\n")
