@@ -44,6 +44,7 @@ class QuartoReportView(r.ReportView):
         super().__init__(report=report, report_type=report_type)
         self.quarto_checks = quarto_checks
         self.static_dir = static_dir
+        self.output_dir = self.BASE_DIR  # set default output directory
         # self.BUNDLED_EXECUTION = False
         self.quarto_path = "quarto"
         # self.env_vars = os.environ.copy()
@@ -84,13 +85,13 @@ class QuartoReportView(r.ReportView):
         self.report.logger.debug(
             f"Generating '{self.report_type}' report in directory: '{output_dir}'"
         )
-
+        self.output_dir = output_dir.resolve().absolute()
         # Create the output folder
-        if create_folder(output_dir):
-            self.report.logger.debug(f"Created output directory: '{output_dir}'")
+        if create_folder(self.output_dir, is_nested=True):
+            self.report.logger.debug(f"Created output directory: '{self.output_dir}'")
         else:
             self.report.logger.debug(
-                f"Output directory already existed: '{output_dir}'"
+                f"Output directory already existed: '{self.output_dir}'"
             )
 
         # Create the static folder
@@ -207,6 +208,9 @@ class QuartoReportView(r.ReportView):
                     self.report.logger.warning(
                         f"No subsections found in section: '{section.title}'. To show content in the report, add subsections to the section."
                     )
+            # Add globally set output folder
+            report_imports.append("from pathlib import Path")
+            report_imports.append("report_dir = Path().cwd()")
 
             # Remove duplicated imports
             report_unique_imports = set(report_imports)
@@ -224,7 +228,8 @@ class QuartoReportView(r.ReportView):
             report_formatted_imports = "\n".join(report_unique_imports)
 
             # Write the navigation and general content to a Python file
-            with open(Path(output_dir) / f"{self.BASE_DIR}.qmd", "w") as quarto_report:
+            fname_qmd_report = self.output_dir / f"{self.BASE_DIR}.qmd"
+            with open(fname_qmd_report, "w") as quarto_report:
                 quarto_report.write(yaml_header)
                 quarto_report.write(
                     f"""\n```{{python}}
@@ -234,7 +239,7 @@ class QuartoReportView(r.ReportView):
                 )
                 quarto_report.write("\n".join(qmd_content))
                 self.report.logger.info(
-                    f"Created qmd script to render the app: {self.BASE_DIR}.qmd"
+                    f"Created qmd script to render the app: {fname_qmd_report}"
                 )
 
         except Exception as e:
@@ -572,7 +577,7 @@ include-after-body:
                 plot_content.append(self._generate_plot_code(plot))
                 if self.is_report_static:
                     plot_content.append(
-                        f"""fig_plotly.write_image("{static_plot_path.relative_to("quarto_report").as_posix()}")\n```\n"""
+                        f"""fig_plotly.write_image("{static_plot_path.relative_to(self.output_dir).as_posix()}")\n```\n"""
                     )
                     plot_content.append(self._generate_image_content(static_plot_path))
                 else:
@@ -581,7 +586,7 @@ include-after-body:
                 plot_content.append(self._generate_plot_code(plot))
                 if self.is_report_static:
                     plot_content.append(
-                        f"""fig_altair.save("{static_plot_path.relative_to("quarto_report").as_posix()}")\n```\n"""
+                        f"""fig_altair.save("{static_plot_path.as_posix()}")\n```\n"""
                     )
                     plot_content.append(self._generate_image_content(static_plot_path))
                 else:
@@ -653,9 +658,11 @@ response = requests.get('{plot.file_path}')
 response.raise_for_status()
 plot_json = response.text\n"""
         else:  # If it's a local file
-            plot_rel_path = get_relative_file_path(plot.file_path, base_path="..")
+            plot_rel_path = get_relative_file_path(
+                plot.file_path, relativ_to=self.output_dir
+            ).as_posix()
             plot_code += f"""
-with open('{plot_rel_path.as_posix()}', 'r') as plot_file:
+with open(report_dir /'{plot_rel_path}', 'r') as plot_file:
     plot_json = json.load(plot_file)\n"""
         # Add specific code for each visualization tool
         if plot.plot_type == r.PlotType.PLOTLY:
@@ -680,7 +687,9 @@ fig_altair = alt.Chart.from_json(plot_json_str).properties(width=900, height=370
             if is_url(plot.file_path) and plot.file_path.endswith(".html"):
                 iframe_src = output_file
             else:
-                iframe_src = Path("..") / output_file
+                iframe_src = get_relative_file_path(
+                    output_file, relativ_to=self.output_dir
+                )
 
             # Embed the HTML file in an iframe
             plot_code = f"""
@@ -757,12 +766,12 @@ fig_altair = alt.Chart.from_json(plot_json_str).properties(width=900, height=370
                 df_file_path = dataframe.file_path
             else:
                 df_file_path = get_relative_file_path(
-                    dataframe.file_path, base_path=".."
-                )
+                    dataframe.file_path, relativ_to=self.output_dir
+                ).as_posix()
             # Load the DataFrame using the correct function
             read_function = read_function_mapping[file_extension]
             dataframe_content.append(
-                f"""df = pd.{read_function.__name__}('{df_file_path.as_posix()}')\n"""
+                f"""df = pd.{read_function.__name__}(report_dir / '{df_file_path}')\n"""
             )
             # Display the dataframe
             dataframe_content.extend(self._show_dataframe(dataframe))
@@ -781,7 +790,7 @@ fig_altair = alt.Chart.from_json(plot_json_str).properties(width=900, height=370
                         )
                     )
                     dataframe_content.append(
-                        f"df = pd.{read_function.__name__}('{df_file_path.as_posix()}', "
+                        f"df = pd.{read_function.__name__}(report_dir / '{df_file_path}', "
                         f"sheet_name='{sheet_name}')\n"
                     )
                     # Display the dataframe
@@ -845,10 +854,12 @@ fig_altair = alt.Chart.from_json(plot_json_str).properties(width=900, height=370
                     )
                 )
             else:  # If it's a local file
-                md_rel_path = get_relative_file_path(markdown.file_path, base_path="..")
+                md_rel_path = get_relative_file_path(
+                    markdown.file_path, relativ_to=self.output_dir
+                )
                 markdown_content.append(
                     f"""
-with open('{md_rel_path.as_posix()}', 'r') as markdown_file:
+with open(report_dir / '{md_rel_path.as_posix()}', 'r') as markdown_file:
     markdown_content = markdown_file.read()\n"""
                 )
 
@@ -935,7 +946,9 @@ with open('{md_rel_path.as_posix()}', 'r') as markdown_file:
             if is_url(html.file_path):
                 html_file_path = html.file_path
             else:
-                html_file_path = get_relative_file_path(html.file_path, base_path="..")
+                html_file_path = get_relative_file_path(
+                    html.file_path, relativ_to=self.output_dir
+                )
             iframe_code = f"""
 <div style="text-align: center;">
 <iframe src="{html_file_path.as_posix()}" alt="{html.title}" width="950px" height="530px"></iframe>
@@ -978,7 +991,9 @@ with open('{md_rel_path.as_posix()}', 'r') as markdown_file:
         if is_url(image_path):
             src = image_path
         else:
-            src = get_relative_file_path(image_path, base_path="..").as_posix()
+            src = get_relative_file_path(
+                image_path, relativ_to=self.output_dir
+            ).as_posix()
 
         return f"""![]({src}){{fig-alt={alt_text} width={width}}}\n"""
 

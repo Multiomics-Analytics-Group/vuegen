@@ -174,7 +174,9 @@ def create_folder(directory_path: str, is_nested: bool = False) -> bool:
         raise OSError(f"Error creating directory '{directory_path}': {e}")
 
 
-def get_relative_file_path(file_path: str, base_path: str = "") -> Path:
+def get_relative_file_path(
+    file_path: str, base_path: str = "", relativ_to: str = "."
+) -> Path:
     """
     Returns the relative file path of a given file with respect to
     the current working directory (CWD).
@@ -189,13 +191,23 @@ def get_relative_file_path(file_path: str, base_path: str = "") -> Path:
         The full file path to be converted to a relative path.
     base_path : str, optional
         The base path to be prepended to the relative path, default is an empty string.
+    relativ_to : str, optional
+        The directory to which the file path should be relative,
+        default is the current directory (".").
 
     Returns
     -------
     Path
         The file path relative to the CWD.
     """
-    rel_path = Path(file_path).resolve().relative_to(Path.cwd().resolve())
+    if relativ_to == ".":
+        # Use the current working directory as the base
+        relativ_to = Path.cwd()
+    elif isinstance(relativ_to, str):
+        # ensure path is a Path object
+        relativ_to = Path(relativ_to)
+    rel_path = os.path.relpath(Path(file_path).resolve(), relativ_to)
+    rel_path = Path(rel_path)  # Ensure rel_path is a Path object
 
     if base_path:
         rel_path = Path(base_path) / rel_path
