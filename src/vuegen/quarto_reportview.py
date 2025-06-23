@@ -561,11 +561,11 @@ include-after-body:
         if self.is_report_static:
             static_plot_path = (
                 Path(self.static_dir) / f"{plot.title.replace(' ', '_')}.png"
-            )
+            ).absolute()
         else:
             html_plot_file = (
                 Path(self.static_dir) / f"{plot.title.replace(' ', '_')}.html"
-            )
+            ).absolute()
 
         # Add content for the different plot types
         try:
@@ -907,9 +907,11 @@ with open(report_dir / '{md_rel_path.as_posix()}', 'r') as markdown_file:
                     fpath_df_image.stem + f"_{suffix.replace(' ', '_')}"
                 )
             fpath_df_image = fpath_df_image.with_suffix(".png")
-
+            fpath_df_image_rel_static = get_relative_file_path(
+                fpath_df_image, relativ_to=self.static_dir
+            )
             dataframe_content.append(
-                f"df.dfi.export('{Path(fpath_df_image).relative_to('quarto_report').as_posix()}',"
+                f"df.dfi.export('{fpath_df_image_rel_static}',"
                 " max_rows=10, max_cols=5, table_conversion='matplotlib')\n```\n"
             )
             # Use helper method to add centered image content
