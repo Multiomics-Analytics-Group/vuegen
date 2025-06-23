@@ -908,7 +908,7 @@ with open(report_dir / '{md_rel_path.as_posix()}', 'r') as markdown_file:
                 )
             fpath_df_image = fpath_df_image.with_suffix(".png")
             fpath_df_image_rel_static = get_relative_file_path(
-                fpath_df_image, relativ_to=self.static_dir
+                fpath_df_image, relativ_to=self.output_dir
             )
             dataframe_content.append(
                 f"df.dfi.export('{fpath_df_image_rel_static}',"
