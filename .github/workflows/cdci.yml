@@ -114,7 +114,7 @@ jobs:
           cd docs
           vuegen -c example_config_files/Basic_example_vuegen_demo_notebook_config.yaml -output_dir ../tests/report_examples/Basic_example_vuegen_demo_notebook_cfg/html -rt html
           # Check for changes
-          if git diff tests/report_examples | grep .; then
+          if git diff ../tests/report_examples | grep .; then
             echo "Error: One or more protected files have been modified."
             exit 1
           fi
