@@ -126,6 +126,7 @@ def get_report(
             quarto_checks=quarto_checks,
             static_dir=static_files_dir,
         )
+        # ToDo: output_dir should be passed then in init of QuartoReportView
         quarto_report.generate_report(output_dir=report_dir)
         quarto_report.run_report(output_dir=report_dir)
     # ? Could be also the path to the report file for quarto based reports
