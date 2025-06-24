@@ -130,35 +130,10 @@ class QuartoReportView(r.ReportView):
                 qmd_content.append(
                     self._generate_image_content(self.report.graphical_abstract)
                 )
-            # ? Do we need to handle overview separately?
-            main_section = self.report.sections[0]
-
-            # ! description can be a Markdown component, but it is treated differently
-            # ! It won't be added to the section content.
-            if main_section.components:
-                self.report.logger.debug(
-                    "Adding components of main section folder to the report as overall overview."
-                )
-                section_content, section_imports = self._combine_components(
-                    main_section.components
-                )
-                if section_content:
-                    qmd_content.append("# General Overview")
-
-                    if is_report_revealjs:
-                        # Add tabset for revealjs
-                        section_content = [
-                            "::: {.panel-tabset}\n",
-                            *section_content,
-                            ":::",
-                        ]
-                    qmd_content.extend(section_content)
-
-                report_imports.extend(section_imports)
 
             # Add the sections and subsections to the report
             self.report.logger.info("Starting to generate sections for the report.")
-            for section in self.report.sections[1:]:
+            for section in self.report.sections:
                 self.report.logger.debug(
                     f"Processing section: '{section.title}' - {len(section.subsections)} subsection(s)"
                 )
