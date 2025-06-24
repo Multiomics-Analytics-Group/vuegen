@@ -679,14 +679,6 @@ plot_json_str = json.dumps(plot_json)\n
 # Create the plotly plot
 fig_altair = alt.Chart.from_json(plot_json_str).properties(width=900, height=370)\n"""
         elif plot.plot_type == r.PlotType.INTERACTIVE_NETWORK:
-            # Generate the HTML embedding for interactive networks
-            # if is_url(plot.file_path) and plot.file_path.endswith(".html"):
-            #    iframe_src = output_file
-            # else:
-            #    iframe_src = get_relative_file_path(
-            #        output_file, relativ_to=self.output_dir
-            #    )
-
             # Embed the HTML file in an iframe
             plot_code = f"""
 <div style="text-align: center;">
@@ -850,7 +842,7 @@ fig_altair = alt.Chart.from_json(plot_json_str).properties(width=900, height=370
                 md_path = Path(markdown.file_path).resolve()
                 markdown_content.append(
                     f"""
-with open(report_dir / '{md_path.as_posix()}', 'r') as markdown_file:
+with open('{md_path.as_posix()}', 'r') as markdown_file:
     markdown_content = markdown_file.read()\n"""
                 )
 
@@ -898,9 +890,6 @@ with open(report_dir / '{md_path.as_posix()}', 'r') as markdown_file:
                     fpath_df_image.stem + f"_{suffix.replace(' ', '_')}"
                 )
             fpath_df_image = fpath_df_image.with_suffix(".png")
-            # fpath_df_image_static = get_relative_file_path(
-            #    fpath_df_image, relativ_to=self.output_dir
-            # )
             dataframe_content.append(
                 f"df.dfi.export('{fpath_df_image}',"
                 " max_rows=10, max_cols=5, table_conversion='matplotlib')\n```\n"
@@ -985,7 +974,7 @@ with open(report_dir / '{md_path.as_posix()}', 'r') as markdown_file:
         else:
             src = Path(image_path).resolve().as_posix()
 
-        return f"""![]({src}){{fig-alt={alt_text} width={width}}}\n"""
+        return f"""![](/{src}){{fig-alt={alt_text} width={width}}}\n"""
 
     def _generate_component_imports(self, component: r.Component) -> List[str]:
         """
