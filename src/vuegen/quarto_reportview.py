@@ -563,6 +563,7 @@ include-after-body:
             static_plot_path = (
                 Path(self.static_dir) / f"{plot.title.replace(' ', '_')}.png"
             ).absolute()
+            self.report.logger.debug(f"Static plot path: {static_plot_path}")
         else:
             html_plot_file = (
                 Path(self.static_dir) / f"{plot.title.replace(' ', '_')}.html"
@@ -593,7 +594,7 @@ include-after-body:
                 else:
                     plot_content.append("""fig_altair\n```\n""")
             elif plot.plot_type == r.PlotType.INTERACTIVE_NETWORK:
-                networkx_graph = plot.read_network()  # ? what does this do?
+                networkx_graph = plot.read_network()
                 if isinstance(networkx_graph, tuple):
                     # If network_data is a tuple, separate the network and html file path
                     networkx_graph, html_plot_file = networkx_graph
@@ -660,7 +661,7 @@ response.raise_for_status()
 plot_json = response.text\n"""
         else:  # If it's a local file
             plot_rel_path = get_relative_file_path(
-                plot.file_path, relativ_to=self.output_dir
+                plot.file_path, relative_to=self.output_dir
             ).as_posix()
             plot_code += f"""
 with open(report_dir /'{plot_rel_path}', 'r') as plot_file:
@@ -689,7 +690,7 @@ fig_altair = alt.Chart.from_json(plot_json_str).properties(width=900, height=370
                 iframe_src = output_file
             else:
                 iframe_src = get_relative_file_path(
-                    output_file, relativ_to=self.output_dir
+                    output_file, relative_to=self.output_dir
                 )
 
             # Embed the HTML file in an iframe
@@ -767,7 +768,7 @@ fig_altair = alt.Chart.from_json(plot_json_str).properties(width=900, height=370
                 df_file_path = dataframe.file_path
             else:
                 df_file_path = get_relative_file_path(
-                    dataframe.file_path, relativ_to=self.output_dir
+                    dataframe.file_path, relative_to=self.output_dir
                 ).as_posix()
             # Load the DataFrame using the correct function
             read_function = read_function_mapping[file_extension]
@@ -856,7 +857,7 @@ fig_altair = alt.Chart.from_json(plot_json_str).properties(width=900, height=370
                 )
             else:  # If it's a local file
                 md_rel_path = get_relative_file_path(
-                    markdown.file_path, relativ_to=self.output_dir
+                    markdown.file_path, relative_to=self.output_dir
                 )
                 markdown_content.append(
                     f"""
@@ -909,7 +910,7 @@ with open(report_dir / '{md_rel_path.as_posix()}', 'r') as markdown_file:
                 )
             fpath_df_image = fpath_df_image.with_suffix(".png")
             fpath_df_image_rel_static = get_relative_file_path(
-                fpath_df_image, relativ_to=self.output_dir
+                fpath_df_image, relative_to=self.output_dir
             )
             dataframe_content.append(
                 f"df.dfi.export('{fpath_df_image_rel_static}',"
@@ -950,7 +951,7 @@ with open(report_dir / '{md_rel_path.as_posix()}', 'r') as markdown_file:
                 html_file_path = html.file_path
             else:
                 html_file_path = get_relative_file_path(
-                    html.file_path, relativ_to=self.output_dir
+                    html.file_path, relative_to=self.output_dir
                 )
             iframe_code = f"""
 <div style="text-align: center;">
@@ -995,7 +996,7 @@ with open(report_dir / '{md_rel_path.as_posix()}', 'r') as markdown_file:
             src = image_path
         else:
             src = get_relative_file_path(
-                image_path, relativ_to=self.output_dir
+                image_path, relative_to=self.output_dir
             ).as_posix()
 
         return f"""![]({src}){{fig-alt={alt_text} width={width}}}\n"""

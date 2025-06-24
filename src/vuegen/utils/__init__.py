@@ -175,7 +175,7 @@ def create_folder(directory_path: str, is_nested: bool = False) -> bool:
 
 
 def get_relative_file_path(
-    file_path: str, base_path: str = "", relativ_to: str = "."
+    file_path: str, base_path: str = "", relative_to: str = "."
 ) -> Path:
     """
     Returns the relative file path of a given file with respect to
@@ -200,13 +200,13 @@ def get_relative_file_path(
     Path
         The file path relative to the CWD.
     """
-    if relativ_to == ".":
+    if relative_to == ".":
         # Use the current working directory as the base
-        relativ_to = Path.cwd()
-    elif isinstance(relativ_to, str):
+        relative_to = Path.cwd()
+    elif isinstance(relative_to, str):
         # ensure path is a Path object
-        relativ_to = Path(relativ_to)
-    rel_path = os.path.relpath(Path(file_path).resolve(), relativ_to)
+        relative_to = Path(relative_to)
+    rel_path = os.path.relpath(Path(file_path).resolve(), relative_to)
     rel_path = Path(rel_path)  # Ensure rel_path is a Path object
 
     if base_path:
