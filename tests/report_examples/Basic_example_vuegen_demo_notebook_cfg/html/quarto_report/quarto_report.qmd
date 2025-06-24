@@ -51,7 +51,7 @@ report_dir = Path().cwd()
 ```
 
 A general description of the report.
-![](https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/vuegen_logo.png){fig-alt= width=90%}
+![](https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/vuegen_logo.svg){fig-alt= width=90%}
 
 # Plots
 This section contains example plots.
