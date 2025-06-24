@@ -85,7 +85,7 @@ class QuartoReportView(r.ReportView):
             Will overwrite value set on initialization of QuartoReportView.
         """
         if output_dir is not None:
-            self.output_dir = Path(output_dir).resolve().absolute()
+            self.output_dir = Path(output_dir).resolve()
 
         self.report.logger.debug(
             f"Generating '{self.report_type}' report in directory: '{self.output_dir}'"
@@ -543,7 +543,7 @@ include-after-body:
             # ? should that be in the output folder
             static_plot_path = (
                 Path(self.static_dir) / f"{plot.title.replace(' ', '_')}.png"
-            ).absolute()
+            ).resolve()
             self.report.logger.debug(f"Static plot path: {static_plot_path}")
         else:
             html_plot_file = (
@@ -569,7 +569,7 @@ include-after-body:
                 plot_content.append(self._generate_plot_code(plot))
                 if self.is_report_static:
                     plot_content.append(
-                        f"""fig_altair.save("{static_plot_path.as_posix()}")\n```\n"""
+                        f"""fig_altair.save("{static_plot_path.relative_to(self.output_dir).as_posix()}")\n```\n"""
                     )
                     plot_content.append(self._generate_image_content(static_plot_path))
                 else:

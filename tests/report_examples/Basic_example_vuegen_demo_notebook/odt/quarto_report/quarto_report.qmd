@@ -72,7 +72,7 @@ plot_json_str = json.dumps(plot_json)
 # Create the plotly plot
 fig_altair = alt.Chart.from_json(plot_json_str).properties(width=900, height=370)
 
-fig_altair.save("/Users/heweb/Documents/repos/vuegen/tests/report_examples/Basic_example_vuegen_demo_notebook/odt/quarto_report/static/Multiline_Plot_Altair.png")
+fig_altair.save("static/Multiline_Plot_Altair.png")
 ```
 
 ![](static/Multiline_Plot_Altair.png){fig-alt= width=90%}
@@ -143,7 +143,7 @@ plot_json_str = json.dumps(plot_json)
 # Create the plotly plot
 fig_altair = alt.Chart.from_json(plot_json_str).properties(width=900, height=370)
 
-fig_altair.save("/Users/heweb/Documents/repos/vuegen/tests/report_examples/Basic_example_vuegen_demo_notebook/odt/quarto_report/static/Saline_Metagenomics_Samples_Map_Altair.png")
+fig_altair.save("static/Saline_Metagenomics_Samples_Map_Altair.png")
 ```
 
 ![](static/Saline_Metagenomics_Samples_Map_Altair.png){fig-alt= width=90%}
