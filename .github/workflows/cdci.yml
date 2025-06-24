@@ -127,7 +127,17 @@ jobs:
             echo "Error: One or more protected files have been modified."
             exit 1
           fi
-
+      - name: check for changes in quarto report files 
+        run: |
+          # write quarto based report to test folder
+          for format in html pdf docx odt revealjs pptx jupyter; do
+            vuegen -dir docs/example_data/Basic_example_vuegen_demo_notebook -output_dir tests/report_examples/Basic_example_vuegen_demo_notebook/$format  -rt $format 
+            # Check for changes
+            if git diff tests/report_examples | grep .; then
+              echo Failed for report: $format
+              echo "Error: One or more protected files have been modified."
+              exit 1
+            fi
 
   publish:
     name: Publish package to PyPI

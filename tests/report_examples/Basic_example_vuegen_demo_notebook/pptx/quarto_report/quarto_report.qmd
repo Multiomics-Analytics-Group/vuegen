@@ -194,7 +194,7 @@ fig_plotly.write_image("static/Plotly_Plot_R.png")
 
 df = pd.read_csv(report_dir / '../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/2_Dataframes/1_All_formats/1_phyla_correlation_network_csv.csv')
 
-df.dfi.export('Phyla_Correlation_Network_Csv.png', max_rows=10, max_cols=5, table_conversion='matplotlib')
+df.dfi.export('static/Phyla_Correlation_Network_Csv.png', max_rows=10, max_cols=5, table_conversion='matplotlib')
 ```
 
 ![](static/Phyla_Correlation_Network_Csv.png){fig-alt= width=90%}
@@ -206,7 +206,7 @@ df.dfi.export('Phyla_Correlation_Network_Csv.png', max_rows=10, max_cols=5, tabl
 
 df = pd.read_excel(report_dir / '../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/2_Dataframes/1_All_formats/2_abundance_table_example_xls.xls')
 
-df.dfi.export('Abundance_Table_Example_Xls.png', max_rows=10, max_cols=5, table_conversion='matplotlib')
+df.dfi.export('static/Abundance_Table_Example_Xls.png', max_rows=10, max_cols=5, table_conversion='matplotlib')
 ```
 
 ![](static/Abundance_Table_Example_Xls.png){fig-alt= width=90%}
@@ -218,7 +218,7 @@ df.dfi.export('Abundance_Table_Example_Xls.png', max_rows=10, max_cols=5, table_
 
 df = pd.read_excel(report_dir / '../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/2_Dataframes/1_All_formats/2_abundance_table_example_xls.xls', sheet_name='infos')
 
-df.dfi.export('Abundance_Table_Example_Xls_infos.png', max_rows=10, max_cols=5, table_conversion='matplotlib')
+df.dfi.export('static/Abundance_Table_Example_Xls_infos.png', max_rows=10, max_cols=5, table_conversion='matplotlib')
 ```
 
 ![](static/Abundance_Table_Example_Xls_infos.png){fig-alt= width=90%}
@@ -230,7 +230,7 @@ df.dfi.export('Abundance_Table_Example_Xls_infos.png', max_rows=10, max_cols=5, 
 
 df = pd.read_table(report_dir / '../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/2_Dataframes/1_All_formats/3_sample_info_example_txt.txt')
 
-df.dfi.export('Sample_Info_Example_Txt.png', max_rows=10, max_cols=5, table_conversion='matplotlib')
+df.dfi.export('static/Sample_Info_Example_Txt.png', max_rows=10, max_cols=5, table_conversion='matplotlib')
 ```
 
 ![](static/Sample_Info_Example_Txt.png){fig-alt= width=90%}
@@ -242,7 +242,7 @@ df.dfi.export('Sample_Info_Example_Txt.png', max_rows=10, max_cols=5, table_conv
 
 df = pd.read_parquet(report_dir / '../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/2_Dataframes/1_All_formats/4_sample_info_example_parquet.parquet')
 
-df.dfi.export('Sample_Info_Example_Parquet.png', max_rows=10, max_cols=5, table_conversion='matplotlib')
+df.dfi.export('static/Sample_Info_Example_Parquet.png', max_rows=10, max_cols=5, table_conversion='matplotlib')
 ```
 
 ![](static/Sample_Info_Example_Parquet.png){fig-alt= width=90%}
@@ -254,7 +254,7 @@ df.dfi.export('Sample_Info_Example_Parquet.png', max_rows=10, max_cols=5, table_
 
 df = pd.read_excel(report_dir / '../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/2_Dataframes/1_All_formats/5_example_xlsx.xlsx')
 
-df.dfi.export('Example_Xlsx.png', max_rows=10, max_cols=5, table_conversion='matplotlib')
+df.dfi.export('static/Example_Xlsx.png', max_rows=10, max_cols=5, table_conversion='matplotlib')
 ```
 
 ![](static/Example_Xlsx.png){fig-alt= width=90%}
@@ -289,7 +289,7 @@ Optional description for subsection.
 ### Readme
 
 ```{python}
-#| label: 'Readme 4'
+#| label: 'Readme 3'
 #| fig-cap: ""
 
 
