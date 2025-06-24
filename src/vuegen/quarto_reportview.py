@@ -9,7 +9,7 @@ import networkx as nx
 
 from . import report as r
 from . import table_utils
-from .utils import create_folder, get_relative_file_path, is_url, sort_imports
+from .utils import create_folder, is_url, sort_imports
 
 
 class QuartoReportView(r.ReportView):
@@ -85,7 +85,7 @@ class QuartoReportView(r.ReportView):
         self.report.logger.debug(
             f"Generating '{self.report_type}' report in directory: '{output_dir}'"
         )
-        self.output_dir = output_dir.resolve().absolute()
+        self.output_dir = output_dir.resolve()
         # Create the output folder
         if create_folder(self.output_dir, is_nested=True):
             self.report.logger.debug(f"Created output directory: '{self.output_dir}'")
@@ -95,6 +95,7 @@ class QuartoReportView(r.ReportView):
             )
 
         # Create the static folder
+        self.static_dir = self.output_dir / "static"
         if create_folder(self.static_dir):
             self.report.logger.info(
                 f"Created output directory for static content: '{self.static_dir}'"
@@ -208,10 +209,6 @@ class QuartoReportView(r.ReportView):
                     self.report.logger.warning(
                         f"No subsections found in section: '{section.title}'. To show content in the report, add subsections to the section."
                     )
-            # Add globally set output folder
-            report_imports.append("from pathlib import Path")
-            report_imports.append("report_dir = Path().cwd()")
-
             # Remove duplicated imports
             report_unique_imports = set(report_imports)
 
@@ -561,12 +558,12 @@ include-after-body:
         if self.is_report_static:
             # ? should that be in the output folder
             static_plot_path = (
-                Path(self.static_dir) / f"{plot.title.replace(' ', '_')}.png"
-            ).absolute()
+                self.static_dir / f"{plot.title.replace(' ', '_')}.png"
+            ).resolve()
         else:
             html_plot_file = (
-                Path(self.static_dir) / f"{plot.title.replace(' ', '_')}.html"
-            ).absolute()
+                self.static_dir / f"{plot.title.replace(' ', '_')}.html"
+            ).resolve()
 
         # Add content for the different plot types
         try:
@@ -578,7 +575,7 @@ include-after-body:
                 plot_content.append(self._generate_plot_code(plot))
                 if self.is_report_static:
                     plot_content.append(
-                        f"""fig_plotly.write_image("{static_plot_path.relative_to(self.output_dir).as_posix()}")\n```\n"""
+                        f"""fig_plotly.write_image("{static_plot_path.as_posix()}")\n```\n"""
                     )
                     plot_content.append(self._generate_image_content(static_plot_path))
                 else:
@@ -659,11 +656,9 @@ response = requests.get('{plot.file_path}')
 response.raise_for_status()
 plot_json = response.text\n"""
         else:  # If it's a local file
-            plot_rel_path = get_relative_file_path(
-                plot.file_path, relativ_to=self.output_dir
-            ).as_posix()
+            plot_abs_path = Path(plot.file_path).resolve().as_posix()
             plot_code += f"""
-with open(report_dir /'{plot_rel_path}', 'r') as plot_file:
+with open('{plot_abs_path}', 'r') as plot_file:
     plot_json = json.load(plot_file)\n"""
         # Add specific code for each visualization tool
         if plot.plot_type == r.PlotType.PLOTLY:
@@ -685,17 +680,17 @@ plot_json_str = json.dumps(plot_json)\n
 fig_altair = alt.Chart.from_json(plot_json_str).properties(width=900, height=370)\n"""
         elif plot.plot_type == r.PlotType.INTERACTIVE_NETWORK:
             # Generate the HTML embedding for interactive networks
-            if is_url(plot.file_path) and plot.file_path.endswith(".html"):
-                iframe_src = output_file
-            else:
-                iframe_src = get_relative_file_path(
-                    output_file, relativ_to=self.output_dir
-                )
+            # if is_url(plot.file_path) and plot.file_path.endswith(".html"):
+            #    iframe_src = output_file
+            # else:
+            #    iframe_src = get_relative_file_path(
+            #        output_file, relativ_to=self.output_dir
+            #    )
 
             # Embed the HTML file in an iframe
             plot_code = f"""
 <div style="text-align: center;">
-<iframe src="{iframe_src}" alt="{plot.title} plot" width="800px" height="630px"></iframe>
+<iframe src="{output_file}" alt="{plot.title} plot" width="800px" height="630px"></iframe>
 </div>\n"""
         return plot_code
 
@@ -743,9 +738,8 @@ fig_altair = alt.Chart.from_json(plot_json_str).properties(width=900, height=370
             if is_url(dataframe.file_path):
                 df_file_path = dataframe.file_path
             else:
-                df_file_path = get_relative_file_path(
-                    dataframe.file_path,
-                )
+                df_file_path = Path(dataframe.file_path).resolve().as_posix()
+
             sheet_names = None
             # If the file is an Excel file, get the sheet names
             if file_extension in [
@@ -766,13 +760,11 @@ fig_altair = alt.Chart.from_json(plot_json_str).properties(width=900, height=370
             if is_url(dataframe.file_path):
                 df_file_path = dataframe.file_path
             else:
-                df_file_path = get_relative_file_path(
-                    dataframe.file_path, relativ_to=self.output_dir
-                ).as_posix()
+                df_file_path = Path(dataframe.file_path).resolve().as_posix()
             # Load the DataFrame using the correct function
             read_function = read_function_mapping[file_extension]
             dataframe_content.append(
-                f"""df = pd.{read_function.__name__}(report_dir / '{df_file_path}')\n"""
+                f"""df = pd.{read_function.__name__}('{df_file_path}')\n"""
             )
             # Display the dataframe
             dataframe_content.extend(self._show_dataframe(dataframe))
@@ -791,7 +783,7 @@ fig_altair = alt.Chart.from_json(plot_json_str).properties(width=900, height=370
                         )
                     )
                     dataframe_content.append(
-                        f"df = pd.{read_function.__name__}(report_dir / '{df_file_path}', "
+                        f"df = pd.{read_function.__name__}('{df_file_path}', "
                         f"sheet_name='{sheet_name}')\n"
                     )
                     # Display the dataframe
@@ -855,12 +847,10 @@ fig_altair = alt.Chart.from_json(plot_json_str).properties(width=900, height=370
                     )
                 )
             else:  # If it's a local file
-                md_rel_path = get_relative_file_path(
-                    markdown.file_path, relativ_to=self.output_dir
-                )
+                md_path = Path(markdown.file_path).resolve()
                 markdown_content.append(
                     f"""
-with open(report_dir / '{md_rel_path.as_posix()}', 'r') as markdown_file:
+with open(report_dir / '{md_path.as_posix()}', 'r') as markdown_file:
     markdown_content = markdown_file.read()\n"""
                 )
 
@@ -908,11 +898,11 @@ with open(report_dir / '{md_rel_path.as_posix()}', 'r') as markdown_file:
                     fpath_df_image.stem + f"_{suffix.replace(' ', '_')}"
                 )
             fpath_df_image = fpath_df_image.with_suffix(".png")
-            fpath_df_image_rel_static = get_relative_file_path(
-                fpath_df_image, relativ_to=self.output_dir
-            )
+            # fpath_df_image_static = get_relative_file_path(
+            #    fpath_df_image, relativ_to=self.output_dir
+            # )
             dataframe_content.append(
-                f"df.dfi.export('{fpath_df_image_rel_static}',"
+                f"df.dfi.export('{fpath_df_image}',"
                 " max_rows=10, max_cols=5, table_conversion='matplotlib')\n```\n"
             )
             # Use helper method to add centered image content
@@ -949,12 +939,11 @@ with open(report_dir / '{md_rel_path.as_posix()}', 'r') as markdown_file:
             if is_url(html.file_path):
                 html_file_path = html.file_path
             else:
-                html_file_path = get_relative_file_path(
-                    html.file_path, relativ_to=self.output_dir
-                )
+                html_file_path = Path(html.file_path).resolve().as_posix()
+
             iframe_code = f"""
 <div style="text-align: center;">
-<iframe src="{html_file_path.as_posix()}" alt="{html.title}" width="950px" height="530px"></iframe>
+<iframe src="{html_file_path}" alt="{html.title}" width="950px" height="530px"></iframe>
 </div>\n"""
             html_content.append(iframe_code)
 
@@ -994,9 +983,7 @@ with open(report_dir / '{md_rel_path.as_posix()}', 'r') as markdown_file:
         if is_url(image_path):
             src = image_path
         else:
-            src = get_relative_file_path(
-                image_path, relativ_to=self.output_dir
-            ).as_posix()
+            src = Path(image_path).resolve().as_posix()
 
         return f"""![]({src}){{fig-alt={alt_text} width={width}}}\n"""
 
