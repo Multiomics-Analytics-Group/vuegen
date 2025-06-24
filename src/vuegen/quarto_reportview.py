@@ -25,6 +25,7 @@ class QuartoReportView(r.ReportView):
         report: r.Report,
         report_type: r.ReportType,
         quarto_checks: bool = False,
+        output_dir: Optional[Path] = BASE_DIR,
         static_dir: str = STATIC_FILES_DIR,
     ):
         """_summary_
@@ -44,7 +45,7 @@ class QuartoReportView(r.ReportView):
         super().__init__(report=report, report_type=report_type)
         self.quarto_checks = quarto_checks
         self.static_dir = static_dir
-        self.output_dir = self.BASE_DIR  # set default output directory
+        self.output_dir = output_dir.resolve().absolute()
         # self.BUNDLED_EXECUTION = False
         self.quarto_path = "quarto"
         # self.env_vars = os.environ.copy()
@@ -73,19 +74,22 @@ class QuartoReportView(r.ReportView):
             r.ComponentType.HTML: self._generate_html_content,
         }
 
-    def generate_report(self, output_dir: Path = BASE_DIR) -> None:
+    def generate_report(self, output_dir: Optional[Path] = None) -> None:
         """
         Generates the qmd file of the quarto report. It creates code for rendering each section and its subsections with all components.
 
         Parameters
         ----------
         output_dir : Path, optional
-            The folder where the generated report files will be saved (default is BASE_DIR).
+            The folder where the generated report files will be saved.
+            Will overwrite value set on initialization of QuartoReportView.
         """
+        if output_dir is not None:
+            self.output_dir = Path(output_dir).resolve().absolute()
+
         self.report.logger.debug(
-            f"Generating '{self.report_type}' report in directory: '{output_dir}'"
+            f"Generating '{self.report_type}' report in directory: '{self.output_dir}'"
         )
-        self.output_dir = output_dir.resolve().absolute()
         # Create the output folder
         if create_folder(self.output_dir, is_nested=True):
             self.report.logger.debug(f"Created output directory: '{self.output_dir}'")
@@ -248,7 +252,7 @@ class QuartoReportView(r.ReportView):
             )
             raise
 
-    def run_report(self, output_dir: str = BASE_DIR) -> None:
+    def run_report(self, output_dir: Optional[Path] = None) -> None:
         """
         Runs the generated quarto report.
 
@@ -258,8 +262,10 @@ class QuartoReportView(r.ReportView):
             The folder where the report was generated (default is 'sections').
         """
         # from quarto_cli import run_quarto # entrypoint of quarto-cli not in module?
+        if output_dir is not None:
+            self.output_dir = Path(output_dir).resolve().absolute()
 
-        file_path_to_qmd = Path(output_dir) / f"{self.BASE_DIR}.qmd"
+        file_path_to_qmd = Path(self.output_dir) / f"{self.BASE_DIR}.qmd"
         args = [self.quarto_path, "render", str(file_path_to_qmd)]
         self.report.logger.info(
             f"Running '{self.report.title}' '{self.report_type}' report with {args!r}"
