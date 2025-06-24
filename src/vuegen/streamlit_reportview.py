@@ -616,7 +616,7 @@ html_content = response.text\n"""
                 else:
                     plot_content.append(
                         f"""
-with open('{Path(html_plot_file).relative_to(Path.cwd())}', 'r') as html_file:
+with open('{Path(html_plot_file).resolve().relative_to(Path.cwd())}', 'r') as html_file:
     html_content = html_file.read()\n"""
                     )
 
