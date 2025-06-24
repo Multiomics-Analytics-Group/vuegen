@@ -138,6 +138,7 @@ jobs:
               echo "Error: One or more protected files have been modified."
               exit 1
             fi
+          done
 
   publish:
     name: Publish package to PyPI
