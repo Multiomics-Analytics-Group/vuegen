@@ -20,8 +20,12 @@ jobs:
       - uses: actions/checkout@v4
       - uses: psf/black@stable
         with:
-          jupyter: true
+          # ! for now (format output files of vuegen for streamlit)
+          src: "./src"  
       - uses: isort/isort-action@v1
+        with:
+          # ! should be removed once all imports are correctly sorted
+          sort-paths: src
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
@@ -67,6 +71,7 @@ jobs:
         run: |
           cd docs
           vuegen -dir example_data/Earth_microbiome_vuegen_demo_notebook
+          # here we are testing that the generated config from the -dir call works
           vuegen -c example_data/Earth_microbiome_vuegen_demo_notebook/Earth_microbiome_vuegen_demo_notebook_config.yaml
       # repeat for easier inspection on GitHub:
       - name: quarto html report
@@ -104,6 +109,36 @@ jobs:
           cd docs
           vuegen -dir example_data/Earth_microbiome_vuegen_demo_notebook -rt jupyter
           vuegen -c example_data/Earth_microbiome_vuegen_demo_notebook/Earth_microbiome_vuegen_demo_notebook_config.yaml -rt jupyter
+      - name: quarto html report based on predefined config file
+        run: |
+          cd docs
+          vuegen -c example_config_files/Basic_example_vuegen_demo_notebook_config.yaml -output_dir ../tests/report_examples/Basic_example_vuegen_demo_notebook_cfg/html -rt html
+          # Check for changes
+          if git diff ../tests/report_examples | grep .; then
+            echo "Error: One or more protected files have been modified."
+            exit 1
+          fi
+      - name: check for changes in report files
+        run: |
+          # write streamlit report to test folder 
+          vuegen -dir docs/example_data/Basic_example_vuegen_demo_notebook -output_dir tests/report_examples/Basic_example_vuegen_demo_notebook
+          # Check for changes
+          if git diff tests/report_examples | grep .; then
+            echo "Error: One or more protected files have been modified."
+            exit 1
+          fi
+      - name: check for changes in quarto report files 
+        run: |
+          # write quarto based report to test folder
+          for format in html pdf docx odt revealjs pptx jupyter; do
+            vuegen -dir docs/example_data/Basic_example_vuegen_demo_notebook -output_dir tests/report_examples/Basic_example_vuegen_demo_notebook/$format  -rt $format 
+            # Check for changes
+            if git diff tests/report_examples | grep .; then
+              echo Failed for report: $format
+              echo "Error: One or more protected files have been modified."
+              exit 1
+            fi
+          done
 
   publish:
     name: Publish package to PyPI

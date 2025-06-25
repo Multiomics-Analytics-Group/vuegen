@@ -330,11 +330,9 @@ class ConfigManager:
 
         main_section_config = {
             "title": self._create_title_fromdir(base_dir_path.name),
-            "description": "Components added to main report folder.",
+            "description": "",
             "components": [],
         }
-        # treat it as any other section.
-        yaml_config["sections"].append(main_section_config)
 
         # Generate sections and subsections config
         for section_dir in sorted_sections:
@@ -345,11 +343,19 @@ class ConfigManager:
             # could be single plots?
             else:
                 file_in_main_section_dir = section_dir
+                if file_in_main_section_dir.name.lower() == "description.md":
+                    continue  # Skip description files in the main section
                 component_config = self._create_component_config_fromfile(
                     file_in_main_section_dir
                 )
                 if component_config is not None:
                     main_section_config["components"].append(component_config)
+
+        if main_section_config["components"]:
+            # If components were added to the main section, i.e. there were components
+            # found in the main report directory, add it to the first position of the
+            # list of sections
+            yaml_config["sections"].insert(0, main_section_config)
 
         return yaml_config, base_dir_path
 

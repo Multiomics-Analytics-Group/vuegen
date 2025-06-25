@@ -9,7 +9,13 @@ from streamlit.web import cli as stcli
 
 from . import report as r
 from . import table_utils
-from .utils import create_folder, generate_footer, get_relative_file_path, is_url
+from .utils import (
+    create_folder,
+    generate_footer,
+    get_relative_file_path,
+    is_url,
+    sort_imports,
+)
 from .utils.variables import make_valid_identifier
 
 
@@ -144,15 +150,12 @@ class StreamlitReportView(r.WebAppReportView):
             report_manag_content.append("\nsections_pages = {}")
 
             # Generate the home page and update the report manager content
-            # ! top level files (compontents) are added to the home page
             self._generate_home_section(
                 output_dir=output_dir,
                 report_manag_content=report_manag_content,
             )
-            # ! move this into the _generate_home_section method
-            subsection_page_vars = []
 
-            for section in self.report.sections:  # skip home section components
+            for section in self.report.sections:
                 # Create a folder for each section
                 subsection_page_vars = []
                 section_name_var = make_valid_identifier(
@@ -503,6 +506,8 @@ class StreamlitReportView(r.WebAppReportView):
                 all_contents.extend(content)
         # remove duplicates
         all_imports = list(set(all_imports))
+        all_imports, setup_statements = sort_imports(all_imports)
+        all_imports.extend(setup_statements)
         return all_contents, all_imports, has_chatbot
 
     def _generate_subsection(self, subsection) -> tuple[List[str], List[str]]:
@@ -608,7 +613,7 @@ html_content = response.text\n"""
                 else:
                     plot_content.append(
                         f"""
-with open('{Path(html_plot_file).relative_to(Path.cwd())}', 'r') as html_file:
+with open('{Path(html_plot_file).resolve().relative_to(Path.cwd())}', 'r') as html_file:
     html_content = html_file.read()\n"""
                     )
 
