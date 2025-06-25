@@ -25,7 +25,7 @@ from .utils.variables import make_valid_identifier
 
 def write_python_file(fpath: str, imports: list[str], contents: list[str]) -> None:
     """Write a Python file with the given imports and contents."""
-    with open(fpath, "w", encoding="utf8") as f:
+    with open(fpath, "w", encoding="utf-8") as f:
         # Write imports at the top of the file
         f.write("\n".join(imports) + "\n\n")
 
@@ -1208,7 +1208,7 @@ close-streamlit-app-with-button-click/35132/5
                     combined = "\\n".join(msg["content"] for msg in st.session_state.messages
                                                                     if msg["role"] == "user")
                     messages = [{{"role": "user", "content": combined}}]
-                    with st.spinner('Generating answer...'):       
+                    with st.spinner('Generating answer...'):
                         response = generate_query(messages)
                         parsed_response = parse_api_response(response)
 
