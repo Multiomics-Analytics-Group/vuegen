@@ -76,7 +76,8 @@ class QuartoReportView(r.ReportView):
 
     def generate_report(self, output_dir: Optional[Path] = None) -> None:
         """
-        Generates the qmd file of the quarto report. It creates code for rendering each section and its subsections with all components.
+        Generates the qmd file of the quarto report. It creates code for rendering
+        each section and its subsections with all components.
 
         Parameters
         ----------
@@ -105,7 +106,8 @@ class QuartoReportView(r.ReportView):
             )
         else:
             self.report.logger.info(
-                f"Output directory for static content already existed: '{self.static_dir}'"
+                "Output directory for static content already existed: "
+                f"'{self.static_dir}'"
             )
 
         try:
@@ -135,7 +137,8 @@ class QuartoReportView(r.ReportView):
             self.report.logger.info("Starting to generate sections for the report.")
             for section in self.report.sections:
                 self.report.logger.debug(
-                    f"Processing section: '{section.title}' - {len(section.subsections)} subsection(s)"
+                    f"Processing section: '{section.title}' -"
+                    f" {len(section.subsections)} subsection(s)"
                 )
                 # Add section header and description
                 qmd_content.append(f"# {section.title}")
@@ -170,7 +173,8 @@ class QuartoReportView(r.ReportView):
                     # Iterate through subsections and integrate them into the section file
                     for subsection in section.subsections:
                         self.report.logger.debug(
-                            f"Processing subsection: '{subsection.title}' - {len(subsection.components)} component(s)"
+                            f"Processing subsection: '{subsection.title}' - "
+                            f"{len(subsection.components)} component(s)"
                         )
                         # Generate content for the subsection
                         subsection_content, subsection_imports = (
@@ -185,7 +189,8 @@ class QuartoReportView(r.ReportView):
                         )  # even easier as it's global
                 else:
                     self.report.logger.warning(
-                        f"No subsections found in section: '{section.title}'. To show content in the report, add subsections to the section."
+                        f"No subsections found in section: '{section.title}'. "
+                        "To show content in the report, add subsections to the section."
                     )
             # Add globally set output folder
             report_imports.append("from pathlib import Path")
@@ -208,7 +213,7 @@ class QuartoReportView(r.ReportView):
 
             # Write the navigation and general content to a Python file
             fname_qmd_report = self.output_dir / f"{self.BASE_DIR}.qmd"
-            with open(fname_qmd_report, "w") as quarto_report:
+            with open(fname_qmd_report, "w", encoding="utf-8") as quarto_report:
                 quarto_report.write(yaml_header)
                 quarto_report.write(
                     f"""\n```{{python}}
@@ -281,7 +286,8 @@ class QuartoReportView(r.ReportView):
                     check=True,
                 )
                 self.report.logger.info(
-                    f"Converted '{self.report.title}' '{self.report_type}' report to Jupyter Notebook after execution"
+                    f"Converted '{self.report.title}' '{self.report_type}' "
+                    "report to Jupyter Notebook after execution"
                 )
             self.report.logger.info(
                 f"'{self.report.title}' '{self.report_type}' report rendered"
@@ -291,15 +297,11 @@ class QuartoReportView(r.ReportView):
                 f"Error running '{self.report.title}' {self.report_type} report: {str(e)}"
             )
             raise
-        # except FileNotFoundError as e:
-        #     self.report.logger.error(
-        #         f"Quarto is not installed. Please install Quarto to run the report: {str(e)}"
-        #     )
-        #     raise
 
     def _create_yaml_header(self) -> str:
         """
-        Creates a YAML header for the Quarto report based on the specified eport type and output format.
+        Creates a YAML header for the Quarto report based on the specified eport type
+        and output format.
 
         Returns
         -------
@@ -339,7 +341,7 @@ include-in-header:
 include-after-body:
     text: |
         <footer class="footer">
-            This report was generated with 
+            This report was generated with
             <a href="https://github.com/Multiomics-Analytics-Group/vuegen" target="_blank">
                 <img src="https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/vuegen_logo.svg" alt="VueGen" width="65px">
             </a>
@@ -351,7 +353,7 @@ include-after-body:
     fig-align: center
     margin:
       - bottom=40mm
-    include-in-header: 
+    include-in-header:
         text: |
             \\usepackage{scrlayer-scrpage}
             \\usepackage{hyperref}
@@ -386,7 +388,7 @@ include-in-header:
 include-after-body:
     text: |
         <footer class="footer">
-            This report was generated with 
+            This report was generated with
             <a href="https://github.com/Multiomics-Analytics-Group/vuegen" target="_blank">
                 <img src="https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/vuegen_logo.svg" alt="VueGen" width="65px">
             </a>
@@ -417,7 +419,7 @@ include-in-header:
 include-after-body:
     text: |
         <footer class="footer">
-            This report was generated with 
+            This report was generated with
             <a href="https://github.com/Multiomics-Analytics-Group/vuegen" target="_blank">
                 <img src="../docs/images/vuegen_logo.svg" alt="VueGen" width="65px">
             </a>
@@ -480,8 +482,9 @@ include-after-body:
         is_report_revealjs,
     ) -> tuple[List[str], List[str]]:
         """
-        Generate code to render components (plots, dataframes, markdown) in the given subsection,
-        creating imports and content for the subsection based on the component type.
+        Generate code to render components (plots, dataframes, markdown) in the given
+        subsection, creating imports and content for the subsection based on the component
+        type.
 
         Parameters
         ----------
@@ -559,18 +562,16 @@ include-after-body:
             elif plot.plot_type == r.PlotType.PLOTLY:
                 plot_content.append(self._generate_plot_code(plot))
                 if self.is_report_static:
-                    plot_content.append(
-                        f"""fig_plotly.write_image("{static_plot_path.relative_to(self.output_dir).as_posix()}")\n```\n"""
-                    )
+                    fpath = static_plot_path.relative_to(self.output_dir).as_posix()
+                    plot_content.append(f"""fig_plotly.write_image("{fpath}")\n```\n""")
                     plot_content.append(self._generate_image_content(static_plot_path))
                 else:
                     plot_content.append("""fig_plotly.show()\n```\n""")
             elif plot.plot_type == r.PlotType.ALTAIR:
                 plot_content.append(self._generate_plot_code(plot))
                 if self.is_report_static:
-                    plot_content.append(
-                        f"""fig_altair.save("{static_plot_path.relative_to(self.output_dir).as_posix()}")\n```\n"""
-                    )
+                    fpath = static_plot_path.relative_to(self.output_dir).as_posix()
+                    plot_content.append(f"""fig_altair.save("{fpath}")\n```\n""")
                     plot_content.append(self._generate_image_content(static_plot_path))
                 else:
                     plot_content.append("""fig_altair\n```\n""")
@@ -601,7 +602,8 @@ include-after-body:
                 self.report.logger.warning(f"Unsupported plot type: {plot.plot_type}")
         except Exception as e:
             self.report.logger.error(
-                f"Error generating content for '{plot.plot_type}' plot '{plot.id}' '{plot.title}': {str(e)}"
+                f"Error generating content for '{plot.plot_type}' plot '{plot.id}' "
+                f"'{plot.title}': {str(e)}"
             )
             raise
 
@@ -718,7 +720,8 @@ fig_altair = alt.Chart.from_json(plot_json_str).properties(width=900, height=370
                 file_extension == fmt.value_with_dot for fmt in r.DataFrameFormat
             ):
                 self.report.logger.error(
-                    f"Unsupported file extension: {file_extension}. Supported extensions are: {', '.join(fmt.value for fmt in r.DataFrameFormat)}."
+                    f"Unsupported file extension: {file_extension}. Supported extensions"
+                    f" are: {', '.join(fmt.value for fmt in r.DataFrameFormat)}."
                 )
 
             # Build the file path (URL or local file)
@@ -773,7 +776,8 @@ fig_altair = alt.Chart.from_json(plot_json_str).properties(width=900, height=370
                         )
                     )
                     dataframe_content.append(
-                        f"df = pd.{read_function.__name__}(report_dir / '{df_file_path}', "
+                        f"df = pd.{read_function.__name__}"
+                        f"(report_dir / '{df_file_path}', "
                         f"sheet_name='{sheet_name}')\n"
                     )
                     # Display the dataframe
@@ -783,7 +787,8 @@ fig_altair = alt.Chart.from_json(plot_json_str).properties(width=900, height=370
 
         except Exception as e:
             self.report.logger.error(
-                f"Error generating content for DataFrame: {dataframe.title}. Error: {str(e)}"
+                f"Error generating content for DataFrame: {dataframe.title}. "
+                f"Error: {str(e)}"
             )
             raise
         # Add caption if available
@@ -851,7 +856,8 @@ with open(report_dir / '{md_rel_path.as_posix()}', 'r') as markdown_file:
 
         except Exception as e:
             self.report.logger.error(
-                f"Error generating content for Markdown: {markdown.title}. Error: {str(e)}"
+                f"Error generating content for Markdown: {markdown.title}. "
+                f"Error: {str(e)}"
             )
             raise
 
@@ -866,7 +872,8 @@ with open(report_dir / '{md_rel_path.as_posix()}', 'r') as markdown_file:
 
     def _show_dataframe(self, dataframe, suffix: Optional[str] = None) -> List[str]:
         """
-        Appends either a static image or an interactive representation of a DataFrame to the content list.
+        Appends either a static image or an interactive representation of a DataFrame
+        to the content list.
 
         Parameters
         ----------
@@ -902,7 +909,7 @@ with open(report_dir / '{md_rel_path.as_posix()}', 'r') as markdown_file:
         else:
             # Append code to display the DataFrame interactively
             dataframe_content.append(
-                """show(df, classes="display nowrap compact", lengthMenu=[3, 5, 10])\n```\n"""
+                'show(df, classes="display nowrap compact", lengthMenu=[3, 5, 10])\n```\n'
             )
 
         return dataframe_content
@@ -914,7 +921,8 @@ with open(report_dir / '{md_rel_path.as_posix()}', 'r') as markdown_file:
         Parameters
         ----------
         html : Html
-            The HTML component to add to the report. This could be a local file path or a URL.
+            The HTML component to add to the report. This could be a local file path
+            or a URL.
 
         Returns
         -------
@@ -955,7 +963,8 @@ with open(report_dir / '{md_rel_path.as_posix()}', 'r') as markdown_file:
         self, image_path: str, alt_text: str = "", width: str = "90%"
     ) -> str:
         """
-        Adds an image to the content list in an HTML format with a specified width and height.
+        Adds an image to the content list in an HTML format with a specified width
+        and height.
 
         Parameters
         ----------
@@ -989,7 +998,8 @@ with open(report_dir / '{md_rel_path.as_posix()}', 'r') as markdown_file:
         Parameters
         ----------
         component : r.Component
-            The component for which to generate the required imports. The component can be of type:
+            The component for which to generate the required imports.
+            The component can be of type:
             - PLOT
             - DATAFRAME
             - MARKDOWN
