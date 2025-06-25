@@ -54,17 +54,20 @@ with open(report_dir /'../../../../../docs/example_data/Basic_example_vuegen_dem
     plot_json = json.load(plot_file)
 
 # Keep only 'data' and 'layout' sections
-plot_json = {key: plot_json[key] for key in plot_json if key in ['data', 'layout']}
-
+plot_json = {key: plot_json[key] for key in plot_json
+                if key in ['data', 'layout']
+            }
 # Remove 'frame' section in 'data'
-plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'} for entry in plot_json.get('data', [])]
-
+plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'}
+                            for entry in plot_json.get('data', [])
+                    ]
 # Convert JSON to string
 plot_json_str = json.dumps(plot_json)
-
 # Create the plotly plot
 fig_plotly = pio.from_json(plot_json_str)
-fig_plotly.update_layout(autosize=False, width=950, height=400, margin=dict(b=50, t=50, l=50, r=50))
+fig_plotly.update_layout(autosize=False, width=950, height=400,
+                         margin=dict(b=50, t=50, l=50, r=50)
+                         )
 
 fig_plotly.write_image("static/Top_Species_Plot_By_Biome_Plotly.png")
 ```
@@ -84,7 +87,8 @@ with open(report_dir /'../../../../../docs/example_data/Basic_example_vuegen_dem
 plot_json_str = json.dumps(plot_json)
 
 # Create the altair plot
-fig_altair = alt.Chart.from_json(plot_json_str).properties(width=900, height=370)
+fig_altair = alt.Chart.from_json(plot_json_str
+                ).properties(width=900, height=370)
 
 fig_altair.save("static/Multiline_Plot_Altair.png")
 ```
@@ -101,17 +105,20 @@ with open(report_dir /'../../../../../docs/example_data/Basic_example_vuegen_dem
     plot_json = json.load(plot_file)
 
 # Keep only 'data' and 'layout' sections
-plot_json = {key: plot_json[key] for key in plot_json if key in ['data', 'layout']}
-
+plot_json = {key: plot_json[key] for key in plot_json
+                if key in ['data', 'layout']
+            }
 # Remove 'frame' section in 'data'
-plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'} for entry in plot_json.get('data', [])]
-
+plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'}
+                            for entry in plot_json.get('data', [])
+                    ]
 # Convert JSON to string
 plot_json_str = json.dumps(plot_json)
-
 # Create the plotly plot
 fig_plotly = pio.from_json(plot_json_str)
-fig_plotly.update_layout(autosize=False, width=950, height=400, margin=dict(b=50, t=50, l=50, r=50))
+fig_plotly.update_layout(autosize=False, width=950, height=400,
+                         margin=dict(b=50, t=50, l=50, r=50)
+                         )
 
 fig_plotly.write_image("static/Pie_Plot_Countries_Plotly.png")
 ```
@@ -128,17 +135,20 @@ with open(report_dir /'../../../../../docs/example_data/Basic_example_vuegen_dem
     plot_json = json.load(plot_file)
 
 # Keep only 'data' and 'layout' sections
-plot_json = {key: plot_json[key] for key in plot_json if key in ['data', 'layout']}
-
+plot_json = {key: plot_json[key] for key in plot_json
+                if key in ['data', 'layout']
+            }
 # Remove 'frame' section in 'data'
-plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'} for entry in plot_json.get('data', [])]
-
+plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'}
+                            for entry in plot_json.get('data', [])
+                    ]
 # Convert JSON to string
 plot_json_str = json.dumps(plot_json)
-
 # Create the plotly plot
 fig_plotly = pio.from_json(plot_json_str)
-fig_plotly.update_layout(autosize=False, width=950, height=400, margin=dict(b=50, t=50, l=50, r=50))
+fig_plotly.update_layout(autosize=False, width=950, height=400,
+                         margin=dict(b=50, t=50, l=50, r=50)
+                         )
 
 fig_plotly.write_image("static/Pie_Plots_Biomes_Plotly.png")
 ```
@@ -158,7 +168,8 @@ with open(report_dir /'../../../../../docs/example_data/Basic_example_vuegen_dem
 plot_json_str = json.dumps(plot_json)
 
 # Create the altair plot
-fig_altair = alt.Chart.from_json(plot_json_str).properties(width=900, height=370)
+fig_altair = alt.Chart.from_json(plot_json_str
+                ).properties(width=900, height=370)
 
 fig_altair.save("static/Saline_Metagenomics_Samples_Map_Altair.png")
 ```
@@ -175,17 +186,20 @@ with open(report_dir /'../../../../../docs/example_data/Basic_example_vuegen_dem
     plot_json = json.load(plot_file)
 
 # Keep only 'data' and 'layout' sections
-plot_json = {key: plot_json[key] for key in plot_json if key in ['data', 'layout']}
-
+plot_json = {key: plot_json[key] for key in plot_json
+                if key in ['data', 'layout']
+            }
 # Remove 'frame' section in 'data'
-plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'} for entry in plot_json.get('data', [])]
-
+plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'}
+                            for entry in plot_json.get('data', [])
+                    ]
 # Convert JSON to string
 plot_json_str = json.dumps(plot_json)
-
 # Create the plotly plot
 fig_plotly = pio.from_json(plot_json_str)
-fig_plotly.update_layout(autosize=False, width=950, height=400, margin=dict(b=50, t=50, l=50, r=50))
+fig_plotly.update_layout(autosize=False, width=950, height=400,
+                         margin=dict(b=50, t=50, l=50, r=50)
+                         )
 
 fig_plotly.write_image("static/Plotly_Plot_R.png")
 ```

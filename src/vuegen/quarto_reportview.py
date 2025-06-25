@@ -709,14 +709,20 @@ with open(report_dir /'{plot_rel_path}', 'r') as plot_file:
             plot_code += textwrap.dedent(
                 """
                 # Keep only 'data' and 'layout' sections
-                plot_json = {key: plot_json[key] for key in plot_json if key in ['data', 'layout']}\n
+                plot_json = {key: plot_json[key] for key in plot_json
+                                if key in ['data', 'layout']
+                            }
                 # Remove 'frame' section in 'data'
-                plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'} for entry in plot_json.get('data', [])]\n
+                plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'}
+                                            for entry in plot_json.get('data', [])
+                                    ]
                 # Convert JSON to string
-                plot_json_str = json.dumps(plot_json)\n
+                plot_json_str = json.dumps(plot_json)
                 # Create the plotly plot
                 fig_plotly = pio.from_json(plot_json_str)
-                fig_plotly.update_layout(autosize=False, width=950, height=400, margin=dict(b=50, t=50, l=50, r=50))
+                fig_plotly.update_layout(autosize=False, width=950, height=400,
+                                         margin=dict(b=50, t=50, l=50, r=50)
+                                         )
                 """
             )
         elif plot.plot_type == r.PlotType.ALTAIR:
@@ -726,7 +732,8 @@ with open(report_dir /'{plot_rel_path}', 'r') as plot_file:
                 plot_json_str = json.dumps(plot_json)
 
                 # Create the altair plot
-                fig_altair = alt.Chart.from_json(plot_json_str).properties(width=900, height=370)
+                fig_altair = alt.Chart.from_json(plot_json_str
+                                ).properties(width=900, height=370)
                 """
             )
         elif plot.plot_type == r.PlotType.INTERACTIVE_NETWORK:
@@ -742,7 +749,9 @@ with open(report_dir /'{plot_rel_path}', 'r') as plot_file:
             plot_code = textwrap.dedent(
                 f"""
                 <div style="text-align: center;">
-                <iframe src="{iframe_src}" alt="{plot.title} plot" width="800px" height="630px"></iframe>
+                <iframe src="{iframe_src}" alt="{plot.title} plot"
+                        width="800px" height="630px">
+                </iframe>
                 </div>
                 """
             )
