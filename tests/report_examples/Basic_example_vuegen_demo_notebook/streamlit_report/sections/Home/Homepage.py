@@ -1,6 +1,12 @@
 import streamlit as st
-st.markdown('''<p style='text-align: center; color: #000000;'>A general description of the report.
-</p>''', unsafe_allow_html=True)
+
+st.markdown(
+    (
+        "<p style='text-align: center; "
+        "color: #000000;'>A general description of the report.</p>"
+    ),
+    unsafe_allow_html=True)
+
 footer = '''<style type="text/css">
 .footer {
     position: relative;

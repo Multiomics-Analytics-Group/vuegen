@@ -4,17 +4,38 @@ import pandas as pd
 import streamlit as st
 df_index = 1
 
-st.markdown('''<h3 style='text-align: center; color: #023558;'>All Formats</h3>''', unsafe_allow_html=True)
-st.markdown('''<h4 style='text-align: center; color: #2b8cbe;'>Phyla Correlation Network Csv</h4>''', unsafe_allow_html=True)
+
+st.markdown(
+    (
+        "<h3 style='text-align: center; "
+        "color: #023558;'>All Formats</h3>"
+    ),
+    unsafe_allow_html=True)
+
+
+st.markdown(
+    (
+        "<h4 style='text-align: center; "
+        "color: #2b8cbe;'>Phyla Correlation Network Csv</h4>"
+    ),
+    unsafe_allow_html=True)
+
 df = pd.read_csv('docs/example_data/Basic_example_vuegen_demo_notebook/2_Dataframes/1_All_formats/1_phyla_correlation_network_csv.csv')
 
 
 # Displays a DataFrame using AgGrid with configurable options.
 grid_builder = GridOptionsBuilder.from_dataframe(df)
-grid_builder.configure_default_column(editable=True, groupable=True, filter=True)
-grid_builder.configure_side_bar(filters_panel=True, columns_panel=True)
+grid_builder.configure_default_column(editable=True,
+                                      groupable=True,
+                                      filter=True,
+)
+grid_builder.configure_side_bar(filters_panel=True,
+                                columns_panel=True)
 grid_builder.configure_selection(selection_mode="multiple")
-grid_builder.configure_pagination(enabled=True, paginationAutoPageSize=False, paginationPageSize=20)
+grid_builder.configure_pagination(enabled=True,
+                                paginationAutoPageSize=False,
+                                paginationPageSize=20,
+)
 grid_options = grid_builder.build()
 
 AgGrid(df, gridOptions=grid_options, enable_enterprise_modules=True)
@@ -28,7 +49,14 @@ st.download_button(
     mime='text/csv',
     key=f"download_button_{df_index}")
 df_index += 1
-st.markdown('''<h4 style='text-align: center; color: #2b8cbe;'>Abundance Table Example Xls</h4>''', unsafe_allow_html=True)
+
+st.markdown(
+    (
+        "<h4 style='text-align: center; "
+        "color: #2b8cbe;'>Abundance Table Example Xls</h4>"
+    ),
+    unsafe_allow_html=True)
+
 selected_sheet = 0
 sheet_names = table_utils.get_sheet_names("docs/example_data/Basic_example_vuegen_demo_notebook/2_Dataframes/1_All_formats/2_abundance_table_example_xls.xls")
 selected_sheet = st.selectbox("Select a sheet to display", options=sheet_names)
@@ -38,10 +66,17 @@ df = pd.read_excel('docs/example_data/Basic_example_vuegen_demo_notebook/2_Dataf
 
 # Displays a DataFrame using AgGrid with configurable options.
 grid_builder = GridOptionsBuilder.from_dataframe(df)
-grid_builder.configure_default_column(editable=True, groupable=True, filter=True)
-grid_builder.configure_side_bar(filters_panel=True, columns_panel=True)
+grid_builder.configure_default_column(editable=True,
+                                      groupable=True,
+                                      filter=True,
+)
+grid_builder.configure_side_bar(filters_panel=True,
+                                columns_panel=True)
 grid_builder.configure_selection(selection_mode="multiple")
-grid_builder.configure_pagination(enabled=True, paginationAutoPageSize=False, paginationPageSize=20)
+grid_builder.configure_pagination(enabled=True,
+                                paginationAutoPageSize=False,
+                                paginationPageSize=20,
+)
 grid_options = grid_builder.build()
 
 AgGrid(df, gridOptions=grid_options, enable_enterprise_modules=True)
@@ -55,16 +90,30 @@ st.download_button(
     mime='text/csv',
     key=f"download_button_{df_index}")
 df_index += 1
-st.markdown('''<h4 style='text-align: center; color: #2b8cbe;'>Sample Info Example Txt</h4>''', unsafe_allow_html=True)
+
+st.markdown(
+    (
+        "<h4 style='text-align: center; "
+        "color: #2b8cbe;'>Sample Info Example Txt</h4>"
+    ),
+    unsafe_allow_html=True)
+
 df = pd.read_table('docs/example_data/Basic_example_vuegen_demo_notebook/2_Dataframes/1_All_formats/3_sample_info_example_txt.txt')
 
 
 # Displays a DataFrame using AgGrid with configurable options.
 grid_builder = GridOptionsBuilder.from_dataframe(df)
-grid_builder.configure_default_column(editable=True, groupable=True, filter=True)
-grid_builder.configure_side_bar(filters_panel=True, columns_panel=True)
+grid_builder.configure_default_column(editable=True,
+                                      groupable=True,
+                                      filter=True,
+)
+grid_builder.configure_side_bar(filters_panel=True,
+                                columns_panel=True)
 grid_builder.configure_selection(selection_mode="multiple")
-grid_builder.configure_pagination(enabled=True, paginationAutoPageSize=False, paginationPageSize=20)
+grid_builder.configure_pagination(enabled=True,
+                                paginationAutoPageSize=False,
+                                paginationPageSize=20,
+)
 grid_options = grid_builder.build()
 
 AgGrid(df, gridOptions=grid_options, enable_enterprise_modules=True)
@@ -78,16 +127,30 @@ st.download_button(
     mime='text/csv',
     key=f"download_button_{df_index}")
 df_index += 1
-st.markdown('''<h4 style='text-align: center; color: #2b8cbe;'>Sample Info Example Parquet</h4>''', unsafe_allow_html=True)
+
+st.markdown(
+    (
+        "<h4 style='text-align: center; "
+        "color: #2b8cbe;'>Sample Info Example Parquet</h4>"
+    ),
+    unsafe_allow_html=True)
+
 df = pd.read_parquet('docs/example_data/Basic_example_vuegen_demo_notebook/2_Dataframes/1_All_formats/4_sample_info_example_parquet.parquet')
 
 
 # Displays a DataFrame using AgGrid with configurable options.
 grid_builder = GridOptionsBuilder.from_dataframe(df)
-grid_builder.configure_default_column(editable=True, groupable=True, filter=True)
-grid_builder.configure_side_bar(filters_panel=True, columns_panel=True)
+grid_builder.configure_default_column(editable=True,
+                                      groupable=True,
+                                      filter=True,
+)
+grid_builder.configure_side_bar(filters_panel=True,
+                                columns_panel=True)
 grid_builder.configure_selection(selection_mode="multiple")
-grid_builder.configure_pagination(enabled=True, paginationAutoPageSize=False, paginationPageSize=20)
+grid_builder.configure_pagination(enabled=True,
+                                paginationAutoPageSize=False,
+                                paginationPageSize=20,
+)
 grid_options = grid_builder.build()
 
 AgGrid(df, gridOptions=grid_options, enable_enterprise_modules=True)
@@ -101,17 +164,31 @@ st.download_button(
     mime='text/csv',
     key=f"download_button_{df_index}")
 df_index += 1
-st.markdown('''<h4 style='text-align: center; color: #2b8cbe;'>Example Xlsx</h4>''', unsafe_allow_html=True)
+
+st.markdown(
+    (
+        "<h4 style='text-align: center; "
+        "color: #2b8cbe;'>Example Xlsx</h4>"
+    ),
+    unsafe_allow_html=True)
+
 selected_sheet = 0
 df = pd.read_excel('docs/example_data/Basic_example_vuegen_demo_notebook/2_Dataframes/1_All_formats/5_example_xlsx.xlsx', sheet_name=selected_sheet)
 
 
 # Displays a DataFrame using AgGrid with configurable options.
 grid_builder = GridOptionsBuilder.from_dataframe(df)
-grid_builder.configure_default_column(editable=True, groupable=True, filter=True)
-grid_builder.configure_side_bar(filters_panel=True, columns_panel=True)
+grid_builder.configure_default_column(editable=True,
+                                      groupable=True,
+                                      filter=True,
+)
+grid_builder.configure_side_bar(filters_panel=True,
+                                columns_panel=True)
 grid_builder.configure_selection(selection_mode="multiple")
-grid_builder.configure_pagination(enabled=True, paginationAutoPageSize=False, paginationPageSize=20)
+grid_builder.configure_pagination(enabled=True,
+                                paginationAutoPageSize=False,
+                                paginationPageSize=20,
+)
 grid_options = grid_builder.build()
 
 AgGrid(df, gridOptions=grid_options, enable_enterprise_modules=True)

@@ -1,9 +1,23 @@
 import streamlit as st
 
-st.markdown('''<h3 style='text-align: center; color: #023558;'>Static Networks</h3>''', unsafe_allow_html=True)
-st.markdown('''<h4 style='text-align: center; color: #2b8cbe;'>Phyla Correlation Network</h4>''', unsafe_allow_html=True)
 
-st.image('docs/example_data/Basic_example_vuegen_demo_notebook/3_Networks/2_Static_networks/1_phyla_correlation_network.png', caption='', use_column_width=True)
+st.markdown(
+    (
+        "<h3 style='text-align: center; "
+        "color: #023558;'>Static Networks</h3>"
+    ),
+    unsafe_allow_html=True)
+
+
+st.markdown(
+    (
+        "<h4 style='text-align: center; "
+        "color: #2b8cbe;'>Phyla Correlation Network</h4>"
+    ),
+    unsafe_allow_html=True)
+
+
+st.image('docs/example_data/Basic_example_vuegen_demo_notebook/3_Networks/2_Static_networks/1_phyla_correlation_network.png',  caption='', use_column_width=True)
 
 footer = '''<style type="text/css">
 .footer {

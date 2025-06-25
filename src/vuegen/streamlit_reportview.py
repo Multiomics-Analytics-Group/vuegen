@@ -678,10 +678,10 @@ with open('{Path(html_plot_file).resolve().relative_to(Path.cwd())}', 'r') as ht
                     textwrap.dedent(
                         f"""
                         st.markdown(("<p style='text-align: center; color: black;'> "
-                                    f"<b>Number of nodes:</b> {num_nodes} </p>"),
+                                    "<b>Number of nodes:</b> {num_nodes} </p>"),
                                     unsafe_allow_html=True)
                         st.markdown(("<p style='text-align: center; color: black;'>"
-                                    f" <b>Number of relationships:</b> {num_edges} </p>"),
+                                     " <b>Number of relationships:</b> {num_edges} </p>"),
                                     unsafe_allow_html=True)
                         """
                     )
