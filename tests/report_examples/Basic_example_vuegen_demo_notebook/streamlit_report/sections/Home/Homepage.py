@@ -1,14 +1,6 @@
-import requests
 import streamlit as st
 st.markdown('''<p style='text-align: center; color: #000000;'>A general description of the report.
 </p>''', unsafe_allow_html=True)
-st.markdown('''<h4 style='text-align: center; color: #2b8cbe;'>Description</h4>''', unsafe_allow_html=True)
-
-with open('docs/example_data/Basic_example_vuegen_demo_notebook/description.md', 'r') as markdown_file:
-    markdown_content = markdown_file.read()
-
-st.markdown(markdown_content, unsafe_allow_html=True)
-
 footer = '''<style type="text/css">
 .footer {
     position: relative;
