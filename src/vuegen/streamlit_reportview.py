@@ -1165,66 +1165,65 @@ close-streamlit-app-with-button-click/35132/5
 
         if chatbot.model:
             # --- Ollama-style streaming chatbot ---
-            chatbot_content.append(
-                textwrap.dedent(
-                    f"""
-                    {init_messages_block}
+            code_block = textwrap.dedent(
+                f"""
+                {init_messages_block}
 
-                    # Function to send prompt to Ollama API
-                    def generate_query(messages):
-                        response = requests.post(
-                            "{chatbot.api_call.api_url}",
-                            json={{"model": "{chatbot.model}", "messages": messages, "stream": True}},
-                        )
-                        response.raise_for_status()
-                        return response
+                # Function to send prompt to Ollama API
+                def generate_query(messages):
+                    response = requests.post(
+                        "{chatbot.api_call.api_url}",
+                        json={{"model": "{chatbot.model}", "messages": messages, "stream": True}},
+                    )
+                    response.raise_for_status()
+                    return response
 
-                    # Parse streaming response from Ollama
-                    def parse_api_response(response):
-                        try:
-                            output = ""
-                            for line in response.iter_lines():
-                                body = json.loads(line)
-                                if "error" in body:
-                                    raise Exception(f"API error: {{body['error']}}")
-                                if body.get("done", False):
-                                    return {{"role": "assistant", "content": output}}
-                                output += body.get("message", {{}}).get("content", "")
-                        except Exception as e:
-                            return {{"role": "assistant", "content":
-                                    f"Error while processing API response: {{str(e)}}"}}
+                # Parse streaming response from Ollama
+                def parse_api_response(response):
+                    try:
+                        output = ""
+                        for line in response.iter_lines():
+                            body = json.loads(line)
+                            if "error" in body:
+                                raise Exception(f"API error: {{body['error']}}")
+                            if body.get("done", False):
+                                return {{"role": "assistant", "content": output}}
+                            output += body.get("message", {{}}).get("content", "")
+                    except Exception as e:
+                        return {{"role": "assistant", "content":
+                                f"Error while processing API response: {{str(e)}}"}}
 
-                    # Simulated typing effect for responses
-                    def response_generator(msg_content):
-                        for word in msg_content.split():
-                            yield word + " "
-                            time.sleep(0.1)
-                        yield "\\n"
+                # Simulated typing effect for responses
+                def response_generator(msg_content):
+                    for word in msg_content.split():
+                        yield word + " "
+                        time.sleep(0.1)
+                    yield "\\n"
 
-                    {render_messages_block}
+                {render_messages_block}
 
-                    {handle_prompt_block}
+                {handle_prompt_block}
 
-                        # Retrieve question and generate answer
-                        combined = "\\n".join(msg["content"] for msg in st.session_state.messages
-                                                                        if msg["role"] == "user")
-                        messages = [{{"role": "user", "content": combined}}]
-                        with st.spinner('Generating answer...'):       
-                            response = generate_query(messages)
-                            parsed_response = parse_api_response(response)
+                    # Retrieve question and generate answer
+                    combined = "\\n".join(msg["content"] for msg in st.session_state.messages
+                                                                    if msg["role"] == "user")
+                    messages = [{{"role": "user", "content": combined}}]
+                    with st.spinner('Generating answer...'):       
+                        response = generate_query(messages)
+                        parsed_response = parse_api_response(response)
 
-                        # Add the assistant's response to the session state and display it
-                        st.session_state.messages.append(parsed_response)
-                        with st.chat_message("assistant"):
-                            st.write_stream(response_generator(parsed_response["content"]))
-                    """
-                )
+                    # Add the assistant's response to the session state and display it
+                    st.session_state.messages.append(parsed_response)
+                    with st.chat_message("assistant"):
+                        st.write_stream(response_generator(parsed_response["content"]))
+                """
             )
+            chatbot_content.append(code_block)
+
         else:
             # --- Standard (non-streaming) API chatbot ---
-            chatbot_content.append(
-                textwrap.dedent(
-                    f"""
+            code_block = textwrap.dedent(
+                f"""
                     {init_messages_block}
 
                     # Function to send prompt to standard API
@@ -1271,8 +1270,8 @@ close-streamlit-app-with-button-click/35132/5
                             else:
                                 st.error("Failed to get response from API")
                     """
-                )
             )
+            chatbot_content.append(code_block)
 
         if chatbot.caption:
             chatbot_content.append(
