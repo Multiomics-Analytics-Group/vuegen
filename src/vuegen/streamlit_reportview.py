@@ -661,16 +661,23 @@ close-streamlit-app-with-button-click/35132/5
                 # Determine whether the file path is a URL or a local file
                 if is_url(html_plot_file):
                     plot_content.append(
-                        f"""
-response = requests.get('{html_plot_file}')
-response.raise_for_status()
-html_content = response.text\n"""
+                        textwrap.dedent(
+                            f"""
+                            response = requests.get('{html_plot_file}')
+                            response.raise_for_status()
+                            html_content = response.text
+                            """
+                        )
                     )
                 else:
+                    fpath = Path(html_plot_file).resolve().relative_to(Path.cwd())
                     plot_content.append(
-                        f"""
-with open('{Path(html_plot_file).resolve().relative_to(Path.cwd())}', 'r') as html_file:
-    html_content = html_file.read()\n"""
+                        textwrap.dedent(
+                            f"""
+                            with open('{fpath}', 'r') as html_file:
+                                html_content = html_file.read()
+                            """
+                        )
                     )
 
                 # Append the code for additional information (nodes and edges count)
@@ -822,12 +829,14 @@ with open('{Path(html_plot_file).resolve().relative_to(Path.cwd())}', 'r') as ht
                 sheet_names = table_utils.get_sheet_names(df_file_path.as_posix())
                 if len(sheet_names) > 1:
                     # If there are multiple sheets, ask the user to select one
-
+                    fpath = df_file_path.as_posix()
                     dataframe_content.append(
                         textwrap.dedent(
                             f"""\
-                        sheet_names = table_utils.get_sheet_names("{df_file_path.as_posix()}")
-                        selected_sheet = st.selectbox("Select a sheet to display", options=sheet_names)
+                        sheet_names = table_utils.get_sheet_names("{fpath}")
+                        selected_sheet = st.selectbox("Select a sheet to display",
+                                                      options=sheet_names,
+                                        )
                         """
                         )
                     )
@@ -839,7 +848,8 @@ with open('{Path(html_plot_file).resolve().relative_to(Path.cwd())}', 'r') as ht
                 r.DataFrameFormat.XLSX.value_with_dot,
             ]:
                 dataframe_content.append(
-                    f"""df = pd.{read_function.__name__}('{df_file_path.as_posix()}', sheet_name=selected_sheet)\n"""
+                    f"df = pd.{read_function.__name__}('{df_file_path.as_posix()}',"
+                    " sheet_name=selected_sheet)\n"
                 )
             else:
                 dataframe_content.append(
@@ -924,17 +934,23 @@ with open('{Path(html_plot_file).resolve().relative_to(Path.cwd())}', 'r') as ht
             # If the file path is a URL, generate code to fetch content via requests
             if is_url(markdown.file_path):
                 markdown_content.append(
-                    f"""
-response = requests.get('{markdown.file_path}')
-response.raise_for_status()
-markdown_content = response.text\n"""
+                    textwrap.dedent(
+                        f"""
+                        response = requests.get('{markdown.file_path}')
+                        response.raise_for_status()
+                        markdown_content = response.text
+                        """
+                    )
                 )
             else:  # If it's a local file
                 md_rel_path = get_relative_file_path(markdown.file_path)
                 markdown_content.append(
-                    f"""
-with open('{md_rel_path.as_posix()}', 'r') as markdown_file:
-    markdown_content = markdown_file.read()\n"""
+                    textwrap.dedent(
+                        f"""
+                        with open('{md_rel_path.as_posix()}', 'r') as markdown_file:
+                            markdown_content = markdown_file.read()
+                        """
+                    )
                 )
             # Code to display md content
             markdown_content.append(
@@ -984,18 +1000,24 @@ with open('{md_rel_path.as_posix()}', 'r') as markdown_file:
         try:
             if is_url(html.file_path):
                 # If it's a URL, fetch content dynamically
-                html_content.append(
-                    f"""
-response = requests.get('{html.file_path}')
-response.raise_for_status()
-html_content = response.text\n"""
+                textwrap.dedent(
+                    html_content.append(
+                        f"""
+                        response = requests.get('{html.file_path}')
+                        response.raise_for_status()
+                        html_content = response.text
+                        """
+                    )
                 )
             else:  # If it's a local file
-                html_rel_path = get_relative_file_path(html.file_path)
+                html_rel_path = get_relative_file_path(html.file_path).as_posix()
                 html_content.append(
-                    f"""
-with open('{html_rel_path.as_posix()}', 'r', encoding='utf-8') as html_file:
-    html_content = html_file.read()\n"""
+                    textwrap.dedent(
+                        f"""
+                        with open('{html_rel_path}', 'r', encoding='utf-8') as html_file:
+                            html_content = html_file.read()
+                        """
+                    )
                 )
 
             # Display HTML content using Streamlit
@@ -1104,142 +1126,152 @@ with open('{html_rel_path.as_posix()}', 'r', encoding='utf-8') as html_file:
         )
 
         # --- Shared code blocks (as strings) ---
-        init_messages_block = """
-# Init session state
-if 'messages' not in st.session_state:
-    st.session_state['messages'] = []
-    """
+        init_messages_block = textwrap.dedent(
+            """
+            # Init session state
+            if 'messages' not in st.session_state:
+                st.session_state['messages'] = []
+            """
+        )
 
-        render_messages_block = """
-# Display chat history
-for message in st.session_state['messages']:
-    with st.chat_message(message['role']):
-        content = message['content']
-        if isinstance(content, dict):
-            st.markdown(content.get('text', ''), unsafe_allow_html=True)
-            if 'links' in content:
-                st.markdown("**Sources:**")
-                for link in content['links']:
-                    st.markdown(f"- [{link}]({link})")
-            if 'subgraph_pyvis' in content:
-                st.components.v1.html(content['subgraph_pyvis'], height=600)
-        else:
-            st.write(content)
-    """
+        render_messages_block = textwrap.dedent(
+            """
+            # Display chat history
+            for message in st.session_state['messages']:
+                with st.chat_message(message['role']):
+                    content = message['content']
+                    if isinstance(content, dict):
+                        st.markdown(content.get('text', ''), unsafe_allow_html=True)
+                        if 'links' in content:
+                            st.markdown("**Sources:**")
+                            for link in content['links']:
+                                st.markdown(f"- [{link}]({link})")
+                        if 'subgraph_pyvis' in content:
+                            st.components.v1.html(content['subgraph_pyvis'], height=600)
+                    else:
+                        st.write(content)
+            """
+        )
 
-        handle_prompt_block = """
-# Capture and append new user prompt
-if prompt := st.chat_input("Enter your prompt here:"):
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    with st.chat_message("user"):
-        st.write(prompt)
-    """
+        handle_prompt_block = textwrap.dedent(
+            """
+            # Capture and append new user prompt
+            if prompt := st.chat_input("Enter your prompt here:"):
+                st.session_state.messages.append({"role": "user", "content": prompt})
+                with st.chat_message("user"):
+                    st.write(prompt)
+            """
+        )
 
         if chatbot.model:
             # --- Ollama-style streaming chatbot ---
             chatbot_content.append(
-                f"""
-{init_messages_block}
+                textwrap.dedent(
+                    f"""
+                    {init_messages_block}
 
-# Function to send prompt to Ollama API
-def generate_query(messages):
-    response = requests.post(
-        "{chatbot.api_call.api_url}",
-        json={{"model": "{chatbot.model}", "messages": messages, "stream": True}},
-    )
-    response.raise_for_status()
-    return response
+                    # Function to send prompt to Ollama API
+                    def generate_query(messages):
+                        response = requests.post(
+                            "{chatbot.api_call.api_url}",
+                            json={{"model": "{chatbot.model}", "messages": messages, "stream": True}},
+                        )
+                        response.raise_for_status()
+                        return response
 
-# Parse streaming response from Ollama
-def parse_api_response(response):
-    try:
-        output = ""
-        for line in response.iter_lines():
-            body = json.loads(line)
-            if "error" in body:
-                raise Exception(f"API error: {{body['error']}}")
-            if body.get("done", False):
-                return {{"role": "assistant", "content": output}}
-            output += body.get("message", {{}}).get("content", "")
-    except Exception as e:
-        return {{"role": "assistant", "content":
-                f"Error while processing API response: {{str(e)}}"}}
+                    # Parse streaming response from Ollama
+                    def parse_api_response(response):
+                        try:
+                            output = ""
+                            for line in response.iter_lines():
+                                body = json.loads(line)
+                                if "error" in body:
+                                    raise Exception(f"API error: {{body['error']}}")
+                                if body.get("done", False):
+                                    return {{"role": "assistant", "content": output}}
+                                output += body.get("message", {{}}).get("content", "")
+                        except Exception as e:
+                            return {{"role": "assistant", "content":
+                                    f"Error while processing API response: {{str(e)}}"}}
 
-# Simulated typing effect for responses
-def response_generator(msg_content):
-    for word in msg_content.split():
-        yield word + " "
-        time.sleep(0.1)
-    yield "\\n"
+                    # Simulated typing effect for responses
+                    def response_generator(msg_content):
+                        for word in msg_content.split():
+                            yield word + " "
+                            time.sleep(0.1)
+                        yield "\\n"
 
-{render_messages_block}
+                    {render_messages_block}
 
-{handle_prompt_block}
+                    {handle_prompt_block}
 
-    # Retrieve question and generate answer
-    combined = "\\n".join(msg["content"] for msg in st.session_state.messages
-                                                    if msg["role"] == "user")
-    messages = [{{"role": "user", "content": combined}}]
-    with st.spinner('Generating answer...'):       
-        response = generate_query(messages)
-        parsed_response = parse_api_response(response)
+                        # Retrieve question and generate answer
+                        combined = "\\n".join(msg["content"] for msg in st.session_state.messages
+                                                                        if msg["role"] == "user")
+                        messages = [{{"role": "user", "content": combined}}]
+                        with st.spinner('Generating answer...'):       
+                            response = generate_query(messages)
+                            parsed_response = parse_api_response(response)
 
-    # Add the assistant's response to the session state and display it
-    st.session_state.messages.append(parsed_response)
-    with st.chat_message("assistant"):
-        st.write_stream(response_generator(parsed_response["content"]))
-                """
+                        # Add the assistant's response to the session state and display it
+                        st.session_state.messages.append(parsed_response)
+                        with st.chat_message("assistant"):
+                            st.write_stream(response_generator(parsed_response["content"]))
+                    """
+                )
             )
         else:
             # --- Standard (non-streaming) API chatbot ---
             chatbot_content.append(
-                f"""
-{init_messages_block}
+                textwrap.dedent(
+                    f"""
+                    {init_messages_block}
 
-# Function to send prompt to standard API
-def generate_query(prompt):
-    try:
-        response = requests.post(
-            "{chatbot.api_call.api_url}",
-            json={{"prompt": prompt}},
-            headers={chatbot.api_call.headers}
-        )
-        response.raise_for_status()
-        return response.json()
-    except requests.exceptions.RequestException as e:
-        st.error(f"API request failed: {{str(e)}}")
-        if hasattr(e, 'response') and e.response:
-            try:
-                error_details = e.response.json()
-                st.error(f"Error details: {{error_details}}")
-            except ValueError:
-                st.error(f"Response text: {{e.response.text}}")
-        return None
+                    # Function to send prompt to standard API
+                    def generate_query(prompt):
+                        try:
+                            response = requests.post(
+                                "{chatbot.api_call.api_url}",
+                                json={{"prompt": prompt}},
+                                headers={chatbot.api_call.headers}
+                            )
+                            response.raise_for_status()
+                            return response.json()
+                        except requests.exceptions.RequestException as e:
+                            st.error(f"API request failed: {{str(e)}}")
+                            if hasattr(e, 'response') and e.response:
+                                try:
+                                    error_details = e.response.json()
+                                    st.error(f"Error details: {{error_details}}")
+                                except ValueError:
+                                    st.error(f"Response text: {{e.response.text}}")
+                            return None
 
-{render_messages_block}
+                    {render_messages_block}
 
-{handle_prompt_block}
+                    {handle_prompt_block}
 
-    with st.spinner('Generating answer...'):
-        response = generate_query(prompt)
+                        with st.spinner('Generating answer...'):
+                            response = generate_query(prompt)
 
-        if response:
-            # Append and display assistant response
-            st.session_state.messages.append({{
-                "role": "assistant",
-                "content": response
-            }})
-            with st.chat_message("assistant"):
-                st.markdown(response.get('text', ''), unsafe_allow_html=True)
-                if 'links' in response:
-                    st.markdown("**Sources:**")
-                    for link in response['links']:
-                        st.markdown(f"- [{{link}}]({{link}})")
-                if 'subgraph_pyvis' in response:
-                    st.components.v1.html(response['subgraph_pyvis'], height=600)
-        else:
-            st.error("Failed to get response from API")
-                """
+                            if response:
+                                # Append and display assistant response
+                                st.session_state.messages.append({{
+                                    "role": "assistant",
+                                    "content": response
+                                }})
+                                with st.chat_message("assistant"):
+                                    st.markdown(response.get('text', ''), unsafe_allow_html=True)
+                                    if 'links' in response:
+                                        st.markdown("**Sources:**")
+                                        for link in response['links']:
+                                            st.markdown(f"- [{{link}}]({{link}})")
+                                    if 'subgraph_pyvis' in response:
+                                        st.components.v1.html(response['subgraph_pyvis'], height=600)
+                            else:
+                                st.error("Failed to get response from API")
+                    """
+                )
             )
 
         if chatbot.caption:

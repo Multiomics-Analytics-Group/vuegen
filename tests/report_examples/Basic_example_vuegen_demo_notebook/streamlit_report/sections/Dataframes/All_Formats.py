@@ -59,7 +59,9 @@ st.markdown(
 
 selected_sheet = 0
 sheet_names = table_utils.get_sheet_names("docs/example_data/Basic_example_vuegen_demo_notebook/2_Dataframes/1_All_formats/2_abundance_table_example_xls.xls")
-selected_sheet = st.selectbox("Select a sheet to display", options=sheet_names)
+selected_sheet = st.selectbox("Select a sheet to display",
+                              options=sheet_names,
+                )
 
 df = pd.read_excel('docs/example_data/Basic_example_vuegen_demo_notebook/2_Dataframes/1_All_formats/2_abundance_table_example_xls.xls', sheet_name=selected_sheet)
 
