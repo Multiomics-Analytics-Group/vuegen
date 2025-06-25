@@ -167,7 +167,7 @@ vuegen --config docs/example_config_files/Earth_microbiome_vuegen_demo_notebook.
 
 If a configuration file is given, users can specify titles and descriptions for sections and subsections, as well as component paths and required attributes, such as file format and delimiter for dataframes, plot types, and other details.
 
-The component paths in the configuration file can be absolute or relative to the execution directory.
+The component paths in the configuration file can be absolute or relative to the execution directory. In the examples, we assume that the working directory is the `docs` folder, so the paths are relative to it. If you run VueGen from another directory, you need to adjust the paths accordingly.
 
 The current report types supported by VueGen are:
 
