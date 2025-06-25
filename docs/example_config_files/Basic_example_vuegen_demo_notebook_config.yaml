@@ -11,37 +11,37 @@ sections:
     description: Optional description for section.
     components:
     - title: Top Species Plot By Biome Plotly
-      file_path: ./docs/example_data/Basic_example_vuegen_demo_notebook/1_Plots/1_Interactive_plots/1_top_species_plot_by_biome_plotly.json
+      file_path: example_data/Basic_example_vuegen_demo_notebook/1_Plots/1_Interactive_plots/1_top_species_plot_by_biome_plotly.json
       description: ''
       caption: ''
       component_type: plot
       plot_type: plotly
     - title: Multiline Plot Altair
-      file_path: ./docs/example_data/Basic_example_vuegen_demo_notebook/1_Plots/1_Interactive_plots/2_multiline_plot_altair.json
+      file_path: example_data/Basic_example_vuegen_demo_notebook/1_Plots/1_Interactive_plots/2_multiline_plot_altair.json
       description: ''
       caption: ''
       component_type: plot
       plot_type: altair
     - title: Pie Plot Countries Plotly
-      file_path: ./docs/example_data/Basic_example_vuegen_demo_notebook/1_Plots/1_Interactive_plots/3_pie_plot_countries_plotly.json
+      file_path: example_data/Basic_example_vuegen_demo_notebook/1_Plots/1_Interactive_plots/3_pie_plot_countries_plotly.json
       description: ''
       caption: ''
       component_type: plot
       plot_type: plotly
     - title: Pie Plots Biomes Plotly
-      file_path: ./docs/example_data/Basic_example_vuegen_demo_notebook/1_Plots/1_Interactive_plots/4_pie_plots_biomes_plotly.json
+      file_path: example_data/Basic_example_vuegen_demo_notebook/1_Plots/1_Interactive_plots/4_pie_plots_biomes_plotly.json
       description: ''
       caption: ''
       component_type: plot
       plot_type: plotly
     - title: Saline Metagenomics Samples Map Altair
-      file_path: ./docs/example_data/Basic_example_vuegen_demo_notebook/1_Plots/1_Interactive_plots/5_saline_metagenomics_samples_map_altair.json
+      file_path: example_data/Basic_example_vuegen_demo_notebook/1_Plots/1_Interactive_plots/5_saline_metagenomics_samples_map_altair.json
       description: ''
       caption: ''
       component_type: plot
       plot_type: altair
     - title: Description
-      file_path: ./docs/example_data/Basic_example_vuegen_demo_notebook/1_Plots/1_Interactive_plots/description.md
+      file_path: example_data/Basic_example_vuegen_demo_notebook/1_Plots/1_Interactive_plots/description.md
       description: ''
       caption: ''
       component_type: markdown
@@ -49,19 +49,19 @@ sections:
     description: ''
     components:
     - title: Number Samples Per Study
-      file_path: ./docs/example_data/Basic_example_vuegen_demo_notebook/1_Plots/2_Static_plots/1_number_samples_per_study.png
+      file_path: example_data/Basic_example_vuegen_demo_notebook/1_Plots/2_Static_plots/1_number_samples_per_study.png
       description: ''
       caption: ''
       component_type: plot
       plot_type: static
     - title: Animal Metagenomics Samples Map
-      file_path: ./docs/example_data/Basic_example_vuegen_demo_notebook/1_Plots/2_Static_plots/2_animal_metagenomics_samples_map.png
+      file_path: example_data/Basic_example_vuegen_demo_notebook/1_Plots/2_Static_plots/2_animal_metagenomics_samples_map.png
       description: ''
       caption: ''
       component_type: plot
       plot_type: static
     - title: Alpha Diversity Host Associated Samples
-      file_path: ./docs/example_data/Basic_example_vuegen_demo_notebook/1_Plots/2_Static_plots/3_alpha_diversity_host_associated_samples.png
+      file_path: example_data/Basic_example_vuegen_demo_notebook/1_Plots/2_Static_plots/3_alpha_diversity_host_associated_samples.png
       description: ''
       caption: ''
       component_type: plot
@@ -82,27 +82,27 @@ sections:
     description: This subsection contains example dataframes.
     components:
     - title: Phyla Correlation Network Csv
-      file_path: ./docs/example_data/Basic_example_vuegen_demo_notebook/2_Dataframes/1_All_formats/1_phyla_correlation_network_csv.csv
+      file_path: example_data/Basic_example_vuegen_demo_notebook/2_Dataframes/1_All_formats/1_phyla_correlation_network_csv.csv
       description: ''
       caption: ''
       component_type: dataframe
       file_format: csv
       delimiter: ','
     - title: Abundance Table Example Xls
-      file_path: ./docs/example_data/Basic_example_vuegen_demo_notebook/2_Dataframes/1_All_formats/2_abundance_table_example_xls.xls
+      file_path: example_data/Basic_example_vuegen_demo_notebook/2_Dataframes/1_All_formats/2_abundance_table_example_xls.xls
       description: ''
       caption: ''
       component_type: dataframe
       file_format: xls
     - title: Sample Info Example Txt
-      file_path: ./docs/example_data/Basic_example_vuegen_demo_notebook/2_Dataframes/1_All_formats/3_sample_info_example_txt.txt
+      file_path: example_data/Basic_example_vuegen_demo_notebook/2_Dataframes/1_All_formats/3_sample_info_example_txt.txt
       description: ''
       caption: ''
       component_type: dataframe
       file_format: txt
       delimiter: \t
     - title: Sample Info Example Parquet
-      file_path: ./docs/example_data/Basic_example_vuegen_demo_notebook/2_Dataframes/1_All_formats/4_sample_info_example_parquet.parquet
+      file_path: example_data/Basic_example_vuegen_demo_notebook/2_Dataframes/1_All_formats/4_sample_info_example_parquet.parquet
       description: ''
       caption: ''
       component_type: dataframe
@@ -114,13 +114,13 @@ sections:
     description: Optional description for subsection
     components:
     - title: Man Example
-      file_path: ./docs/example_data/Basic_example_vuegen_demo_notebook/3_Networks/1_Interactive_networks/1_man_example.graphml
+      file_path: example_data/Basic_example_vuegen_demo_notebook/3_Networks/1_Interactive_networks/1_man_example.graphml
       description: ''
       caption: ''
       component_type: plot
       plot_type: interactive_network
     - title: Description
-      file_path: ./docs/example_data/Basic_example_vuegen_demo_notebook/3_Networks/1_Interactive_networks/description.md
+      file_path: example_data/Basic_example_vuegen_demo_notebook/3_Networks/1_Interactive_networks/description.md
       description: ''
       caption: ''
       component_type: markdown
@@ -128,7 +128,7 @@ sections:
     description: ''
     components:
     - title: Phyla Correlation Network
-      file_path: ./docs/example_data/Basic_example_vuegen_demo_notebook/3_Networks/2_Static_networks/1_phyla_correlation_network.png
+      file_path: example_data/Basic_example_vuegen_demo_notebook/3_Networks/2_Static_networks/1_phyla_correlation_network.png
       description: ''
       caption: ''
       component_type: plot
@@ -140,18 +140,18 @@ sections:
     description: ''
     components:
     - title: Plot
-      file_path: ./docs/example_data/Basic_example_vuegen_demo_notebook/4_Html/1_All_html/1_plot.html
+      file_path: example_data/Basic_example_vuegen_demo_notebook/4_Html/1_All_html/1_plot.html
       description: ''
       caption: ''
       component_type: html
     - title: Ckg Network
-      file_path: ./docs/example_data/Basic_example_vuegen_demo_notebook/4_Html/1_All_html/2_ckg_network.html
+      file_path: example_data/Basic_example_vuegen_demo_notebook/4_Html/1_All_html/2_ckg_network.html
       description: ''
       caption: ''
       component_type: plot
       plot_type: interactive_network
     - title: Multiqc Report
-      file_path: ./docs/example_data/Basic_example_vuegen_demo_notebook/4_Html/1_All_html/3_multiqc_report.html
+      file_path: example_data/Basic_example_vuegen_demo_notebook/4_Html/1_All_html/3_multiqc_report.html
       description: ''
       caption: ''
       component_type: html
@@ -162,7 +162,7 @@ sections:
     description: ''
     components:
     - title: Readme
-      file_path: ./docs/example_data/Basic_example_vuegen_demo_notebook/5_Markdown/1_All_markdown/README.md
+      file_path: example_data/Basic_example_vuegen_demo_notebook/5_Markdown/1_All_markdown/README.md
       description: ''
       caption: ''
       component_type: markdown
