@@ -829,13 +829,13 @@ class ReportView(ABC):
         pass
 
     @abstractmethod
-    def _generate_component_imports(self) -> str:
+    def _generate_component_imports(self, component: Component) -> str:
         """
         Generate necessary imports for a component of the report.
 
         Parameters
         ----------
-        component : r.Component
+        component : Component
             The component for which to generate the required imports.
             The component can be of type:
             - PLOT
