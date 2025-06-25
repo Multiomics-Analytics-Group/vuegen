@@ -126,6 +126,9 @@ vuegen --directory docs/example_data/Earth_microbiome_vuegen_demo_notebook --rep
 
 > [!NOTE]
 > By default, the `streamlit_autorun` argument is set to False, but you can use it in case you want to automatically run the streamlit app.
+> You can also specify the output directory with the `--output_directory` argumument, which defaults to the current working directory.
+> See all available arguments with the `--help` option.
+
 
 ### Folder structure
 
@@ -154,6 +157,8 @@ report_folder/
 The titles for sections, subsections, and components are extracted from the corresponding folder and file names, and afterward, users can add descriptions, captions, and other details to the configuration file. Component types are inferred from the file extensions and names.
 The order of sections, subsections, and components can be defined using numerical suffixes in folder and file names.
 
+### Configuration file
+
 It's also possible to provide a configuration file instead of a directory:
 
 ```bash
@@ -161,6 +166,8 @@ vuegen --config docs/example_config_files/Earth_microbiome_vuegen_demo_notebook.
 ```
 
 If a configuration file is given, users can specify titles and descriptions for sections and subsections, as well as component paths and required attributes, such as file format and delimiter for dataframes, plot types, and other details.
+
+The component paths in the configuration file can be absolute or relative to the execution directory.
 
 The current report types supported by VueGen are:
 
