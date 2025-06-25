@@ -150,15 +150,12 @@ class StreamlitReportView(r.WebAppReportView):
             report_manag_content.append("\nsections_pages = {}")
 
             # Generate the home page and update the report manager content
-            # ! top level files (compontents) are added to the home page
             self._generate_home_section(
                 output_dir=output_dir,
                 report_manag_content=report_manag_content,
             )
-            # ! move this into the _generate_home_section method
-            subsection_page_vars = []
 
-            for section in self.report.sections:  # skip home section components
+            for section in self.report.sections:
                 # Create a folder for each section
                 subsection_page_vars = []
                 section_name_var = make_valid_identifier(
