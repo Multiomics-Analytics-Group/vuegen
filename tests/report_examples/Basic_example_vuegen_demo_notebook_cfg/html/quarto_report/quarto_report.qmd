@@ -60,6 +60,7 @@ This section contains example plots.
 Optional description for section.
 
 ### Top Species Plot By Biome Plotly
+
 ```{python}
 #| label: 'Top Species Plot By Biome Plotly 1'
 #| fig-cap: ""
@@ -84,6 +85,7 @@ fig_plotly.show()
 ```
 
 ### Multiline Plot Altair
+
 ```{python}
 #| label: 'Multiline Plot Altair 2'
 #| fig-cap: ""
@@ -94,13 +96,14 @@ with open(report_dir /'../../../../../docs/example_data/Basic_example_vuegen_dem
 # Convert JSON to string
 plot_json_str = json.dumps(plot_json)
 
-# Create the plotly plot
+# Create the altair plot
 fig_altair = alt.Chart.from_json(plot_json_str).properties(width=900, height=370)
 
 fig_altair
 ```
 
 ### Pie Plot Countries Plotly
+
 ```{python}
 #| label: 'Pie Plot Countries Plotly 3'
 #| fig-cap: ""
@@ -125,6 +128,7 @@ fig_plotly.show()
 ```
 
 ### Pie Plots Biomes Plotly
+
 ```{python}
 #| label: 'Pie Plots Biomes Plotly 4'
 #| fig-cap: ""
@@ -149,6 +153,7 @@ fig_plotly.show()
 ```
 
 ### Saline Metagenomics Samples Map Altair
+
 ```{python}
 #| label: 'Saline Metagenomics Samples Map Altair 5'
 #| fig-cap: ""
@@ -159,7 +164,7 @@ with open(report_dir /'../../../../../docs/example_data/Basic_example_vuegen_dem
 # Convert JSON to string
 plot_json_str = json.dumps(plot_json)
 
-# Create the plotly plot
+# Create the altair plot
 fig_altair = alt.Chart.from_json(plot_json_str).properties(width=900, height=370)
 
 fig_altair
@@ -257,7 +262,8 @@ Optional description for subsection
 ### Plot
 
 <div style="text-align: center;">
-<iframe src="../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/4_Html/1_All_html/1_plot.html" alt="Plot" width="950px" height="530px"></iframe>
+<iframe src="../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/4_Html/1_All_html/1_plot.html" alt="Plot"
+        width="950px" height="530px"></iframe>
 </div>
 
 ### Ckg Network
@@ -273,7 +279,8 @@ Optional description for subsection
 ### Multiqc Report
 
 <div style="text-align: center;">
-<iframe src="../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/4_Html/1_All_html/3_multiqc_report.html" alt="Multiqc Report" width="950px" height="530px"></iframe>
+<iframe src="../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/4_Html/1_All_html/3_multiqc_report.html" alt="Multiqc Report"
+        width="950px" height="530px"></iframe>
 </div>
 
 # Markdown

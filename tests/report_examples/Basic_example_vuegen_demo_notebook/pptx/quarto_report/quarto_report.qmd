@@ -34,6 +34,7 @@ Optional description for section.
 
 
 ### Top Species Plot By Biome Plotly
+
 ```{python}
 #| label: 'Top Species Plot By Biome Plotly 1'
 #| fig-cap: ""
@@ -60,6 +61,7 @@ fig_plotly.write_image("static/Top_Species_Plot_By_Biome_Plotly.png")
 ![](static/Top_Species_Plot_By_Biome_Plotly.png){fig-alt= width=90%}
 
 ### Multiline Plot Altair
+
 ```{python}
 #| label: 'Multiline Plot Altair 2'
 #| fig-cap: ""
@@ -70,7 +72,7 @@ with open(report_dir /'../../../../../docs/example_data/Basic_example_vuegen_dem
 # Convert JSON to string
 plot_json_str = json.dumps(plot_json)
 
-# Create the plotly plot
+# Create the altair plot
 fig_altair = alt.Chart.from_json(plot_json_str).properties(width=900, height=370)
 
 fig_altair.save("static/Multiline_Plot_Altair.png")
@@ -79,6 +81,7 @@ fig_altair.save("static/Multiline_Plot_Altair.png")
 ![](static/Multiline_Plot_Altair.png){fig-alt= width=90%}
 
 ### Pie Plot Countries Plotly
+
 ```{python}
 #| label: 'Pie Plot Countries Plotly 3'
 #| fig-cap: ""
@@ -105,6 +108,7 @@ fig_plotly.write_image("static/Pie_Plot_Countries_Plotly.png")
 ![](static/Pie_Plot_Countries_Plotly.png){fig-alt= width=90%}
 
 ### Pie Plots Biomes Plotly
+
 ```{python}
 #| label: 'Pie Plots Biomes Plotly 4'
 #| fig-cap: ""
@@ -131,6 +135,7 @@ fig_plotly.write_image("static/Pie_Plots_Biomes_Plotly.png")
 ![](static/Pie_Plots_Biomes_Plotly.png){fig-alt= width=90%}
 
 ### Saline Metagenomics Samples Map Altair
+
 ```{python}
 #| label: 'Saline Metagenomics Samples Map Altair 5'
 #| fig-cap: ""
@@ -141,7 +146,7 @@ with open(report_dir /'../../../../../docs/example_data/Basic_example_vuegen_dem
 # Convert JSON to string
 plot_json_str = json.dumps(plot_json)
 
-# Create the plotly plot
+# Create the altair plot
 fig_altair = alt.Chart.from_json(plot_json_str).properties(width=900, height=370)
 
 fig_altair.save("static/Saline_Metagenomics_Samples_Map_Altair.png")
@@ -150,6 +155,7 @@ fig_altair.save("static/Saline_Metagenomics_Samples_Map_Altair.png")
 ![](static/Saline_Metagenomics_Samples_Map_Altair.png){fig-alt= width=90%}
 
 ### Plotly Plot R
+
 ```{python}
 #| label: 'Plotly Plot R 6'
 #| fig-cap: ""
