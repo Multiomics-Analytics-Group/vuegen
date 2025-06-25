@@ -1,3 +1,5 @@
+"""QuartoReportView class for generating Quarto reports."""
+
 import os
 import subprocess
 import sys
@@ -10,6 +12,15 @@ import networkx as nx
 from . import report as r
 from . import table_utils
 from .utils import create_folder, get_relative_file_path, is_url, sort_imports
+
+GITHUB_ORG_URL = "https://github.com/Multiomics-Analytics-Group"
+ORG = "Multiomics Network Analytics Group (MoNA)"
+GITHUB_ORG_URL_BRACKETS = "{https://github.com/Multiomics-Analytics-Group}"
+REPO_URL = "https://github.com/Multiomics-Analytics-Group/vuegen"
+LOGO_URL = (
+    "https://raw.githubusercontent.com/Multiomics-Analytics-Group/"
+    "vuegen/main/docs/images/vuegen_logo.svg"
+)
 
 
 class QuartoReportView(r.ReportView):
@@ -321,9 +332,10 @@ class QuartoReportView(r.ReportView):
             format:"""
         )
         # Define format-specific YAML configurations
+        # \u007b is { and \u007d is }
         format_configs = {
             r.ReportType.HTML: textwrap.dedent(
-                """
+                f"""
                   html:
                     toc: true
                     toc-location: left
@@ -333,27 +345,29 @@ class QuartoReportView(r.ReportView):
                 include-in-header:
                     text: |
                         <style type="text/css">
-                        .footer {
+                        .footer \u007b
                         position: relative;
                         left: 0;
                         width: 100%;
                         text-align: center;
                         margin-top: 20px;
-                        }
+                        \u007d
                         </style>
                 include-after-body:
                     text: |
                         <footer class="footer">
                             This report was generated with
-                            <a href="https://github.com/Multiomics-Analytics-Group/vuegen" target="_blank">
-                                <img src="https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/vuegen_logo.svg" alt="VueGen" width="65px">
+                            <a href="{REPO_URL}" target="_blank">
+                                <img src="{LOGO_URL}" alt="VueGen" width="65px">
                             </a>
-                            | Copyright 2025 <a href="https://github.com/Multiomics-Analytics-Group" target="_blank">Multiomics Network Analytics Group (MoNA)</a>
+                            | Copyright 2025 <a href="{GITHUB_ORG_URL}" target="_blank">
+                            {ORG}</a>
                         </footer>"""
             ),
+            # \u007b is { and \u007d is }
             r.ReportType.PDF: textwrap.indent(
                 textwrap.dedent(
-                    """
+                    f"""
                       pdf:
                         toc: false
                         fig-align: center
@@ -361,11 +375,13 @@ class QuartoReportView(r.ReportView):
                           - bottom=40mm
                         include-in-header:
                             text: |
-                                \\usepackage{scrlayer-scrpage}
-                                \\usepackage{hyperref}
+                                \\usepackage{{scrlayer-scrpage}}
+                                \\usepackage{{hyperref}}
                                 \\clearpairofpagestyles
-                                \\lofoot{This report was generated with \\href{https://github.com/Multiomics-Analytics-Group/vuegen}{VueGen} | \\copyright{} 2025 \\href{https://github.com/Multiomics-Analytics-Group}{Multiomics Network Analytics Group}}
-                                \\rofoot{\\pagemark}"""
+                                \\lofoot\u007bThis report was generated with
+                                \\href{{{REPO_URL}}}{{VueGen}} | \\copyright{{}} 2025
+                                 \\href{GITHUB_ORG_URL_BRACKETS}\u007b{ORG}\u007d\u007d
+                                \\rofoot{{\\pagemark}}"""
                 ),
                 "  ",
             ),
@@ -386,7 +402,7 @@ class QuartoReportView(r.ReportView):
                 "  ",
             ),
             r.ReportType.REVEALJS: textwrap.dedent(
-                """
+                f"""
                   revealjs:
                     toc: false
                     smaller: true
@@ -397,22 +413,23 @@ class QuartoReportView(r.ReportView):
                 include-in-header:
                     text: |
                         <style type="text/css">
-                        .footer {
+                        .footer \u007b
                         position: fixed;
                         left: 0;
                         bottom: 0;
                         width: 100%;
                         text-align: center;
-                        }
+                        \u007d
                         </style>
                 include-after-body:
                     text: |
                         <footer class="footer">
                             This report was generated with
-                            <a href="https://github.com/Multiomics-Analytics-Group/vuegen" target="_blank">
-                                <img src="https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/vuegen_logo.svg" alt="VueGen" width="65px">
+                            <a href="{REPO_URL}" target="_blank">
+                                <img src="{LOGO_URL}" alt="VueGen" width="65px">
                             </a>
-                            | Copyright 2025 <a href="https://github.com/Multiomics-Analytics-Group" target="_blank">Multiomics Network Analytics Group (MoNA)</a>
+                            | Copyright 2025 <a href="{GITHUB_ORG_URL}"
+                             target="_blank">{ORG}</a>
                         </footer>"""
             ),
             r.ReportType.PPTX: textwrap.indent(
@@ -425,7 +442,7 @@ class QuartoReportView(r.ReportView):
                 "  ",
             ),
             r.ReportType.JUPYTER: textwrap.dedent(
-                """
+                f"""
                   html:
                     toc: true
                     toc-location: left
@@ -435,22 +452,23 @@ class QuartoReportView(r.ReportView):
                 include-in-header:
                     text: |
                         <style type="text/css">
-                        .footer {
+                        .footer \u007b
                         position: relative;
                         left: 0;
                         width: 100%;
                         text-align: center;
                         margin-top: 20px;
-                        }
+                         \u007d
                         </style>
                 include-after-body:
                     text: |
                         <footer class="footer">
                             This report was generated with
-                            <a href="https://github.com/Multiomics-Analytics-Group/vuegen" target="_blank">
-                                <img src="../docs/images/vuegen_logo.svg" alt="VueGen" width="65px">
+                            <a href="{REPO_URL}" target="_blank">
+                                <img src="{LOGO_URL}" alt="VueGen" width="65px">
                             </a>
-                            | Copyright 2025 <a href="https://github.com/Multiomics-Analytics-Group" target="_blank">Multiomics Network Analytics Group (MoNA)</a>
+                            | Copyright 2025 <a href="{GITHUB_ORG_URL}"
+                             target="_blank">{ORG}</a>
                         </footer>"""
             ),
         }

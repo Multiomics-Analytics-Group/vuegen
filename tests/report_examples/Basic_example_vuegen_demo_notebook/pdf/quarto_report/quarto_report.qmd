@@ -16,7 +16,9 @@ format:
             \usepackage{scrlayer-scrpage}
             \usepackage{hyperref}
             \clearpairofpagestyles
-            \lofoot{This report was generated with \href{https://github.com/Multiomics-Analytics-Group/vuegen}{VueGen} | \copyright{} 2025 \href{https://github.com/Multiomics-Analytics-Group}{Multiomics Network Analytics Group}}
+            \lofoot{This report was generated with
+            \href{https://github.com/Multiomics-Analytics-Group/vuegen}{VueGen} | \copyright{} 2025
+             \href{https://github.com/Multiomics-Analytics-Group}{Multiomics Network Analytics Group (MoNA)}}
             \rofoot{\pagemark}
 ---
 
