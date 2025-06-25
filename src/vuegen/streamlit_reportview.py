@@ -837,16 +837,15 @@ with open('{Path(html_plot_file).relative_to(Path.cwd())}', 'r') as html_file:
                 r.DataFrameFormat.XLSX.value_with_dot,
             ]:
                 dataframe_content.append("selected_sheet = 0")
-                sheet_names = table_utils.get_sheet_names(dataframe.file_path)
+                sheet_names = table_utils.get_sheet_names(df_file_path.as_posix())
                 if len(sheet_names) > 1:
                     # If there are multiple sheets, ask the user to select one
 
                     dataframe_content.append(
                         textwrap.dedent(
                             f"""\
-                        sheet_names = table_utils.get_sheet_names("{dataframe.file_path}")
-                        selected_sheet = st.selectbox("Select a sheet to display",
-                                                        options=sheet_names)
+                        sheet_names = table_utils.get_sheet_names("{df_file_path.as_posix()}")
+                        selected_sheet = st.selectbox("Select a sheet to display", options=sheet_names)
                         """
                         )
                     )
@@ -858,8 +857,7 @@ with open('{Path(html_plot_file).relative_to(Path.cwd())}', 'r') as html_file:
                 r.DataFrameFormat.XLSX.value_with_dot,
             ]:
                 dataframe_content.append(
-                    f"df = pd.{read_function.__name__}('{dataframe.file_path}',"
-                    " sheet_name=selected_sheet)\n"
+                    f"""df = pd.{read_function.__name__}('{df_file_path.as_posix()}', sheet_name=selected_sheet)\n"""
                 )
             else:
                 dataframe_content.append(
