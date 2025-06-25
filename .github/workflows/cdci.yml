@@ -109,6 +109,15 @@ jobs:
           cd docs
           vuegen -dir example_data/Earth_microbiome_vuegen_demo_notebook -rt jupyter
           vuegen -c example_data/Earth_microbiome_vuegen_demo_notebook/Earth_microbiome_vuegen_demo_notebook_config.yaml -rt jupyter
+      - name: quarto html report based on predefined config file
+        run: |
+          cd docs
+          vuegen -c example_config_files/Basic_example_vuegen_demo_notebook_config.yaml -output_dir ../tests/report_examples/Basic_example_vuegen_demo_notebook_cfg/html -rt html
+          # Check for changes
+          if git diff ../tests/report_examples | grep .; then
+            echo "Error: One or more protected files have been modified."
+            exit 1
+          fi
       - name: check for changes in report files
         run: |
           # write streamlit report to test folder 
@@ -118,7 +127,18 @@ jobs:
             echo "Error: One or more protected files have been modified."
             exit 1
           fi
-
+      - name: check for changes in quarto report files 
+        run: |
+          # write quarto based report to test folder
+          for format in html pdf docx odt revealjs pptx jupyter; do
+            vuegen -dir docs/example_data/Basic_example_vuegen_demo_notebook -output_dir tests/report_examples/Basic_example_vuegen_demo_notebook/$format  -rt $format 
+            # Check for changes
+            if git diff tests/report_examples | grep .; then
+              echo Failed for report: $format
+              echo "Error: One or more protected files have been modified."
+              exit 1
+            fi
+          done
 
   publish:
     name: Publish package to PyPI

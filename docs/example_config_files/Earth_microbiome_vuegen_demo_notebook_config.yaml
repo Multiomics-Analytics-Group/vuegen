@@ -123,8 +123,7 @@ sections:
       component_type: PLOT
       plot_type: STATIC
   - title: Shanon entropy analysis
-    description: This subsection contains the Shannon entropy analysis of the EMP
-    dataset.
+    description: This subsection contains the Shannon entropy analysis of the EMP dataset.
     components:
     - title: Specificity of sequences and higher taxonomic groups for environment
       file_path: https://raw.githubusercontent.com/biocore/emp/master/methods/images/figure4_entropy.png

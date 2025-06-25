@@ -150,14 +150,12 @@ class StreamlitReportView(r.WebAppReportView):
             report_manag_content.append("\nsections_pages = {}")
 
             # Generate the home page and update the report manager content
-            # ! top level files (compontents) are added to the home page
             self._generate_home_section(
                 output_dir=output_dir,
                 report_manag_content=report_manag_content,
-                home_section=self.report.sections[0],
             )
 
-            for section in self.report.sections[1:]:  # skip home section components
+            for section in self.report.sections:
                 # Create a folder for each section
                 subsection_page_vars = []
                 section_name_var = make_valid_identifier(
@@ -354,7 +352,6 @@ class StreamlitReportView(r.WebAppReportView):
         self,
         output_dir: str,
         report_manag_content: list,
-        home_section: r.Section,
     ) -> None:
         """
         Generates the homepage for the report and updates the report manager content.
@@ -367,13 +364,7 @@ class StreamlitReportView(r.WebAppReportView):
             A list to store the content that will be written to the report manager file.
         """
         self.report.logger.debug("Processing home section.")
-        all_components = []
-        subsection_imports = []
-        if home_section.components:
-            # some assert on title?
-            all_components, subsection_imports, _ = self._combine_components(
-                home_section.components
-            )
+
         try:
             # Create folder for the home page
             home_dir_path = Path(output_dir) / "Home"
@@ -386,11 +377,7 @@ class StreamlitReportView(r.WebAppReportView):
 
             # Create the home page content
             home_content = []
-            subsection_imports.append("import streamlit as st")
-            subsection_imports = set(subsection_imports)
-            subsection_imports, _ = sort_imports(subsection_imports)
-
-            home_content.extend(subsection_imports)
+            home_content.append("import streamlit as st")
             if self.report.description:
                 home_content.append(
                     self._format_text(text=self.report.description, type="paragraph")
@@ -401,8 +388,6 @@ class StreamlitReportView(r.WebAppReportView):
                 )
 
             # add components content to page (if any)
-            if all_components:
-                home_content.extend(all_components)
 
             # Define the footer variable and add it to the home page content
             home_content.append("footer = '''" + generate_footer() + "'''\n")
@@ -434,13 +419,11 @@ class StreamlitReportView(r.WebAppReportView):
             The folder where section files will be saved.
         """
         self.report.logger.info("Starting to generate sections for the report.")
-
         try:
-            for section in self.report.sections[1:]:
+            for section in self.report.sections:
                 self.report.logger.debug(
                     f"Processing section '{section.id}': '{section.title}' - {len(section.subsections)} subsection(s)"
                 )
-
                 if section.components:
                     # add an section overview page
                     section_content, section_imports, _ = self._combine_components(
@@ -456,9 +439,8 @@ class StreamlitReportView(r.WebAppReportView):
                     )
 
                 if not section.subsections:
-                    self.report.logger.warning(
-                        f"No subsections found in section: '{section.title}'. "
-                        "To show content in the report, add subsections to the section."
+                    self.report.logger.debug(
+                        f"No subsections found in section: '{section.title}'."
                     )
                     continue
 
@@ -631,7 +613,7 @@ html_content = response.text\n"""
                 else:
                     plot_content.append(
                         f"""
-with open('{Path(html_plot_file).relative_to(Path.cwd())}', 'r') as html_file:
+with open('{Path(html_plot_file).resolve().relative_to(Path.cwd())}', 'r') as html_file:
     html_content = html_file.read()\n"""
                     )
 

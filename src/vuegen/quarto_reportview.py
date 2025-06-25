@@ -85,7 +85,7 @@ class QuartoReportView(r.ReportView):
             Will overwrite value set on initialization of QuartoReportView.
         """
         if output_dir is not None:
-            self.output_dir = Path(output_dir).resolve().absolute()
+            self.output_dir = Path(output_dir).resolve()
 
         self.report.logger.debug(
             f"Generating '{self.report_type}' report in directory: '{self.output_dir}'"
@@ -130,35 +130,10 @@ class QuartoReportView(r.ReportView):
                 qmd_content.append(
                     self._generate_image_content(self.report.graphical_abstract)
                 )
-            # ? Do we need to handle overview separately?
-            main_section = self.report.sections[0]
-
-            # ! description can be a Markdown component, but it is treated differently
-            # ! It won't be added to the section content.
-            if main_section.components:
-                self.report.logger.debug(
-                    "Adding components of main section folder to the report as overall overview."
-                )
-                section_content, section_imports = self._combine_components(
-                    main_section.components
-                )
-                if section_content:
-                    qmd_content.append("# General Overview")
-
-                    if is_report_revealjs:
-                        # Add tabset for revealjs
-                        section_content = [
-                            "::: {.panel-tabset}\n",
-                            *section_content,
-                            ":::",
-                        ]
-                    qmd_content.extend(section_content)
-
-                report_imports.extend(section_imports)
 
             # Add the sections and subsections to the report
             self.report.logger.info("Starting to generate sections for the report.")
-            for section in self.report.sections[1:]:
+            for section in self.report.sections:
                 self.report.logger.debug(
                     f"Processing section: '{section.title}' - {len(section.subsections)} subsection(s)"
                 )
@@ -568,7 +543,7 @@ include-after-body:
             # ? should that be in the output folder
             static_plot_path = (
                 Path(self.static_dir) / f"{plot.title.replace(' ', '_')}.png"
-            ).absolute()
+            ).resolve()
             self.report.logger.debug(f"Static plot path: {static_plot_path}")
         else:
             html_plot_file = (
@@ -594,7 +569,7 @@ include-after-body:
                 plot_content.append(self._generate_plot_code(plot))
                 if self.is_report_static:
                     plot_content.append(
-                        f"""fig_altair.save("{static_plot_path.as_posix()}")\n```\n"""
+                        f"""fig_altair.save("{static_plot_path.relative_to(self.output_dir).as_posix()}")\n```\n"""
                     )
                     plot_content.append(self._generate_image_content(static_plot_path))
                 else:
