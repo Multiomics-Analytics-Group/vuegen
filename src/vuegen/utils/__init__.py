@@ -217,7 +217,7 @@ def get_relative_file_path(
     return rel_path
 
 
-def get_parser(prog_name: str, others: dict = {}) -> argparse.Namespace:
+def get_parser(prog_name: str, others: Optional[dict] = None) -> argparse.Namespace:
     """
     Initiates argparse.ArgumentParser() and adds common arguments.
 
@@ -239,6 +239,8 @@ def get_parser(prog_name: str, others: dict = {}) -> argparse.Namespace:
     AssertionError
         If prog_name is not a string or others is not a dictionary.
     """
+    if others is None:
+        others = {}
     # Preconditions
     assert isinstance(prog_name, str), f"prog_name should be a string: {prog_name}"
     assert isinstance(others, dict), f"others must be a dict: {others}"
