@@ -57,7 +57,8 @@ with open('docs/example_data/Basic_example_vuegen_demo_notebook/3_Networks/1_Int
 
 st.markdown(markdown_content, unsafe_allow_html=True)
 
-footer = '''<style type="text/css">
+footer = '''
+<style type="text/css">
 .footer {
     position: relative;
     left: 0;
@@ -73,6 +74,7 @@ footer = '''<style type="text/css">
     | Copyright 2025 <a href="https://github.com/Multiomics-Analytics-Group" target="_blank">
         Multiomics Network Analytics Group (MoNA)
     </a>
-</footer>'''
+</footer>
+'''
 
 st.markdown(footer, unsafe_allow_html=True)

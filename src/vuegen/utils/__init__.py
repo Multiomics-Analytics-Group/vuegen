@@ -5,16 +5,11 @@ import json
 import logging
 import os
 import sys
+import textwrap
 from datetime import datetime
-
-try:
-    from enum import StrEnum
-except ImportError:
-    from strenum import StrEnum
-
 from io import StringIO
 from pathlib import Path
-from typing import Iterable, Type
+from typing import Iterable, Optional, Type
 from urllib.parse import urlparse
 
 import networkx as nx
@@ -22,8 +17,15 @@ import requests
 import yaml
 from bs4 import BeautifulSoup
 
+try:
+    from enum import StrEnum
+except ImportError:
+    from strenum import StrEnum
 
-## CHECKS
+from vuegen.constants import GITHUB_ORG_URL, LOGO_URL, ORG, REPO_URL, TIMEOUT
+
+
+# CHECKS
 def check_path(filepath: Path) -> bool:
     """
     Checks if the given file or folder path exists.
@@ -848,7 +850,8 @@ def get_completion_message(report_type: str, config_path: str) -> str:
     return f"{message}\n{border}"
 
 
-## REPORT FORMATTING
+# REPORT FORMATTING
+# ? move as only used in streamlit_report
 def generate_footer() -> str:
     """
     Generate an HTML footer for a report.
@@ -861,23 +864,27 @@ def generate_footer() -> str:
     str
         A formatted HTML string representing the footer.
     """
-    footer = """<style type="text/css">
-.footer {
-    position: relative;
-    left: 0;
-    width: 100%;
-    text-align: center;
-}
-</style>
-<footer class="footer">
-    This report was generated with
-    <a href="https://github.com/Multiomics-Analytics-Group/vuegen" target="_blank">
-        <img src="https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/vuegen_logo.svg" alt="VueGen" width="65px">
-    </a>
-    | Copyright 2025 <a href="https://github.com/Multiomics-Analytics-Group" target="_blank">
-        Multiomics Network Analytics Group (MoNA)
-    </a>
-</footer>"""
+    footer = textwrap.dedent(
+        f"""
+        <style type="text/css">
+        .footer \u007b
+            position: relative;
+            left: 0;
+            width: 100%;
+            text-align: center;
+        \u007d
+        </style>
+        <footer class="footer">
+            This report was generated with
+            <a href="{REPO_URL}" target="_blank">
+                <img src="{LOGO_URL}" alt="VueGen" width="65px">
+            </a>
+            | Copyright 2025 <a href="{GITHUB_ORG_URL}" target="_blank">
+                {ORG}
+            </a>
+        </footer>
+        """
+    )
     return footer
 
 

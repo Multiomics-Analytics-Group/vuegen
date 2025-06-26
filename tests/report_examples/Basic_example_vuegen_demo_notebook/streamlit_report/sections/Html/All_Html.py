@@ -63,7 +63,8 @@ with open('docs/example_data/Basic_example_vuegen_demo_notebook/4_Html/1_All_htm
 
 st.components.v1.html(html_content, height=600, scrolling=True)
 
-footer = '''<style type="text/css">
+footer = '''
+<style type="text/css">
 .footer {
     position: relative;
     left: 0;
@@ -79,6 +80,7 @@ footer = '''<style type="text/css">
     | Copyright 2025 <a href="https://github.com/Multiomics-Analytics-Group" target="_blank">
         Multiomics Network Analytics Group (MoNA)
     </a>
-</footer>'''
+</footer>
+'''
 
 st.markdown(footer, unsafe_allow_html=True)

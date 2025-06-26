@@ -204,7 +204,8 @@ st.download_button(
     mime='text/csv',
     key=f"download_button_{df_index}")
 df_index += 1
-footer = '''<style type="text/css">
+footer = '''
+<style type="text/css">
 .footer {
     position: relative;
     left: 0;
@@ -220,6 +221,7 @@ footer = '''<style type="text/css">
     | Copyright 2025 <a href="https://github.com/Multiomics-Analytics-Group" target="_blank">
         Multiomics Network Analytics Group (MoNA)
     </a>
-</footer>'''
+</footer>
+'''
 
 st.markdown(footer, unsafe_allow_html=True)
