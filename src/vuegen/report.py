@@ -1,3 +1,5 @@
+"""Contains all comonent classes and Report related base classes for VueGen."""
+
 import logging
 import os
 from abc import ABC, abstractmethod
@@ -17,10 +19,14 @@ import pandas as pd
 import requests
 from pyvis.network import Network
 
+from vuegen.constants import TIMEOUT
+
 from .utils import cyjs_to_networkx, fetch_file_stream, pyvishtml_to_networkx
 
 
 class ReportType(StrEnum):
+    """Enum representing different types of reports that can be generated."""
+
     STREAMLIT = auto()
     HTML = auto()
     PDF = auto()
@@ -32,6 +38,8 @@ class ReportType(StrEnum):
 
 
 class ComponentType(StrEnum):
+    """Enum representing different types of components in a report subsection."""
+
     PLOT = auto()
     DATAFRAME = auto()
     MARKDOWN = auto()
@@ -41,6 +49,8 @@ class ComponentType(StrEnum):
 
 
 class PlotType(StrEnum):
+    """Enum representing different types of plots that can be generated."""
+
     STATIC = auto()
     PLOTLY = auto()
     ALTAIR = auto()
@@ -48,6 +58,8 @@ class PlotType(StrEnum):
 
 
 class NetworkFormat(StrEnum):
+    """Enum representing different formats for network graphs."""
+
     GML = auto()
     GRAPHML = auto()
     GEXF = auto()
@@ -67,11 +79,15 @@ class NetworkFormat(StrEnum):
 
 
 class CSVNetworkFormat(StrEnum):
+    """Enum representing different formats for CSV network files."""
+
     EDGELIST = auto()
     ADJLIST = auto()
 
 
 class DataFrameFormat(StrEnum):
+    """Enum representing different file formats for data in DataFrame format."""
+
     CSV = auto()
     TXT = auto()
     PARQUET = auto()
@@ -192,7 +208,8 @@ class Plot(Component):
             NetworkFormat.CYJS.value_with_dot: cyjs_to_networkx,
         }
 
-        # Handle .csv and .txt files with custom delimiters based on the text format (edgelist or adjlist)
+        # Handle .csv and .txt files with custom delimiters based on the text format
+        # (edgelist or adjlist)
         try:
             # Fetch the file stream (local or URL) using fetch_file_stream
             file_stream = fetch_file_stream(self.file_path)
@@ -211,7 +228,8 @@ class Plot(Component):
                 G = pyvishtml_to_networkx(file_stream)
                 return (G, self.file_path)
 
-            # Handle CSV and TXT files with custom delimiters based on the text format (edgelist or adjlist)
+            # Handle CSV and TXT files with custom delimiters based on the text format
+            # (edgelist or adjlist)
             if (
                 file_extension
                 in [NetworkFormat.CSV.value_with_dot, NetworkFormat.TXT.value_with_dot]
@@ -226,7 +244,8 @@ class Plot(Component):
                     )
 
                 if self.csv_network_format == CSVNetworkFormat.EDGELIST:
-                    # Assert that "source" and "target" columns are present in the DataFrame
+                    # Assert that "source" and "target" columns
+                    # are present in the DataFrame
                     required_columns = {"source", "target"}
                     if not required_columns.issubset(df_net.columns):
                         missing_cols = ", ".join(
@@ -236,7 +255,8 @@ class Plot(Component):
                             f"CSV network file must contain 'source' and 'target' columns. Missing columns: {missing_cols}."
                         )
 
-                    # Use additional columns as edge attributes, excluding "source" and "target"
+                    # Use additional columns as edge attributes,
+                    # excluding "source" and "target"
                     edge_attributes = [
                         col for col in df_net.columns if col not in required_columns
                     ]
@@ -412,7 +432,7 @@ class Plot(Component):
             A NetworkX graph object with the 'size' attribute added to the nodes.
         """
         # Clean up edge attributes to avoid conflicts
-        for u, v, data in G.edges(data=True):
+        for _, _, data in G.edges(data=True):
             data.pop("source", None)
             data.pop("target", None)
 
@@ -612,6 +632,7 @@ class APICall(Component):
                     if self.method in ["POST", "PUT", "PATCH"] and request_body_to_send
                     else None
                 ),
+                timeout=TIMEOUT,
             )
             response.raise_for_status()
             self.logger.info(
@@ -710,7 +731,8 @@ class Subsection:
         return cls._id_counter
 
 
-# ? Section is a subclass of Subsection (adding subsections). Destinction might not be necessary
+# ? Section is a subclass of Subsection (adding subsections).
+# ? Distinction might not be necessary
 @dataclass
 class Section:
     """
@@ -814,7 +836,6 @@ class ReportView(ABC):
             The folder where the generated report files will be saved
             (default is 'sections').
         """
-        pass
 
     @abstractmethod
     def run_report(self, output_dir: str = "sections") -> None:
@@ -826,7 +847,6 @@ class ReportView(ABC):
         output_dir : str, optional
             The folder where the report was generated (default is 'sections').
         """
-        pass
 
     @abstractmethod
     def _generate_component_imports(self, component: Component) -> str:
@@ -847,7 +867,6 @@ class ReportView(ABC):
         str
             A str of import statements for the component.
         """
-        pass
 
 
 class WebAppReportView(ReportView):
@@ -877,7 +896,6 @@ class WebAppReportView(ReportView):
         str
             The formatted text string.
         """
-        pass
 
     @abstractmethod
     def _generate_sections(self, output_dir: str) -> None:
@@ -893,7 +911,6 @@ class WebAppReportView(ReportView):
         -----
         This method is intended to be used internally by the `generate_report` method.
         """
-        pass
 
     @abstractmethod
     def _generate_subsection(
@@ -915,4 +932,3 @@ class WebAppReportView(ReportView):
             - list of subsection content lines (List[str])
             - list of imports for the subsection (List[str])
         """
-        pass

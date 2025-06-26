@@ -1,3 +1,5 @@
+"""Constants for the Vuegen project."""
+
 GITHUB_ORG_URL = "https://github.com/Multiomics-Analytics-Group"
 ORG = "Multiomics Network Analytics Group (MoNA)"
 GITHUB_ORG_URL_BRACKETS = "{https://github.com/Multiomics-Analytics-Group}"

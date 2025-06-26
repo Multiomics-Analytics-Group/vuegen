@@ -863,7 +863,7 @@ def get_completion_message(report_type: str, config_path: str) -> str:
             📂 Your {report_type} report is available at:
                 quarto_report
 
-            ✨ You can extend the report by adding new files to the input directory or 
+            ✨ You can extend the report by adding new files to the input directory or
                updating the config file.
 
             🛠️ Advanced users can modify the report template directly in:
