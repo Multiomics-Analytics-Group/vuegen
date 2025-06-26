@@ -305,7 +305,7 @@ def get_parser(prog_name: str, others: Optional[dict] = None) -> argparse.Namesp
     return parser
 
 
-def fetch_file_stream(file_path: str) -> StringIO:
+def fetch_file_stream(file_path: str, timeout: int = TIMEOUT) -> StringIO:
     """
     Fetches a file-like stream from a given file path or URL.
 
@@ -334,7 +334,7 @@ def fetch_file_stream(file_path: str) -> StringIO:
     if is_url(file_path):
         # Handle URL input
         try:
-            response = requests.get(file_path)
+            response = requests.get(file_path, timeout=timeout)
             response.raise_for_status()  # Raise an exception for HTTP errors
             return StringIO(response.text)
         except requests.exceptions.RequestException as e:
