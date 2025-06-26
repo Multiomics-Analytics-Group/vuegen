@@ -220,7 +220,9 @@ class Plot(Component):
             # Check if the file extension matches any Enum value
             if not any(file_extension == fmt.value_with_dot for fmt in NetworkFormat):
                 self.logger.error(
-                    f"Unsupported file extension: {file_extension}. Supported extensions are: {', '.join(fmt.value for fmt in NetworkFormat)}."
+                    "Unsupported file extension: %s. Supported extensions are: %s",
+                    file_extension,
+                    ", ".join(fmt.value for fmt in NetworkFormat),
                 )
 
             # Handle HTML files for pyvis interactive networks
@@ -240,7 +242,9 @@ class Plot(Component):
                     df_net = pd.read_csv(file_stream, delimiter=delimiter)
                 except pd.errors.ParserError:
                     self.logger.error(
-                        f"Error parsing CSV/TXT file {self.file_path}. Please check the file format or delimiter."
+                        "Error parsing CSV/TXT file %s. "
+                        "Please check the file format or delimiter.",
+                        self.file_path,
                     )
 
                 if self.csv_network_format == CSVNetworkFormat.EDGELIST:
@@ -252,7 +256,9 @@ class Plot(Component):
                             required_columns.difference(df_net.columns)
                         )
                         self.logger.error(
-                            f"CSV network file must contain 'source' and 'target' columns. Missing columns: {missing_cols}."
+                            "CSV network file must contain 'source' and 'target' columns."
+                            " Missing columns: %s.",
+                            missing_cols,
                         )
 
                     # Use additional columns as edge attributes,
@@ -275,31 +281,34 @@ class Plot(Component):
                         )
 
                     self.logger.info(
-                        f"Successfully read network from file: {self.file_path}."
+                        "Successfully read network from file: %s.", self.file_path
                     )
                     return G
                 elif self.csv_network_format == CSVNetworkFormat.ADJLIST:
                     G = nx.from_pandas_adjacency(df_net)
                     self.logger.info(
-                        f"Successfully read network from file: {self.file_path}."
+                        "Successfully read network from file: %s.", self.file_path
                     )
                     return G
                 else:
                     self.logger.error(
-                        f"Unsupported format for CSV/TXT file: {self.csv_network_format}."
+                        "Unsupported format for CSV/TXT file: %s.",
+                        self.csv_network_format,
                     )
 
             # Handle other formats using the mapping and return the NetworkX graph object
             # from the specified network file
             G = file_extension_map[file_extension](file_stream)
             G = self._add_size_attribute(G)
-            self.logger.info(f"Successfully read network from file: {self.file_path}.")
+            self.logger.info("Successfully read network from file: %s.", self.file_path)
             return G
         except Exception as e:
-            self.logger.error(f"Error occurred while reading network file: {str(e)}.")
-            raise RuntimeError(
-                f"An error occurred while reading the network file: {str(e)}"
+            self.logger.error(
+                "Error occurred while reading network file: %s.", e, exc_info=True
             )
+            raise RuntimeError(
+                "An error occurred while reading the network file."
+            ) from e
 
     def save_network_image(
         self, G: nx.Graph, output_file: str, format: str, dpi: int = 300
@@ -322,20 +331,25 @@ class Plot(Component):
         # Check if the output file path is valid
         if not os.path.isdir(os.path.dirname(output_file)):
             self.logger.error(
-                f"Directory for saving image does not exist: {os.path.dirname(output_file)}."
+                "Directory for saving image does not exist: %s",
+                os.path.dirname(output_file),
             )
             raise FileNotFoundError(
-                f"The directory for saving the file does not exist: {os.path.dirname(output_file)}."
+                "The directory for saving the file does not exist: "
+                f"{os.path.dirname(output_file)}."
             )
 
         # Validate image format
         valid_formats = ["png", "jpg", "jpeg", "svg"]
         if format.lower() not in valid_formats:
             self.logger.error(
-                f"Invalid image format: {format}. Supported formats are: {', '.join(valid_formats)}."
+                "Invalid image format: %s. Supported formats are: %s.",
+                format,
+                ", ".join(valid_formats),
             )
             raise ValueError(
-                f"Invalid format: {format}. Supported formats are: {', '.join(valid_formats)}."
+                f"Invalid format: {format}."
+                f" Supported formats are: {', '.join(valid_formats)}."
             )
 
         try:
@@ -343,10 +357,10 @@ class Plot(Component):
             nx.draw(G, with_labels=False)
             plt.savefig(output_file, format=format, dpi=dpi)
             plt.clf()
-            self.logger.info(f"Network image saved successfully at: {output_file}.")
+            self.logger.info("Network image saved successfully at: %s.", output_file)
         except Exception as e:
-            self.logger.error(f"Failed to save the network image: {str(e)}.")
-            raise RuntimeError(f"Failed to save the network image: {str(e)}")
+            self.logger.error("Failed to save the network image: %s.", e, exc_info=True)
+            raise RuntimeError("Failed to save the network image.") from e
 
     def create_and_save_pyvis_network(self, G: nx.Graph, output_file: str) -> Network:
         """
@@ -368,17 +382,19 @@ class Plot(Component):
         # Check if the network object and output file path are valid
         if not isinstance(G, nx.Graph):
             self.logger.error(
-                f"Provided object is not a valid NetworkX graph: {type(G)}."
+                "Provided object is not a valid NetworkX graph: %s.", type(G)
             )
             raise TypeError(
                 f"The provided object is not a valid NetworkX graph: {type(G)}."
             )
         if not os.path.isdir(os.path.dirname(output_file)):
             self.logger.error(
-                f"Directory for saving PyVis network does not exist: {os.path.dirname(output_file)}."
+                "Directory for saving PyVis network does not exist: %s.",
+                os.path.dirname(output_file),
             )
             raise FileNotFoundError(
-                f"The directory for saving the file does not exist: {os.path.dirname(output_file)}."
+                "The directory for saving the file does not exist: "
+                f"{os.path.dirname(output_file)}."
             )
 
         try:
@@ -409,12 +425,14 @@ class Plot(Component):
 
             # Save the network as an HTML file
             net.save_graph(str(output_file))
-            self.logger.info(f"PyVis network created and saved as: {output_file}.")
+            self.logger.info("PyVis network created and saved as: %s.", output_file)
             return net
 
         except Exception as e:
-            self.logger.error(f"Failed to create and save PyVis network: {str(e)}.")
-            raise RuntimeError(f"Failed to create and save the PyVis network: {str(e)}")
+            self.logger.error(
+                "Failed to create and save PyVis network: %s.", e, exc_info=True
+            )
+            raise RuntimeError("Failed to create and save the PyVis network.") from e
 
     def _add_size_attribute(self, G: nx.Graph) -> nx.Graph:
         """
@@ -617,9 +635,9 @@ class APICall(Component):
             else self.request_body
         )
         try:
-            self.logger.info(f"Making {self.method} request to API: {self.api_url}")
-            self.logger.debug(f"Headers: {self.headers}")
-            self.logger.debug(f"Params: {self.params}")
+            self.logger.info("Making %s request to API: %s", self.method, self.api_url)
+            self.logger.debug("Headers: %s", self.headers)
+            self.logger.debug("Params: %s", self.params)
 
             response = requests.request(
                 self.method,
@@ -636,11 +654,11 @@ class APICall(Component):
             )
             response.raise_for_status()
             self.logger.info(
-                f"Request successful with status code {response.status_code}."
+                "Request successful with status code %d.", response.status_code
             )
             return response.json()
         except requests.exceptions.RequestException as e:
-            self.logger.error(f"API request failed: {e}")
+            self.logger.error("API request failed: %s", e, exc_info=True)
             return None
 
 
