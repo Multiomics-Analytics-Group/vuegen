@@ -818,36 +818,44 @@ def get_completion_message(report_type: str, config_path: str) -> str:
     border = "─" * 65  # Creates a separator line
 
     if report_type == "streamlit":
-        message = f"""🚀 Streamlit Report Generated!
+        message = textwrap.dedent(
+            f"""
+            🚀 Streamlit Report Generated!
 
-📂 All scripts to build the Streamlit app are available at:
-    streamlit_report/sections
+            📂 All scripts to build the Streamlit app are available at:
+                streamlit_report/sections
 
-▶️ To run the Streamlit app, use the following command:
-    streamlit run streamlit_report/sections/report_manager.py
+            ▶️ To run the Streamlit app, use the following command:
+                streamlit run streamlit_report/sections/report_manager.py
 
-✨ You can extend the report by adding new files to the input directory or updating the config file.
+            ✨ You can extend the report by adding new files to the input directory or
+               updating the config file.
 
-🛠️ Advanced users can modify the Python scripts directly in:
-    streamlit_report/sections
+            🛠️ Advanced users can modify the Python scripts directly in:
+                streamlit_report/sections
 
-⚙️ Configuration file used:
-    {config_path}
-"""
+            ⚙️ Configuration file used:
+                {config_path}
+            """
+        )
     else:
-        message = f"""🚀 {report_type.capitalize()} Report Generated!
+        message = textwrap.dedent(
+            f"""
+            🚀 {report_type.capitalize()} Report Generated!
 
-📂 Your {report_type} report is available at:
-    quarto_report
+            📂 Your {report_type} report is available at:
+                quarto_report
 
-✨ You can extend the report by adding new files to the input directory or updating the config file.
+            ✨ You can extend the report by adding new files to the input directory or 
+               updating the config file.
 
-🛠️ Advanced users can modify the report template directly in:
-    quarto_report/quarto_report.qmd
+            🛠️ Advanced users can modify the report template directly in:
+                quarto_report/quarto_report.qmd
 
-⚙️ Configuration file used:
-    {config_path}
-"""
+            ⚙️ Configuration file used:
+                {config_path}
+            """
+        )
 
     return f"{message}\n{border}"
 
