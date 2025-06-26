@@ -1,3 +1,10 @@
+"""File system utilities, file conversion functions,
+graph related utilities, config file writing, and
+command line parser and logging messages (completion).
+
+streamlit report footer is also in this file.
+"""
+
 from __future__ import annotations
 
 import argparse
@@ -72,14 +79,16 @@ def assert_enum_value(
     """
     try:
         return enum_class[value.upper()]
-    except KeyError:
+    except KeyError as e:
         expected_values = ", ".join([str(e.value) for e in enum_class])
         logger.error(
-            f"Invalid value for {enum_class.__name__}: '{value}'. Expected values are: {expected_values}"
+            f"Invalid value for {enum_class.__name__}: '{value}'."
+            f"Expected values are: {expected_values}"
         )
         raise ValueError(
-            f"Invalid {enum_class.__name__}: {value}. Expected values are: {expected_values}"
-        )
+            f"Invalid {enum_class.__name__}: {value}. "
+            f"Expected values are: {expected_values}"
+        ) from e
 
 
 def is_url(filepath: Path) -> bool:
@@ -138,17 +147,19 @@ def is_pyvis_html(filepath: str) -> bool:
     return pyvis_identifier_valid and body_structure_valid
 
 
-## FILE_SYSTEM
+# FILE_SYSTEM
 def create_folder(directory_path: str, is_nested: bool = False) -> bool:
     """
-    Create a folder. Optionally create nested directories if the specified path includes subdirectories.
+    Create a folder. Optionally create nested directories if the specified path includes
+    subdirectories.
 
     Parameters
     ----------
     directory_path : str
         The path of the directory to create.
     is_nested : bool
-        A flag indicating whether to create nested directories (True uses os.makedirs, False uses os.mkdir).
+        A flag indicating whether to create nested directories.
+        True uses os.makedirs, False uses os.mkdir.
 
     Returns
     -------
@@ -173,7 +184,7 @@ def create_folder(directory_path: str, is_nested: bool = False) -> bool:
         else:
             return False
     except OSError as e:
-        raise OSError(f"Error creating directory '{directory_path}': {e}")
+        raise OSError(f"Error creating directory '{directory_path}'.") from e
 
 
 def get_relative_file_path(
@@ -268,7 +279,10 @@ def get_parser(prog_name: str, others: Optional[dict] = None) -> argparse.Namesp
         "--report_type",
         type=str,
         default="streamlit",
-        help="Type of the report to generate (streamlit, html, pdf, docx, odt, revealjs, pptx, or jupyter).",
+        help=(
+            "Type of the report to generate: streamlit, html, pdf, docx, odt, revealjs,"
+            " pptx, or jupyter."
+        ),
     )
     parser.add_argument(
         "-output_dir",
@@ -338,9 +352,8 @@ def fetch_file_stream(file_path: str, timeout: int = TIMEOUT) -> StringIO:
             response.raise_for_status()  # Raise an exception for HTTP errors
             return StringIO(response.text)
         except requests.exceptions.RequestException as e:
-            raise ValueError(
-                f"Error fetching content from URL: {file_path}. Error: {str(e)}"
-            )
+            raise ValueError(f"Error fetching content from URL: {file_path}.") from e
+
     else:
         # Handle local file input
         if not os.path.exists(file_path):
@@ -351,12 +364,13 @@ def fetch_file_stream(file_path: str, timeout: int = TIMEOUT) -> StringIO:
             return StringIO(file.read())
 
 
-## FILE_CONVERSION
+# FILE_CONVERSION
 def cyjs_to_networkx(file_path: str, name: str = "name", ident: str = "id") -> nx.Graph:
     """
-    Create a NetworkX graph from a `.cyjs` file in Cytoscape format, including all attributes present in the JSON data.
-    This function is modified from the `cytoscape_graph` networkx function to handle the 'value' key explicitly and to include
-    all additional attributes found in the JSON data for both nodes and edges.
+    Create a NetworkX graph from a `.cyjs` file in Cytoscape format, including all
+    attributes present in the JSON data. This function is modified from the
+    `cytoscape_graph` networkx function to handle the 'value' key explicitly and to
+    include all additional attributes found in the JSON data for both nodes and edges.
 
     Parameters
     ----------
@@ -371,14 +385,16 @@ def cyjs_to_networkx(file_path: str, name: str = "name", ident: str = "id") -> n
     Returns
     -------
     graph : networkx.Graph
-        The graph created from the Cytoscape JSON data, including all node and edge attributes.
+        The graph created from the Cytoscape JSON data, including all node and edge
+        attributes.
 
     Raises
     ------
     NetworkXError
         If the `name` and `ident` attributes are identical.
     ValueError
-        If the data format is invalid or missing required elements, such as 'id' or 'name' for nodes.
+        If the data format is invalid or missing required elements, such as 'id'
+        or 'name' for nodes.
     """
     try:
         # If file_path is a file-like object (e.g., StringIO), read from it
@@ -438,7 +454,7 @@ def cyjs_to_networkx(file_path: str, name: str = "name", ident: str = "id") -> n
         return graph
 
     except KeyError as e:
-        raise ValueError(f"Missing required key in data: {e}")
+        raise ValueError("Missing required key in data.") from e
 
 
 def pyvishtml_to_networkx(html_file: str) -> nx.Graph:
@@ -458,7 +474,8 @@ def pyvishtml_to_networkx(html_file: str) -> nx.Graph:
     Raises
     ------
     ValueError
-        If the HTML file does not contain the expected network data, or if nodes lack 'id' attribute.
+        If the HTML file does not contain the expected network data,
+        or if nodes lack 'id' attribute.
     """
     # Load the HTML file
     if isinstance(html_file, StringIO):
@@ -519,7 +536,7 @@ def pyvishtml_to_networkx(html_file: str) -> nx.Graph:
     return graph
 
 
-## CONFIG
+# CONFIG
 def load_yaml_config(file_path: str) -> dict:
     """
     Load a YAML configuration file and return its contents as a dictionary.
@@ -550,7 +567,7 @@ def load_yaml_config(file_path: str) -> dict:
         try:
             config = yaml.safe_load(file)
         except yaml.YAMLError as exc:
-            raise ValueError(f"Error parsing YAML file: {exc}")
+            raise ValueError("Error parsing YAML file.") from exc
 
     return config
 
@@ -590,7 +607,7 @@ def write_yaml_config(yaml_data: dict, directory_path: Path) -> Path:
     return output_yaml
 
 
-## LOGGING
+# LOGGING
 def get_basename(fname: None | str = None) -> str:
     """
     - For a given filename, returns basename WITHOUT file extension
@@ -700,7 +717,7 @@ def generate_log_filename(folder: str = "logs", suffix: str = "") -> str:
         # PRECONDITIONS
         create_folder(folder)  # ? Path(folder).mkdir(parents=True, exist_ok=True)
     except OSError as e:
-        raise OSError(f"Error creating directory '{folder}': {e}")
+        raise OSError(f"Error creating directory '{folder}'") from e
     # MAIN FUNCTION
     log_filename = get_time(incl_timezone=False) + "_" + suffix + ".log"
     log_filepath = os.path.join(folder, log_filename)
@@ -794,7 +811,7 @@ def get_logger(
     logger = init_log(log_file, display=display, logger_id=logger_id)
 
     # Log the path to the log file
-    logger.info(f"Path to log file: {log_file}")
+    logger.info("Path to log file: %s", log_file)
 
     return logger, log_file
 
