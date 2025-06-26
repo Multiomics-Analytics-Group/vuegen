@@ -11,16 +11,8 @@ import networkx as nx
 
 from . import report as r
 from . import table_utils
+from .constants import GITHUB_ORG_URL, GITHUB_ORG_URL_BRACKETS, LOGO_URL, ORG, REPO_URL
 from .utils import create_folder, get_relative_file_path, is_url, sort_imports
-
-GITHUB_ORG_URL = "https://github.com/Multiomics-Analytics-Group"
-ORG = "Multiomics Network Analytics Group (MoNA)"
-GITHUB_ORG_URL_BRACKETS = "{https://github.com/Multiomics-Analytics-Group}"
-REPO_URL = "https://github.com/Multiomics-Analytics-Group/vuegen"
-LOGO_URL = (
-    "https://raw.githubusercontent.com/Multiomics-Analytics-Group/"
-    "vuegen/main/docs/images/vuegen_logo.svg"
-)
 
 
 class QuartoReportView(r.ReportView):
