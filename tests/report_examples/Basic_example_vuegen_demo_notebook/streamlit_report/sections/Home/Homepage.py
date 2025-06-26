@@ -16,7 +16,7 @@ footer = '''<style type="text/css">
 }
 </style>
 <footer class="footer">
-    This report was generated with 
+    This report was generated with
     <a href="https://github.com/Multiomics-Analytics-Group/vuegen" target="_blank">
         <img src="https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/vuegen_logo.svg" alt="VueGen" width="65px">
     </a>
