@@ -55,13 +55,13 @@ class QuartoReportView(r.ReportView):
         if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
             self.report.logger.info("running in a PyInstaller bundle")
             # self.BUNDLED_EXECUTION = True
-            self.report.logger.debug(f"sys._MEIPASS: {sys._MEIPASS}")
+            self.report.logger.debug("sys._MEIPASS: %s", sys._MEIPASS)
         else:
             self.report.logger.info("running in a normal Python process")
 
         self.report.logger.debug("env_vars (QuartoReport): %s", os.environ)
-        self.report.logger.debug(f"PATH: {os.environ['PATH']}")
-        self.report.logger.debug(f"sys.path: {sys.path}")
+        self.report.logger.debug("PATH: %s", os.environ["PATH"])
+        self.report.logger.debug("sys.path: %s", sys.path)
 
         self.is_report_static = self.report_type in {
             r.ReportType.PDF,
@@ -92,25 +92,27 @@ class QuartoReportView(r.ReportView):
             self.output_dir = Path(output_dir).resolve()
 
         self.report.logger.debug(
-            f"Generating '{self.report_type}' report in directory: '{self.output_dir}'"
+            "Generating '%s' report in directory: '%s'",
+            self.report_type,
+            self.output_dir,
         )
         # Create the output folder
         if create_folder(self.output_dir, is_nested=True):
-            self.report.logger.debug(f"Created output directory: '{self.output_dir}'")
+            self.report.logger.debug("Created output directory: '%s'", self.output_dir)
         else:
             self.report.logger.debug(
-                f"Output directory already existed: '{self.output_dir}'"
+                "Output directory already existed: '%s'", self.output_dir
             )
 
         # Create the static folder
         if create_folder(self.static_dir):
             self.report.logger.info(
-                f"Created output directory for static content: '{self.static_dir}'"
+                "Created output directory for static content: '%s'", self.static_dir
             )
         else:
             self.report.logger.info(
-                "Output directory for static content already existed: "
-                f"'{self.static_dir}'"
+                "Output directory for static content already existed: '%s'",
+                self.static_dir,
             )
 
         try:
@@ -140,8 +142,9 @@ class QuartoReportView(r.ReportView):
             self.report.logger.info("Starting to generate sections for the report.")
             for section in self.report.sections:
                 self.report.logger.debug(
-                    f"Processing section: '{section.title}' -"
-                    f" {len(section.subsections)} subsection(s)"
+                    "Processing section: '%s' - %d subsection(s)",
+                    section.title,
+                    len(section.subsections),
                 )
                 # Add section header and description
                 qmd_content.append(f"# {section.title}")
@@ -176,8 +179,9 @@ class QuartoReportView(r.ReportView):
                     # Iterate through subsections and integrate them into the section file
                     for subsection in section.subsections:
                         self.report.logger.debug(
-                            f"Processing subsection: '{subsection.title}' - "
-                            f"{len(subsection.components)} component(s)"
+                            "Processing subsection: '%s' - %d component(s)",
+                            subsection.title,
+                            len(subsection.components),
                         )
                         # Generate content for the subsection
                         subsection_content, subsection_imports = (
@@ -192,8 +196,9 @@ class QuartoReportView(r.ReportView):
                         )  # even easier as it's global
                 else:
                     self.report.logger.warning(
-                        f"No subsections found in section: '{section.title}'. "
-                        "To show content in the report, add subsections to the section."
+                        "No subsections found in section: '%s'. To show content "
+                        "in the report, add subsections to the section.",
+                        section.title,
                     )
             # Add globally set output folder
             report_imports.append("from pathlib import Path")
@@ -226,12 +231,14 @@ class QuartoReportView(r.ReportView):
                 )
                 quarto_report.write("\n".join(qmd_content))
                 self.report.logger.info(
-                    f"Created qmd script to render the app: {fname_qmd_report}"
+                    "Created qmd script to render the app: %s", fname_qmd_report
                 )
 
         except Exception as e:
             self.report.logger.error(
-                f"An error occurred while generating the report: {str(e)}"
+                "An error occurred while generating the report: %s",
+                e,
+                exc_info=True,
             )
             raise
 
@@ -251,7 +258,10 @@ class QuartoReportView(r.ReportView):
         file_path_to_qmd = Path(self.output_dir) / f"{self.BASE_DIR}.qmd"
         args = [self.quarto_path, "render", str(file_path_to_qmd)]
         self.report.logger.info(
-            f"Running '{self.report.title}' '{self.report_type}' report with {args!r}"
+            "Running '%s' '%s' report with %r",
+            self.report.title,
+            self.report_type,
+            args,
         )
         if (
             self.report_type
@@ -289,15 +299,22 @@ class QuartoReportView(r.ReportView):
                     check=True,
                 )
                 self.report.logger.info(
-                    f"Converted '{self.report.title}' '{self.report_type}' "
-                    "report to Jupyter Notebook after execution"
+                    "Converted '%s' '%s' report to Jupyter Notebook after execution",
+                    self.report.title,
+                    self.report_type,
                 )
             self.report.logger.info(
-                f"'{self.report.title}' '{self.report_type}' report rendered"
+                "'%s' '%s' report rendered",
+                self.report.title,
+                self.report_type,
             )
         except subprocess.CalledProcessError as e:
             self.report.logger.error(
-                f"Error running '{self.report.title}' {self.report_type} report: {str(e)}"
+                "Error running '%s' %s report: %s",
+                self.report.title,
+                self.report_type,
+                e,
+                exc_info=True,
             )
             raise
 
@@ -495,7 +512,7 @@ class QuartoReportView(r.ReportView):
             fct = self.components_fct_map.get(component.component_type, None)
             if fct is None:
                 self.report.logger.warning(
-                    f"Unsupported component type '{component.component_type}' "
+                    "Unsupported component type '%s'", component.component_type
                 )
             elif (
                 component.component_type == r.ComponentType.MARKDOWN
@@ -557,7 +574,7 @@ class QuartoReportView(r.ReportView):
             subsection_content.append(":::\n")
 
         self.report.logger.info(
-            f"Generated content and imports for subsection: '{subsection.title}'"
+            "Generated content and imports for subsection: '%s'", subsection.title
         )
         return subsection_content, subsection_imports
 
@@ -585,7 +602,7 @@ class QuartoReportView(r.ReportView):
             static_plot_path = (
                 Path(self.static_dir) / f"{plot.title.replace(' ', '_')}.png"
             ).resolve()
-            self.report.logger.debug(f"Static plot path: {static_plot_path}")
+            self.report.logger.debug("Static plot path: %s", static_plot_path)
         else:
             html_plot_file = (
                 Path(self.static_dir) / f"{plot.title.replace(' ', '_')}.html"
@@ -637,11 +654,15 @@ class QuartoReportView(r.ReportView):
                 else:
                     plot_content.append(self._generate_plot_code(plot, html_plot_file))
             else:
-                self.report.logger.warning(f"Unsupported plot type: {plot.plot_type}")
+                self.report.logger.warning("Unsupported plot type: %s", plot.plot_type)
         except Exception as e:
             self.report.logger.error(
-                f"Error generating content for '{plot.plot_type}' plot '{plot.id}' "
-                f"'{plot.title}': {str(e)}"
+                "Error generating content for '%s' plot '%s' '%s': %s",
+                plot.plot_type,
+                plot.id,
+                plot.title,
+                e,
+                exc_info=True,
             )
             raise
 
@@ -650,7 +671,7 @@ class QuartoReportView(r.ReportView):
             plot_content.append(f">{plot.caption}\n")
 
         self.report.logger.info(
-            f"Successfully generated content for plot: '{plot.title}'"
+            "Successfully generated content for plot: '%s'", plot.title
         )
         return plot_content
 
@@ -786,8 +807,9 @@ with open(report_dir /'{plot_rel_path}', 'r') as plot_file:
                 file_extension == fmt.value_with_dot for fmt in r.DataFrameFormat
             ):
                 self.report.logger.error(
-                    f"Unsupported file extension: {file_extension}. Supported extensions"
-                    f" are: {', '.join(fmt.value for fmt in r.DataFrameFormat)}."
+                    "Unsupported file extension: %s. Supported extensions are: %s.",
+                    file_extension,
+                    ", ".join(fmt.value for fmt in r.DataFrameFormat),
                 )
 
             # Build the file path (URL or local file)
@@ -807,8 +829,9 @@ with open(report_dir /'{plot_rel_path}', 'r') as plot_file:
                 if len(sheet_names) > 1:
                     # If there are multiple sheets, use the first one
                     self.report.logger.info(
-                        f"Multiple sheets found in the Excel file: {df_file_path}. "
-                        f"Sheets: {sheet_names}"
+                        "Multiple sheets found in the Excel file: %s. Sheets: %s",
+                        df_file_path,
+                        sheet_names,
                     )
                 else:
                     sheet_names = None
@@ -853,8 +876,10 @@ with open(report_dir /'{plot_rel_path}', 'r') as plot_file:
 
         except Exception as e:
             self.report.logger.error(
-                f"Error generating content for DataFrame: {dataframe.title}. "
-                f"Error: {str(e)}"
+                "Error generating content for DataFrame: %s. Error: %s",
+                dataframe.title,
+                e,
+                exc_info=True,
             )
             raise
         # Add caption if available
@@ -863,7 +888,7 @@ with open(report_dir /'{plot_rel_path}', 'r') as plot_file:
             dataframe_content.append(f">{dataframe.caption}\n")
 
         self.report.logger.info(
-            f"Successfully generated content for DataFrame: '{dataframe.title}'"
+            "Successfully generated content for DataFrame: '%s'", dataframe.title
         )
         return dataframe_content
 
@@ -922,8 +947,10 @@ with open(report_dir / '{md_rel_path.as_posix()}', 'r') as markdown_file:
 
         except Exception as e:
             self.report.logger.error(
-                f"Error generating content for Markdown: {markdown.title}. "
-                f"Error: {str(e)}"
+                "Error generating content for Markdown: %s. Error: %s",
+                markdown.title,
+                e,
+                exc_info=True,
             )
             raise
 
@@ -932,7 +959,7 @@ with open(report_dir / '{md_rel_path.as_posix()}', 'r') as markdown_file:
             markdown_content.append(f">{markdown.caption}\n")
 
         self.report.logger.info(
-            f"Successfully generated content for Markdown: '{markdown.title}'"
+            "Successfully generated content for Markdown: '%s'", markdown.title
         )
         return markdown_content
 
@@ -1020,12 +1047,15 @@ with open(report_dir / '{md_rel_path.as_posix()}', 'r') as markdown_file:
 
         except Exception as e:
             self.report.logger.error(
-                f"Error generating content for HTML: {html.title}. Error: {str(e)}"
+                "Error generating content for HTML: %s. Error: %s",
+                html.title,
+                e,
+                exc_info=True,
             )
             raise
 
         self.report.logger.info(
-            f"Successfully generated content for HTML: '{html.title}'"
+            "Successfully generated content for HTML: '%s'", html.title
         )
         return html_content
 

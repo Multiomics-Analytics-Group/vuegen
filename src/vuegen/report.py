@@ -240,11 +240,13 @@ class Plot(Component):
                 delimiter = "," if file_extension == ".csv" else "\\t"
                 try:
                     df_net = pd.read_csv(file_stream, delimiter=delimiter)
-                except pd.errors.ParserError:
+                except pd.errors.ParserError as e:
                     self.logger.error(
                         "Error parsing CSV/TXT file %s. "
-                        "Please check the file format or delimiter.",
+                        "Please check the file format or delimiter: %s.",
                         self.file_path,
+                        e,
+                        exc_info=True,
                     )
 
                 if self.csv_network_format == CSVNetworkFormat.EDGELIST:
@@ -256,8 +258,8 @@ class Plot(Component):
                             required_columns.difference(df_net.columns)
                         )
                         self.logger.error(
-                            "CSV network file must contain 'source' and 'target' columns."
-                            " Missing columns: %s.",
+                            "CSV network file must contain 'source' and 'target'"
+                            " columns. Missing columns: %s.",
                             missing_cols,
                         )
 

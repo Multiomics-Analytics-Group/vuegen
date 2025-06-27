@@ -151,7 +151,9 @@ class ConfigManager:
                 else:
                     component_config["plot_type"] = r.PlotType.PLOTLY.value
             except Exception as e:
-                self.logger.warning("Could not parse JSON file %s: %s", file_path, e)
+                self.logger.warning(
+                    "Could not parse JSON file %s: %s", file_path, e, exc_info=True
+                )
                 component_config["plot_type"] = "unknown"
         elif file_ext == ".md":
             component_config["component_type"] = r.ComponentType.MARKDOWN.value
@@ -637,7 +639,9 @@ class ConfigManager:
             try:
                 parsed_body = json.loads(request_body)
             except json.JSONDecodeError as e:
-                self.logger.error("Failed to parse request_body JSON: %s", e)
+                self.logger.error(
+                    "Failed to parse request_body JSON: %s", e, exc_info=True
+                )
                 raise ValueError("Invalid JSON in request_body.") from e
 
         return r.APICall(

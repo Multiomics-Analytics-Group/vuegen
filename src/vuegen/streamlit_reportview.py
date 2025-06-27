@@ -96,24 +96,26 @@ class StreamlitReportView(r.WebAppReportView):
             (default is SECTIONS_DIR).
         """
         self.report.logger.debug(
-            f"Generating '{self.report_type}' report in directory: '{output_dir}'"
+            "Generating '%s' report in directory: '%s'", self.report_type, output_dir
         )
 
         # Create the output folder
         if create_folder(output_dir, is_nested=True):
-            self.report.logger.info(f"Created output directory: '{output_dir}'")
+            self.report.logger.info("Created output directory: '%s'", output_dir)
         else:
-            self.report.logger.info(f"Output directory already existed: '{output_dir}'")
+            self.report.logger.info(
+                "Output directory already existed: '%s'", output_dir
+            )
 
         # Create the static folder
         if create_folder(self.static_dir):
             self.report.logger.info(
-                f"Created output directory for static content: '{self.static_dir}'"
+                "Created output directory for static content: '%s'", self.static_dir
             )
         else:
             self.report.logger.info(
-                "Output directory for static content already existed: "
-                f"{self.static_dir}"
+                "Output directory for static content already existed: '%s'",
+                self.static_dir,
             )
 
         try:
@@ -177,11 +179,11 @@ class StreamlitReportView(r.WebAppReportView):
 
                 if create_folder(section_dir_path):
                     self.report.logger.debug(
-                        f"Created section directory: {section_dir_path}"
+                        "Created section directory: %s", section_dir_path
                     )
                 else:
                     self.report.logger.debug(
-                        f"Section directory already existed: {section_dir_path}"
+                        "Section directory already existed: %s", section_dir_path
                     )
                 # add an overview page to section for it's section components
                 # they will be written when the components are parsed
@@ -205,12 +207,12 @@ class StreamlitReportView(r.WebAppReportView):
                     subsection_name_var = make_valid_identifier(subsection.title)
                     if not subsection_name_var.isidentifier():
                         self.report.logger.warning(
-                            f"Subsection name '{subsection_name_var}' "
-                            " is not a valid identifier."
+                            "Subsection name '%s' is not a valid identifier.",
+                            subsection_name_var,
                         )
                         raise ValueError(
-                            "Subsection name is not a valid Python identifier: "
-                            f"{subsection_name_var}"
+                            "Subsection name is not a valid Python identifier: %s",
+                            subsection_name_var,
                         )
                     subsection_file_path = (
                         Path(section_name_var) / f"{subsection_name_var}.py"
@@ -261,14 +263,16 @@ close-streamlit-app-with-button-click/35132/5
             ) as nav_manager:
                 nav_manager.write("\n".join(report_manag_content))
                 self.report.logger.info(
-                    f"Created app navigation script: {self.REPORT_MANAG_SCRIPT}"
+                    "Created app navigation script: %s", self.REPORT_MANAG_SCRIPT
                 )
 
             # Create Python files for each section and its subsections and plots
             self._generate_sections(output_dir=output_dir)
         except Exception as e:
             self.report.logger.error(
-                f"An error occurred while generating the report: {str(e)}"
+                "An error occurred while generating the report: %s",
+                e,
+                exc_info=True,
             )
             raise
 
@@ -283,10 +287,10 @@ close-streamlit-app-with-button-click/35132/5
         """
         if self.streamlit_autorun:
             self.report.logger.info(
-                f"Running '{self.report.title}' {self.report_type} report."
+                "Running '%s' %s report.", self.report.title, self.report_type
             )
             self.report.logger.debug(
-                f"Running Streamlit report from directory: {output_dir}"
+                "Running Streamlit report from directory: %s", output_dir
             )
             # ! using pyinstaller: vuegen main script as executable,
             # ! not the Python Interpreter
@@ -296,7 +300,7 @@ close-streamlit-app-with-button-click/35132/5
                 # ! streamlit  command option is not known in packaged app
                 target_file = os.path.join(output_dir, self.REPORT_MANAG_SCRIPT)
                 self.report.logger.debug(
-                    f"Running Streamlit report from file: {target_file}"
+                    "Running Streamlit report from file: %s", target_file
                 )
                 if self.bundled_execution:
                     args = [
@@ -317,19 +321,21 @@ close-streamlit-app-with-button-click/35132/5
             except KeyboardInterrupt:
                 print("Streamlit process interrupted.")
             except subprocess.CalledProcessError as e:
-                self.report.logger.error(f"Error running Streamlit report: {str(e)}")
+                self.report.logger.error(
+                    "Error running Streamlit report: %s", e, exc_info=True
+                )
                 raise
         else:
             # If autorun is False, print instructions for manual execution
             self.report.logger.info(
-                "All the scripts to build the Streamlit app are available at "
-                f"{output_dir}"
+                "All the scripts to build the Streamlit app are available at %s",
+                output_dir,
             )
             self.report.logger.info(
                 "To run the Streamlit app, use the following command:"
             )
             self.report.logger.info(
-                f"streamlit run {Path(output_dir) / self.REPORT_MANAG_SCRIPT}"
+                "streamlit run %s", Path(output_dir) / self.REPORT_MANAG_SCRIPT
             )
             msg = (
                 "\nAll the scripts to build the Streamlit app are available at: "
@@ -413,10 +419,10 @@ close-streamlit-app-with-button-click/35132/5
             # Create folder for the home page
             home_dir_path = Path(output_dir) / "Home"
             if create_folder(home_dir_path):
-                self.report.logger.debug(f"Created home directory: {home_dir_path}")
+                self.report.logger.debug("Created home directory: %s", home_dir_path)
             else:
                 self.report.logger.debug(
-                    f"Home directory already existed: {home_dir_path}"
+                    "Home directory already existed: %s", home_dir_path
                 )
 
             # Create the home page content
@@ -442,7 +448,9 @@ close-streamlit-app-with-button-click/35132/5
             home_page_path = Path(home_dir_path) / "Homepage.py"
             with open(home_page_path, "w", encoding="utf-8") as home_page:
                 home_page.write("\n".join(home_content))
-            self.report.logger.info(f"Home page content written to '{home_page_path}'.")
+            self.report.logger.info(
+                "Home page content written to '%s'.", home_page_path
+            )
 
             # Add the home page to the report manager content
             report_manag_content.append(
@@ -452,7 +460,9 @@ close-streamlit-app-with-button-click/35132/5
             report_manag_content.append("sections_pages['Home'] = [homepage]\n")
             self.report.logger.info("Home page added to the report manager content.")
         except Exception as e:
-            self.report.logger.error(f"Error generating the home section: {str(e)}")
+            self.report.logger.error(
+                "Error generating the home section: %s", e, exc_info=True
+            )
             raise
 
     def _generate_sections(self, output_dir: str) -> None:
@@ -469,8 +479,11 @@ close-streamlit-app-with-button-click/35132/5
         try:
             for section in self.report.sections:
                 self.report.logger.debug(
-                    f"Processing section '{section.id}': '{section.title}' - "
-                    f"{len(section.subsections)} subsection(s)"
+                    # Continue
+                    "Processing section '%s': '%s' - %s subsection(s)",
+                    section.id,
+                    section.title,
+                    len(section.subsections),
                 )
                 if section.components:
                     # add an section overview page
@@ -488,7 +501,7 @@ close-streamlit-app-with-button-click/35132/5
 
                 if not section.subsections:
                     self.report.logger.debug(
-                        f"No subsections found in section: '{section.title}'."
+                        "No subsections found in section: '%s'.", section.title
                     )
                     continue
 
@@ -498,8 +511,10 @@ close-streamlit-app-with-button-click/35132/5
                 # ! method
                 for subsection in section.subsections:
                     self.report.logger.debug(
-                        f"Processing subsection '{subsection.id}': '{subsection.title} -"
-                        f" {len(subsection.components)} component(s)'"
+                        "Processing subsection '%s': '%s' - %s component(s)",
+                        subsection.id,
+                        subsection.title,
+                        len(subsection.components),
                     )
                     try:
                         # Create subsection file
@@ -518,19 +533,22 @@ close-streamlit-app-with-button-click/35132/5
                             contents=subsection_content,
                         )
                         self.report.logger.info(
-                            f"Subsection file created: '{subsection_file_path}'"
+                            "Subsection file created: '%s'", subsection_file_path
                         )
                     except Exception as subsection_error:
                         self.report.logger.error(
-                            f"Error processing subsection '{subsection.id}'"
-                            f" '{subsection.title}' "
-                            f"in section  '{section.id}' '{section.title}':"
-                            f" {str(subsection_error)}"
+                            "Error processing subsection '%s' '%s' "
+                            "in section  '%s' '%s': %s",
+                            subsection.id,
+                            subsection.title,
+                            section.id,
+                            section.title,
+                            str(subsection_error),
                         )
                         raise
 
         except Exception as e:
-            self.report.logger.error(f"Error generating sections: {str(e)}")
+            self.report.logger.error("Error generating sections: %s", e, exc_info=True)
             raise
 
     def _combine_components(self, components: list[dict]) -> tuple[list, list, bool]:
@@ -549,7 +567,7 @@ close-streamlit-app-with-button-click/35132/5
             fct = self.components_fct_map.get(component.component_type, None)
             if fct is None:
                 self.report.logger.warning(
-                    f"Unsupported component type '{component.component_type}' "
+                    "Unsupported component type '%s' ", component.component_type
                 )
             else:
                 if component.component_type == r.ComponentType.CHATBOT:
@@ -602,7 +620,7 @@ close-streamlit-app-with-button-click/35132/5
             subsection_content.append("st.markdown(footer, unsafe_allow_html=True)\n")
 
         self.report.logger.info(
-            f"Generated content and imports for subsection: '{subsection.title}'"
+            "Generated content and imports for subsection: '%s'", subsection.title
         )
         return subsection_content, subsection_imports
 
@@ -697,16 +715,22 @@ close-streamlit-app-with-button-click/35132/5
                 # Add the specific code for visualization
                 plot_content.append(self._generate_plot_code(plot))
             else:
-                self.report.logger.warning(f"Unsupported plot type: {plot.plot_type}")
+                self.report.logger.warning("Unsupported plot type: %s", plot.plot_type)
         except Exception as e:
             self.report.logger.error(
-                f"Error generating content for '{plot.plot_type}' plot '{plot.id}' "
-                f"'{plot.title}': {str(e)}"
+                "Error generating content for '%s' plot '%s' '%s': %s",
+                plot.plot_type,
+                plot.id,
+                plot.title,
+                e,
+                exc_info=True,
             )
             raise
 
         self.report.logger.info(
-            f"Successfully generated content for plot '{plot.id}': '{plot.title}'"
+            "Successfully generated content for plot '%s': '%s'",
+            plot.id,
+            plot.title,
         )
         return plot_content
 
@@ -806,10 +830,9 @@ close-streamlit-app-with-button-click/35132/5
                 file_extension == fmt.value_with_dot for fmt in r.DataFrameFormat
             ):
                 self.report.logger.error(
-                    f"Unsupported file extension: {file_extension}. "
-                    "Supported extensions are: {}.".format(
-                        ", ".join(fmt.value for fmt in r.DataFrameFormat)
-                    )
+                    "Unsupported file extension: %s. Supported extensions are: %s.",
+                    file_extension,
+                    ", ".join(fmt.value for fmt in r.DataFrameFormat),
                 )
                 # return []  # Skip execution if unsupported file extension
                 # Should it not return here?
@@ -890,8 +913,10 @@ close-streamlit-app-with-button-click/35132/5
             )
         except Exception as e:
             self.report.logger.error(
-                f"Error generating content for DataFrame: {dataframe.title}. "
-                f"Error: {str(e)}"
+                "Error generating content for DataFrame: %s. Error: %s",
+                dataframe.title,
+                e,
+                exc_info=True,
             )
             raise
 
@@ -904,7 +929,8 @@ close-streamlit-app-with-button-click/35132/5
             )
 
         self.report.logger.info(
-            f"Successfully generated content for DataFrame: '{dataframe.title}'"
+            "Successfully generated content for DataFrame: '%s'",
+            dataframe.title,
         )
         return dataframe_content
 
@@ -958,8 +984,10 @@ close-streamlit-app-with-button-click/35132/5
             )
         except Exception as e:
             self.report.logger.error(
-                f"Error generating content for Markdown: {markdown.title}. "
-                f"Error: {str(e)}"
+                "Error generating content for Markdown: %s. Error: %s",
+                markdown.title,
+                e,
+                exc_info=True,
             )
             raise
 
@@ -972,7 +1000,8 @@ close-streamlit-app-with-button-click/35132/5
             )
 
         self.report.logger.info(
-            f"Successfully generated content for Markdown: '{markdown.title}'"
+            "Successfully generated content for Markdown: '%s'",
+            markdown.title,
         )
         return markdown_content
 
@@ -1027,7 +1056,10 @@ close-streamlit-app-with-button-click/35132/5
 
         except Exception as e:
             self.report.logger.error(
-                f"Error generating content for HTML: {html.title}. Error: {str(e)}"
+                "Error generating content for HTML: %s. Error: %s",
+                html.title,
+                e,
+                exc_info=True,
             )
             raise
 
@@ -1038,7 +1070,8 @@ close-streamlit-app-with-button-click/35132/5
             )
 
         self.report.logger.info(
-            f"Successfully generated content for HTML: '{html.title}'"
+            "Successfully generated content for HTML: '%s'",
+            html.title,
         )
         return html_content
 
@@ -1070,7 +1103,10 @@ close-streamlit-app-with-button-click/35132/5
             apicall_content.append(f"""st.write({apicall_response})\n""")
         except Exception as e:
             self.report.logger.error(
-                f"Error generating content for APICall: {apicall.title}. Error: {str(e)}"
+                "Error generating content for APICall: %s. Error: %s",
+                apicall.title,
+                e,
+                exc_info=True,
             )
             raise
 
@@ -1083,8 +1119,9 @@ close-streamlit-app-with-button-click/35132/5
             )
 
         self.report.logger.info(
-            f"Successfully generated content for APICall '{apicall.title}' "
-            f"using method '{apicall.method}'"
+            "Successfully generated content for APICall '%s' using method '%s'",
+            apicall.title,
+            apicall.method,
         )
         return apicall_content
 
