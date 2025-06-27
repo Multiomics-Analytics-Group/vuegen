@@ -1,7 +1,14 @@
 import streamlit as st
-st.markdown('''<p style='text-align: center; color: #000000;'>A general description of the report.
-</p>''', unsafe_allow_html=True)
-footer = '''<style type="text/css">
+
+st.markdown(
+    (
+        "<p style='text-align: center; "
+        "color: #000000;'>A general description of the report.</p>"
+    ),
+    unsafe_allow_html=True)
+
+footer = '''
+<style type="text/css">
 .footer {
     position: relative;
     left: 0;
@@ -10,13 +17,14 @@ footer = '''<style type="text/css">
 }
 </style>
 <footer class="footer">
-    This report was generated with 
+    This report was generated with
     <a href="https://github.com/Multiomics-Analytics-Group/vuegen" target="_blank">
         <img src="https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/vuegen_logo.svg" alt="VueGen" width="65px">
     </a>
     | Copyright 2025 <a href="https://github.com/Multiomics-Analytics-Group" target="_blank">
         Multiomics Network Analytics Group (MoNA)
     </a>
-</footer>'''
+</footer>
+'''
 
 st.markdown(footer, unsafe_allow_html=True)

@@ -1,3 +1,5 @@
+"""Reading tabular data using pandas."""
+
 import pandas as pd
 
 from . import report as r

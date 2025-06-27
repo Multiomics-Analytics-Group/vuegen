@@ -1,3 +1,5 @@
+"""Command-line interface for VueGen report generation."""
+
 import sys
 from pathlib import Path
 

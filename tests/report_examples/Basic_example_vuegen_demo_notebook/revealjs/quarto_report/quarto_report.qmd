@@ -27,11 +27,12 @@ include-in-header:
 include-after-body:
     text: |
         <footer class="footer">
-            This report was generated with 
+            This report was generated with
             <a href="https://github.com/Multiomics-Analytics-Group/vuegen" target="_blank">
                 <img src="https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/vuegen_logo.svg" alt="VueGen" width="65px">
             </a>
-            | Copyright 2025 <a href="https://github.com/Multiomics-Analytics-Group" target="_blank">Multiomics Network Analytics Group (MoNA)</a>
+            | Copyright 2025 <a href="https://github.com/Multiomics-Analytics-Group"
+             target="_blank">Multiomics Network Analytics Group (MoNA)</a>
         </footer>
 ---
 
@@ -61,6 +62,7 @@ Optional description for section.
 ::: {.panel-tabset}
 
 ### Top Species Plot By Biome Plotly
+
 ```{python}
 #| label: 'Top Species Plot By Biome Plotly 1'
 #| fig-cap: ""
@@ -69,22 +71,26 @@ with open(report_dir /'../../../../../docs/example_data/Basic_example_vuegen_dem
     plot_json = json.load(plot_file)
 
 # Keep only 'data' and 'layout' sections
-plot_json = {key: plot_json[key] for key in plot_json if key in ['data', 'layout']}
-
+plot_json = {key: plot_json[key] for key in plot_json
+                if key in ['data', 'layout']
+            }
 # Remove 'frame' section in 'data'
-plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'} for entry in plot_json.get('data', [])]
-
+plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'}
+                            for entry in plot_json.get('data', [])
+                    ]
 # Convert JSON to string
 plot_json_str = json.dumps(plot_json)
-
 # Create the plotly plot
 fig_plotly = pio.from_json(plot_json_str)
-fig_plotly.update_layout(autosize=False, width=950, height=400, margin=dict(b=50, t=50, l=50, r=50))
+fig_plotly.update_layout(autosize=False, width=950, height=400,
+                         margin=dict(b=50, t=50, l=50, r=50)
+                         )
 
 fig_plotly.show()
 ```
 
 ### Multiline Plot Altair
+
 ```{python}
 #| label: 'Multiline Plot Altair 2'
 #| fig-cap: ""
@@ -95,13 +101,15 @@ with open(report_dir /'../../../../../docs/example_data/Basic_example_vuegen_dem
 # Convert JSON to string
 plot_json_str = json.dumps(plot_json)
 
-# Create the plotly plot
-fig_altair = alt.Chart.from_json(plot_json_str).properties(width=900, height=370)
+# Create the altair plot
+fig_altair = alt.Chart.from_json(plot_json_str
+                ).properties(width=900, height=370)
 
 fig_altair
 ```
 
 ### Pie Plot Countries Plotly
+
 ```{python}
 #| label: 'Pie Plot Countries Plotly 3'
 #| fig-cap: ""
@@ -110,22 +118,26 @@ with open(report_dir /'../../../../../docs/example_data/Basic_example_vuegen_dem
     plot_json = json.load(plot_file)
 
 # Keep only 'data' and 'layout' sections
-plot_json = {key: plot_json[key] for key in plot_json if key in ['data', 'layout']}
-
+plot_json = {key: plot_json[key] for key in plot_json
+                if key in ['data', 'layout']
+            }
 # Remove 'frame' section in 'data'
-plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'} for entry in plot_json.get('data', [])]
-
+plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'}
+                            for entry in plot_json.get('data', [])
+                    ]
 # Convert JSON to string
 plot_json_str = json.dumps(plot_json)
-
 # Create the plotly plot
 fig_plotly = pio.from_json(plot_json_str)
-fig_plotly.update_layout(autosize=False, width=950, height=400, margin=dict(b=50, t=50, l=50, r=50))
+fig_plotly.update_layout(autosize=False, width=950, height=400,
+                         margin=dict(b=50, t=50, l=50, r=50)
+                         )
 
 fig_plotly.show()
 ```
 
 ### Pie Plots Biomes Plotly
+
 ```{python}
 #| label: 'Pie Plots Biomes Plotly 4'
 #| fig-cap: ""
@@ -134,22 +146,26 @@ with open(report_dir /'../../../../../docs/example_data/Basic_example_vuegen_dem
     plot_json = json.load(plot_file)
 
 # Keep only 'data' and 'layout' sections
-plot_json = {key: plot_json[key] for key in plot_json if key in ['data', 'layout']}
-
+plot_json = {key: plot_json[key] for key in plot_json
+                if key in ['data', 'layout']
+            }
 # Remove 'frame' section in 'data'
-plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'} for entry in plot_json.get('data', [])]
-
+plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'}
+                            for entry in plot_json.get('data', [])
+                    ]
 # Convert JSON to string
 plot_json_str = json.dumps(plot_json)
-
 # Create the plotly plot
 fig_plotly = pio.from_json(plot_json_str)
-fig_plotly.update_layout(autosize=False, width=950, height=400, margin=dict(b=50, t=50, l=50, r=50))
+fig_plotly.update_layout(autosize=False, width=950, height=400,
+                         margin=dict(b=50, t=50, l=50, r=50)
+                         )
 
 fig_plotly.show()
 ```
 
 ### Saline Metagenomics Samples Map Altair
+
 ```{python}
 #| label: 'Saline Metagenomics Samples Map Altair 5'
 #| fig-cap: ""
@@ -160,13 +176,15 @@ with open(report_dir /'../../../../../docs/example_data/Basic_example_vuegen_dem
 # Convert JSON to string
 plot_json_str = json.dumps(plot_json)
 
-# Create the plotly plot
-fig_altair = alt.Chart.from_json(plot_json_str).properties(width=900, height=370)
+# Create the altair plot
+fig_altair = alt.Chart.from_json(plot_json_str
+                ).properties(width=900, height=370)
 
 fig_altair
 ```
 
 ### Plotly Plot R
+
 ```{python}
 #| label: 'Plotly Plot R 6'
 #| fig-cap: ""
@@ -175,17 +193,20 @@ with open(report_dir /'../../../../../docs/example_data/Basic_example_vuegen_dem
     plot_json = json.load(plot_file)
 
 # Keep only 'data' and 'layout' sections
-plot_json = {key: plot_json[key] for key in plot_json if key in ['data', 'layout']}
-
+plot_json = {key: plot_json[key] for key in plot_json
+                if key in ['data', 'layout']
+            }
 # Remove 'frame' section in 'data'
-plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'} for entry in plot_json.get('data', [])]
-
+plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'}
+                            for entry in plot_json.get('data', [])
+                    ]
 # Convert JSON to string
 plot_json_str = json.dumps(plot_json)
-
 # Create the plotly plot
 fig_plotly = pio.from_json(plot_json_str)
-fig_plotly.update_layout(autosize=False, width=950, height=400, margin=dict(b=50, t=50, l=50, r=50))
+fig_plotly.update_layout(autosize=False, width=950, height=400,
+                         margin=dict(b=50, t=50, l=50, r=50)
+                         )
 
 fig_plotly.show()
 ```
@@ -286,7 +307,9 @@ Optional description for subsection.
 
 
 <div style="text-align: center;">
-<iframe src="static/Man_Example.html" alt="Man Example plot" width="800px" height="630px"></iframe>
+<iframe src="static/Man_Example.html" alt="Man Example plot"
+        width="800px" height="630px">
+</iframe>
 </div>
 
 :::
@@ -306,7 +329,8 @@ Optional description for subsection.
 ### Plot
 
 <div style="text-align: center;">
-<iframe src="../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/4_Html/1_All_html/1_plot.html" alt="Plot" width="950px" height="530px"></iframe>
+<iframe src="../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/4_Html/1_All_html/1_plot.html" alt="Plot"
+        width="950px" height="530px"></iframe>
 </div>
 
 ### Ckg Network
@@ -316,13 +340,16 @@ Optional description for subsection.
 
 
 <div style="text-align: center;">
-<iframe src="../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/4_Html/1_All_html/2_ckg_network.html" alt="Ckg Network plot" width="800px" height="630px"></iframe>
+<iframe src="../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/4_Html/1_All_html/2_ckg_network.html" alt="Ckg Network plot"
+        width="800px" height="630px">
+</iframe>
 </div>
 
 ### Multiqc Report
 
 <div style="text-align: center;">
-<iframe src="../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/4_Html/1_All_html/3_multiqc_report.html" alt="Multiqc Report" width="950px" height="530px"></iframe>
+<iframe src="../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/4_Html/1_All_html/3_multiqc_report.html" alt="Multiqc Report"
+        width="950px" height="530px"></iframe>
 </div>
 
 :::
