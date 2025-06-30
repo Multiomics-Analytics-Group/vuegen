@@ -1176,15 +1176,16 @@ close-streamlit-app-with-button-click/35132/5
         )
 
         # --- Shared code blocks (as strings) ---
-        init_messages_block = textwrap.dedent(
+        init_messages_block = textwrap.indent(
             """
             # Init session state
             if 'messages' not in st.session_state:
                 st.session_state['messages'] = []
-            """
+            """,
+            " " * 4,
         )
 
-        render_messages_block = textwrap.dedent(
+        render_messages_block = textwrap.indent(
             """
             # Display chat history
             for message in st.session_state['messages']:
@@ -1200,32 +1201,33 @@ close-streamlit-app-with-button-click/35132/5
                             st.components.v1.html(content['subgraph_pyvis'], height=600)
                     else:
                         st.write(content)
-            """
+            """,
+            " " * 4,
         )
 
-        handle_prompt_block = textwrap.dedent(
+        handle_prompt_block = textwrap.indent(
             """
             # Capture and append new user prompt
             if prompt := st.chat_input("Enter your prompt here:"):
                 st.session_state.messages.append({"role": "user", "content": prompt})
                 with st.chat_message("user"):
                     st.write(prompt)
-            """
+            """,
+            " " * 4,
         )
-
         if chatbot.model:
             # --- Ollama-style streaming chatbot ---
+            # all other codeblocks pasted in need to be on this indentation level
             code_block = textwrap.dedent(
                 f"""
                 {init_messages_block}
-
                 # Function to send prompt to Ollama API
                 def generate_query(messages):
                     response = requests.post(
                         "{chatbot.api_call.api_url}",
                         json={{"model": "{chatbot.model}",
-                               "messages": messages,
-                               "stream": True}},
+                                "messages": messages,
+                                "stream": True}},
                     )
                     response.raise_for_status()
                     return response
@@ -1251,11 +1253,8 @@ close-streamlit-app-with-button-click/35132/5
                         yield word + " "
                         time.sleep(0.1)
                     yield "\\n"
-
                 {render_messages_block}
-
                 {handle_prompt_block}
-
                     # Retrieve question and generate answer
                     combined = "\\n".join(msg["content"]
                                 for msg in st.session_state.messages
@@ -1277,55 +1276,55 @@ close-streamlit-app-with-button-click/35132/5
             # --- Standard (non-streaming) API chatbot ---
             code_block = textwrap.dedent(
                 f"""
-                    {init_messages_block}
+                {init_messages_block}
 
-                    # Function to send prompt to standard API
-                    def generate_query(prompt):
-                        try:
-                            response = requests.post(
-                                "{chatbot.api_call.api_url}",
-                                json={{"prompt": prompt}},
-                                headers={chatbot.api_call.headers}
-                            )
-                            response.raise_for_status()
-                            return response.json()
-                        except requests.exceptions.RequestException as e:
-                            st.error(f"API request failed: {{str(e)}}")
-                            if hasattr(e, 'response') and e.response:
-                                try:
-                                    error_details = e.response.json()
-                                    st.error(f"Error details: {{error_details}}")
-                                except ValueError:
-                                    st.error(f"Response text: {{e.response.text}}")
-                            return None
+                # Function to send prompt to standard API
+                def generate_query(prompt):
+                    try:
+                        response = requests.post(
+                            "{chatbot.api_call.api_url}",
+                            json={{"prompt": prompt}},
+                            headers={chatbot.api_call.headers}
+                        )
+                        response.raise_for_status()
+                        return response.json()
+                    except requests.exceptions.RequestException as e:
+                        st.error(f"API request failed: {{str(e)}}")
+                        if hasattr(e, 'response') and e.response:
+                            try:
+                                error_details = e.response.json()
+                                st.error(f"Error details: {{error_details}}")
+                            except ValueError:
+                                st.error(f"Response text: {{e.response.text}}")
+                        return None
 
-                    {render_messages_block}
+                {render_messages_block}
 
-                    {handle_prompt_block}
+                {handle_prompt_block}
 
-                        with st.spinner('Generating answer...'):
-                            response = generate_query(prompt)
+                    with st.spinner('Generating answer...'):
+                        response = generate_query(prompt)
 
-                            if response:
-                                # Append and display assistant response
-                                st.session_state.messages.append({{
-                                    "role": "assistant",
-                                    "content": response
-                                }})
-                                with st.chat_message("assistant"):
-                                    st.markdown(response.get('text', ''),
-                                                unsafe_allow_html=True)
-                                    if 'links' in response:
-                                        st.markdown("**Sources:**")
-                                        for link in response['links']:
-                                            st.markdown(f"- [{{link}}]({{link}})")
-                                    if 'subgraph_pyvis' in response:
-                                        st.components.v1.html(
-                                            response['subgraph_pyvis'],
-                                            height=600
-                                        )
-                            else:
-                                st.error("Failed to get response from API")
+                        if response:
+                            # Append and display assistant response
+                            st.session_state.messages.append({{
+                                "role": "assistant",
+                                "content": response
+                            }})
+                            with st.chat_message("assistant"):
+                                st.markdown(response.get('text', ''),
+                                            unsafe_allow_html=True)
+                                if 'links' in response:
+                                    st.markdown("**Sources:**")
+                                    for link in response['links']:
+                                        st.markdown(f"- [{{link}}]({{link}})")
+                                if 'subgraph_pyvis' in response:
+                                    st.components.v1.html(
+                                        response['subgraph_pyvis'],
+                                        height=600
+                                    )
+                        else:
+                            st.error("Failed to get response from API")
                     """
             )
             chatbot_content.append(code_block)
