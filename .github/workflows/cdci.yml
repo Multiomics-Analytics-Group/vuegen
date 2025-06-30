@@ -120,7 +120,7 @@ jobs:
           fi
       - name: check streamlit report files for chatbot API
         run: |
-          vuegen -c docs/chatbot_config.yaml -output_dir tests/report_examples/chat_bot
+          vuegen -c docs/example_config_files/Chatbot_example_config.yaml -output_dir tests/report_examples/chat_bot
           if git diff tests/report_examples | grep .; then
             echo Failed for report: $format
             echo "Error: One or more protected files have been modified."

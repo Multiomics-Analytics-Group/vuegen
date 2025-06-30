@@ -5,13 +5,13 @@ import psutil
 import streamlit as st
 
 st.set_page_config(layout="wide",
-                   page_title="VueGen Chatbot Case Study")
+                   page_title="Chatbot example")
 
 
 st.markdown(
     (
         "<h1 style='text-align: center; "
-        "color: #023858;'>VueGen Chatbot Case Study</h1>"
+        "color: #023858;'>Chatbot example</h1>"
     ),
     unsafe_allow_html=True)
 
@@ -20,8 +20,8 @@ sections_pages = {}
 homepage = st.Page('Home/Homepage.py', title='Homepage')
 sections_pages['Home'] = [homepage]
 
-Ollama_style_streaming_chatbot = st.Page('Chatbot_Example/Ollama_style_streaming_chatbot.py', title='Ollama-style streaming chatbot')
-sections_pages['Chatbot Example'] = [Ollama_style_streaming_chatbot]
+Simple_test = st.Page('ChatBot_test/Simple_test.py', title='Simple test')
+sections_pages['ChatBot test'] = [Simple_test]
 
 report_nav = st.navigation(sections_pages)
 
