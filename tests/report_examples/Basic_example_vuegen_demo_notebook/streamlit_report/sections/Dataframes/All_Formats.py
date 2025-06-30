@@ -41,7 +41,8 @@ grid_options = grid_builder.build()
 AgGrid(df, gridOptions=grid_options, enable_enterprise_modules=True)
 
 # Button to download the df
-df_csv = df.to_csv(sep=',', header=True, index=False).encode('utf-8')
+df_csv = df.to_csv(sep=',', header=True, index=False
+                  ).encode('utf-8')
 st.download_button(
     label="Download dataframe as CSV",
     data=df_csv,
@@ -84,7 +85,8 @@ grid_options = grid_builder.build()
 AgGrid(df, gridOptions=grid_options, enable_enterprise_modules=True)
 
 # Button to download the df
-df_csv = df.to_csv(sep=',', header=True, index=False).encode('utf-8')
+df_csv = df.to_csv(sep=',', header=True, index=False
+                  ).encode('utf-8')
 st.download_button(
     label="Download dataframe as CSV",
     data=df_csv,
@@ -121,7 +123,8 @@ grid_options = grid_builder.build()
 AgGrid(df, gridOptions=grid_options, enable_enterprise_modules=True)
 
 # Button to download the df
-df_csv = df.to_csv(sep=',', header=True, index=False).encode('utf-8')
+df_csv = df.to_csv(sep=',', header=True, index=False
+                  ).encode('utf-8')
 st.download_button(
     label="Download dataframe as CSV",
     data=df_csv,
@@ -158,7 +161,8 @@ grid_options = grid_builder.build()
 AgGrid(df, gridOptions=grid_options, enable_enterprise_modules=True)
 
 # Button to download the df
-df_csv = df.to_csv(sep=',', header=True, index=False).encode('utf-8')
+df_csv = df.to_csv(sep=',', header=True, index=False
+                  ).encode('utf-8')
 st.download_button(
     label="Download dataframe as CSV",
     data=df_csv,
@@ -196,7 +200,8 @@ grid_options = grid_builder.build()
 AgGrid(df, gridOptions=grid_options, enable_enterprise_modules=True)
 
 # Button to download the df
-df_csv = df.to_csv(sep=',', header=True, index=False).encode('utf-8')
+df_csv = df.to_csv(sep=',', header=True, index=False
+                  ).encode('utf-8')
 st.download_button(
     label="Download dataframe as CSV",
     data=df_csv,

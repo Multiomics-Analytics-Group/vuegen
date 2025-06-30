@@ -298,8 +298,8 @@ class Plot(Component):
                         self.csv_network_format,
                     )
 
-            # Handle other formats using the mapping and return the NetworkX graph object
-            # from the specified network file
+            # Handle other formats using the mapping and return the NetworkX graph
+            # object from the specified network file
             G = file_extension_map[file_extension](file_stream)
             G = self._add_size_attribute(G)
             self.logger.info("Successfully read network from file: %s.", self.file_path)
@@ -366,7 +366,8 @@ class Plot(Component):
 
     def create_and_save_pyvis_network(self, G: nx.Graph, output_file: str) -> Network:
         """
-        Creates a PyVis network from a NetworkX graph object and saves it as an HTML file.
+        Creates a PyVis network from a NetworkX graph object and saves it as an HTML
+        file.
 
         Parameters
         ----------

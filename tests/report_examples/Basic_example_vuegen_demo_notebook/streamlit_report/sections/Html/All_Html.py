@@ -18,8 +18,8 @@ st.markdown(
     unsafe_allow_html=True)
 
 
-with open('docs/example_data/Basic_example_vuegen_demo_notebook/4_Html/1_All_html/1_plot.html', 'r', encoding='utf-8') as html_file:
-    html_content = html_file.read()
+with open('docs/example_data/Basic_example_vuegen_demo_notebook/4_Html/1_All_html/1_plot.html', 'r', encoding='utf-8') as f:
+    html_content = f.read()
 
 st.components.v1.html(html_content, height=600, scrolling=True)
 
@@ -40,7 +40,8 @@ st.markdown(("<p style='text-align: center; color: black;'> "
             "<b>Number of nodes:</b> 33 </p>"),
             unsafe_allow_html=True)
 st.markdown(("<p style='text-align: center; color: black;'>"
-             " <b>Number of relationships:</b> 35 </p>"),
+             " <b>Number of relationships:</b> 35"
+             " </p>"),
             unsafe_allow_html=True)
 
 # Streamlit checkbox for controlling the layout
@@ -58,8 +59,8 @@ st.markdown(
     unsafe_allow_html=True)
 
 
-with open('docs/example_data/Basic_example_vuegen_demo_notebook/4_Html/1_All_html/3_multiqc_report.html', 'r', encoding='utf-8') as html_file:
-    html_content = html_file.read()
+with open('docs/example_data/Basic_example_vuegen_demo_notebook/4_Html/1_All_html/3_multiqc_report.html', 'r', encoding='utf-8') as f:
+    html_content = f.read()
 
 st.components.v1.html(html_content, height=600, scrolling=True)
 

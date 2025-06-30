@@ -104,8 +104,8 @@ def is_url(filepath: Path) -> bool:
     -------
     bool
         True if the input path is a valid URL, meaning it contains both a scheme
-        (e.g., http, https, ftp) and a network location (e.g., example.com).
-        Returns False if either the scheme or the network location is missing or invalid.
+        (e.g., http, https, ftp) and a network location (e.g., example.com). Returns
+        False if either the scheme or the network location is missing or invalid.
     """
     # Parse the url and return validation
     parsed_url = urlparse(str(filepath))

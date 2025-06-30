@@ -124,9 +124,8 @@ class QuartoReportView(r.ReportView):
 
             # Create qmd content and imports for the report
             qmd_content = []
-            report_imports = (
-                []
-            )  # only one global import list for a single report (different to streamlit)
+            # only one global import list for a single report (different to streamlit)
+            report_imports = []
 
             # Add description of the report
             if self.report.description:
@@ -152,8 +151,8 @@ class QuartoReportView(r.ReportView):
                     qmd_content.append(f"""{section.description}\n""")
 
                 # Add components of section to the report
-                # ! description can be a Markdown component, but it is treated differently
-                # ! It won't be added to the section content.
+                # ! description can be a Markdown component, but it is treated
+                # ! differently. It won't be added to the section content.
                 if section.components:
                     self.report.logger.debug(
                         "Adding components of section folder to the report."
@@ -176,7 +175,8 @@ class QuartoReportView(r.ReportView):
                     report_imports.extend(section_imports)
 
                 if section.subsections:
-                    # Iterate through subsections and integrate them into the section file
+                    # Iterate through subsections and
+                    # integrate them into the section file
                     for subsection in section.subsections:
                         self.report.logger.debug(
                             "Processing subsection: '%s' - %d component(s)",
@@ -538,8 +538,8 @@ class QuartoReportView(r.ReportView):
     ) -> tuple[List[str], List[str]]:
         """
         Generate code to render components (plots, dataframes, markdown) in the given
-        subsection, creating imports and content for the subsection based on the component
-        type.
+        subsection, creating imports and content for the subsection based on the
+        component type.
 
         Parameters
         ----------
@@ -633,7 +633,8 @@ class QuartoReportView(r.ReportView):
             elif plot.plot_type == r.PlotType.INTERACTIVE_NETWORK:
                 networkx_graph = plot.read_network()
                 if isinstance(networkx_graph, tuple):
-                    # If network_data is a tuple, separate the network and html file path
+                    # If network_data is a tuple,
+                    # separate the network and html file path
                     networkx_graph, html_plot_file = networkx_graph
                 elif isinstance(networkx_graph, nx.Graph) and not self.is_report_static:
                     # Get the pyvis object and create html
@@ -1002,7 +1003,8 @@ with open(report_dir / '{md_rel_path.as_posix()}', 'r') as markdown_file:
         else:
             # Append code to display the DataFrame interactively
             dataframe_content.append(
-                'show(df, classes="display nowrap compact", lengthMenu=[3, 5, 10])\n```\n'
+                'show(df, classes="display nowrap compact", '
+                "lengthMenu=[3, 5, 10])\n```\n"
             )
 
         return dataframe_content

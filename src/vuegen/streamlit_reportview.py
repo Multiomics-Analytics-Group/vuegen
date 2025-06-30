@@ -1,5 +1,6 @@
 """
-StreamlitReportView class for generating Streamlit reports based on a configuration file.
+StreamlitReportView class for generating Streamlit reports
+based on a configuration file.
 """
 
 import os
@@ -60,9 +61,11 @@ class StreamlitReportView(r.WebAppReportView):
         report_type : r.ReportType
             Enum of report type as definded by the ReportType Enum.
         streamlit_autorun : bool, optional
-            Wheather streamlit should be started after report generation, by default False
+            Wheather streamlit should be started after report generation,
+            by default False
         static_dir : str, optional
-            The folder where the static files will be saved, by default STATIC_FILES_DIR.
+            The folder where the static files will be saved,
+            by default STATIC_FILES_DIR.
         """
         super().__init__(report=report, report_type=report_type)
         self.streamlit_autorun = streamlit_autorun
@@ -189,15 +192,18 @@ class StreamlitReportView(r.WebAppReportView):
                 # they will be written when the components are parsed
                 # using `_generate_sections`
                 if section.components:
+                    _fname = (
+                        f"0_overview_{make_valid_identifier(section.title).lower()}.py"
+                    )
                     subsection_file_path = (
-                        Path(section_name_var)
-                        / f"0_overview_{make_valid_identifier(section.title).lower()}.py"
+                        Path(section_name_var) / _fname
                     ).as_posix()  # Make sure it's Posix Paths
                     section.file_path = subsection_file_path
                     # Create a Page object for each subsection and
                     # add it to the home page content
                     report_manag_content.append(
-                        f"{section_name_var}_overview = st.Page('{subsection_file_path}'"
+                        f"{section_name_var}_overview = "
+                        f"st.Page('{subsection_file_path}'"
                         f", title='Overview {section.title}')"
                     )
                     subsection_page_vars.append(f"{section_name_var}_overview")
@@ -206,13 +212,13 @@ class StreamlitReportView(r.WebAppReportView):
                     # ! could add a non-integer to ensure it's a valid identifier
                     subsection_name_var = make_valid_identifier(subsection.title)
                     if not subsection_name_var.isidentifier():
-                        self.report.logger.warning(
-                            "Subsection name '%s' is not a valid identifier.",
-                            subsection_name_var,
+                        msg = (
+                            "Subsection name is not a valid Python identifier: "
+                            f"{subsection_name_var}"
                         )
+                        self.report.logger.error(msg)
                         raise ValueError(
-                            "Subsection name is not a valid Python identifier: %s",
-                            subsection_name_var,
+                            msg,
                         )
                     subsection_file_path = (
                         Path(section_name_var) / f"{subsection_name_var}.py"
@@ -664,7 +670,8 @@ close-streamlit-app-with-button-click/35132/5
             elif plot.plot_type == r.PlotType.INTERACTIVE_NETWORK:
                 networkx_graph = plot.read_network()
                 if isinstance(networkx_graph, tuple):
-                    # If network_data is a tuple, separate the network and html file path
+                    # If network_data is a tuple, separate the network
+                    # and html file path
                     networkx_graph, html_plot_file = networkx_graph
                 else:
                     # Otherwise,
@@ -710,7 +717,8 @@ close-streamlit-app-with-button-click/35132/5
                                     "<b>Number of nodes:</b> {num_nodes} </p>"),
                                     unsafe_allow_html=True)
                         st.markdown(("<p style='text-align: center; color: black;'>"
-                                     " <b>Number of relationships:</b> {num_edges} </p>"),
+                                     " <b>Number of relationships:</b> {num_edges}"
+                                     " </p>"),
                                     unsafe_allow_html=True)
                         """
                     )
@@ -880,7 +888,7 @@ close-streamlit-app-with-button-click/35132/5
                 )
             else:
                 dataframe_content.append(
-                    f"""df = pd.{read_function.__name__}('{df_file_path.as_posix()}')\n"""
+                    f"df = pd.{read_function.__name__}('{df_file_path.as_posix()}')\n"
                 )
             # ! Alternative to select box: iterate over sheets in DataFrame
             # Displays a DataFrame using AgGrid with configurable options.
@@ -905,7 +913,8 @@ close-streamlit-app-with-button-click/35132/5
                     AgGrid(df, gridOptions=grid_options, enable_enterprise_modules=True)
 
                     # Button to download the df
-                    df_csv = df.to_csv(sep=',', header=True, index=False).encode('utf-8')
+                    df_csv = df.to_csv(sep=',', header=True, index=False
+                                      ).encode('utf-8')
                     st.download_button(
                         label="Download dataframe as CSV",
                         data=df_csv,
@@ -1047,8 +1056,8 @@ close-streamlit-app-with-button-click/35132/5
                 html_content.append(
                     textwrap.dedent(
                         f"""
-                        with open('{html_rel_path}', 'r', encoding='utf-8') as html_file:
-                            html_content = html_file.read()
+                        with open('{html_rel_path}', 'r', encoding='utf-8') as f:
+                            html_content = f.read()
                         """
                     )
                 )
@@ -1135,8 +1144,8 @@ close-streamlit-app-with-button-click/35132/5
         Ollama-style streaming APIs.
 
         This method builds and returns a list of strings, which are later executed to
-        create the chatbot interface in a Streamlit app. It includes user input handling,
-        API interaction logic, response parsing,
+        create the chatbot interface in a Streamlit app. It includes user input
+        handling, API interaction logic, response parsing,
         and conditional rendering of text, source links, and HTML subgraphs.
 
         The function distinguishes between two chatbot modes:
@@ -1214,7 +1223,9 @@ close-streamlit-app-with-button-click/35132/5
                 def generate_query(messages):
                     response = requests.post(
                         "{chatbot.api_call.api_url}",
-                        json={{"model": "{chatbot.model}", "messages": messages, "stream": True}},
+                        json={{"model": "{chatbot.model}",
+                               "messages": messages,
+                               "stream": True}},
                     )
                     response.raise_for_status()
                     return response
@@ -1246,8 +1257,9 @@ close-streamlit-app-with-button-click/35132/5
                 {handle_prompt_block}
 
                     # Retrieve question and generate answer
-                    combined = "\\n".join(msg["content"] for msg in st.session_state.messages
-                                                                    if msg["role"] == "user")
+                    combined = "\\n".join(msg["content"]
+                                for msg in st.session_state.messages
+                                if msg["role"] == "user")
                     messages = [{{"role": "user", "content": combined}}]
                     with st.spinner('Generating answer...'):
                         response = generate_query(messages)
@@ -1301,13 +1313,17 @@ close-streamlit-app-with-button-click/35132/5
                                     "content": response
                                 }})
                                 with st.chat_message("assistant"):
-                                    st.markdown(response.get('text', ''), unsafe_allow_html=True)
+                                    st.markdown(response.get('text', ''),
+                                                unsafe_allow_html=True)
                                     if 'links' in response:
                                         st.markdown("**Sources:**")
                                         for link in response['links']:
                                             st.markdown(f"- [{{link}}]({{link}})")
                                     if 'subgraph_pyvis' in response:
-                                        st.components.v1.html(response['subgraph_pyvis'], height=600)
+                                        st.components.v1.html(
+                                            response['subgraph_pyvis'],
+                                            height=600
+                                        )
                             else:
                                 st.error("Failed to get response from API")
                     """

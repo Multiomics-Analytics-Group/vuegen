@@ -252,7 +252,8 @@ class ConfigManager:
                     continue
                 # components are added to subsection
                 # ! Alternatively, one could add (sub-)sections to the subsection
-                # ? Then one could remove differentiation between sections and subsections
+                # ? Then one could remove differentiation between sections and
+                # ? subsections
                 nested_components = self._create_subsect_config_fromdir(file, level + 1)
                 components.extend(nested_components["components"])
 
@@ -490,8 +491,8 @@ class ConfigManager:
         Returns
         -------
         Component
-            A Component object (Plot, DataFrame, or Markdown) populated with the provided
-            metadata.
+            A Component object (Plot, DataFrame, or Markdown) populated with the
+            provided metadata.
         """
         # Determine the component type
         component_type = assert_enum_value(

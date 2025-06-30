@@ -34,7 +34,8 @@ st.markdown(("<p style='text-align: center; color: black;'> "
             "<b>Number of nodes:</b> 9 </p>"),
             unsafe_allow_html=True)
 st.markdown(("<p style='text-align: center; color: black;'>"
-             " <b>Number of relationships:</b> 14 </p>"),
+             " <b>Number of relationships:</b> 14"
+             " </p>"),
             unsafe_allow_html=True)
 
 # Streamlit checkbox for controlling the layout
