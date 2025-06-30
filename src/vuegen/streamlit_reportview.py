@@ -648,13 +648,11 @@ close-streamlit-app-with-button-click/35132/5
         # Add content for the different plot types
         try:
             if plot.plot_type == r.PlotType.STATIC:
-                # Use .as_posix() only if the plot_file_path is a Path object
-                # so, if the file_path is a URL, it will not cause an error
-                plot_file_path = (
-                    plot.file_path.as_posix()
-                    if isinstance(plot.file_path, Path)
-                    else plot.file_path
-                )
+                # If the file path is a URL, keep the file path as is
+                if is_url(plot.file_path):
+                    plot_file_path = plot.file_path
+                else:  # If it's a local file
+                    plot_file_path = get_relative_file_path(plot.file_path).as_posix()
                 plot_content.append(
                     f"\nst.image('{plot_file_path}', "
                     f" caption='{plot.caption}', use_column_width=True)\n"
