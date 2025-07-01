@@ -1,3 +1,8 @@
+"""
+StreamlitReportView class for generating Streamlit reports
+based on a configuration file.
+"""
+
 import os
 import subprocess
 import sys
@@ -20,7 +25,8 @@ from .utils.variables import make_valid_identifier
 
 
 def write_python_file(fpath: str, imports: list[str], contents: list[str]) -> None:
-    with open(fpath, "w", encoding="utf8") as f:
+    """Write a Python file with the given imports and contents."""
+    with open(fpath, "w", encoding="utf-8") as f:
         # Write imports at the top of the file
         f.write("\n".join(imports) + "\n\n")
 
@@ -55,16 +61,18 @@ class StreamlitReportView(r.WebAppReportView):
         report_type : r.ReportType
             Enum of report type as definded by the ReportType Enum.
         streamlit_autorun : bool, optional
-            Wheather streamlit should be started after report generation, by default False
+            Wheather streamlit should be started after report generation,
+            by default False
         static_dir : str, optional
-            The folder where the static files will be saved, by default STATIC_FILES_DIR.
+            The folder where the static files will be saved,
+            by default STATIC_FILES_DIR.
         """
         super().__init__(report=report, report_type=report_type)
         self.streamlit_autorun = streamlit_autorun
-        self.BUNDLED_EXECUTION = False
+        self.bundled_execution = False
         if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
             self.report.logger.info("running in a PyInstaller bundle")
-            self.BUNDLED_EXECUTION = True
+            self.bundled_execution = True
         else:
             self.report.logger.info("running in a normal Python process")
 
@@ -81,31 +89,36 @@ class StreamlitReportView(r.WebAppReportView):
 
     def generate_report(self, output_dir: str = SECTIONS_DIR) -> None:
         """
-        Generates the Streamlit report and creates Python files for each section and its subsections and plots.
+        Generates the Streamlit report and creates Python files for each section
+        and its subsections and plots.
 
         Parameters
         ----------
         output_dir : str, optional
-            The folder where the generated report files will be saved (default is SECTIONS_DIR).
+            The folder where the generated report files will be saved
+            (default is SECTIONS_DIR).
         """
         self.report.logger.debug(
-            f"Generating '{self.report_type}' report in directory: '{output_dir}'"
+            "Generating '%s' report in directory: '%s'", self.report_type, output_dir
         )
 
         # Create the output folder
         if create_folder(output_dir, is_nested=True):
-            self.report.logger.info(f"Created output directory: '{output_dir}'")
+            self.report.logger.info("Created output directory: '%s'", output_dir)
         else:
-            self.report.logger.info(f"Output directory already existed: '{output_dir}'")
+            self.report.logger.info(
+                "Output directory already existed: '%s'", output_dir
+            )
 
         # Create the static folder
         if create_folder(self.static_dir):
             self.report.logger.info(
-                f"Created output directory for static content: '{self.static_dir}'"
+                "Created output directory for static content: '%s'", self.static_dir
             )
         else:
             self.report.logger.info(
-                f"Output directory for static content already existed: '{self.static_dir}'"
+                "Output directory for static content already existed: '%s'",
+                self.static_dir,
             )
 
         try:
@@ -117,8 +130,8 @@ class StreamlitReportView(r.WebAppReportView):
                     """\
                     import os
                     import time
-                    
-                    import psutil                    
+
+                    import psutil
                     import streamlit as st
                     """
                 )
@@ -127,7 +140,10 @@ class StreamlitReportView(r.WebAppReportView):
                 report_manag_content.append(
                     textwrap.dedent(
                         f"""\
-                        st.set_page_config(layout="wide", page_title="{self.report.title}", page_icon="{self.report.logo}")
+                        st.set_page_config(layout="wide",
+                                           page_title="{self.report.title}",
+                                           page_icon="{self.report.logo}"
+                        )
                         st.logo("{self.report.logo}")
                         """
                     )
@@ -136,7 +152,8 @@ class StreamlitReportView(r.WebAppReportView):
                 report_manag_content.append(
                     textwrap.dedent(
                         f"""\
-                        st.set_page_config(layout="wide", page_title="{self.report.title}")
+                        st.set_page_config(layout="wide",
+                                           page_title="{self.report.title}")
                         """
                     )
                 )
@@ -165,22 +182,29 @@ class StreamlitReportView(r.WebAppReportView):
 
                 if create_folder(section_dir_path):
                     self.report.logger.debug(
-                        f"Created section directory: {section_dir_path}"
+                        "Created section directory: %s", section_dir_path
                     )
                 else:
                     self.report.logger.debug(
-                        f"Section directory already existed: {section_dir_path}"
+                        "Section directory already existed: %s", section_dir_path
                     )
-                # add an overview page to section of components exist
+                # add an overview page to section for it's section components
+                # they will be written when the components are parsed
+                # using `_generate_sections`
                 if section.components:
+                    _fname = (
+                        f"0_overview_{make_valid_identifier(section.title).lower()}.py"
+                    )
                     subsection_file_path = (
-                        Path(section_name_var)
-                        / f"0_overview_{make_valid_identifier(section.title).lower()}.py"
+                        Path(section_name_var) / _fname
                     ).as_posix()  # Make sure it's Posix Paths
                     section.file_path = subsection_file_path
-                    # Create a Page object for each subsection and add it to the home page content
+                    # Create a Page object for each subsection and
+                    # add it to the home page content
                     report_manag_content.append(
-                        f"{section_name_var}_overview = st.Page('{subsection_file_path}', title='Overview {section.title}')"
+                        f"{section_name_var}_overview = "
+                        f"st.Page('{subsection_file_path}'"
+                        f", title='Overview {section.title}')"
                     )
                     subsection_page_vars.append(f"{section_name_var}_overview")
 
@@ -188,25 +212,30 @@ class StreamlitReportView(r.WebAppReportView):
                     # ! could add a non-integer to ensure it's a valid identifier
                     subsection_name_var = make_valid_identifier(subsection.title)
                     if not subsection_name_var.isidentifier():
-                        self.report.logger.warning(
-                            f"Subsection name '{subsection_name_var}' is not a valid identifier."
+                        msg = (
+                            "Subsection name is not a valid Python identifier: "
+                            f"{subsection_name_var}"
                         )
+                        self.report.logger.error(msg)
                         raise ValueError(
-                            f"Subsection name is not a valid Python identifier: {subsection_name_var}"
+                            msg,
                         )
                     subsection_file_path = (
                         Path(section_name_var) / f"{subsection_name_var}.py"
                     ).as_posix()  # Make sure it's Posix Paths
                     subsection.file_path = subsection_file_path
-                    # Create a Page object for each subsection and add it to the home page content
+                    # Create a Page object for each subsection and
+                    # add it to the home page content
                     report_manag_content.append(
-                        f"{subsection_name_var} = st.Page('{subsection_file_path}', title='{subsection.title}')"
+                        f"{subsection_name_var} = st.Page('{subsection_file_path}', "
+                        f"title='{subsection.title}')"
                     )
                     subsection_page_vars.append(subsection_name_var)
 
                 # Add all subsection Page objects to the corresponding section
                 report_manag_content.append(
-                    f"sections_pages['{section.title}'] = [{', '.join(subsection_page_vars)}]\n"
+                    f"sections_pages['{section.title}'] = "
+                    f"[{', '.join(subsection_page_vars)}]\n"
                 )
 
             # Add navigation object to the home page content
@@ -214,9 +243,12 @@ class StreamlitReportView(r.WebAppReportView):
                 textwrap.dedent(
                     """\
                     report_nav = st.navigation(sections_pages)
-                    
-                    # Following https://discuss.streamlit.io/t/close-streamlit-app-with-button-click/35132/5
-                    exit_app = st.sidebar.button("Shut Down App", icon=":material/power_off:", use_container_width=True)
+
+                    # Following https://discuss.streamlit.io/t/\
+close-streamlit-app-with-button-click/35132/5
+                    exit_app = st.sidebar.button("Shut Down App",
+                                                 icon=":material/power_off:",
+                                                 use_container_width=True)
                     if exit_app:
                         st.toast("Shutting down the app...")
                         time.sleep(1)
@@ -225,7 +257,7 @@ class StreamlitReportView(r.WebAppReportView):
                         p = psutil.Process(pid)
                         p.terminate()
 
-                    
+
                     report_nav.run()
                     """
                 )
@@ -237,14 +269,16 @@ class StreamlitReportView(r.WebAppReportView):
             ) as nav_manager:
                 nav_manager.write("\n".join(report_manag_content))
                 self.report.logger.info(
-                    f"Created app navigation script: {self.REPORT_MANAG_SCRIPT}"
+                    "Created app navigation script: %s", self.REPORT_MANAG_SCRIPT
                 )
 
             # Create Python files for each section and its subsections and plots
             self._generate_sections(output_dir=output_dir)
         except Exception as e:
             self.report.logger.error(
-                f"An error occurred while generating the report: {str(e)}"
+                "An error occurred while generating the report: %s",
+                e,
+                exc_info=True,
             )
             raise
 
@@ -259,21 +293,22 @@ class StreamlitReportView(r.WebAppReportView):
         """
         if self.streamlit_autorun:
             self.report.logger.info(
-                f"Running '{self.report.title}' {self.report_type} report."
+                "Running '%s' %s report.", self.report.title, self.report_type
             )
             self.report.logger.debug(
-                f"Running Streamlit report from directory: {output_dir}"
+                "Running Streamlit report from directory: %s", output_dir
             )
-            # ! using pyinstaller: vuegen main script as executable, not the Python Interpreter
+            # ! using pyinstaller: vuegen main script as executable,
+            # ! not the Python Interpreter
             msg = f"{sys.executable = }"
             self.report.logger.debug(msg)
             try:
                 # ! streamlit  command option is not known in packaged app
                 target_file = os.path.join(output_dir, self.REPORT_MANAG_SCRIPT)
                 self.report.logger.debug(
-                    f"Running Streamlit report from file: {target_file}"
+                    "Running Streamlit report from file: %s", target_file
                 )
-                if self.BUNDLED_EXECUTION:
+                if self.bundled_execution:
                     args = [
                         "streamlit",
                         "run",
@@ -292,22 +327,26 @@ class StreamlitReportView(r.WebAppReportView):
             except KeyboardInterrupt:
                 print("Streamlit process interrupted.")
             except subprocess.CalledProcessError as e:
-                self.report.logger.error(f"Error running Streamlit report: {str(e)}")
+                self.report.logger.error(
+                    "Error running Streamlit report: %s", e, exc_info=True
+                )
                 raise
         else:
             # If autorun is False, print instructions for manual execution
             self.report.logger.info(
-                f"All the scripts to build the Streamlit app are available at {output_dir}"
+                "All the scripts to build the Streamlit app are available at %s",
+                output_dir,
             )
             self.report.logger.info(
                 "To run the Streamlit app, use the following command:"
             )
             self.report.logger.info(
-                f"streamlit run {Path(output_dir) / self.REPORT_MANAG_SCRIPT}"
+                "streamlit run %s", Path(output_dir) / self.REPORT_MANAG_SCRIPT
             )
             msg = (
-                f"\nAll the scripts to build the Streamlit app are available at: {output_dir}\n\n"
-                f"To run the Streamlit app, use the following command:\n\n"
+                "\nAll the scripts to build the Streamlit app are available at: "
+                f"{output_dir}\n\n"
+                "To run the Streamlit app, use the following command:\n\n"
                 f"\tstreamlit run {Path(output_dir) / self.REPORT_MANAG_SCRIPT}"
             )
             print(msg)
@@ -330,7 +369,8 @@ class StreamlitReportView(r.WebAppReportView):
         type : str
             The type of the text (e.g., 'header', 'paragraph').
         level : int, optional
-            If the text is a header, the level of the header (e.g., 1 for h1, 2 for h2, etc.).
+            If the text is a header, the level of the header
+            (e.g., 1 for h1, 2 for h2, etc.).
         color : str, optional
             The color of the header text.
         text_align : str, optional
@@ -345,8 +385,24 @@ class StreamlitReportView(r.WebAppReportView):
             tag = f"h{level}"
         elif type == "paragraph" or type == "caption":
             tag = "p"
+        else:
+            raise ValueError(
+                f"Unsupported text type: {type}. Supported types are 'header', "
+                "'paragraph', and 'caption'."
+            )
 
-        return f"""st.markdown('''<{tag} style='text-align: {text_align}; color: {color};'>{text}</{tag}>''', unsafe_allow_html=True)"""
+        text = text.strip()  # get rid of new lines
+
+        return textwrap.dedent(
+            f"""
+            st.markdown(
+                (
+                    "<{tag} style='text-align: {text_align}; "
+                    "color: {color};'>{text}</{tag}>"
+                ),
+                unsafe_allow_html=True)
+            """
+        )
 
     def _generate_home_section(
         self,
@@ -369,10 +425,10 @@ class StreamlitReportView(r.WebAppReportView):
             # Create folder for the home page
             home_dir_path = Path(output_dir) / "Home"
             if create_folder(home_dir_path):
-                self.report.logger.debug(f"Created home directory: {home_dir_path}")
+                self.report.logger.debug("Created home directory: %s", home_dir_path)
             else:
                 self.report.logger.debug(
-                    f"Home directory already existed: {home_dir_path}"
+                    "Home directory already existed: %s", home_dir_path
                 )
 
             # Create the home page content
@@ -384,7 +440,8 @@ class StreamlitReportView(r.WebAppReportView):
                 )
             if self.report.graphical_abstract:
                 home_content.append(
-                    f"\nst.image('{self.report.graphical_abstract}', use_column_width=True)"
+                    f"\nst.image('{self.report.graphical_abstract}', "
+                    "use_column_width=True)"
                 )
 
             # add components content to page (if any)
@@ -395,23 +452,29 @@ class StreamlitReportView(r.WebAppReportView):
 
             # Write the home page content to a Python file
             home_page_path = Path(home_dir_path) / "Homepage.py"
-            with open(home_page_path, "w") as home_page:
+            with open(home_page_path, "w", encoding="utf-8") as home_page:
                 home_page.write("\n".join(home_content))
-            self.report.logger.info(f"Home page content written to '{home_page_path}'.")
+            self.report.logger.info(
+                "Home page content written to '%s'.", home_page_path
+            )
 
             # Add the home page to the report manager content
             report_manag_content.append(
-                "homepage = st.Page('Home/Homepage.py', title='Homepage')"  # ! here Posix Path is hardcoded
+                # ! here Posix Path is hardcoded
+                "homepage = st.Page('Home/Homepage.py', title='Homepage')"
             )
             report_manag_content.append("sections_pages['Home'] = [homepage]\n")
             self.report.logger.info("Home page added to the report manager content.")
         except Exception as e:
-            self.report.logger.error(f"Error generating the home section: {str(e)}")
+            self.report.logger.error(
+                "Error generating the home section: %s", e, exc_info=True
+            )
             raise
 
     def _generate_sections(self, output_dir: str) -> None:
         """
-        Generates Python files for each section in the report, including subsections and its components (plots, dataframes, markdown).
+        Generates Python files for each section in the report, including subsections
+        and its components (plots, dataframes, markdown).
 
         Parameters
         ----------
@@ -422,7 +485,11 @@ class StreamlitReportView(r.WebAppReportView):
         try:
             for section in self.report.sections:
                 self.report.logger.debug(
-                    f"Processing section '{section.id}': '{section.title}' - {len(section.subsections)} subsection(s)"
+                    # Continue
+                    "Processing section '%s': '%s' - %s subsection(s)",
+                    section.id,
+                    section.title,
+                    len(section.subsections),
                 )
                 if section.components:
                     # add an section overview page
@@ -440,16 +507,20 @@ class StreamlitReportView(r.WebAppReportView):
 
                 if not section.subsections:
                     self.report.logger.debug(
-                        f"No subsections found in section: '{section.title}'."
+                        "No subsections found in section: '%s'.", section.title
                     )
                     continue
 
                 # Iterate through subsections and integrate them into the section file
-                # subsection should have the subsection_file_path as file_path?
+                # ! subsection should have the subsection_file_path as file_path,
+                # ! which is set when parsing the config in the main generate_sections
+                # ! method
                 for subsection in section.subsections:
                     self.report.logger.debug(
-                        f"Processing subsection '{subsection.id}': '{subsection.title} -"
-                        f" {len(subsection.components)} component(s)'"
+                        "Processing subsection '%s': '%s' - %s component(s)",
+                        subsection.id,
+                        subsection.title,
+                        len(subsection.components),
                     )
                     try:
                         # Create subsection file
@@ -468,17 +539,22 @@ class StreamlitReportView(r.WebAppReportView):
                             contents=subsection_content,
                         )
                         self.report.logger.info(
-                            f"Subsection file created: '{subsection_file_path}'"
+                            "Subsection file created: '%s'", subsection_file_path
                         )
                     except Exception as subsection_error:
                         self.report.logger.error(
-                            f"Error processing subsection '{subsection.id}' '{subsection.title}' "
-                            f"in section  '{section.id}' '{section.title}': {str(subsection_error)}"
+                            "Error processing subsection '%s' '%s' "
+                            "in section  '%s' '%s': %s",
+                            subsection.id,
+                            subsection.title,
+                            section.id,
+                            section.title,
+                            str(subsection_error),
                         )
                         raise
 
         except Exception as e:
-            self.report.logger.error(f"Error generating sections: {str(e)}")
+            self.report.logger.error("Error generating sections: %s", e, exc_info=True)
             raise
 
     def _combine_components(self, components: list[dict]) -> tuple[list, list, bool]:
@@ -497,7 +573,7 @@ class StreamlitReportView(r.WebAppReportView):
             fct = self.components_fct_map.get(component.component_type, None)
             if fct is None:
                 self.report.logger.warning(
-                    f"Unsupported component type '{component.component_type}' "
+                    "Unsupported component type '%s' ", component.component_type
                 )
             else:
                 if component.component_type == r.ComponentType.CHATBOT:
@@ -512,8 +588,9 @@ class StreamlitReportView(r.WebAppReportView):
 
     def _generate_subsection(self, subsection) -> tuple[List[str], List[str]]:
         """
-        Generate code to render components (plots, dataframes, markdown) in the given subsection,
-        creating imports and content for the subsection based on the component type.
+        Generate code to render components (plots, dataframes, markdown) in the given
+        subsection, creating imports and content for the subsection based on the
+        component type.
 
         Parameters
         ----------
@@ -549,13 +626,14 @@ class StreamlitReportView(r.WebAppReportView):
             subsection_content.append("st.markdown(footer, unsafe_allow_html=True)\n")
 
         self.report.logger.info(
-            f"Generated content and imports for subsection: '{subsection.title}'"
+            "Generated content and imports for subsection: '%s'", subsection.title
         )
         return subsection_content, subsection_imports
 
     def _generate_plot_content(self, plot) -> List[str]:
         """
-        Generate content for a plot component based on the plot type (static or interactive).
+        Generate content for a plot component based on the plot type
+        (static or interactive).
 
         Parameters
         ----------
@@ -576,9 +654,14 @@ class StreamlitReportView(r.WebAppReportView):
         # Add content for the different plot types
         try:
             if plot.plot_type == r.PlotType.STATIC:
-                plot_rel_path = get_relative_file_path(plot.file_path)
+                # If the file path is a URL, keep the file path as is
+                if is_url(plot.file_path):
+                    plot_file_path = plot.file_path
+                else:  # If it's a local file
+                    plot_file_path = get_relative_file_path(plot.file_path).as_posix()
                 plot_content.append(
-                    f"\nst.image('{plot_rel_path.as_posix()}', caption='{plot.caption}', use_column_width=True)\n"
+                    f"\nst.image('{plot_file_path}', "
+                    f" caption='{plot.caption}', use_column_width=True)\n"
                 )
             elif plot.plot_type == r.PlotType.PLOTLY:
                 plot_content.append(self._generate_plot_code(plot))
@@ -587,10 +670,12 @@ class StreamlitReportView(r.WebAppReportView):
             elif plot.plot_type == r.PlotType.INTERACTIVE_NETWORK:
                 networkx_graph = plot.read_network()
                 if isinstance(networkx_graph, tuple):
-                    # If network_data is a tuple, separate the network and html file path
+                    # If network_data is a tuple, separate the network
+                    # and html file path
                     networkx_graph, html_plot_file = networkx_graph
                 else:
-                    # Otherwise, create and save a new pyvis network from the netowrkx graph
+                    # Otherwise,
+                    # create and save a new pyvis network from the netowrkx graph
                     html_plot_file = (
                         Path(self.static_dir) / f"{plot.title.replace(' ', '_')}.html"
                     ).resolve()
@@ -605,37 +690,59 @@ class StreamlitReportView(r.WebAppReportView):
                 # Determine whether the file path is a URL or a local file
                 if is_url(html_plot_file):
                     plot_content.append(
-                        f"""
-response = requests.get('{html_plot_file}')
-response.raise_for_status()
-html_content = response.text\n"""
+                        textwrap.dedent(
+                            f"""
+                            response = requests.get('{html_plot_file}')
+                            response.raise_for_status()
+                            html_content = response.text
+                            """
+                        )
                     )
                 else:
+                    fpath = Path(html_plot_file).resolve().relative_to(Path.cwd())
                     plot_content.append(
-                        f"""
-with open('{Path(html_plot_file).resolve().relative_to(Path.cwd())}', 'r') as html_file:
-    html_content = html_file.read()\n"""
+                        textwrap.dedent(
+                            f"""
+                            with open('{fpath}', 'r') as html_file:
+                                html_content = html_file.read()
+                            """
+                        )
                     )
 
                 # Append the code for additional information (nodes and edges count)
                 plot_content.append(
-                    f"""
-st.markdown(f"<p style='text-align: center; color: black;'> <b>Number of nodes:</b> {num_nodes} </p>", unsafe_allow_html=True)
-st.markdown(f"<p style='text-align: center; color: black;'> <b>Number of relationships:</b> {num_edges} </p>", unsafe_allow_html=True)\n"""
+                    textwrap.dedent(
+                        f"""
+                        st.markdown(("<p style='text-align: center; color: black;'> "
+                                    "<b>Number of nodes:</b> {num_nodes} </p>"),
+                                    unsafe_allow_html=True)
+                        st.markdown(("<p style='text-align: center; color: black;'>"
+                                     " <b>Number of relationships:</b> {num_edges}"
+                                     " </p>"),
+                                    unsafe_allow_html=True)
+                        """
+                    )
                 )
 
                 # Add the specific code for visualization
                 plot_content.append(self._generate_plot_code(plot))
             else:
-                self.report.logger.warning(f"Unsupported plot type: {plot.plot_type}")
+                self.report.logger.warning("Unsupported plot type: %s", plot.plot_type)
         except Exception as e:
             self.report.logger.error(
-                f"Error generating content for '{plot.plot_type}' plot '{plot.id}' '{plot.title}': {str(e)}"
+                "Error generating content for '%s' plot '%s' '%s': %s",
+                plot.plot_type,
+                plot.id,
+                plot.title,
+                e,
+                exc_info=True,
             )
             raise
 
         self.report.logger.info(
-            f"Successfully generated content for plot '{plot.id}': '{plot.title}'"
+            "Successfully generated content for plot '%s': '%s'",
+            plot.id,
+            plot.title,
         )
         return plot_content
 
@@ -656,37 +763,51 @@ st.markdown(f"<p style='text-align: center; color: black;'> <b>Number of relatio
         """
         # If the file path is a URL, generate code to fetch content via requests
         if is_url(plot.file_path):
-            plot_code = f"""
-response = requests.get('{plot.file_path}')
-response.raise_for_status()
-plot_json = json.loads(response.text)\n"""
+            plot_code = textwrap.dedent(
+                f"""
+                response = requests.get('{plot.file_path}')
+                response.raise_for_status()
+                plot_json = json.loads(response.text)\n"""
+            )
         else:  # If it's a local file
             plot_rel_path = get_relative_file_path(plot.file_path)
-            plot_code = f"""
-with open('{plot_rel_path.as_posix()}', 'r') as plot_file:
-    plot_json = json.load(plot_file)\n"""
+            plot_code = textwrap.dedent(
+                f"""
+                with open('{plot_rel_path.as_posix()}', 'r') as plot_file:
+                    plot_json = json.load(plot_file)\n"""
+            )
 
         # Add specific code for each visualization tool
         if plot.plot_type == r.PlotType.PLOTLY:
-            plot_code += """
-# Keep only 'data' and 'layout' sections
-plot_json = {key: plot_json[key] for key in plot_json if key in ['data', 'layout']}
+            plot_code += textwrap.dedent(
+                """
+                # Keep only 'data' and 'layout' sections
+                plot_json = {key: plot_json[key] for key in plot_json
+                                                 if key in ['data', 'layout']}
 
-# Remove 'frame' section in 'data'
-plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'} for entry in plot_json.get('data', [])]
-st.plotly_chart(plot_json, use_container_width=True)\n"""
+                # Remove 'frame' section in 'data'
+                plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'}
+                                                for entry in plot_json.get('data', [])]
+                st.plotly_chart(plot_json, use_container_width=True)\n"""
+            )
 
         elif plot.plot_type == r.PlotType.ALTAIR:
-            plot_code += """
-altair_plot = alt.Chart.from_dict(plot_json)
-st.vega_lite_chart(json.loads(altair_plot.to_json()), use_container_width=True)\n"""
+            plot_code += textwrap.dedent(
+                """
+                altair_plot = alt.Chart.from_dict(plot_json)
+                st.vega_lite_chart(json.loads(altair_plot.to_json()),
+                                   use_container_width=True)\n"""
+            )
 
         elif plot.plot_type == r.PlotType.INTERACTIVE_NETWORK:
-            plot_code = """# Streamlit checkbox for controlling the layout
-control_layout = st.checkbox('Add panel to control layout', value=True)
-net_html_height = 1200 if control_layout else 630
-# Load HTML into HTML component for display on Streamlit
-st.components.v1.html(html_content, height=net_html_height)\n"""
+            plot_code = textwrap.dedent(
+                """\
+                # Streamlit checkbox for controlling the layout
+                control_layout = st.checkbox('Add panel to control layout', value=True)
+                net_html_height = 1200 if control_layout else 630
+                # Load HTML into HTML component for display on Streamlit
+                st.components.v1.html(html_content, height=net_html_height)\n"""
+            )
         return plot_code
 
     def _generate_dataframe_content(self, dataframe) -> List[str]:
@@ -721,10 +842,13 @@ st.components.v1.html(html_content, height=net_html_height)\n"""
                 file_extension == fmt.value_with_dot for fmt in r.DataFrameFormat
             ):
                 self.report.logger.error(
-                    f"Unsupported file extension: {file_extension}. Supported extensions are: {', '.join(fmt.value for fmt in r.DataFrameFormat)}."
+                    "Unsupported file extension: %s. Supported extensions are: %s.",
+                    file_extension,
+                    ", ".join(fmt.value for fmt in r.DataFrameFormat),
                 )
                 # return []  # Skip execution if unsupported file extension
-                # Should it not return here? Can we even call the method with an unsupported file extension?
+                # Should it not return here?
+                # Can we even call the method with an unsupported file extension?
 
             # Build the file path (URL or local file)
             if is_url(dataframe.file_path):
@@ -740,12 +864,14 @@ st.components.v1.html(html_content, height=net_html_height)\n"""
                 sheet_names = table_utils.get_sheet_names(df_file_path.as_posix())
                 if len(sheet_names) > 1:
                     # If there are multiple sheets, ask the user to select one
-
+                    fpath = df_file_path.as_posix()
                     dataframe_content.append(
                         textwrap.dedent(
                             f"""\
-                        sheet_names = table_utils.get_sheet_names("{df_file_path.as_posix()}")
-                        selected_sheet = st.selectbox("Select a sheet to display", options=sheet_names)
+                        sheet_names = table_utils.get_sheet_names("{fpath}")
+                        selected_sheet = st.selectbox("Select a sheet to display",
+                                                      options=sheet_names,
+                                        )
                         """
                         )
                     )
@@ -757,39 +883,53 @@ st.components.v1.html(html_content, height=net_html_height)\n"""
                 r.DataFrameFormat.XLSX.value_with_dot,
             ]:
                 dataframe_content.append(
-                    f"""df = pd.{read_function.__name__}('{df_file_path.as_posix()}', sheet_name=selected_sheet)\n"""
+                    f"df = pd.{read_function.__name__}('{df_file_path.as_posix()}',"
+                    " sheet_name=selected_sheet)\n"
                 )
             else:
                 dataframe_content.append(
-                    f"""df = pd.{read_function.__name__}('{df_file_path.as_posix()}')\n"""
+                    f"df = pd.{read_function.__name__}('{df_file_path.as_posix()}')\n"
                 )
             # ! Alternative to select box: iterate over sheets in DataFrame
             # Displays a DataFrame using AgGrid with configurable options.
             dataframe_content.append(
-                """
-# Displays a DataFrame using AgGrid with configurable options.
-grid_builder = GridOptionsBuilder.from_dataframe(df)
-grid_builder.configure_default_column(editable=True, groupable=True, filter=True)
-grid_builder.configure_side_bar(filters_panel=True, columns_panel=True)
-grid_builder.configure_selection(selection_mode="multiple")
-grid_builder.configure_pagination(enabled=True, paginationAutoPageSize=False, paginationPageSize=20)
-grid_options = grid_builder.build()
+                textwrap.dedent(
+                    """
+                    # Displays a DataFrame using AgGrid with configurable options.
+                    grid_builder = GridOptionsBuilder.from_dataframe(df)
+                    grid_builder.configure_default_column(editable=True,
+                                                          groupable=True,
+                                                          filter=True,
+                    )
+                    grid_builder.configure_side_bar(filters_panel=True,
+                                                    columns_panel=True)
+                    grid_builder.configure_selection(selection_mode="multiple")
+                    grid_builder.configure_pagination(enabled=True,
+                                                    paginationAutoPageSize=False,
+                                                    paginationPageSize=20,
+                    )
+                    grid_options = grid_builder.build()
 
-AgGrid(df, gridOptions=grid_options, enable_enterprise_modules=True)
+                    AgGrid(df, gridOptions=grid_options, enable_enterprise_modules=True)
 
-# Button to download the df
-df_csv = df.to_csv(sep=',', header=True, index=False).encode('utf-8')
-st.download_button(
-    label="Download dataframe as CSV",
-    data=df_csv,
-    file_name=f"dataframe_{df_index}.csv",
-    mime='text/csv',
-    key=f"download_button_{df_index}")
-df_index += 1"""
+                    # Button to download the df
+                    df_csv = df.to_csv(sep=',', header=True, index=False
+                                      ).encode('utf-8')
+                    st.download_button(
+                        label="Download dataframe as CSV",
+                        data=df_csv,
+                        file_name=f"dataframe_{df_index}.csv",
+                        mime='text/csv',
+                        key=f"download_button_{df_index}")
+                    df_index += 1"""
+                )
             )
         except Exception as e:
             self.report.logger.error(
-                f"Error generating content for DataFrame: {dataframe.title}. Error: {str(e)}"
+                "Error generating content for DataFrame: %s. Error: %s",
+                dataframe.title,
+                e,
+                exc_info=True,
             )
             raise
 
@@ -802,7 +942,8 @@ df_index += 1"""
             )
 
         self.report.logger.info(
-            f"Successfully generated content for DataFrame: '{dataframe.title}'"
+            "Successfully generated content for DataFrame: '%s'",
+            dataframe.title,
         )
         return dataframe_content
 
@@ -832,17 +973,23 @@ df_index += 1"""
             # If the file path is a URL, generate code to fetch content via requests
             if is_url(markdown.file_path):
                 markdown_content.append(
-                    f"""
-response = requests.get('{markdown.file_path}')
-response.raise_for_status()
-markdown_content = response.text\n"""
+                    textwrap.dedent(
+                        f"""
+                        response = requests.get('{markdown.file_path}')
+                        response.raise_for_status()
+                        markdown_content = response.text
+                        """
+                    )
                 )
             else:  # If it's a local file
                 md_rel_path = get_relative_file_path(markdown.file_path)
                 markdown_content.append(
-                    f"""
-with open('{md_rel_path.as_posix()}', 'r') as markdown_file:
-    markdown_content = markdown_file.read()\n"""
+                    textwrap.dedent(
+                        f"""
+                        with open('{md_rel_path.as_posix()}', 'r') as markdown_file:
+                            markdown_content = markdown_file.read()
+                        """
+                    )
                 )
             # Code to display md content
             markdown_content.append(
@@ -850,7 +997,10 @@ with open('{md_rel_path.as_posix()}', 'r') as markdown_file:
             )
         except Exception as e:
             self.report.logger.error(
-                f"Error generating content for Markdown: {markdown.title}. Error: {str(e)}"
+                "Error generating content for Markdown: %s. Error: %s",
+                markdown.title,
+                e,
+                exc_info=True,
             )
             raise
 
@@ -863,7 +1013,8 @@ with open('{md_rel_path.as_posix()}', 'r') as markdown_file:
             )
 
         self.report.logger.info(
-            f"Successfully generated content for Markdown: '{markdown.title}'"
+            "Successfully generated content for Markdown: '%s'",
+            markdown.title,
         )
         return markdown_content
 
@@ -891,18 +1042,24 @@ with open('{md_rel_path.as_posix()}', 'r') as markdown_file:
         try:
             if is_url(html.file_path):
                 # If it's a URL, fetch content dynamically
-                html_content.append(
-                    f"""
-response = requests.get('{html.file_path}')
-response.raise_for_status()
-html_content = response.text\n"""
+                textwrap.dedent(
+                    html_content.append(
+                        f"""
+                        response = requests.get('{html.file_path}')
+                        response.raise_for_status()
+                        html_content = response.text
+                        """
+                    )
                 )
             else:  # If it's a local file
-                html_rel_path = get_relative_file_path(html.file_path)
+                html_rel_path = get_relative_file_path(html.file_path).as_posix()
                 html_content.append(
-                    f"""
-with open('{html_rel_path.as_posix()}', 'r', encoding='utf-8') as html_file:
-    html_content = html_file.read()\n"""
+                    textwrap.dedent(
+                        f"""
+                        with open('{html_rel_path}', 'r', encoding='utf-8') as f:
+                            html_content = f.read()
+                        """
+                    )
                 )
 
             # Display HTML content using Streamlit
@@ -912,7 +1069,10 @@ with open('{html_rel_path.as_posix()}', 'r', encoding='utf-8') as html_file:
 
         except Exception as e:
             self.report.logger.error(
-                f"Error generating content for HTML: {html.title}. Error: {str(e)}"
+                "Error generating content for HTML: %s. Error: %s",
+                html.title,
+                e,
+                exc_info=True,
             )
             raise
 
@@ -923,14 +1083,15 @@ with open('{html_rel_path.as_posix()}', 'r', encoding='utf-8') as html_file:
             )
 
         self.report.logger.info(
-            f"Successfully generated content for HTML: '{html.title}'"
+            "Successfully generated content for HTML: '%s'",
+            html.title,
         )
         return html_content
 
     def _generate_apicall_content(self, apicall) -> List[str]:
         """
-        Generate content for an API component. This method handles the API call and formats
-        the response for display in the Streamlit app.
+        Generate content for an API component. This method handles the API call and
+        formats the response for display in the Streamlit app.
 
         Parameters
         ----------
@@ -955,7 +1116,10 @@ with open('{html_rel_path.as_posix()}', 'r', encoding='utf-8') as html_file:
             apicall_content.append(f"""st.write({apicall_response})\n""")
         except Exception as e:
             self.report.logger.error(
-                f"Error generating content for APICall: {apicall.title}. Error: {str(e)}"
+                "Error generating content for APICall: %s. Error: %s",
+                apicall.title,
+                e,
+                exc_info=True,
             )
             raise
 
@@ -968,29 +1132,34 @@ with open('{html_rel_path.as_posix()}', 'r', encoding='utf-8') as html_file:
             )
 
         self.report.logger.info(
-            f"Successfully generated content for APICall '{apicall.title}' using method '{apicall.method}'"
+            "Successfully generated content for APICall '%s' using method '%s'",
+            apicall.title,
+            apicall.method,
         )
         return apicall_content
 
     def _generate_chatbot_content(self, chatbot) -> List[str]:
         """
-        Generate content to render a ChatBot component, supporting standard and Ollama-style streaming APIs.
+        Generate content to render a ChatBot component, supporting standard and
+        Ollama-style streaming APIs.
 
-        This method builds and returns a list of strings, which are later executed to create the chatbot
-        interface in a Streamlit app. It includes user input handling, API interaction logic, response parsing,
+        This method builds and returns a list of strings, which are later executed to
+        create the chatbot interface in a Streamlit app. It includes user input
+        handling, API interaction logic, response parsing,
         and conditional rendering of text, source links, and HTML subgraphs.
 
         The function distinguishes between two chatbot modes:
-        - **Ollama-style streaming API**: Identified by the presence of `chatbot.model`. Uses streaming
-        JSON chunks from the server to simulate a real-time response.
-        - **Standard API**: Assumes a simple POST request with a prompt and a full JSON response with text,
+        - **Ollama-style streaming API**: Identified by the presence of `chatbot.model`.
+          Uses streaming JSON chunks from the server to simulate a real-time response.
+        - **Standard API**: Assumes a simple POST request with a prompt and a full JSON
+          response with text,
         and other fields like links, HTML graphs, etc.
 
         Parameters
         ----------
         chatbot : ChatBot
-            The ChatBot component to generate content for, containing configuration such as title, model,
-            API endpoint, headers, and caption.
+            The ChatBot component to generate content for, containing configuration such
+            as title, model, API endpoint, headers, and caption.
 
         Returns
         -------
@@ -1007,141 +1176,158 @@ with open('{html_rel_path.as_posix()}', 'r', encoding='utf-8') as html_file:
         )
 
         # --- Shared code blocks (as strings) ---
-        init_messages_block = """
-# Init session state
-if 'messages' not in st.session_state:
-    st.session_state['messages'] = []
-    """
+        init_messages_block = textwrap.indent(
+            """
+            # Init session state
+            if 'messages' not in st.session_state:
+                st.session_state['messages'] = []
+            """,
+            " " * 4,
+        )
 
-        render_messages_block = """
-# Display chat history
-for message in st.session_state['messages']:
-    with st.chat_message(message['role']):
-        content = message['content']
-        if isinstance(content, dict):
-            st.markdown(content.get('text', ''), unsafe_allow_html=True)
-            if 'links' in content:
-                st.markdown("**Sources:**")
-                for link in content['links']:
-                    st.markdown(f"- [{link}]({link})")
-            if 'subgraph_pyvis' in content:
-                st.components.v1.html(content['subgraph_pyvis'], height=600)
-        else:
-            st.write(content)
-    """
+        render_messages_block = textwrap.indent(
+            """
+            # Display chat history
+            for message in st.session_state['messages']:
+                with st.chat_message(message['role']):
+                    content = message['content']
+                    if isinstance(content, dict):
+                        st.markdown(content.get('text', ''), unsafe_allow_html=True)
+                        if 'links' in content:
+                            st.markdown("**Sources:**")
+                            for link in content['links']:
+                                st.markdown(f"- [{link}]({link})")
+                        if 'subgraph_pyvis' in content:
+                            st.components.v1.html(content['subgraph_pyvis'], height=600)
+                    else:
+                        st.write(content)
+            """,
+            " " * 4,
+        )
 
-        handle_prompt_block = """
-# Capture and append new user prompt
-if prompt := st.chat_input("Enter your prompt here:"):
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    with st.chat_message("user"):
-        st.write(prompt)
-    """
-
+        handle_prompt_block = textwrap.indent(
+            """
+            # Capture and append new user prompt
+            if prompt := st.chat_input("Enter your prompt here:"):
+                st.session_state.messages.append({"role": "user", "content": prompt})
+                with st.chat_message("user"):
+                    st.write(prompt)
+            """,
+            " " * 4,
+        )
         if chatbot.model:
             # --- Ollama-style streaming chatbot ---
-            chatbot_content.append(
+            # all other codeblocks pasted in need to be on this indentation level
+            code_block = textwrap.dedent(
                 f"""
-{init_messages_block}
+                {init_messages_block}
+                # Function to send prompt to Ollama API
+                def generate_query(messages):
+                    response = requests.post(
+                        "{chatbot.api_call.api_url}",
+                        json={{"model": "{chatbot.model}",
+                                "messages": messages,
+                                "stream": True}},
+                    )
+                    response.raise_for_status()
+                    return response
 
-# Function to send prompt to Ollama API
-def generate_query(messages):
-    response = requests.post(
-        "{chatbot.api_call.api_url}",
-        json={{"model": "{chatbot.model}", "messages": messages, "stream": True}},
-    )
-    response.raise_for_status()
-    return response               
+                # Parse streaming response from Ollama
+                def parse_api_response(response):
+                    try:
+                        output = ""
+                        for line in response.iter_lines():
+                            body = json.loads(line)
+                            if "error" in body:
+                                raise Exception(f"API error: {{body['error']}}")
+                            if body.get("done", False):
+                                return {{"role": "assistant", "content": output}}
+                            output += body.get("message", {{}}).get("content", "")
+                    except Exception as e:
+                        return {{"role": "assistant", "content":
+                                f"Error while processing API response: {{str(e)}}"}}
 
-# Parse streaming response from Ollama
-def parse_api_response(response):
-    try:
-        output = ""
-        for line in response.iter_lines():
-            body = json.loads(line)
-            if "error" in body:
-                raise Exception(f"API error: {{body['error']}}")
-            if body.get("done", False):
-                return {{"role": "assistant", "content": output}}
-            output += body.get("message", {{}}).get("content", "")
-    except Exception as e:
-        return {{"role": "assistant", "content": f"Error while processing API response: {{str(e)}}"}}
+                # Simulated typing effect for responses
+                def response_generator(msg_content):
+                    for word in msg_content.split():
+                        yield word + " "
+                        time.sleep(0.1)
+                    yield "\\n"
+                {render_messages_block}
+                {handle_prompt_block}
+                    # Retrieve question and generate answer
+                    combined = "\\n".join(msg["content"]
+                                for msg in st.session_state.messages
+                                if msg["role"] == "user")
+                    messages = [{{"role": "user", "content": combined}}]
+                    with st.spinner('Generating answer...'):
+                        response = generate_query(messages)
+                        parsed_response = parse_api_response(response)
 
-# Simulated typing effect for responses
-def response_generator(msg_content):
-    for word in msg_content.split():
-        yield word + " "
-        time.sleep(0.1)
-    yield "\\n"
-
-{render_messages_block}
-
-{handle_prompt_block}
-
-    # Retrieve question and generate answer
-    combined = "\\n".join(msg["content"] for msg in st.session_state.messages if msg["role"] == "user")
-    messages = [{{"role": "user", "content": combined}}]
-    with st.spinner('Generating answer...'):                       
-        response = generate_query(messages)
-        parsed_response = parse_api_response(response)
-    
-    # Add the assistant's response to the session state and display it
-    st.session_state.messages.append(parsed_response)
-    with st.chat_message("assistant"):
-        st.write_stream(response_generator(parsed_response["content"]))
+                    # Add the assistant's response to the session state and display it
+                    st.session_state.messages.append(parsed_response)
+                    with st.chat_message("assistant"):
+                        st.write_stream(response_generator(parsed_response["content"]))
                 """
             )
+            chatbot_content.append(code_block)
+
         else:
             # --- Standard (non-streaming) API chatbot ---
-            chatbot_content.append(
+            code_block = textwrap.dedent(
                 f"""
-{init_messages_block}
+                {init_messages_block}
 
-# Function to send prompt to standard API
-def generate_query(prompt):
-    try:
-        response = requests.post(
-            "{chatbot.api_call.api_url}",
-            json={{"prompt": prompt}},
-            headers={chatbot.api_call.headers}
-        )
-        response.raise_for_status()
-        return response.json()
-    except requests.exceptions.RequestException as e:
-        st.error(f"API request failed: {{str(e)}}")
-        if hasattr(e, 'response') and e.response:
-            try:
-                error_details = e.response.json()
-                st.error(f"Error details: {{error_details}}")
-            except ValueError:
-                st.error(f"Response text: {{e.response.text}}")
-        return None
+                # Function to send prompt to standard API
+                def generate_query(prompt):
+                    try:
+                        response = requests.post(
+                            "{chatbot.api_call.api_url}",
+                            json={{"prompt": prompt}},
+                            headers={chatbot.api_call.headers}
+                        )
+                        response.raise_for_status()
+                        return response.json()
+                    except requests.exceptions.RequestException as e:
+                        st.error(f"API request failed: {{str(e)}}")
+                        if hasattr(e, 'response') and e.response:
+                            try:
+                                error_details = e.response.json()
+                                st.error(f"Error details: {{error_details}}")
+                            except ValueError:
+                                st.error(f"Response text: {{e.response.text}}")
+                        return None
 
-{render_messages_block}
+                {render_messages_block}
 
-{handle_prompt_block}
+                {handle_prompt_block}
 
-    with st.spinner('Generating answer...'):
-        response = generate_query(prompt)
+                    with st.spinner('Generating answer...'):
+                        response = generate_query(prompt)
 
-        if response:
-            # Append and display assistant response
-            st.session_state.messages.append({{
-                "role": "assistant",
-                "content": response
-            }})
-            with st.chat_message("assistant"):
-                st.markdown(response.get('text', ''), unsafe_allow_html=True)
-                if 'links' in response:
-                    st.markdown("**Sources:**")
-                    for link in response['links']:
-                        st.markdown(f"- [{{link}}]({{link}})")
-                if 'subgraph_pyvis' in response:
-                    st.components.v1.html(response['subgraph_pyvis'], height=600)
-        else:
-            st.error("Failed to get response from API")
-                """
+                        if response:
+                            # Append and display assistant response
+                            st.session_state.messages.append({{
+                                "role": "assistant",
+                                "content": response
+                            }})
+                            with st.chat_message("assistant"):
+                                st.markdown(response.get('text', ''),
+                                            unsafe_allow_html=True)
+                                if 'links' in response:
+                                    st.markdown("**Sources:**")
+                                    for link in response['links']:
+                                        st.markdown(f"- [{{link}}]({{link}})")
+                                if 'subgraph_pyvis' in response:
+                                    st.components.v1.html(
+                                        response['subgraph_pyvis'],
+                                        height=600
+                                    )
+                        else:
+                            st.error("Failed to get response from API")
+                    """
             )
+            chatbot_content.append(code_block)
 
         if chatbot.caption:
             chatbot_content.append(
@@ -1159,7 +1345,8 @@ def generate_query(prompt):
         Parameters
         ----------
         component : r.Component
-            The component for which to generate the required imports. The component can be of type:
+            The component for which to generate the required imports.
+            The component can be of type:
             - PLOT
             - DATAFRAME
 

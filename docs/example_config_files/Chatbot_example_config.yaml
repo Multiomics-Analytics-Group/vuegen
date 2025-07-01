@@ -1,7 +1,7 @@
 report:
   title: Chatbot example
   description: >
-    A chatbot exaple.
+    A chatbot example.
 sections:
   - title: ChatBot test
     subsections:

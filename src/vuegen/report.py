@@ -1,3 +1,5 @@
+"""Contains all comonent classes and Report related base classes for VueGen."""
+
 import logging
 import os
 from abc import ABC, abstractmethod
@@ -17,10 +19,14 @@ import pandas as pd
 import requests
 from pyvis.network import Network
 
+from vuegen.constants import TIMEOUT
+
 from .utils import cyjs_to_networkx, fetch_file_stream, pyvishtml_to_networkx
 
 
 class ReportType(StrEnum):
+    """Enum representing different types of reports that can be generated."""
+
     STREAMLIT = auto()
     HTML = auto()
     PDF = auto()
@@ -32,6 +38,8 @@ class ReportType(StrEnum):
 
 
 class ComponentType(StrEnum):
+    """Enum representing different types of components in a report subsection."""
+
     PLOT = auto()
     DATAFRAME = auto()
     MARKDOWN = auto()
@@ -41,6 +49,8 @@ class ComponentType(StrEnum):
 
 
 class PlotType(StrEnum):
+    """Enum representing different types of plots that can be generated."""
+
     STATIC = auto()
     PLOTLY = auto()
     ALTAIR = auto()
@@ -48,6 +58,8 @@ class PlotType(StrEnum):
 
 
 class NetworkFormat(StrEnum):
+    """Enum representing different formats for network graphs."""
+
     GML = auto()
     GRAPHML = auto()
     GEXF = auto()
@@ -67,11 +79,15 @@ class NetworkFormat(StrEnum):
 
 
 class CSVNetworkFormat(StrEnum):
+    """Enum representing different formats for CSV network files."""
+
     EDGELIST = auto()
     ADJLIST = auto()
 
 
 class DataFrameFormat(StrEnum):
+    """Enum representing different file formats for data in DataFrame format."""
+
     CSV = auto()
     TXT = auto()
     PARQUET = auto()
@@ -87,15 +103,17 @@ class DataFrameFormat(StrEnum):
 @dataclass
 class Component:
     """
-    Base class for different components in a report subsection. It encapsulates elements like
-    plots, dataframes, markdown, or apicalls, providing a consistent structure for report generation.
+    Base class for different components in a report subsection. It encapsulates elements
+    like plots, dataframes, markdown, or apicalls,
+    providing a consistent structure for report generation.
 
     Attributes
     ----------
     _id_counter : ClassVar[int]
         Class-level counter for unique IDs.
     id : int
-        Unique identifier for the component, assigned automatically when an object is created.
+        Unique identifier for the component, assigned automatically
+        when an object is created.
     title : str
         Title of the component.
     component_type : ComponentType
@@ -103,7 +121,8 @@ class Component:
     logger : logging.Logger
         Logger object for tracking warnings, errors, and info messages.
     file_path : Optional[str]
-        Path to the file associated with the component (e.g., plot JSON file, image file, csv file, etc.).
+        Path to the file associated with the component
+        (e.g., plot JSON file, image file, csv file, etc.).
     caption : Optional[str]
         Caption providing additional context about the component (default: None).
     """
@@ -134,7 +153,8 @@ class Plot(Component):
     plot_type : PlotType
         The type of the plot (INTERACTIVE or STATIC).
     csv_network_format : CSVNetworkFormat, optional
-        The format of the CSV file for network plots (EDGELIST or ADJLIST) (default is None).
+        The format of the CSV file for network plots (EDGELIST or ADJLIST)
+        (default is None).
     """
 
     def __init__(
@@ -188,7 +208,8 @@ class Plot(Component):
             NetworkFormat.CYJS.value_with_dot: cyjs_to_networkx,
         }
 
-        # Handle .csv and .txt files with custom delimiters based on the text format (edgelist or adjlist)
+        # Handle .csv and .txt files with custom delimiters based on the text format
+        # (edgelist or adjlist)
         try:
             # Fetch the file stream (local or URL) using fetch_file_stream
             file_stream = fetch_file_stream(self.file_path)
@@ -199,7 +220,9 @@ class Plot(Component):
             # Check if the file extension matches any Enum value
             if not any(file_extension == fmt.value_with_dot for fmt in NetworkFormat):
                 self.logger.error(
-                    f"Unsupported file extension: {file_extension}. Supported extensions are: {', '.join(fmt.value for fmt in NetworkFormat)}."
+                    "Unsupported file extension: %s. Supported extensions are: %s",
+                    file_extension,
+                    ", ".join(fmt.value for fmt in NetworkFormat),
                 )
 
             # Handle HTML files for pyvis interactive networks
@@ -207,7 +230,8 @@ class Plot(Component):
                 G = pyvishtml_to_networkx(file_stream)
                 return (G, self.file_path)
 
-            # Handle CSV and TXT files with custom delimiters based on the text format (edgelist or adjlist)
+            # Handle CSV and TXT files with custom delimiters based on the text format
+            # (edgelist or adjlist)
             if (
                 file_extension
                 in [NetworkFormat.CSV.value_with_dot, NetworkFormat.TXT.value_with_dot]
@@ -216,23 +240,31 @@ class Plot(Component):
                 delimiter = "," if file_extension == ".csv" else "\\t"
                 try:
                     df_net = pd.read_csv(file_stream, delimiter=delimiter)
-                except pd.errors.ParserError:
+                except pd.errors.ParserError as e:
                     self.logger.error(
-                        f"Error parsing CSV/TXT file {self.file_path}. Please check the file format or delimiter."
+                        "Error parsing CSV/TXT file %s. "
+                        "Please check the file format or delimiter: %s.",
+                        self.file_path,
+                        e,
+                        exc_info=True,
                     )
 
                 if self.csv_network_format == CSVNetworkFormat.EDGELIST:
-                    # Assert that "source" and "target" columns are present in the DataFrame
+                    # Assert that "source" and "target" columns
+                    # are present in the DataFrame
                     required_columns = {"source", "target"}
                     if not required_columns.issubset(df_net.columns):
                         missing_cols = ", ".join(
                             required_columns.difference(df_net.columns)
                         )
                         self.logger.error(
-                            f"CSV network file must contain 'source' and 'target' columns. Missing columns: {missing_cols}."
+                            "CSV network file must contain 'source' and 'target'"
+                            " columns. Missing columns: %s.",
+                            missing_cols,
                         )
 
-                    # Use additional columns as edge attributes, excluding "source" and "target"
+                    # Use additional columns as edge attributes,
+                    # excluding "source" and "target"
                     edge_attributes = [
                         col for col in df_net.columns if col not in required_columns
                     ]
@@ -251,30 +283,34 @@ class Plot(Component):
                         )
 
                     self.logger.info(
-                        f"Successfully read network from file: {self.file_path}."
+                        "Successfully read network from file: %s.", self.file_path
                     )
                     return G
                 elif self.csv_network_format == CSVNetworkFormat.ADJLIST:
                     G = nx.from_pandas_adjacency(df_net)
                     self.logger.info(
-                        f"Successfully read network from file: {self.file_path}."
+                        "Successfully read network from file: %s.", self.file_path
                     )
                     return G
                 else:
                     self.logger.error(
-                        f"Unsupported format for CSV/TXT file: {self.csv_network_format}."
+                        "Unsupported format for CSV/TXT file: %s.",
+                        self.csv_network_format,
                     )
 
-            # Handle other formats using the mapping and return the NetworkX graph object from the specified network file
+            # Handle other formats using the mapping and return the NetworkX graph
+            # object from the specified network file
             G = file_extension_map[file_extension](file_stream)
             G = self._add_size_attribute(G)
-            self.logger.info(f"Successfully read network from file: {self.file_path}.")
+            self.logger.info("Successfully read network from file: %s.", self.file_path)
             return G
         except Exception as e:
-            self.logger.error(f"Error occurred while reading network file: {str(e)}.")
-            raise RuntimeError(
-                f"An error occurred while reading the network file: {str(e)}"
+            self.logger.error(
+                "Error occurred while reading network file: %s.", e, exc_info=True
             )
+            raise RuntimeError(
+                "An error occurred while reading the network file."
+            ) from e
 
     def save_network_image(
         self, G: nx.Graph, output_file: str, format: str, dpi: int = 300
@@ -297,20 +333,25 @@ class Plot(Component):
         # Check if the output file path is valid
         if not os.path.isdir(os.path.dirname(output_file)):
             self.logger.error(
-                f"Directory for saving image does not exist: {os.path.dirname(output_file)}."
+                "Directory for saving image does not exist: %s",
+                os.path.dirname(output_file),
             )
             raise FileNotFoundError(
-                f"The directory for saving the file does not exist: {os.path.dirname(output_file)}."
+                "The directory for saving the file does not exist: "
+                f"{os.path.dirname(output_file)}."
             )
 
         # Validate image format
         valid_formats = ["png", "jpg", "jpeg", "svg"]
         if format.lower() not in valid_formats:
             self.logger.error(
-                f"Invalid image format: {format}. Supported formats are: {', '.join(valid_formats)}."
+                "Invalid image format: %s. Supported formats are: %s.",
+                format,
+                ", ".join(valid_formats),
             )
             raise ValueError(
-                f"Invalid format: {format}. Supported formats are: {', '.join(valid_formats)}."
+                f"Invalid format: {format}."
+                f" Supported formats are: {', '.join(valid_formats)}."
             )
 
         try:
@@ -318,14 +359,15 @@ class Plot(Component):
             nx.draw(G, with_labels=False)
             plt.savefig(output_file, format=format, dpi=dpi)
             plt.clf()
-            self.logger.info(f"Network image saved successfully at: {output_file}.")
+            self.logger.info("Network image saved successfully at: %s.", output_file)
         except Exception as e:
-            self.logger.error(f"Failed to save the network image: {str(e)}.")
-            raise RuntimeError(f"Failed to save the network image: {str(e)}")
+            self.logger.error("Failed to save the network image: %s.", e, exc_info=True)
+            raise RuntimeError("Failed to save the network image.") from e
 
     def create_and_save_pyvis_network(self, G: nx.Graph, output_file: str) -> Network:
         """
-        Creates a PyVis network from a NetworkX graph object and saves it as an HTML file.
+        Creates a PyVis network from a NetworkX graph object and saves it as an HTML
+        file.
 
         Parameters
         ----------
@@ -343,17 +385,19 @@ class Plot(Component):
         # Check if the network object and output file path are valid
         if not isinstance(G, nx.Graph):
             self.logger.error(
-                f"Provided object is not a valid NetworkX graph: {type(G)}."
+                "Provided object is not a valid NetworkX graph: %s.", type(G)
             )
             raise TypeError(
                 f"The provided object is not a valid NetworkX graph: {type(G)}."
             )
         if not os.path.isdir(os.path.dirname(output_file)):
             self.logger.error(
-                f"Directory for saving PyVis network does not exist: {os.path.dirname(output_file)}."
+                "Directory for saving PyVis network does not exist: %s.",
+                os.path.dirname(output_file),
             )
             raise FileNotFoundError(
-                f"The directory for saving the file does not exist: {os.path.dirname(output_file)}."
+                "The directory for saving the file does not exist: "
+                f"{os.path.dirname(output_file)}."
             )
 
         try:
@@ -384,16 +428,19 @@ class Plot(Component):
 
             # Save the network as an HTML file
             net.save_graph(str(output_file))
-            self.logger.info(f"PyVis network created and saved as: {output_file}.")
+            self.logger.info("PyVis network created and saved as: %s.", output_file)
             return net
 
         except Exception as e:
-            self.logger.error(f"Failed to create and save PyVis network: {str(e)}.")
-            raise RuntimeError(f"Failed to create and save the PyVis network: {str(e)}")
+            self.logger.error(
+                "Failed to create and save PyVis network: %s.", e, exc_info=True
+            )
+            raise RuntimeError("Failed to create and save the PyVis network.") from e
 
     def _add_size_attribute(self, G: nx.Graph) -> nx.Graph:
         """
-        Adds a 'size' attribute to the nodes of a NetworkX graph based on their degree centrality.
+        Adds a 'size' attribute to the nodes of a NetworkX graph
+        based on their degree centrality.
 
         Parameters
         ----------
@@ -406,7 +453,7 @@ class Plot(Component):
             A NetworkX graph object with the 'size' attribute added to the nodes.
         """
         # Clean up edge attributes to avoid conflicts
-        for u, v, data in G.edges(data=True):
+        for _, _, data in G.edges(data=True):
             data.pop("source", None)
             data.pop("target", None)
 
@@ -445,9 +492,11 @@ class DataFrame(Component):
     Attributes
     ----------
     file_format : DataFrameFormat
-        The format of the file from which the DataFrame is loaded (e.g., CSV, TXT, PARQUET).
+        The format of the file from which the DataFrame is loaded
+        (e.g., CSV, TXT, PARQUET).
     delimiter : Optional[str]
-        The delimiter to use if the file is a delimited text format (e.g., ';', '\t', etc).
+        The delimiter to use if the file is a delimited text format
+        (e.g., ';', '\t', etc).
     """
 
     def __init__(
@@ -530,7 +579,8 @@ class APICall(Component):
     api_url : str
         The URL of the API to interact with.
     method : str
-        HTTP method to use for the request ("GET", "POST", or "PUT"). The deafult is "GET".
+        HTTP method to use for the request ("GET", "POST", or "PUT").
+        The deafult is "GET".
     headers : Optional[dict]
         Headers to include in the API request (default is None).
     params : Optional[dict]
@@ -588,9 +638,9 @@ class APICall(Component):
             else self.request_body
         )
         try:
-            self.logger.info(f"Making {self.method} request to API: {self.api_url}")
-            self.logger.debug(f"Headers: {self.headers}")
-            self.logger.debug(f"Params: {self.params}")
+            self.logger.info("Making %s request to API: %s", self.method, self.api_url)
+            self.logger.debug("Headers: %s", self.headers)
+            self.logger.debug("Params: %s", self.params)
 
             response = requests.request(
                 self.method,
@@ -603,26 +653,29 @@ class APICall(Component):
                     if self.method in ["POST", "PUT", "PATCH"] and request_body_to_send
                     else None
                 ),
+                timeout=TIMEOUT,
             )
             response.raise_for_status()
             self.logger.info(
-                f"Request successful with status code {response.status_code}."
+                "Request successful with status code %d.", response.status_code
             )
             return response.json()
         except requests.exceptions.RequestException as e:
-            self.logger.error(f"API request failed: {e}")
+            self.logger.error("API request failed: %s", e, exc_info=True)
             return None
 
 
 class ChatBot(Component):
     """
     A component for creating a ChatBot that interacts with an API.
-    This component uses an APICall instance to send requests to the chatbot API and receive responses.
+    This component uses an APICall instance to send requests
+    to the chatbot API and receive responses.
 
     Attributes
     ----------
     api_call : APICall
-        An instance of the APICall class used to interact with the API for fetching chatbot responses.
+        An instance of the APICall class used to interact
+        with the API for fetching chatbot responses.
     model : Optional[str]
         The language model to use for the chatbot (default is None).
     headers : Optional[dict]
@@ -670,7 +723,8 @@ class Subsection:
     _id_counter : ClassVar[int]
         Class-level counter for unique IDs.
     id : int
-        Unique identifier for the subsection, assigned automatically when an object is created.
+        Unique identifier for the subsection, assigned automatically
+        when an object is created.
     title : str
         Title of the subsection.
     components : List[Component]
@@ -698,7 +752,8 @@ class Subsection:
         return cls._id_counter
 
 
-# ? Section is a subclass of Subsection (adding subsections). Destinction might not be necessary
+# ? Section is a subclass of Subsection (adding subsections).
+# ? Distinction might not be necessary
 @dataclass
 class Section:
     """
@@ -709,7 +764,8 @@ class Section:
     _id_counter : ClassVar[int]
         Class-level counter for unique IDs.
     id : int
-        Unique identifier for the section, assigned automatically when an object is created.
+        Unique identifier for the section, assigned automatically
+        when an object is created.
     title : str
         Title of the section.
     subsections : List[Subsection]
@@ -798,9 +854,9 @@ class ReportView(ABC):
         Parameters
         ----------
         output_dir : str, optional
-            The folder where the generated report files will be saved (default is 'sections').
+            The folder where the generated report files will be saved
+            (default is 'sections').
         """
-        pass
 
     @abstractmethod
     def run_report(self, output_dir: str = "sections") -> None:
@@ -812,17 +868,17 @@ class ReportView(ABC):
         output_dir : str, optional
             The folder where the report was generated (default is 'sections').
         """
-        pass
 
     @abstractmethod
-    def _generate_component_imports(self) -> str:
+    def _generate_component_imports(self, component: Component) -> str:
         """
         Generate necessary imports for a component of the report.
 
         Parameters
         ----------
-        component : r.Component
-            The component for which to generate the required imports. The component can be of type:
+        component : Component
+            The component for which to generate the required imports.
+            The component can be of type:
             - PLOT
             - DATAFRAME
             - MARKDOWN
@@ -832,7 +888,6 @@ class ReportView(ABC):
         str
             A str of import statements for the component.
         """
-        pass
 
 
 class WebAppReportView(ReportView):
@@ -852,7 +907,8 @@ class WebAppReportView(ReportView):
         type : str
             The type of the text (e.g., 'header', 'paragraph').
         level : int, optional
-            If the text is a header, the level of the header (e.g., 1 for h1, 2 for h2, etc.).
+            If the text is a header, the level of the header
+            (e.g., 1 for h1, 2 for h2, etc.).
         color : str, optional
             The color of the header text.
 
@@ -861,7 +917,6 @@ class WebAppReportView(ReportView):
         str
             The formatted text string.
         """
-        pass
 
     @abstractmethod
     def _generate_sections(self, output_dir: str) -> None:
@@ -877,15 +932,15 @@ class WebAppReportView(ReportView):
         -----
         This method is intended to be used internally by the `generate_report` method.
         """
-        pass
 
     @abstractmethod
     def _generate_subsection(
         self, subsection: Subsection
     ) -> tuple[List[str], List[str]]:
         """
-        Generate code to render components (plots, dataframes, markdown) in the given subsection,
-        creating imports and content for the subsection based on the component type.
+        Generate code to render components (plots, dataframes, markdown) in the given
+        subsection, creating imports and content for the subsection based on
+        the component type.
 
         Parameters
         ----------
@@ -898,4 +953,3 @@ class WebAppReportView(ReportView):
             - list of subsection content lines (List[str])
             - list of imports for the subsection (List[str])
         """
-        pass

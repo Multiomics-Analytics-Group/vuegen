@@ -1,3 +1,5 @@
+"""QuartoReportView class for generating Quarto reports."""
+
 import os
 import subprocess
 import sys
@@ -9,6 +11,7 @@ import networkx as nx
 
 from . import report as r
 from . import table_utils
+from .constants import GITHUB_ORG_URL, GITHUB_ORG_URL_BRACKETS, LOGO_URL, ORG, REPO_URL
 from .utils import create_folder, get_relative_file_path, is_url, sort_imports
 
 
@@ -52,13 +55,13 @@ class QuartoReportView(r.ReportView):
         if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
             self.report.logger.info("running in a PyInstaller bundle")
             # self.BUNDLED_EXECUTION = True
-            self.report.logger.debug(f"sys._MEIPASS: {sys._MEIPASS}")
+            self.report.logger.debug("sys._MEIPASS: %s", sys._MEIPASS)
         else:
             self.report.logger.info("running in a normal Python process")
 
         self.report.logger.debug("env_vars (QuartoReport): %s", os.environ)
-        self.report.logger.debug(f"PATH: {os.environ['PATH']}")
-        self.report.logger.debug(f"sys.path: {sys.path}")
+        self.report.logger.debug("PATH: %s", os.environ["PATH"])
+        self.report.logger.debug("sys.path: %s", sys.path)
 
         self.is_report_static = self.report_type in {
             r.ReportType.PDF,
@@ -76,7 +79,8 @@ class QuartoReportView(r.ReportView):
 
     def generate_report(self, output_dir: Optional[Path] = None) -> None:
         """
-        Generates the qmd file of the quarto report. It creates code for rendering each section and its subsections with all components.
+        Generates the qmd file of the quarto report. It creates code for rendering
+        each section and its subsections with all components.
 
         Parameters
         ----------
@@ -88,24 +92,27 @@ class QuartoReportView(r.ReportView):
             self.output_dir = Path(output_dir).resolve()
 
         self.report.logger.debug(
-            f"Generating '{self.report_type}' report in directory: '{self.output_dir}'"
+            "Generating '%s' report in directory: '%s'",
+            self.report_type,
+            self.output_dir,
         )
         # Create the output folder
         if create_folder(self.output_dir, is_nested=True):
-            self.report.logger.debug(f"Created output directory: '{self.output_dir}'")
+            self.report.logger.debug("Created output directory: '%s'", self.output_dir)
         else:
             self.report.logger.debug(
-                f"Output directory already existed: '{self.output_dir}'"
+                "Output directory already existed: '%s'", self.output_dir
             )
 
         # Create the static folder
         if create_folder(self.static_dir):
             self.report.logger.info(
-                f"Created output directory for static content: '{self.static_dir}'"
+                "Created output directory for static content: '%s'", self.static_dir
             )
         else:
             self.report.logger.info(
-                f"Output directory for static content already existed: '{self.static_dir}'"
+                "Output directory for static content already existed: '%s'",
+                self.static_dir,
             )
 
         try:
@@ -117,9 +124,8 @@ class QuartoReportView(r.ReportView):
 
             # Create qmd content and imports for the report
             qmd_content = []
-            report_imports = (
-                []
-            )  # only one global import list for a single report (different to streamlit)
+            # only one global import list for a single report (different to streamlit)
+            report_imports = []
 
             # Add description of the report
             if self.report.description:
@@ -135,7 +141,9 @@ class QuartoReportView(r.ReportView):
             self.report.logger.info("Starting to generate sections for the report.")
             for section in self.report.sections:
                 self.report.logger.debug(
-                    f"Processing section: '{section.title}' - {len(section.subsections)} subsection(s)"
+                    "Processing section: '%s' - %d subsection(s)",
+                    section.title,
+                    len(section.subsections),
                 )
                 # Add section header and description
                 qmd_content.append(f"# {section.title}")
@@ -143,8 +151,8 @@ class QuartoReportView(r.ReportView):
                     qmd_content.append(f"""{section.description}\n""")
 
                 # Add components of section to the report
-                # ! description can be a Markdown component, but it is treated differently
-                # ! It won't be added to the section content.
+                # ! description can be a Markdown component, but it is treated
+                # ! differently. It won't be added to the section content.
                 if section.components:
                     self.report.logger.debug(
                         "Adding components of section folder to the report."
@@ -167,10 +175,13 @@ class QuartoReportView(r.ReportView):
                     report_imports.extend(section_imports)
 
                 if section.subsections:
-                    # Iterate through subsections and integrate them into the section file
+                    # Iterate through subsections and
+                    # integrate them into the section file
                     for subsection in section.subsections:
                         self.report.logger.debug(
-                            f"Processing subsection: '{subsection.title}' - {len(subsection.components)} component(s)"
+                            "Processing subsection: '%s' - %d component(s)",
+                            subsection.title,
+                            len(subsection.components),
                         )
                         # Generate content for the subsection
                         subsection_content, subsection_imports = (
@@ -185,7 +196,9 @@ class QuartoReportView(r.ReportView):
                         )  # even easier as it's global
                 else:
                     self.report.logger.warning(
-                        f"No subsections found in section: '{section.title}'. To show content in the report, add subsections to the section."
+                        "No subsections found in section: '%s'. To show content "
+                        "in the report, add subsections to the section.",
+                        section.title,
                     )
             # Add globally set output folder
             report_imports.append("from pathlib import Path")
@@ -208,7 +221,7 @@ class QuartoReportView(r.ReportView):
 
             # Write the navigation and general content to a Python file
             fname_qmd_report = self.output_dir / f"{self.BASE_DIR}.qmd"
-            with open(fname_qmd_report, "w") as quarto_report:
+            with open(fname_qmd_report, "w", encoding="utf-8") as quarto_report:
                 quarto_report.write(yaml_header)
                 quarto_report.write(
                     f"""\n```{{python}}
@@ -218,12 +231,14 @@ class QuartoReportView(r.ReportView):
                 )
                 quarto_report.write("\n".join(qmd_content))
                 self.report.logger.info(
-                    f"Created qmd script to render the app: {fname_qmd_report}"
+                    "Created qmd script to render the app: %s", fname_qmd_report
                 )
 
         except Exception as e:
             self.report.logger.error(
-                f"An error occurred while generating the report: {str(e)}"
+                "An error occurred while generating the report: %s",
+                e,
+                exc_info=True,
             )
             raise
 
@@ -243,7 +258,10 @@ class QuartoReportView(r.ReportView):
         file_path_to_qmd = Path(self.output_dir) / f"{self.BASE_DIR}.qmd"
         args = [self.quarto_path, "render", str(file_path_to_qmd)]
         self.report.logger.info(
-            f"Running '{self.report.title}' '{self.report_type}' report with {args!r}"
+            "Running '%s' '%s' report with %r",
+            self.report.title,
+            self.report_type,
+            args,
         )
         if (
             self.report_type
@@ -281,25 +299,29 @@ class QuartoReportView(r.ReportView):
                     check=True,
                 )
                 self.report.logger.info(
-                    f"Converted '{self.report.title}' '{self.report_type}' report to Jupyter Notebook after execution"
+                    "Converted '%s' '%s' report to Jupyter Notebook after execution",
+                    self.report.title,
+                    self.report_type,
                 )
             self.report.logger.info(
-                f"'{self.report.title}' '{self.report_type}' report rendered"
+                "'%s' '%s' report rendered",
+                self.report.title,
+                self.report_type,
             )
         except subprocess.CalledProcessError as e:
             self.report.logger.error(
-                f"Error running '{self.report.title}' {self.report_type} report: {str(e)}"
+                "Error running '%s' %s report: %s",
+                self.report.title,
+                self.report_type,
+                e,
+                exc_info=True,
             )
             raise
-        # except FileNotFoundError as e:
-        #     self.report.logger.error(
-        #         f"Quarto is not installed. Please install Quarto to run the report: {str(e)}"
-        #     )
-        #     raise
 
     def _create_yaml_header(self) -> str:
         """
-        Creates a YAML header for the Quarto report based on the specified eport type and output format.
+        Creates a YAML header for the Quarto report based on the specified eport type
+        and output format.
 
         Returns
         -------
@@ -307,122 +329,157 @@ class QuartoReportView(r.ReportView):
             A formatted YAML header string customized for the specified output format.
         """
         # Base YAML header with title
-        yaml_header = f"""---
-title: {self.report.title}
-fig-align: center
-execute:
-  echo: false
-  output: asis
-jupyter: python3
-format:"""
-
+        yaml_header = textwrap.dedent(
+            f"""\
+            ---
+            title: {self.report.title}
+            fig-align: center
+            execute:
+              echo: false
+              output: asis
+            jupyter: python3
+            format:"""
+        )
         # Define format-specific YAML configurations
+        # \u007b is { and \u007d is }
         format_configs = {
-            r.ReportType.HTML: """
-  html:
-    toc: true
-    toc-location: left
-    toc-depth: 3
-    page-layout: full
-    self-contained: true
-include-in-header:
-    text: |
-        <style type="text/css">
-        .footer {
-        position: relative;
-        left: 0;
-        width: 100%;
-        text-align: center;
-        margin-top: 20px;
-        }
-        </style>
-include-after-body:
-    text: |
-        <footer class="footer">
-            This report was generated with 
-            <a href="https://github.com/Multiomics-Analytics-Group/vuegen" target="_blank">
-                <img src="https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/vuegen_logo.svg" alt="VueGen" width="65px">
-            </a>
-            | Copyright 2025 <a href="https://github.com/Multiomics-Analytics-Group" target="_blank">Multiomics Network Analytics Group (MoNA)</a>
-        </footer>""",
-            r.ReportType.PDF: """
-  pdf:
-    toc: false
-    fig-align: center
-    margin:
-      - bottom=40mm
-    include-in-header: 
-        text: |
-            \\usepackage{scrlayer-scrpage}
-            \\usepackage{hyperref}
-            \\clearpairofpagestyles
-            \\lofoot{This report was generated with \\href{https://github.com/Multiomics-Analytics-Group/vuegen}{VueGen} | \\copyright{} 2025 \\href{https://github.com/Multiomics-Analytics-Group}{Multiomics Network Analytics Group}}
-            \\rofoot{\\pagemark}""",
-            r.ReportType.DOCX: """
-  docx:
-    toc: false""",
-            r.ReportType.ODT: """
-  odt:
-    toc: false""",
-            r.ReportType.REVEALJS: """
-  revealjs:
-    toc: false
-    smaller: true
-    controls: true
-    navigation-mode: vertical
-    controls-layout: bottom-right
-    output-file: quarto_report_revealjs.html
-include-in-header:
-    text: |
-        <style type="text/css">
-        .footer {
-        position: fixed;
-        left: 0;
-        bottom: 0;
-        width: 100%;
-        text-align: center;
-        }
-        </style>
-include-after-body:
-    text: |
-        <footer class="footer">
-            This report was generated with 
-            <a href="https://github.com/Multiomics-Analytics-Group/vuegen" target="_blank">
-                <img src="https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/vuegen_logo.svg" alt="VueGen" width="65px">
-            </a>
-            | Copyright 2025 <a href="https://github.com/Multiomics-Analytics-Group" target="_blank">Multiomics Network Analytics Group (MoNA)</a>
-        </footer>""",
-            r.ReportType.PPTX: """
-  pptx:
-    toc: false
-    output: true""",
-            r.ReportType.JUPYTER: """
-  html:
-    toc: true
-    toc-location: left
-    toc-depth: 3
-    page-layout: full
-    self-contained: true
-include-in-header:
-    text: |
-        <style type="text/css">
-        .footer {
-        position: relative;
-        left: 0;
-        width: 100%;
-        text-align: center;
-        margin-top: 20px;
-        }
-        </style>
-include-after-body:
-    text: |
-        <footer class="footer">
-            This report was generated with 
-            <a href="https://github.com/Multiomics-Analytics-Group/vuegen" target="_blank">
-                <img src="../docs/images/vuegen_logo.svg" alt="VueGen" width="65px">
-            </a>
-            | Copyright 2025 <a href="https://github.com/Multiomics-Analytics-Group" target="_blank">Multiomics Network Analytics Group (MoNA)</a>
-        </footer>""",
+            r.ReportType.HTML: textwrap.dedent(
+                f"""
+                  html:
+                    toc: true
+                    toc-location: left
+                    toc-depth: 3
+                    page-layout: full
+                    self-contained: true
+                include-in-header:
+                    text: |
+                        <style type="text/css">
+                        .footer \u007b
+                        position: relative;
+                        left: 0;
+                        width: 100%;
+                        text-align: center;
+                        margin-top: 20px;
+                        \u007d
+                        </style>
+                include-after-body:
+                    text: |
+                        <footer class="footer">
+                            This report was generated with
+                            <a href="{REPO_URL}" target="_blank">
+                                <img src="{LOGO_URL}" alt="VueGen" width="65px">
+                            </a>
+                            | Copyright 2025 <a href="{GITHUB_ORG_URL}" target="_blank">
+                            {ORG}</a>
+                        </footer>"""
+            ),
+            # \u007b is { and \u007d is }
+            r.ReportType.PDF: textwrap.indent(
+                textwrap.dedent(
+                    f"""
+                      pdf:
+                        toc: false
+                        fig-align: center
+                        margin:
+                          - bottom=40mm
+                        include-in-header:
+                            text: |
+                                \\usepackage{{scrlayer-scrpage}}
+                                \\usepackage{{hyperref}}
+                                \\clearpairofpagestyles
+                                \\lofoot\u007bThis report was generated with
+                                \\href{{{REPO_URL}}}{{VueGen}} | \\copyright{{}} 2025
+                                 \\href{GITHUB_ORG_URL_BRACKETS}\u007b{ORG}\u007d\u007d
+                                \\rofoot{{\\pagemark}}"""
+                ),
+                "  ",
+            ),
+            r.ReportType.DOCX: textwrap.indent(
+                textwrap.dedent(
+                    """
+                    docx:
+                      toc: false"""
+                ),
+                "  ",
+            ),
+            r.ReportType.ODT: textwrap.indent(
+                textwrap.dedent(
+                    """
+                    odt:
+                      toc: false"""
+                ),
+                "  ",
+            ),
+            r.ReportType.REVEALJS: textwrap.dedent(
+                f"""
+                  revealjs:
+                    toc: false
+                    smaller: true
+                    controls: true
+                    navigation-mode: vertical
+                    controls-layout: bottom-right
+                    output-file: quarto_report_revealjs.html
+                include-in-header:
+                    text: |
+                        <style type="text/css">
+                        .footer \u007b
+                        position: fixed;
+                        left: 0;
+                        bottom: 0;
+                        width: 100%;
+                        text-align: center;
+                        \u007d
+                        </style>
+                include-after-body:
+                    text: |
+                        <footer class="footer">
+                            This report was generated with
+                            <a href="{REPO_URL}" target="_blank">
+                                <img src="{LOGO_URL}" alt="VueGen" width="65px">
+                            </a>
+                            | Copyright 2025 <a href="{GITHUB_ORG_URL}"
+                             target="_blank">{ORG}</a>
+                        </footer>"""
+            ),
+            r.ReportType.PPTX: textwrap.indent(
+                textwrap.dedent(
+                    """
+                    pptx:
+                      toc: false
+                      output: true"""
+                ),
+                "  ",
+            ),
+            r.ReportType.JUPYTER: textwrap.dedent(
+                f"""
+                  html:
+                    toc: true
+                    toc-location: left
+                    toc-depth: 3
+                    page-layout: full
+                    self-contained: true
+                include-in-header:
+                    text: |
+                        <style type="text/css">
+                        .footer \u007b
+                        position: relative;
+                        left: 0;
+                        width: 100%;
+                        text-align: center;
+                        margin-top: 20px;
+                         \u007d
+                        </style>
+                include-after-body:
+                    text: |
+                        <footer class="footer">
+                            This report was generated with
+                            <a href="{REPO_URL}" target="_blank">
+                                <img src="{LOGO_URL}" alt="VueGen" width="65px">
+                            </a>
+                            | Copyright 2025 <a href="{GITHUB_ORG_URL}"
+                             target="_blank">{ORG}</a>
+                        </footer>"""
+            ),
         }
         # Create a key based on the report type and format
         key = self.report_type
@@ -455,7 +512,7 @@ include-after-body:
             fct = self.components_fct_map.get(component.component_type, None)
             if fct is None:
                 self.report.logger.warning(
-                    f"Unsupported component type '{component.component_type}' "
+                    "Unsupported component type '%s'", component.component_type
                 )
             elif (
                 component.component_type == r.ComponentType.MARKDOWN
@@ -480,8 +537,9 @@ include-after-body:
         is_report_revealjs,
     ) -> tuple[List[str], List[str]]:
         """
-        Generate code to render components (plots, dataframes, markdown) in the given subsection,
-        creating imports and content for the subsection based on the component type.
+        Generate code to render components (plots, dataframes, markdown) in the given
+        subsection, creating imports and content for the subsection based on the
+        component type.
 
         Parameters
         ----------
@@ -516,7 +574,7 @@ include-after-body:
             subsection_content.append(":::\n")
 
         self.report.logger.info(
-            f"Generated content and imports for subsection: '{subsection.title}'"
+            "Generated content and imports for subsection: '%s'", subsection.title
         )
         return subsection_content, subsection_imports
 
@@ -544,7 +602,7 @@ include-after-body:
             static_plot_path = (
                 Path(self.static_dir) / f"{plot.title.replace(' ', '_')}.png"
             ).resolve()
-            self.report.logger.debug(f"Static plot path: {static_plot_path}")
+            self.report.logger.debug("Static plot path: %s", static_plot_path)
         else:
             html_plot_file = (
                 Path(self.static_dir) / f"{plot.title.replace(' ', '_')}.html"
@@ -559,25 +617,24 @@ include-after-body:
             elif plot.plot_type == r.PlotType.PLOTLY:
                 plot_content.append(self._generate_plot_code(plot))
                 if self.is_report_static:
-                    plot_content.append(
-                        f"""fig_plotly.write_image("{static_plot_path.relative_to(self.output_dir).as_posix()}")\n```\n"""
-                    )
+                    fpath = static_plot_path.relative_to(self.output_dir).as_posix()
+                    plot_content.append(f"""fig_plotly.write_image("{fpath}")\n```\n""")
                     plot_content.append(self._generate_image_content(static_plot_path))
                 else:
                     plot_content.append("""fig_plotly.show()\n```\n""")
             elif plot.plot_type == r.PlotType.ALTAIR:
                 plot_content.append(self._generate_plot_code(plot))
                 if self.is_report_static:
-                    plot_content.append(
-                        f"""fig_altair.save("{static_plot_path.relative_to(self.output_dir).as_posix()}")\n```\n"""
-                    )
+                    fpath = static_plot_path.relative_to(self.output_dir).as_posix()
+                    plot_content.append(f"""fig_altair.save("{fpath}")\n```\n""")
                     plot_content.append(self._generate_image_content(static_plot_path))
                 else:
                     plot_content.append("""fig_altair\n```\n""")
             elif plot.plot_type == r.PlotType.INTERACTIVE_NETWORK:
                 networkx_graph = plot.read_network()
                 if isinstance(networkx_graph, tuple):
-                    # If network_data is a tuple, separate the network and html file path
+                    # If network_data is a tuple,
+                    # separate the network and html file path
                     networkx_graph, html_plot_file = networkx_graph
                 elif isinstance(networkx_graph, nx.Graph) and not self.is_report_static:
                     # Get the pyvis object and create html
@@ -598,10 +655,15 @@ include-after-body:
                 else:
                     plot_content.append(self._generate_plot_code(plot, html_plot_file))
             else:
-                self.report.logger.warning(f"Unsupported plot type: {plot.plot_type}")
+                self.report.logger.warning("Unsupported plot type: %s", plot.plot_type)
         except Exception as e:
             self.report.logger.error(
-                f"Error generating content for '{plot.plot_type}' plot '{plot.id}' '{plot.title}': {str(e)}"
+                "Error generating content for '%s' plot '%s' '%s': %s",
+                plot.plot_type,
+                plot.id,
+                plot.title,
+                e,
+                exc_info=True,
             )
             raise
 
@@ -610,7 +672,7 @@ include-after-body:
             plot_content.append(f">{plot.caption}\n")
 
         self.report.logger.info(
-            f"Successfully generated content for plot: '{plot.title}'"
+            "Successfully generated content for plot: '%s'", plot.title
         )
         return plot_content
 
@@ -630,41 +692,64 @@ include-after-body:
             The generated plot code as a string.
         """
         # Initialize plot code with common structure
-        plot_code = f"""```{{python}}
-#| label: '{plot.title} {plot.id}'
-#| fig-cap: ""
-"""
+        plot_code = textwrap.dedent(
+            f"""
+            ```{{python}}
+            #| label: '{plot.title} {plot.id}'
+            #| fig-cap: ""
+            """
+        )
         # If the file path is a URL, generate code to fetch content via requests
         if is_url(plot.file_path):
-            plot_code += f"""
-response = requests.get('{plot.file_path}')
-response.raise_for_status()
-plot_json = response.text\n"""
+            plot_code += textwrap.dedent(
+                f"""
+                response = requests.get('{plot.file_path}')
+                response.raise_for_status()
+                plot_json = response.text
+                """
+            )
         else:  # If it's a local file
             plot_rel_path = get_relative_file_path(
                 plot.file_path, relative_to=self.output_dir
             ).as_posix()
-            plot_code += f"""
+            plot_code += textwrap.dedent(
+                f"""
 with open(report_dir /'{plot_rel_path}', 'r') as plot_file:
-    plot_json = json.load(plot_file)\n"""
+    plot_json = json.load(plot_file)
+"""
+            )
         # Add specific code for each visualization tool
         if plot.plot_type == r.PlotType.PLOTLY:
-            plot_code += """
-# Keep only 'data' and 'layout' sections
-plot_json = {key: plot_json[key] for key in plot_json if key in ['data', 'layout']}\n
-# Remove 'frame' section in 'data'
-plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'} for entry in plot_json.get('data', [])]\n
-# Convert JSON to string
-plot_json_str = json.dumps(plot_json)\n
-# Create the plotly plot
-fig_plotly = pio.from_json(plot_json_str)
-fig_plotly.update_layout(autosize=False, width=950, height=400, margin=dict(b=50, t=50, l=50, r=50))\n"""
+            plot_code += textwrap.dedent(
+                """
+                # Keep only 'data' and 'layout' sections
+                plot_json = {key: plot_json[key] for key in plot_json
+                                if key in ['data', 'layout']
+                            }
+                # Remove 'frame' section in 'data'
+                plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'}
+                                            for entry in plot_json.get('data', [])
+                                    ]
+                # Convert JSON to string
+                plot_json_str = json.dumps(plot_json)
+                # Create the plotly plot
+                fig_plotly = pio.from_json(plot_json_str)
+                fig_plotly.update_layout(autosize=False, width=950, height=400,
+                                         margin=dict(b=50, t=50, l=50, r=50)
+                                         )
+                """
+            )
         elif plot.plot_type == r.PlotType.ALTAIR:
-            plot_code += """
-# Convert JSON to string
-plot_json_str = json.dumps(plot_json)\n
-# Create the plotly plot
-fig_altair = alt.Chart.from_json(plot_json_str).properties(width=900, height=370)\n"""
+            plot_code += textwrap.dedent(
+                """
+                # Convert JSON to string
+                plot_json_str = json.dumps(plot_json)
+
+                # Create the altair plot
+                fig_altair = alt.Chart.from_json(plot_json_str
+                                ).properties(width=900, height=370)
+                """
+            )
         elif plot.plot_type == r.PlotType.INTERACTIVE_NETWORK:
             # Generate the HTML embedding for interactive networks
             if is_url(plot.file_path) and plot.file_path.endswith(".html"):
@@ -675,10 +760,15 @@ fig_altair = alt.Chart.from_json(plot_json_str).properties(width=900, height=370
                 )
 
             # Embed the HTML file in an iframe
-            plot_code = f"""
-<div style="text-align: center;">
-<iframe src="{iframe_src}" alt="{plot.title} plot" width="800px" height="630px"></iframe>
-</div>\n"""
+            plot_code = textwrap.dedent(
+                f"""
+                <div style="text-align: center;">
+                <iframe src="{iframe_src}" alt="{plot.title} plot"
+                        width="800px" height="630px">
+                </iframe>
+                </div>
+                """
+            )
         return plot_code
 
     def _generate_dataframe_content(self, dataframe) -> List[str]:
@@ -718,7 +808,9 @@ fig_altair = alt.Chart.from_json(plot_json_str).properties(width=900, height=370
                 file_extension == fmt.value_with_dot for fmt in r.DataFrameFormat
             ):
                 self.report.logger.error(
-                    f"Unsupported file extension: {file_extension}. Supported extensions are: {', '.join(fmt.value for fmt in r.DataFrameFormat)}."
+                    "Unsupported file extension: %s. Supported extensions are: %s.",
+                    file_extension,
+                    ", ".join(fmt.value for fmt in r.DataFrameFormat),
                 )
 
             # Build the file path (URL or local file)
@@ -738,8 +830,9 @@ fig_altair = alt.Chart.from_json(plot_json_str).properties(width=900, height=370
                 if len(sheet_names) > 1:
                     # If there are multiple sheets, use the first one
                     self.report.logger.info(
-                        f"Multiple sheets found in the Excel file: {df_file_path}. "
-                        f"Sheets: {sheet_names}"
+                        "Multiple sheets found in the Excel file: %s. Sheets: %s",
+                        df_file_path,
+                        sheet_names,
                     )
                 else:
                     sheet_names = None
@@ -773,7 +866,8 @@ fig_altair = alt.Chart.from_json(plot_json_str).properties(width=900, height=370
                         )
                     )
                     dataframe_content.append(
-                        f"df = pd.{read_function.__name__}(report_dir / '{df_file_path}', "
+                        f"df = pd.{read_function.__name__}"
+                        f"(report_dir / '{df_file_path}', "
                         f"sheet_name='{sheet_name}')\n"
                     )
                     # Display the dataframe
@@ -783,7 +877,10 @@ fig_altair = alt.Chart.from_json(plot_json_str).properties(width=900, height=370
 
         except Exception as e:
             self.report.logger.error(
-                f"Error generating content for DataFrame: {dataframe.title}. Error: {str(e)}"
+                "Error generating content for DataFrame: %s. Error: %s",
+                dataframe.title,
+                e,
+                exc_info=True,
             )
             raise
         # Add caption if available
@@ -792,7 +889,7 @@ fig_altair = alt.Chart.from_json(plot_json_str).properties(width=900, height=370
             dataframe_content.append(f">{dataframe.caption}\n")
 
         self.report.logger.info(
-            f"Successfully generated content for DataFrame: '{dataframe.title}'"
+            "Successfully generated content for DataFrame: '%s'", dataframe.title
         )
         return dataframe_content
 
@@ -851,7 +948,10 @@ with open(report_dir / '{md_rel_path.as_posix()}', 'r') as markdown_file:
 
         except Exception as e:
             self.report.logger.error(
-                f"Error generating content for Markdown: {markdown.title}. Error: {str(e)}"
+                "Error generating content for Markdown: %s. Error: %s",
+                markdown.title,
+                e,
+                exc_info=True,
             )
             raise
 
@@ -860,13 +960,14 @@ with open(report_dir / '{md_rel_path.as_posix()}', 'r') as markdown_file:
             markdown_content.append(f">{markdown.caption}\n")
 
         self.report.logger.info(
-            f"Successfully generated content for Markdown: '{markdown.title}'"
+            "Successfully generated content for Markdown: '%s'", markdown.title
         )
         return markdown_content
 
     def _show_dataframe(self, dataframe, suffix: Optional[str] = None) -> List[str]:
         """
-        Appends either a static image or an interactive representation of a DataFrame to the content list.
+        Appends either a static image or an interactive representation of a DataFrame
+        to the content list.
 
         Parameters
         ----------
@@ -902,7 +1003,8 @@ with open(report_dir / '{md_rel_path.as_posix()}', 'r') as markdown_file:
         else:
             # Append code to display the DataFrame interactively
             dataframe_content.append(
-                """show(df, classes="display nowrap compact", lengthMenu=[3, 5, 10])\n```\n"""
+                'show(df, classes="display nowrap compact", '
+                "lengthMenu=[3, 5, 10])\n```\n"
             )
 
         return dataframe_content
@@ -914,7 +1016,8 @@ with open(report_dir / '{md_rel_path.as_posix()}', 'r') as markdown_file:
         Parameters
         ----------
         html : Html
-            The HTML component to add to the report. This could be a local file path or a URL.
+            The HTML component to add to the report. This could be a local file path
+            or a URL.
 
         Returns
         -------
@@ -934,20 +1037,27 @@ with open(report_dir / '{md_rel_path.as_posix()}', 'r') as markdown_file:
                 html_file_path = get_relative_file_path(
                     html.file_path, relative_to=self.output_dir
                 )
-            iframe_code = f"""
-<div style="text-align: center;">
-<iframe src="{html_file_path.as_posix()}" alt="{html.title}" width="950px" height="530px"></iframe>
-</div>\n"""
+            iframe_code = textwrap.dedent(
+                f"""
+                <div style="text-align: center;">
+                <iframe src="{html_file_path.as_posix()}" alt="{html.title}"
+                        width="950px" height="530px"></iframe>
+                </div>
+                """
+            )
             html_content.append(iframe_code)
 
         except Exception as e:
             self.report.logger.error(
-                f"Error generating content for HTML: {html.title}. Error: {str(e)}"
+                "Error generating content for HTML: %s. Error: %s",
+                html.title,
+                e,
+                exc_info=True,
             )
             raise
 
         self.report.logger.info(
-            f"Successfully generated content for HTML: '{html.title}'"
+            "Successfully generated content for HTML: '%s'", html.title
         )
         return html_content
 
@@ -955,7 +1065,8 @@ with open(report_dir / '{md_rel_path.as_posix()}', 'r') as markdown_file:
         self, image_path: str, alt_text: str = "", width: str = "90%"
     ) -> str:
         """
-        Adds an image to the content list in an HTML format with a specified width and height.
+        Adds an image to the content list in an HTML format with a specified width
+        and height.
 
         Parameters
         ----------
@@ -989,7 +1100,8 @@ with open(report_dir / '{md_rel_path.as_posix()}', 'r') as markdown_file:
         Parameters
         ----------
         component : r.Component
-            The component for which to generate the required imports. The component can be of type:
+            The component for which to generate the required imports.
+            The component can be of type:
             - PLOT
             - DATAFRAME
             - MARKDOWN

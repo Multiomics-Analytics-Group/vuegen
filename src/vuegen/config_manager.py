@@ -1,3 +1,7 @@
+"""ConfigManage creates configuration files from folders and can create components
+for reports from YAML config files.
+"""
+
 import json
 import logging
 import os
@@ -10,7 +14,8 @@ from .utils import assert_enum_value, get_logger, is_pyvis_html
 
 class ConfigManager:
     """
-    Class for handling metadata of reports from YAML config file and creating report objects.
+    Class for handling metadata of reports from YAML config file and creating report
+    objects.
     """
 
     def __init__(self, logger: Optional[logging.Logger] = None, max_depth: int = 2):
@@ -20,10 +25,11 @@ class ConfigManager:
         Parameters
         ----------
         logger : logging.Logger, optional
-            A logger instance for the class. If not provided, a default logger will be created.
+            A logger instance for the class.
+            If not provided, a default logger will be created.
         max_depth : int, optional
-            The maximum depth of the directory structure to consider when generating the report
-            config from a directory.
+            The maximum depth of the directory structure to consider when generating
+            the report config from a directory.
             The default is 2, which means it will include sections and subsections.
         """
         if logger is None:
@@ -53,7 +59,8 @@ class ConfigManager:
 
     def _create_component_config_fromfile(self, file_path: Path) -> Dict[str, str]:
         """
-        Infers a component config from a file, including component type, plot type, and additional fields.
+        Infers a component config from a file, including component type, plot type,
+        and additional fields.
 
         Parameters
         ----------
@@ -144,13 +151,18 @@ class ConfigManager:
                 else:
                     component_config["plot_type"] = r.PlotType.PLOTLY.value
             except Exception as e:
-                self.logger.warning(f"Could not parse JSON file {file_path}: {e}")
+                self.logger.warning(
+                    "Could not parse JSON file %s: %s", file_path, e, exc_info=True
+                )
                 component_config["plot_type"] = "unknown"
         elif file_ext == ".md":
             component_config["component_type"] = r.ComponentType.MARKDOWN.value
         else:
+            if not file_ext:
+                # hidden files starting with a dot
+                file_ext = file_path.name
             self.logger.error(
-                f"Unsupported file extension: {file_ext}. Skipping file: {file_path}"
+                "Unsupported file extension: %s. Skipping file: %s", file_ext, file_path
             )
             return None
 
@@ -158,7 +170,8 @@ class ConfigManager:
 
     def _sort_paths_by_numprefix(self, paths: List[Path]) -> List[Path]:
         """
-        Sorts a list of Paths by numeric prefixes in their names, placing non-numeric items at the end.
+        Sorts a list of Paths by numeric prefixes in their names, placing non-numeric
+        items at the end.
 
         Parameters
         ----------
@@ -239,7 +252,8 @@ class ConfigManager:
                     continue
                 # components are added to subsection
                 # ! Alternatively, one could add (sub-)sections to the subsection
-                # ? Then one could remove differentiation between sections and subsections
+                # ? Then one could remove differentiation between sections and
+                # ? subsections
                 nested_components = self._create_subsect_config_fromdir(file, level + 1)
                 components.extend(nested_components["components"])
 
@@ -298,7 +312,8 @@ class ConfigManager:
         self, base_dir: str
     ) -> Tuple[Dict[str, Union[str, List[Dict]]], Path]:
         """
-        Generates a YAML-compatible config file from a directory. It also returns the resolved folder path.
+        Generates a YAML-compatible config file from a directory. It also returns the
+        resolved folder path.
 
         Parameters
         ----------
@@ -361,7 +376,8 @@ class ConfigManager:
 
     def initialize_report(self, config: dict) -> tuple[r.Report, dict]:
         """
-        Extracts report metadata from a YAML config file and returns a Report object and the raw metadata.
+        Extracts report metadata from a YAML config file and returns a Report object and
+        the raw metadata.
 
         Parameters
         ----------
@@ -371,7 +387,8 @@ class ConfigManager:
         Returns
         -------
         report, config : tuple[Report, dict]
-            A tuple containing the Report object created from the YAML config file and the raw metadata dictionary.
+            A tuple containing the Report object created from the YAML config file and
+            the raw metadata dictionary.
 
         Raises
         ------
@@ -396,7 +413,9 @@ class ConfigManager:
             report.sections.append(section)
 
         self.logger.info(
-            f"Report '{report.title}' initialized with {len(report.sections)} sections."
+            "Report '%s' initialized with %d sections.",
+            report.title,
+            len(report.sections),
         )
         return report, config
 
@@ -472,7 +491,8 @@ class ConfigManager:
         Returns
         -------
         Component
-            A Component object (Plot, DataFrame, or Markdown) populated with the provided metadata.
+            A Component object (Plot, DataFrame, or Markdown) populated with the
+            provided metadata.
         """
         # Determine the component type
         component_type = assert_enum_value(
@@ -620,8 +640,10 @@ class ConfigManager:
             try:
                 parsed_body = json.loads(request_body)
             except json.JSONDecodeError as e:
-                self.logger.error(f"Failed to parse request_body JSON: {e}")
-                raise ValueError(f"Invalid JSON in request_body: {e}")
+                self.logger.error(
+                    "Failed to parse request_body JSON: %s", e, exc_info=True
+                )
+                raise ValueError("Invalid JSON in request_body.") from e
 
         return r.APICall(
             title=component_data["title"],

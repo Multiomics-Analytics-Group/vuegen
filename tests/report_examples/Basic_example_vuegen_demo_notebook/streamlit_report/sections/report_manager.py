@@ -1,12 +1,20 @@
 import os
 import time
 
-import psutil                    
+import psutil
 import streamlit as st
 
-st.set_page_config(layout="wide", page_title="Basic Example Vuegen Demo Notebook")
+st.set_page_config(layout="wide",
+                   page_title="Basic Example Vuegen Demo Notebook")
 
-st.markdown('''<h1 style='text-align: center; color: #023858;'>Basic Example Vuegen Demo Notebook</h1>''', unsafe_allow_html=True)
+
+st.markdown(
+    (
+        "<h1 style='text-align: center; "
+        "color: #023858;'>Basic Example Vuegen Demo Notebook</h1>"
+    ),
+    unsafe_allow_html=True)
+
 
 sections_pages = {}
 homepage = st.Page('Home/Homepage.py', title='Homepage')
@@ -32,7 +40,9 @@ sections_pages['Markdown'] = [All_Markdown]
 report_nav = st.navigation(sections_pages)
 
 # Following https://discuss.streamlit.io/t/close-streamlit-app-with-button-click/35132/5
-exit_app = st.sidebar.button("Shut Down App", icon=":material/power_off:", use_container_width=True)
+exit_app = st.sidebar.button("Shut Down App",
+                             icon=":material/power_off:",
+                             use_container_width=True)
 if exit_app:
     st.toast("Shutting down the app...")
     time.sleep(1)
