@@ -1,4 +1,4 @@
-## ![VueGen Logo](https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/vuegen_logo.svg)
+## ![VueGen Logo](https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/HEAD/docs/images/logo/vuegen_logo.svg)
 
 <p align="center">
    VueGen is a Python package that automates the creation of scientific reports.
@@ -11,7 +11,7 @@
 | **Build**             | [![CI](https://github.com/Multiomics-Analytics-Group/vuegen/actions/workflows/cdci.yml/badge.svg)][ci-gh-action] [![Docs](https://github.com/Multiomics-Analytics-Group/vuegen/actions/workflows/docs.yml/badge.svg)][ci-docs]                                                                                                                                                                                                                                                                                        |
 | **Examples**          | [![HTML5](https://img.shields.io/badge/html5-%23E34F26.svg?style=for-the-badge&logo=html5&logoColor=white)][emp-html-demo] [![Streamlit](https://img.shields.io/badge/Streamlit-%23FE4B4B.svg?style=for-the-badge&logo=streamlit&logoColor=white)][emp-st-demo]                                                                                                                                                                                                                                                       |
 | **Discuss on GitHub** | [![GitHub issues](https://img.shields.io/github/issues/Multiomics-Analytics-Group/vuegen)][issues] [![GitHub pull requests](https://img.shields.io/github/issues-pr/Multiomics-Analytics-Group/vuegen)][pulls]                                                                                                                                                                                                                                                                                                        |
-| **Cite**              | [![DOI:10.1101/2025.03.05.641152](https://img.shields.io/badge/DOI-10.1101/2025.03.05.641152-B31B1B.svg)][vuegen-preprint]                                                                                                                                                                                                                                                                                                                                                                                            |
+| **Cite**              | [![DOI:10.1093/bioadv/vbaf149](https://img.shields.io/badge/DOI-10.1093/bioadv/vbaf149-074359.svg)][vuegen-article]                                                                                                                                                                                                                                                                                                                                                                                            |
 
 ## Table of contents:
 
@@ -395,20 +395,23 @@ If you use VueGen in your research or publications, please cite it as follows:
 
 **APA:**
 
-Ayala-Ruano, S., Webel, H., & Santos, A. (2025). _VueGen: Automating the generation of scientific reports_. bioRxiv. https://doi.org/10.1101/2025.03.05.641152
+Ayala-Ruano, S., Webel, H., & Santos, A. (2025). _VueGen: Automating the generation of scientific reports_. Bioinformatics Advances, vbaf149. https://doi.org/10.1093/bioadv/vbaf149
 
 **BibTeX:**
 
 ```bibtex
-@article{Ayala-Ruano2025VueGen,
+@article{10.1093/bioadv/vbaf149,
   author  = {Ayala-Ruano, Sebastian and Webel, Henry and Santos, Alberto},
   title   = {VueGen: Automating the generation of scientific reports},
-  journal = {bioRxiv},
+  journal = {Bioinformatics Advances},
+  pages = {vbaf149},
   year    = {2025},
-  doi     = {10.1101/2025.03.05.641152},
-  publisher = {Cold Spring Harbor Laboratory},
-  url     = {https://www.biorxiv.org/content/10.1101/2025.03.05.641152},
-  eprint = {https://www.biorxiv.org/content/10.1101/2025.03.05.641152.full.pdf}
+  month = {06},
+  issn = {2635-0041},
+  doi = {10.1093/bioadv/vbaf149},
+  url = {https://doi.org/10.1093/bioadv/vbaf149},
+  eprint = {https://academic.oup.com/bioinformaticsadvances/advance-article-pdf/doi/
+  10.1093/bioadv/vbaf149/63568410/vbaf149.pdf},
 }
 ```
 
@@ -433,7 +436,7 @@ We appreciate your feedback! If you have any comments, suggestions, or run into 
 [config-chatbot]: https://github.com/Multiomics-Analytics-Group/vuegen/blob/main/docs/example_config_files/Chatbot_example_config.yaml
 [issues]: https://github.com/Multiomics-Analytics-Group/vuegen/issues
 [pulls]: https://github.com/Multiomics-Analytics-Group/vuegen/pulls
-[vuegen-preprint]: https://doi.org/10.1101/2025.03.05.641152
+[vuegen-article]: https://doi.org/10.1093/bioadv/vbaf149
 [quarto]: https://quarto.org/
 [quarto-cli-pypi]: https://pypi.org/project/quarto-cli/
 [quarto-cli]: https://quarto.org/docs/get-started/
