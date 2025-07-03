@@ -27,16 +27,17 @@ you to share any suggestions or observations you have about this project.
 
 Here are the ways you can submit your suggestions and contribute to the project:
 
-1. **Reporting Issues or Suggesting Improvements:** If you have a  [GitHub][github] account 
-   (or are willing to [open one][github-join]) but are unfamiliar with Git, you can report 
-   bugs or suggest improvements by [creating an issue][new-issue]. This GitHub feature allows 
-   for discussion threads on reported issues and proposed enhancements.
+### 1. Reporting Issues or Suggesting Improvements
 
-2. **Submitting Changes via Pull Requests:** If you are comfortable using Git and would like to
-   add or modify a functionality, you can submit a **pull request (PR)**. Instructions on how to contribute this way are provided in the next section.
+If you have a  [GitHub][github] account (or are willing to [open one][github-join]) but are unfamiliar with Git, you can report bugs or suggest improvements by [creating an issue][new-issue]. This GitHub feature allows for discussion threads on reported issues and proposed enhancements.
 
-3. **Providing Feedback via Email:** If you don’t have a GitHub account and are
-   unfamiliar with Git, you can send feedback via email to [asaru@dtu.dk][contact]. However, using GitHub is preferred, as it allows us to respond more quickly and track discussions openly.
+### 2. Submitting Changes via Pull Requests
+
+If you are comfortable using Git and would like to add or modify a functionality, you can submit a **pull request (PR)**. Instructions on how to contribute this way are provided in the next section.
+
+### 3. Providing Feedback via Email
+
+If you don’t have a GitHub account and are unfamiliar with Git, you can send feedback via email to [asaru@dtu.dk][contact]. However, using GitHub is preferred, as it allows us to respond more quickly and track discussions openly.
 
 > [!NOTE]
 > The documentation for [Git][git-docs] and [GitHub][github-docs] are easy to follow, and you can learn the basics using their official guides.

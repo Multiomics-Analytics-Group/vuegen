@@ -1,4 +1,4 @@
-name: Python package
+name: CICD Python Package
 
 on:
   push:
@@ -7,6 +7,7 @@ on:
     branches: [main]
   release:
     types: [published]
+  workflow_dispatch:
 
 jobs:
   test:
@@ -20,17 +21,25 @@ jobs:
       - uses: actions/checkout@v4
       - uses: psf/black@stable
         with:
-          jupyter: true
+          # ! for now (format output files of vuegen for streamlit)
+          src: "./src"  
       - uses: isort/isort-action@v1
+        with:
+          # ! should be removed once all imports are correctly sorted
+          sort-paths: src
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
           cache: "pip" # caching pip dependencies
           cache-dependency-path: "**/pyproject.toml"
-      - name: Install dependencies
+      - name: lint package code with ruff 
         run: |
           python -m pip install --upgrade pip
+          pip install ruff
+          ruff check src
+      - name: Install dependencies for testing
+        run: |
           pip install pytest
           pip install -e .
       - name: Run tests
@@ -64,6 +73,7 @@ jobs:
         run: |
           cd docs
           vuegen -dir example_data/Earth_microbiome_vuegen_demo_notebook
+          # here we are testing that the generated config from the -dir call works
           vuegen -c example_data/Earth_microbiome_vuegen_demo_notebook/Earth_microbiome_vuegen_demo_notebook_config.yaml
       # repeat for easier inspection on GitHub:
       - name: quarto html report
@@ -101,6 +111,44 @@ jobs:
           cd docs
           vuegen -dir example_data/Earth_microbiome_vuegen_demo_notebook -rt jupyter
           vuegen -c example_data/Earth_microbiome_vuegen_demo_notebook/Earth_microbiome_vuegen_demo_notebook_config.yaml -rt jupyter
+      - name: quarto html report based on predefined config file
+        run: |
+          cd docs
+          vuegen -c example_config_files/Basic_example_vuegen_demo_notebook_config.yaml -output_dir ../tests/report_examples/Basic_example_vuegen_demo_notebook_cfg/html -rt html
+          # Check for changes
+          if git diff ../tests/report_examples | grep .; then
+            echo "Error: One or more protected files have been modified."
+            exit 1
+          fi
+      - name: check streamlit report files for chatbot API
+        run: |
+          vuegen -c docs/example_config_files/Chatbot_example_config.yaml -output_dir tests/report_examples/chat_bot
+          if git diff tests/report_examples | grep .; then
+            echo Failed for report: $format
+            echo "Error: One or more protected files have been modified."
+            exit 1
+          fi
+      - name: check for changes in report files
+        run: |
+          # write streamlit report to test folder 
+          vuegen -dir docs/example_data/Basic_example_vuegen_demo_notebook -output_dir tests/report_examples/Basic_example_vuegen_demo_notebook
+          # Check for changes
+          if git diff tests/report_examples | grep .; then
+            echo "Error: One or more protected files have been modified."
+            exit 1
+          fi
+      - name: check for changes in quarto report files 
+        run: |
+          # write quarto based report to test folder
+          for format in html pdf docx odt revealjs pptx jupyter; do
+            vuegen -dir docs/example_data/Basic_example_vuegen_demo_notebook -output_dir tests/report_examples/Basic_example_vuegen_demo_notebook/$format  -rt $format 
+            # Check for changes
+            if git diff tests/report_examples | grep .; then
+              echo Failed for report: $format
+              echo "Error: One or more protected files have been modified."
+              exit 1
+            fi
+          done
 
   publish:
     name: Publish package to PyPI
@@ -128,6 +176,11 @@ jobs:
   build-executable:
     name: Build-exe-${{ matrix.os.label }}
     runs-on: ${{ matrix.os.runner }}
+    if: |
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      github.event_name == 'release' ||
+      startsWith(github.ref, 'refs/tags') ||
+      github.event_name == 'workflow_dispatch'
     needs:
       - test
       - other-reports
@@ -157,7 +210,7 @@ jobs:
       - name: Build executable
         run: |
           cd gui
-          pyinstaller -n vuegen_gui --onefile --windowed --collect-all pyvis --collect-all streamlit --collect-all st_aggrid --collect-all customtkinter --collect-all quarto_cli --collect-all plotly --collect-all _plotly_utils --collect-all traitlets --collect-all referencing --collect-all rpds --collect-all tenacity --collect-all pyvis --collect-all pandas --collect-all numpy --collect-all matplotlib --collect-all openpyxl --collect-all xlrd --collect-all nbformat --collect-all nbclient --collect-all altair --collect-all itables --collect-all kaleido --collect-all pyarrow --collect-all dataframe_image --collect-all narwhals --collect-all PIL --collect-all vl_convert --add-data ../docs/example_data/Basic_example_vuegen_demo_notebook:example_data/Basic_example_vuegen_demo_notebook --add-data ../docs/images/vuegen_logo.png:. app.py
+          pyinstaller -n vuegen_gui --onefile --windowed --collect-all pyvis --collect-all streamlit --collect-all st_aggrid --collect-all customtkinter --collect-all quarto_cli --collect-all plotly --collect-all _plotly_utils --collect-all traitlets --collect-all referencing --collect-all rpds --collect-all tenacity --collect-all pandas --collect-all numpy --collect-all matplotlib --collect-all openpyxl --collect-all xlrd --collect-all nbformat --collect-all nbclient --collect-all altair --collect-all itables --collect-all kaleido --collect-all pyarrow --collect-all dataframe_image --collect-all narwhals --collect-all PIL --collect-all vl_convert --collect-all typing-extensions --add-data ../docs/example_data/Basic_example_vuegen_demo_notebook:example_data/Basic_example_vuegen_demo_notebook --add-data ../docs/images/vuegen_logo.png:. app.py
         # --windowed only for mac, see:
         # https://pyinstaller.org/en/stable/usage.html#building-macos-app-bundles
         # 'Under macOS, PyInstaller always builds a UNIX executable in dist.'

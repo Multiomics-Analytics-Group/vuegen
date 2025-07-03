@@ -38,12 +38,13 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx_new_tab_link",
     "myst_nb",
+    "sphinx_copybutton",
 ]
 
 #  https://myst-nb.readthedocs.io/en/latest/computation/execute.html
 nb_execution_mode = "auto"
 
-myst_enable_extensions = ["dollarmath", "amsmath"]
+myst_enable_extensions = ["dollarmath", "amsmath", "colon_fence"]
 
 # Plolty support through require javascript library
 # https://myst-nb.readthedocs.io/en/latest/render/interactive.html#plotly
@@ -98,13 +99,13 @@ intersphinx_mapping = {
 # https://github.com/executablebooks/MyST-NB/blob/master/docs/conf.py
 # html_title = ""
 html_theme = "sphinx_book_theme"
-# html_logo = "_static/logo-wide.svg"
-# html_favicon = "_static/logo-square.svg"
+html_logo = "images/logo/vuegen_logo.svg"
+html_favicon = "images/logo/vuegen_logo_small.svg"
 html_theme_options = {
     "github_url": "https://github.com/Multiomics-Analytics-Group/vuegen",
     "repository_url": "https://github.com/Multiomics-Analytics-Group/vuegen",
     "repository_branch": "main",
-    "home_page_in_toc": True,
+    "home_page_in_toc": False,
     "path_to_docs": "docs",
     "show_navbar_depth": 1,
     "use_edit_page_button": True,
@@ -136,7 +137,16 @@ if os.environ.get("READTHEDOCS") == "True":
     PROJECT_ROOT = Path(__file__).parent.parent
     PACKAGE_ROOT = PROJECT_ROOT / "src" / "vuegen"
 
+    def run_split_readme(_):
+        print("[conf.py] Splitting README.md into sections...")
+        from split_readme import process_readme
+
+        readme_path = PROJECT_ROOT / "README.md"
+        output_dir = PROJECT_ROOT / "docs" / "sections_readme"
+        process_readme(readme_path, output_dir)
+
     def run_apidoc(_):
+        print("[conf.py] Running sphinx-apidoc...")
         from sphinx.ext import apidoc
 
         apidoc.main(
@@ -154,4 +164,5 @@ if os.environ.get("READTHEDOCS") == "True":
         )
 
     def setup(app):
+        app.connect("builder-inited", run_split_readme)
         app.connect("builder-inited", run_apidoc)

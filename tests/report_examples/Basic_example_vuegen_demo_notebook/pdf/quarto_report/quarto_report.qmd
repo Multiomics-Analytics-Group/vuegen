@@ -1,0 +1,331 @@
+---
+title: Basic Example Vuegen Demo Notebook
+fig-align: center
+execute:
+  echo: false
+  output: asis
+jupyter: python3
+format:
+  pdf:
+    toc: false
+    fig-align: center
+    margin:
+      - bottom=40mm
+    include-in-header:
+        text: |
+            \usepackage{scrlayer-scrpage}
+            \usepackage{hyperref}
+            \clearpairofpagestyles
+            \lofoot{This report was generated with
+            \href{https://github.com/Multiomics-Analytics-Group/vuegen}{VueGen} | \copyright{} 2025
+             \href{https://github.com/Multiomics-Analytics-Group}{Multiomics Network Analytics Group (MoNA)}}
+            \rofoot{\pagemark}
+---
+
+```{python}
+#| label: 'Imports'
+from pathlib import Path
+import IPython.display as display
+import altair as alt
+import dataframe_image as dfi
+import json
+import pandas as pd
+import plotly.io as pio
+import requests
+
+
+report_dir = Path().cwd()
+```
+
+A general description of the report.
+
+# Plots
+## Interactive Plots
+Optional description for section.
+
+
+### Top Species Plot By Biome Plotly
+
+```{python}
+#| label: 'Top Species Plot By Biome Plotly 1'
+#| fig-cap: ""
+
+with open(report_dir /'../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/1_Plots/1_Interactive_plots/1_top_species_plot_by_biome_plotly.json', 'r') as plot_file:
+    plot_json = json.load(plot_file)
+
+# Keep only 'data' and 'layout' sections
+plot_json = {key: plot_json[key] for key in plot_json
+                if key in ['data', 'layout']
+            }
+# Remove 'frame' section in 'data'
+plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'}
+                            for entry in plot_json.get('data', [])
+                    ]
+# Convert JSON to string
+plot_json_str = json.dumps(plot_json)
+# Create the plotly plot
+fig_plotly = pio.from_json(plot_json_str)
+fig_plotly.update_layout(autosize=False, width=950, height=400,
+                         margin=dict(b=50, t=50, l=50, r=50)
+                         )
+
+fig_plotly.write_image("static/Top_Species_Plot_By_Biome_Plotly.png")
+```
+
+![](static/Top_Species_Plot_By_Biome_Plotly.png){fig-alt= width=90%}
+
+### Multiline Plot Altair
+
+```{python}
+#| label: 'Multiline Plot Altair 2'
+#| fig-cap: ""
+
+with open(report_dir /'../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/1_Plots/1_Interactive_plots/2_multiline_plot_altair.json', 'r') as plot_file:
+    plot_json = json.load(plot_file)
+
+# Convert JSON to string
+plot_json_str = json.dumps(plot_json)
+
+# Create the altair plot
+fig_altair = alt.Chart.from_json(plot_json_str
+                ).properties(width=900, height=370)
+
+fig_altair.save("static/Multiline_Plot_Altair.png")
+```
+
+![](static/Multiline_Plot_Altair.png){fig-alt= width=90%}
+
+### Pie Plot Countries Plotly
+
+```{python}
+#| label: 'Pie Plot Countries Plotly 3'
+#| fig-cap: ""
+
+with open(report_dir /'../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/1_Plots/1_Interactive_plots/3_pie_plot_countries_plotly.json', 'r') as plot_file:
+    plot_json = json.load(plot_file)
+
+# Keep only 'data' and 'layout' sections
+plot_json = {key: plot_json[key] for key in plot_json
+                if key in ['data', 'layout']
+            }
+# Remove 'frame' section in 'data'
+plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'}
+                            for entry in plot_json.get('data', [])
+                    ]
+# Convert JSON to string
+plot_json_str = json.dumps(plot_json)
+# Create the plotly plot
+fig_plotly = pio.from_json(plot_json_str)
+fig_plotly.update_layout(autosize=False, width=950, height=400,
+                         margin=dict(b=50, t=50, l=50, r=50)
+                         )
+
+fig_plotly.write_image("static/Pie_Plot_Countries_Plotly.png")
+```
+
+![](static/Pie_Plot_Countries_Plotly.png){fig-alt= width=90%}
+
+### Pie Plots Biomes Plotly
+
+```{python}
+#| label: 'Pie Plots Biomes Plotly 4'
+#| fig-cap: ""
+
+with open(report_dir /'../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/1_Plots/1_Interactive_plots/4_pie_plots_biomes_plotly.json', 'r') as plot_file:
+    plot_json = json.load(plot_file)
+
+# Keep only 'data' and 'layout' sections
+plot_json = {key: plot_json[key] for key in plot_json
+                if key in ['data', 'layout']
+            }
+# Remove 'frame' section in 'data'
+plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'}
+                            for entry in plot_json.get('data', [])
+                    ]
+# Convert JSON to string
+plot_json_str = json.dumps(plot_json)
+# Create the plotly plot
+fig_plotly = pio.from_json(plot_json_str)
+fig_plotly.update_layout(autosize=False, width=950, height=400,
+                         margin=dict(b=50, t=50, l=50, r=50)
+                         )
+
+fig_plotly.write_image("static/Pie_Plots_Biomes_Plotly.png")
+```
+
+![](static/Pie_Plots_Biomes_Plotly.png){fig-alt= width=90%}
+
+### Saline Metagenomics Samples Map Altair
+
+```{python}
+#| label: 'Saline Metagenomics Samples Map Altair 5'
+#| fig-cap: ""
+
+with open(report_dir /'../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/1_Plots/1_Interactive_plots/5_saline_metagenomics_samples_map_altair.json', 'r') as plot_file:
+    plot_json = json.load(plot_file)
+
+# Convert JSON to string
+plot_json_str = json.dumps(plot_json)
+
+# Create the altair plot
+fig_altair = alt.Chart.from_json(plot_json_str
+                ).properties(width=900, height=370)
+
+fig_altair.save("static/Saline_Metagenomics_Samples_Map_Altair.png")
+```
+
+![](static/Saline_Metagenomics_Samples_Map_Altair.png){fig-alt= width=90%}
+
+### Plotly Plot R
+
+```{python}
+#| label: 'Plotly Plot R 6'
+#| fig-cap: ""
+
+with open(report_dir /'../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/1_Plots/1_Interactive_plots/6_plotly_plot_R.json', 'r') as plot_file:
+    plot_json = json.load(plot_file)
+
+# Keep only 'data' and 'layout' sections
+plot_json = {key: plot_json[key] for key in plot_json
+                if key in ['data', 'layout']
+            }
+# Remove 'frame' section in 'data'
+plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'}
+                            for entry in plot_json.get('data', [])
+                    ]
+# Convert JSON to string
+plot_json_str = json.dumps(plot_json)
+# Create the plotly plot
+fig_plotly = pio.from_json(plot_json_str)
+fig_plotly.update_layout(autosize=False, width=950, height=400,
+                         margin=dict(b=50, t=50, l=50, r=50)
+                         )
+
+fig_plotly.write_image("static/Plotly_Plot_R.png")
+```
+
+![](static/Plotly_Plot_R.png){fig-alt= width=90%}
+
+## Static Plots
+### Number Samples Per Study
+![](../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/1_Plots/2_Static_plots/1_number_samples_per_study.png){fig-alt= width=90%}
+
+### Animal Metagenomics Samples Map
+![](../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/1_Plots/2_Static_plots/2_animal_metagenomics_samples_map.png){fig-alt= width=90%}
+
+### Alpha Diversity Host Associated Samples
+![](../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/1_Plots/2_Static_plots/3_alpha_diversity_host_associated_samples.png){fig-alt= width=90%}
+
+# Dataframes
+## All Formats
+### Phyla Correlation Network Csv
+```{python}
+#| label: 'Phyla Correlation Network Csv 1'
+#| fig-cap: ""
+
+df = pd.read_csv(report_dir / '../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/2_Dataframes/1_All_formats/1_phyla_correlation_network_csv.csv')
+
+df.dfi.export('static/Phyla_Correlation_Network_Csv.png', max_rows=10, max_cols=5, table_conversion='matplotlib')
+```
+
+![](static/Phyla_Correlation_Network_Csv.png){fig-alt= width=90%}
+
+### Abundance Table Example Xls
+```{python}
+#| label: 'Abundance Table Example Xls 2'
+#| fig-cap: ""
+
+df = pd.read_excel(report_dir / '../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/2_Dataframes/1_All_formats/2_abundance_table_example_xls.xls')
+
+df.dfi.export('static/Abundance_Table_Example_Xls.png', max_rows=10, max_cols=5, table_conversion='matplotlib')
+```
+
+![](static/Abundance_Table_Example_Xls.png){fig-alt= width=90%}
+
+#### infos
+```{python}
+#| label: 'Abundance Table Example Xls 2 infos'
+#| fig-cap: ""
+
+df = pd.read_excel(report_dir / '../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/2_Dataframes/1_All_formats/2_abundance_table_example_xls.xls', sheet_name='infos')
+
+df.dfi.export('static/Abundance_Table_Example_Xls_infos.png', max_rows=10, max_cols=5, table_conversion='matplotlib')
+```
+
+![](static/Abundance_Table_Example_Xls_infos.png){fig-alt= width=90%}
+
+### Sample Info Example Txt
+```{python}
+#| label: 'Sample Info Example Txt 3'
+#| fig-cap: ""
+
+df = pd.read_table(report_dir / '../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/2_Dataframes/1_All_formats/3_sample_info_example_txt.txt')
+
+df.dfi.export('static/Sample_Info_Example_Txt.png', max_rows=10, max_cols=5, table_conversion='matplotlib')
+```
+
+![](static/Sample_Info_Example_Txt.png){fig-alt= width=90%}
+
+### Sample Info Example Parquet
+```{python}
+#| label: 'Sample Info Example Parquet 4'
+#| fig-cap: ""
+
+df = pd.read_parquet(report_dir / '../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/2_Dataframes/1_All_formats/4_sample_info_example_parquet.parquet')
+
+df.dfi.export('static/Sample_Info_Example_Parquet.png', max_rows=10, max_cols=5, table_conversion='matplotlib')
+```
+
+![](static/Sample_Info_Example_Parquet.png){fig-alt= width=90%}
+
+### Example Xlsx
+```{python}
+#| label: 'Example Xlsx 5'
+#| fig-cap: ""
+
+df = pd.read_excel(report_dir / '../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/2_Dataframes/1_All_formats/5_example_xlsx.xlsx')
+
+df.dfi.export('static/Example_Xlsx.png', max_rows=10, max_cols=5, table_conversion='matplotlib')
+```
+
+![](static/Example_Xlsx.png){fig-alt= width=90%}
+
+# Networks
+## Interactive Networks
+Optional description for subsection.
+
+
+### Man Example
+**Number of nodes:** 9
+
+**Number of edges:** 14
+
+![](static/Man_Example.png){fig-alt= width=90%}
+
+## Static Networks
+### Phyla Correlation Network
+![](../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/3_Networks/2_Static_networks/1_phyla_correlation_network.png){fig-alt= width=90%}
+
+# Html
+## All Html
+### Ckg Network
+**Number of nodes:** 33
+
+**Number of edges:** 35
+
+![](static/Ckg_Network.png){fig-alt= width=90%}
+
+# Markdown
+## All Markdown
+### Readme
+
+```{python}
+#| label: 'Readme 3'
+#| fig-cap: ""
+
+
+with open(report_dir / '../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/5_Markdown/1_All_markdown/README.md', 'r') as markdown_file:
+    markdown_content = markdown_file.read()
+
+display.Markdown(markdown_content)
+```

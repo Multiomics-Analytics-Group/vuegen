@@ -1,3 +1,5 @@
+"""Create valid variable names for Python identifiers."""
+
 import re
 
 

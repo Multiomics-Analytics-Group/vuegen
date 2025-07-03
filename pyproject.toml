@@ -8,7 +8,8 @@ authors = ["MoNA group"]
 license = "MIT"
 readme = "README.md"
 repository = "https://github.com/Multiomics-Analytics-Group/vuegen"
-version = "0.1.0"
+# just a placeholder for dynamic versions, see https://pypi.org/project/poetry-dynamic-versioning/
+version = "0.0.0"
 
 [tool.poetry.dependencies]
 python = ">=3.9,<3.9.7 || >3.9.7,<4.0"
@@ -40,6 +41,7 @@ ipywidgets = { version = "*", optional = true }
 sphinx-new-tab-link = { version = "!=0.2.2", optional = true }
 jupytext = { version = "*", optional = true }
 customtkinter = { version = "*", optional = true }
+sphinx-copybutton = { version = "*", optional = true }
 
 [tool.poetry.group.dev.dependencies]
 ipykernel = { version = "^6.29.5", optional = true }
@@ -63,6 +65,7 @@ docs = [
     "ipywidgets",
     "sphinx-new-tab-link",
     "jupytext",
+    "sphinx-copybutton",
 ]
 gui = ["customtkinter"]
 
@@ -72,3 +75,20 @@ vuegen = "vuegen.__main__:main"
 
 [tool.isort]
 profile = "black"
+
+[tool.jupytext]
+formats = "ipynb,py:percent"
+
+[tool.ruff]
+# Allow lines to be as long as:
+line-length = 88
+
+[tool.ruff.lint]
+# https://docs.astral.sh/ruff/tutorial/#rule-selection
+# 1. Enable flake8-bugbear (`B`) rules
+# 2. Enable pycodestyle (`E`) errors and (`W`) warnings
+# 3. Pyflakes (`F`) errors
+extend-select = ["E", "W", 'F', 'B']
+
+[tool.black]
+line-length = 88

@@ -63,7 +63,7 @@ Windows and macOS specific options:
 
 ## Quarto notebook execution
 
-- add python exe to bundle as suggested [on stackoverflow](https://stackoverflow.com/a/72639099/9684872) [not this way at least]
+- Add python exe to bundle as suggested [on stackoverflow](https://stackoverflow.com/a/72639099/9684872) [not this way at least]
 
 ## test shipping a python virtual environment with vuegen installed
 
@@ -156,14 +156,14 @@ python -m venv .venv --copies --clear --prompt vuegenvenv
 On windows the default Paths is available in the application. This would allow to use
 the default python installation and a global quarto installation.
 
-to test, one could
+To test, one could
 
-- use global quarto and python installations can be used
-- add a deactivate button into app for bundled quarto (so path is not set)
+- Use global quarto and python installations can be used
+- Add a deactivate button into app for bundled quarto (so path is not set)
 
 ### On MacOs
 
-- on MacOs the default paths are not set, but only the minimal one `/usr/bin:/bin:/usr/sbin:/sbin`,
+- On MacOs the default paths are not set, but only the minimal one `/usr/bin:/bin:/usr/sbin:/sbin`,
   see pyinstaller hints
   [on path manipulations](https://pyinstaller.org/en/stable/common-issues-and-pitfalls.html#macos)
-- requires to add path to python environment manually
+- Requires to add path to python environment manually

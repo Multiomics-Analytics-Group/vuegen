@@ -1,3 +1,7 @@
+"""ConfigManage creates configuration files from folders and can create components
+for reports from YAML config files.
+"""
+
 import json
 import logging
 import os
@@ -10,21 +14,28 @@ from .utils import assert_enum_value, get_logger, is_pyvis_html
 
 class ConfigManager:
     """
-    Class for handling metadata of reports from YAML config file and creating report objects.
+    Class for handling metadata of reports from YAML config file and creating report
+    objects.
     """
 
-    def __init__(self, logger: Optional[logging.Logger] = None):
+    def __init__(self, logger: Optional[logging.Logger] = None, max_depth: int = 2):
         """
         Initializes the ConfigManager with a logger.
 
         Parameters
         ----------
         logger : logging.Logger, optional
-            A logger instance for the class. If not provided, a default logger will be created.
+            A logger instance for the class.
+            If not provided, a default logger will be created.
+        max_depth : int, optional
+            The maximum depth of the directory structure to consider when generating
+            the report config from a directory.
+            The default is 2, which means it will include sections and subsections.
         """
         if logger is None:
             logger, _ = get_logger("report")
         self.logger = logger
+        self.max_depth = max_depth
 
     def _create_title_fromdir(self, file_dirname: str) -> str:
         """
@@ -48,7 +59,8 @@ class ConfigManager:
 
     def _create_component_config_fromfile(self, file_path: Path) -> Dict[str, str]:
         """
-        Infers a component config from a file, including component type, plot type, and additional fields.
+        Infers a component config from a file, including component type, plot type,
+        and additional fields.
 
         Parameters
         ----------
@@ -69,7 +81,7 @@ class ConfigManager:
             file_path.resolve().as_posix()
         )  # ! needs to be posix for all OS support
         component_config["description"] = ""
-        component_config["caption"] = ""
+        component_config["caption"] = ""  # ? It is not populated here
 
         # Infer component config
         if file_ext in [
@@ -139,13 +151,18 @@ class ConfigManager:
                 else:
                     component_config["plot_type"] = r.PlotType.PLOTLY.value
             except Exception as e:
-                self.logger.warning(f"Could not parse JSON file {file_path}: {e}")
+                self.logger.warning(
+                    "Could not parse JSON file %s: %s", file_path, e, exc_info=True
+                )
                 component_config["plot_type"] = "unknown"
         elif file_ext == ".md":
             component_config["component_type"] = r.ComponentType.MARKDOWN.value
         else:
+            if not file_ext:
+                # hidden files starting with a dot
+                file_ext = file_path.name
             self.logger.error(
-                f"Unsupported file extension: {file_ext}. Skipping file: {file_path}\n"
+                "Unsupported file extension: %s. Skipping file: %s", file_ext, file_path
             )
             return None
 
@@ -153,7 +170,8 @@ class ConfigManager:
 
     def _sort_paths_by_numprefix(self, paths: List[Path]) -> List[Path]:
         """
-        Sorts a list of Paths by numeric prefixes in their names, placing non-numeric items at the end.
+        Sorts a list of Paths by numeric prefixes in their names, placing non-numeric
+        items at the end.
 
         Parameters
         ----------
@@ -198,7 +216,7 @@ class ConfigManager:
         return ""
 
     def _create_subsect_config_fromdir(
-        self, subsection_dir_path: Path
+        self, subsection_dir_path: Path, level: int = 2
     ) -> Dict[str, Union[str, List[Dict]]]:
         """
         Creates subsection config from a directory.
@@ -217,7 +235,6 @@ class ConfigManager:
         sorted_files = self._sort_paths_by_numprefix(
             list(subsection_dir_path.iterdir())
         )
-
         components = []
         for file in sorted_files:
             if file.is_file():
@@ -227,6 +244,18 @@ class ConfigManager:
                     continue
                 # Add component config to list
                 components.append(component_config)
+            elif file.is_dir():
+                if level >= self.max_depth:
+                    self.logger.warning(
+                        "Subsection nesting level exceeded: %s. Skipping.", file.name
+                    )
+                    continue
+                # components are added to subsection
+                # ! Alternatively, one could add (sub-)sections to the subsection
+                # ? Then one could remove differentiation between sections and
+                # ? subsections
+                nested_components = self._create_subsect_config_fromdir(file, level + 1)
+                components.extend(nested_components["components"])
 
         subsection_config = {
             "title": self._create_title_fromdir(subsection_dir_path.name),
@@ -257,14 +286,25 @@ class ConfigManager:
         )
 
         subsections = []
+        components = []
         for subsection_dir in sorted_subsections:
             if subsection_dir.is_dir():
                 subsections.append(self._create_subsect_config_fromdir(subsection_dir))
+            else:
+                file_in_subsection_dir = (
+                    subsection_dir  # ! maybe take more generic names?
+                )
+                component_config = self._create_component_config_fromfile(
+                    file_in_subsection_dir
+                )
+                if component_config is not None:
+                    components.append(component_config)
 
         section_config = {
             "title": self._create_title_fromdir(section_dir_path.name),
             "description": self._read_description_file(section_dir_path),
             "subsections": subsections,
+            "components": components,
         }
         return section_config
 
@@ -272,7 +312,8 @@ class ConfigManager:
         self, base_dir: str
     ) -> Tuple[Dict[str, Union[str, List[Dict]]], Path]:
         """
-        Generates a YAML-compatible config file from a directory. It also returns the resolved folder path.
+        Generates a YAML-compatible config file from a directory. It also returns the
+        resolved folder path.
 
         Parameters
         ----------
@@ -290,6 +331,7 @@ class ConfigManager:
         # Generate the YAML config
         yaml_config = {
             "report": {
+                # This will be used for the home section of a report
                 "title": self._create_title_fromdir(base_dir_path.name),
                 "description": self._read_description_file(base_dir_path),
                 "graphical_abstract": "",
@@ -301,18 +343,41 @@ class ConfigManager:
         # Sort sections by their number prefix
         sorted_sections = self._sort_paths_by_numprefix(list(base_dir_path.iterdir()))
 
+        main_section_config = {
+            "title": self._create_title_fromdir(base_dir_path.name),
+            "description": "",
+            "components": [],
+        }
+
         # Generate sections and subsections config
         for section_dir in sorted_sections:
             if section_dir.is_dir():
                 yaml_config["sections"].append(
                     self._create_sect_config_fromdir(section_dir)
                 )
+            # could be single plots?
+            else:
+                file_in_main_section_dir = section_dir
+                if file_in_main_section_dir.name.lower() == "description.md":
+                    continue  # Skip description files in the main section
+                component_config = self._create_component_config_fromfile(
+                    file_in_main_section_dir
+                )
+                if component_config is not None:
+                    main_section_config["components"].append(component_config)
+
+        if main_section_config["components"]:
+            # If components were added to the main section, i.e. there were components
+            # found in the main report directory, add it to the first position of the
+            # list of sections
+            yaml_config["sections"].insert(0, main_section_config)
 
         return yaml_config, base_dir_path
 
     def initialize_report(self, config: dict) -> tuple[r.Report, dict]:
         """
-        Extracts report metadata from a YAML config file and returns a Report object and the raw metadata.
+        Extracts report metadata from a YAML config file and returns a Report object and
+        the raw metadata.
 
         Parameters
         ----------
@@ -322,7 +387,8 @@ class ConfigManager:
         Returns
         -------
         report, config : tuple[Report, dict]
-            A tuple containing the Report object created from the YAML config file and the raw metadata dictionary.
+            A tuple containing the Report object created from the YAML config file and
+            the raw metadata dictionary.
 
         Raises
         ------
@@ -347,7 +413,9 @@ class ConfigManager:
             report.sections.append(section)
 
         self.logger.info(
-            f"Report '{report.title}' initialized with {len(report.sections)} sections."
+            "Report '%s' initialized with %d sections.",
+            report.title,
+            len(report.sections),
         )
         return report, config
 
@@ -371,6 +439,10 @@ class ConfigManager:
             subsections=[],
             description=section_data.get("description"),
         )
+
+        for component_data in section_data.get("components", []):
+            component = self._create_component(component_data)
+            section.components.append(component)
 
         # Create subsections
         for subsection_data in section_data.get("subsections", []):
@@ -419,7 +491,8 @@ class ConfigManager:
         Returns
         -------
         Component
-            A Component object (Plot, DataFrame, or Markdown) populated with the provided metadata.
+            A Component object (Plot, DataFrame, or Markdown) populated with the
+            provided metadata.
         """
         # Determine the component type
         component_type = assert_enum_value(
@@ -567,8 +640,10 @@ class ConfigManager:
             try:
                 parsed_body = json.loads(request_body)
             except json.JSONDecodeError as e:
-                self.logger.error(f"Failed to parse request_body JSON: {e}")
-                raise ValueError(f"Invalid JSON in request_body: {e}")
+                self.logger.error(
+                    "Failed to parse request_body JSON: %s", e, exc_info=True
+                )
+                raise ValueError("Invalid JSON in request_body.") from e
 
         return r.APICall(
             title=component_data["title"],

@@ -1,3 +1,10 @@
+"""File system utilities, file conversion functions,
+graph related utilities, config file writing, and
+command line parser and logging messages (completion).
+
+streamlit report footer is also in this file.
+"""
+
 from __future__ import annotations
 
 import argparse
@@ -5,17 +12,11 @@ import json
 import logging
 import os
 import sys
-import unicodedata
+import textwrap
 from datetime import datetime
-
-try:
-    from enum import StrEnum
-except ImportError:
-    from strenum import StrEnum
-
 from io import StringIO
 from pathlib import Path
-from typing import Iterable, Type
+from typing import Iterable, Optional, Type
 from urllib.parse import urlparse
 
 import networkx as nx
@@ -23,8 +24,15 @@ import requests
 import yaml
 from bs4 import BeautifulSoup
 
+try:
+    from enum import StrEnum
+except ImportError:
+    from strenum import StrEnum
 
-## CHECKS
+from vuegen.constants import GITHUB_ORG_URL, LOGO_URL, ORG, REPO_URL, TIMEOUT
+
+
+# CHECKS
 def check_path(filepath: Path) -> bool:
     """
     Checks if the given file or folder path exists.
@@ -71,14 +79,16 @@ def assert_enum_value(
     """
     try:
         return enum_class[value.upper()]
-    except KeyError:
+    except KeyError as e:
         expected_values = ", ".join([str(e.value) for e in enum_class])
         logger.error(
-            f"Invalid value for {enum_class.__name__}: '{value}'. Expected values are: {expected_values}"
+            f"Invalid value for {enum_class.__name__}: '{value}'."
+            f"Expected values are: {expected_values}"
         )
         raise ValueError(
-            f"Invalid {enum_class.__name__}: {value}. Expected values are: {expected_values}"
-        )
+            f"Invalid {enum_class.__name__}: {value}. "
+            f"Expected values are: {expected_values}"
+        ) from e
 
 
 def is_url(filepath: Path) -> bool:
@@ -94,8 +104,8 @@ def is_url(filepath: Path) -> bool:
     -------
     bool
         True if the input path is a valid URL, meaning it contains both a scheme
-        (e.g., http, https, ftp) and a network location (e.g., example.com).
-        Returns False if either the scheme or the network location is missing or invalid.
+        (e.g., http, https, ftp) and a network location (e.g., example.com). Returns
+        False if either the scheme or the network location is missing or invalid.
     """
     # Parse the url and return validation
     parsed_url = urlparse(str(filepath))
@@ -137,17 +147,19 @@ def is_pyvis_html(filepath: str) -> bool:
     return pyvis_identifier_valid and body_structure_valid
 
 
-## FILE_SYSTEM
+# FILE_SYSTEM
 def create_folder(directory_path: str, is_nested: bool = False) -> bool:
     """
-    Create a folder. Optionally create nested directories if the specified path includes subdirectories.
+    Create a folder. Optionally create nested directories if the specified path includes
+    subdirectories.
 
     Parameters
     ----------
     directory_path : str
         The path of the directory to create.
     is_nested : bool
-        A flag indicating whether to create nested directories (True uses os.makedirs, False uses os.mkdir).
+        A flag indicating whether to create nested directories.
+        True uses os.makedirs, False uses os.mkdir.
 
     Returns
     -------
@@ -172,10 +184,51 @@ def create_folder(directory_path: str, is_nested: bool = False) -> bool:
         else:
             return False
     except OSError as e:
-        raise OSError(f"Error creating directory '{directory_path}': {e}")
+        raise OSError(f"Error creating directory '{directory_path}'.") from e
 
 
-def get_parser(prog_name: str, others: dict = {}) -> argparse.Namespace:
+def get_relative_file_path(
+    file_path: str, base_path: str = "", relative_to: str = "."
+) -> Path:
+    """
+    Returns the relative file path of a given file with respect to
+    the current working directory (CWD).
+
+    This method will resolve the absolute path of the given file and
+    return a relative path with respect to the directory where the script is
+    being executed. Optionally, a base path can be added (e.g., "../").
+
+    Parameters
+    ----------
+    file_path : str
+        The full file path to be converted to a relative path.
+    base_path : str, optional
+        The base path to be prepended to the relative path, default is an empty string.
+    relativ_to : str, optional
+        The directory to which the file path should be relative,
+        default is the current directory (".").
+
+    Returns
+    -------
+    Path
+        The file path relative to the CWD.
+    """
+    if relative_to == ".":
+        # Use the current working directory as the base
+        relative_to = Path.cwd()
+    elif isinstance(relative_to, str):
+        # ensure path is a Path object
+        relative_to = Path(relative_to)
+    rel_path = os.path.relpath(Path(file_path).resolve(), relative_to)
+    rel_path = Path(rel_path)  # Ensure rel_path is a Path object
+
+    if base_path:
+        rel_path = Path(base_path) / rel_path
+
+    return rel_path
+
+
+def get_parser(prog_name: str, others: Optional[dict] = None) -> argparse.Namespace:
     """
     Initiates argparse.ArgumentParser() and adds common arguments.
 
@@ -197,6 +250,8 @@ def get_parser(prog_name: str, others: dict = {}) -> argparse.Namespace:
     AssertionError
         If prog_name is not a string or others is not a dictionary.
     """
+    if others is None:
+        others = {}
     # Preconditions
     assert isinstance(prog_name, str), f"prog_name should be a string: {prog_name}"
     assert isinstance(others, dict), f"others must be a dict: {others}"
@@ -224,7 +279,10 @@ def get_parser(prog_name: str, others: dict = {}) -> argparse.Namespace:
         "--report_type",
         type=str,
         default="streamlit",
-        help="Type of the report to generate (streamlit, html, pdf, docx, odt, revealjs, pptx, or jupyter).",
+        help=(
+            "Type of the report to generate: streamlit, html, pdf, docx, odt, revealjs,"
+            " pptx, or jupyter."
+        ),
     )
     parser.add_argument(
         "-output_dir",
@@ -247,11 +305,21 @@ def get_parser(prog_name: str, others: dict = {}) -> argparse.Namespace:
         default=False,
         help="Check if Quarto is installed and available for report generation.",
     )
+    parser.add_argument(
+        "-mdep",
+        "--max_depth",
+        type=int,
+        default=2,
+        help=(
+            "Maximum depth for the recursive search of files in the input directory. "
+            "Ignored if a config file is provided."
+        ),
+    )
     # Parse arguments
     return parser
 
 
-def fetch_file_stream(file_path: str) -> StringIO:
+def fetch_file_stream(file_path: str, timeout: int = TIMEOUT) -> StringIO:
     """
     Fetches a file-like stream from a given file path or URL.
 
@@ -280,13 +348,12 @@ def fetch_file_stream(file_path: str) -> StringIO:
     if is_url(file_path):
         # Handle URL input
         try:
-            response = requests.get(file_path)
+            response = requests.get(file_path, timeout=timeout)
             response.raise_for_status()  # Raise an exception for HTTP errors
             return StringIO(response.text)
         except requests.exceptions.RequestException as e:
-            raise ValueError(
-                f"Error fetching content from URL: {file_path}. Error: {str(e)}"
-            )
+            raise ValueError(f"Error fetching content from URL: {file_path}.") from e
+
     else:
         # Handle local file input
         if not os.path.exists(file_path):
@@ -297,12 +364,13 @@ def fetch_file_stream(file_path: str) -> StringIO:
             return StringIO(file.read())
 
 
-## FILE_CONVERSION
+# FILE_CONVERSION
 def cyjs_to_networkx(file_path: str, name: str = "name", ident: str = "id") -> nx.Graph:
     """
-    Create a NetworkX graph from a `.cyjs` file in Cytoscape format, including all attributes present in the JSON data.
-    This function is modified from the `cytoscape_graph` networkx function to handle the 'value' key explicitly and to include
-    all additional attributes found in the JSON data for both nodes and edges.
+    Create a NetworkX graph from a `.cyjs` file in Cytoscape format, including all
+    attributes present in the JSON data. This function is modified from the
+    `cytoscape_graph` networkx function to handle the 'value' key explicitly and to
+    include all additional attributes found in the JSON data for both nodes and edges.
 
     Parameters
     ----------
@@ -317,14 +385,16 @@ def cyjs_to_networkx(file_path: str, name: str = "name", ident: str = "id") -> n
     Returns
     -------
     graph : networkx.Graph
-        The graph created from the Cytoscape JSON data, including all node and edge attributes.
+        The graph created from the Cytoscape JSON data, including all node and edge
+        attributes.
 
     Raises
     ------
     NetworkXError
         If the `name` and `ident` attributes are identical.
     ValueError
-        If the data format is invalid or missing required elements, such as 'id' or 'name' for nodes.
+        If the data format is invalid or missing required elements, such as 'id'
+        or 'name' for nodes.
     """
     try:
         # If file_path is a file-like object (e.g., StringIO), read from it
@@ -384,7 +454,7 @@ def cyjs_to_networkx(file_path: str, name: str = "name", ident: str = "id") -> n
         return graph
 
     except KeyError as e:
-        raise ValueError(f"Missing required key in data: {e}")
+        raise ValueError("Missing required key in data.") from e
 
 
 def pyvishtml_to_networkx(html_file: str) -> nx.Graph:
@@ -404,7 +474,8 @@ def pyvishtml_to_networkx(html_file: str) -> nx.Graph:
     Raises
     ------
     ValueError
-        If the HTML file does not contain the expected network data, or if nodes lack 'id' attribute.
+        If the HTML file does not contain the expected network data,
+        or if nodes lack 'id' attribute.
     """
     # Load the HTML file
     if isinstance(html_file, StringIO):
@@ -465,7 +536,7 @@ def pyvishtml_to_networkx(html_file: str) -> nx.Graph:
     return graph
 
 
-## CONFIG
+# CONFIG
 def load_yaml_config(file_path: str) -> dict:
     """
     Load a YAML configuration file and return its contents as a dictionary.
@@ -496,7 +567,7 @@ def load_yaml_config(file_path: str) -> dict:
         try:
             config = yaml.safe_load(file)
         except yaml.YAMLError as exc:
-            raise ValueError(f"Error parsing YAML file: {exc}")
+            raise ValueError("Error parsing YAML file.") from exc
 
     return config
 
@@ -536,7 +607,7 @@ def write_yaml_config(yaml_data: dict, directory_path: Path) -> Path:
     return output_yaml
 
 
-## LOGGING
+# LOGGING
 def get_basename(fname: None | str = None) -> str:
     """
     - For a given filename, returns basename WITHOUT file extension
@@ -646,7 +717,7 @@ def generate_log_filename(folder: str = "logs", suffix: str = "") -> str:
         # PRECONDITIONS
         create_folder(folder)  # ? Path(folder).mkdir(parents=True, exist_ok=True)
     except OSError as e:
-        raise OSError(f"Error creating directory '{folder}': {e}")
+        raise OSError(f"Error creating directory '{folder}'") from e
     # MAIN FUNCTION
     log_filename = get_time(incl_timezone=False) + "_" + suffix + ".log"
     log_filepath = os.path.join(folder, log_filename)
@@ -740,7 +811,7 @@ def get_logger(
     logger = init_log(log_file, display=display, logger_id=logger_id)
 
     # Log the path to the log file
-    logger.info(f"Path to log file: {log_file}")
+    logger.info("Path to log file: %s", log_file)
 
     return logger, log_file
 
@@ -781,43 +852,50 @@ def get_completion_message(report_type: str, config_path: str) -> str:
     border = "─" * 65  # Creates a separator line
 
     if report_type == "streamlit":
-        message = """
-🚀 Streamlit Report Generated!
+        message = textwrap.dedent(
+            f"""
+            🚀 Streamlit Report Generated!
 
-📂 All scripts to build the Streamlit app are available at:
-    streamlit_report/sections
+            📂 All scripts to build the Streamlit app are available at:
+                streamlit_report/sections
 
-▶️ To run the Streamlit app, use the following command:
-    streamlit run streamlit_report/sections/report_manager.py
+            ▶️ To run the Streamlit app, use the following command:
+                streamlit run streamlit_report/sections/report_manager.py
 
-✨ You can extend the report by adding new files to the input directory or updating the config file.
+            ✨ You can extend the report by adding new files to the input directory or
+               updating the config file.
 
-🛠️ Advanced users can modify the Python scripts directly in:
-    streamlit_report/sections
+            🛠️ Advanced users can modify the Python scripts directly in:
+                streamlit_report/sections
 
-⚙️ Configuration file used:
-    {config_path}
-"""
+            ⚙️ Configuration file used:
+                {config_path}
+            """
+        )
     else:
-        message = f"""
-🚀 {report_type.capitalize()} Report Generated!
+        message = textwrap.dedent(
+            f"""
+            🚀 {report_type.capitalize()} Report Generated!
 
-📂 Your {report_type} report is available at:
-    quarto_report
+            📂 Your {report_type} report is available at:
+                quarto_report
 
-✨ You can extend the report by adding new files to the input directory or updating the config file.
+            ✨ You can extend the report by adding new files to the input directory or
+               updating the config file.
 
-🛠️ Advanced users can modify the report template directly in:
-    quarto_report/quarto_report.qmd
+            🛠️ Advanced users can modify the report template directly in:
+                quarto_report/quarto_report.qmd
 
-⚙️ Configuration file used:
-    {config_path}
-"""
+            ⚙️ Configuration file used:
+                {config_path}
+            """
+        )
 
     return f"{message}\n{border}"
 
 
-## REPORT FORMATTING
+# REPORT FORMATTING
+# ? move as only used in streamlit_report
 def generate_footer() -> str:
     """
     Generate an HTML footer for a report.
@@ -830,23 +908,27 @@ def generate_footer() -> str:
     str
         A formatted HTML string representing the footer.
     """
-    footer = """<style type="text/css">
-.footer {
-    position: relative;
-    left: 0;
-    width: 100%;
-    text-align: center;
-}
-</style>
-<footer class="footer">
-    This report was generated with 
-    <a href="https://github.com/Multiomics-Analytics-Group/vuegen" target="_blank">
-        <img src="https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/vuegen_logo.svg" alt="VueGen" width="65px">
-    </a>
-    | Copyright 2025 <a href="https://github.com/Multiomics-Analytics-Group" target="_blank">
-        Multiomics Network Analytics Group (MoNA)
-    </a>
-</footer>"""
+    footer = textwrap.dedent(
+        f"""
+        <style type="text/css">
+        .footer \u007b
+            position: relative;
+            left: 0;
+            width: 100%;
+            text-align: center;
+        \u007d
+        </style>
+        <footer class="footer">
+            This report was generated with
+            <a href="{REPO_URL}" target="_blank">
+                <img src="{LOGO_URL}" alt="VueGen" width="65px">
+            </a>
+            | Copyright 2025 <a href="{GITHUB_ORG_URL}" target="_blank">
+                {ORG}
+            </a>
+        </footer>
+        """
+    )
     return footer
 
 
