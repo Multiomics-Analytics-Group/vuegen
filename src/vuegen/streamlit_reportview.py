@@ -699,7 +699,7 @@ close-streamlit-app-with-button-click/35132/5
                         )
                     )
                 else:
-                    fpath = Path(html_plot_file).resolve().relative_to(Path.cwd())
+                    fpath = get_relative_file_path(html_plot_file).as_posix()
                     plot_content.append(
                         textwrap.dedent(
                             f"""
