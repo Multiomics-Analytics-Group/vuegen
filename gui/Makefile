@@ -39,7 +39,7 @@ bundle:
 	--collect-all vl_convert \
 	--collect-all typing-extensions \
 	--add-data ../docs/example_data/Basic_example_vuegen_demo_notebook:example_data/Basic_example_vuegen_demo_notebook \
-	--add-data ../docs/images/vuegen_logo.png:. \
+	--add-data ../docs/images/logo/vuegen_logo.png:. \
 	app.py
 
 

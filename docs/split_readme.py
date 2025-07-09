@@ -3,7 +3,7 @@ from pathlib import Path
 
 # Mapping section titles to their corresponding filenames
 SECTION_MAPPING = {
-    "![VueGen Logo](https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/vuegen_logo.svg)": "home_page.md",
+    "![VueGen Logo](https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/HEAD/docs/images/logo/vuegen_logo.svg)": "home_page.md",
     "About the project": "about.md",
     "Installation": "installation.md",
     "Execution": "execution.md",

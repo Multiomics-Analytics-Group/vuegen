@@ -6,9 +6,9 @@ import streamlit as st
 
 st.set_page_config(layout="wide",
                    page_title="Basic Example Vuegen Demo Notebook",
-                   page_icon="https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/vuegen_logo.png"
+                   page_icon="https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/logo/vuegen_logo.png"
 )
-st.logo("https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/vuegen_logo.png")
+st.logo("https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/logo/vuegen_logo.png")
 
 
 st.markdown(

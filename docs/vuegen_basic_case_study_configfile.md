@@ -6,8 +6,8 @@ The [configuration file](https://github.com/Multiomics-Analytics-Group/vuegen/bl
 report:
   title: Basic Example Vuegen Demo Notebook
   description: A general description of the report.
-  graphical_abstract: https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/vuegen_logo.png
-  logo: https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/vuegen_logo.png
+  graphical_abstract: https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/logo/vuegen_logo.png
+  logo: https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/logo/vuegen_logo.png
 sections:
 - title: Plots
   description: This section contains example plots.

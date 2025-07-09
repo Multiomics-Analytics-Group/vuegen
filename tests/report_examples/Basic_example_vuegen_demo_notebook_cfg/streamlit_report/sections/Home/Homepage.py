@@ -8,7 +8,7 @@ st.markdown(
     unsafe_allow_html=True)
 
 
-st.image('https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/vuegen_logo.png', use_column_width=True)
+st.image('https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/logo/vuegen_logo.png', use_column_width=True)
 footer = '''
 <style type="text/css">
 .footer {
