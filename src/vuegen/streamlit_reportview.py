@@ -50,6 +50,7 @@ class StreamlitReportView(r.WebAppReportView):
         report_type: r.ReportType,
         streamlit_autorun: bool = False,
         static_dir: str = STATIC_FILES_DIR,
+        sections_dir: str = SECTIONS_DIR,
     ):
         """Initialize ReportView with the report and report type.
 
@@ -86,8 +87,9 @@ class StreamlitReportView(r.WebAppReportView):
         }
 
         self.static_dir = static_dir
+        self.section_dir = sections_dir
 
-    def generate_report(self, output_dir: str = SECTIONS_DIR) -> None:
+    def generate_report(self, output_dir: str = None) -> None:
         """
         Generates the Streamlit report and creates Python files for each section
         and its subsections and plots.
@@ -98,6 +100,10 @@ class StreamlitReportView(r.WebAppReportView):
             The folder where the generated report files will be saved
             (default is SECTIONS_DIR).
         """
+        if output_dir is not None:
+            # ? does this imply changes to the static dir
+            self.section_dir = Path(output_dir).resolve()
+        output_dir = Path(self.section_dir)
         self.report.logger.debug(
             "Generating '%s' report in directory: '%s'", self.report_type, output_dir
         )
@@ -282,7 +288,7 @@ close-streamlit-app-with-button-click/35132/5
             )
             raise
 
-    def run_report(self, output_dir: str = SECTIONS_DIR) -> None:
+    def run_report(self, output_dir: str = None) -> None:
         """
         Runs the generated Streamlit report.
 
@@ -291,6 +297,9 @@ close-streamlit-app-with-button-click/35132/5
         output_dir : str, optional
             The folder where the report was generated (default is SECTIONS_DIR).
         """
+        if output_dir is not None:
+            self.report.logger.warning("The output_dir parameter is deprecated.")
+        output_dir = Path(self.section_dir)
         if self.streamlit_autorun:
             self.report.logger.info(
                 "Running '%s' %s report.", self.report.title, self.report_type
