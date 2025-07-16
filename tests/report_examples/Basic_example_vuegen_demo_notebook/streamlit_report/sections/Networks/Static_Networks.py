@@ -1,4 +1,6 @@
+from pathlib import Path
 import streamlit as st
+section_dir = Path(__file__).resolve().parent.parent
 
 
 st.markdown(
@@ -16,8 +18,8 @@ st.markdown(
     ),
     unsafe_allow_html=True)
 
-
-st.image('docs/example_data/Basic_example_vuegen_demo_notebook/3_Networks/2_Static_networks/1_phyla_correlation_network.png',  caption='', use_column_width=True)
+plot_file_path = (section_dir / '../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/3_Networks/2_Static_networks/1_phyla_correlation_network.png').resolve().as_posix()
+st.image(plot_file_path, caption='', use_column_width=True)
 
 footer = '''
 <style type="text/css">

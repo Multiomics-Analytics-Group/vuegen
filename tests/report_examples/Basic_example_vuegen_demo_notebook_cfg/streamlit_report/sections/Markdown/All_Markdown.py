@@ -1,5 +1,7 @@
+from pathlib import Path
 import requests
 import streamlit as st
+section_dir = Path(__file__).resolve().parent.parent
 
 
 st.markdown(
@@ -18,7 +20,8 @@ st.markdown(
     unsafe_allow_html=True)
 
 
-with open('example_data/Basic_example_vuegen_demo_notebook/5_Markdown/1_All_markdown/README.md', 'r') as markdown_file:
+file_path = (section_dir / '../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/5_Markdown/1_All_markdown/README.md').resolve().as_posix()
+with open(file_path, 'r') as markdown_file:
     markdown_content = markdown_file.read()
 
 st.markdown(markdown_content, unsafe_allow_html=True)

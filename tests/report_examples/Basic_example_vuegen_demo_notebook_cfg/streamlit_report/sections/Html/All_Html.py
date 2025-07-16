@@ -1,5 +1,7 @@
+from pathlib import Path
 import requests
 import streamlit as st
+section_dir = Path(__file__).resolve().parent.parent
 
 
 st.markdown(
@@ -17,8 +19,8 @@ st.markdown(
     ),
     unsafe_allow_html=True)
 
-
-with open('example_data/Basic_example_vuegen_demo_notebook/4_Html/1_All_html/1_plot.html', 'r', encoding='utf-8') as f:
+file_path = (section_dir / '../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/4_Html/1_All_html/1_plot.html').resolve().as_posix()
+with open(file_path, 'r', encoding='utf-8') as f:
     html_content = f.read()
 
 st.components.v1.html(html_content, height=600, scrolling=True)
@@ -32,7 +34,8 @@ st.markdown(
     unsafe_allow_html=True)
 
 
-with open('example_data/Basic_example_vuegen_demo_notebook/4_Html/1_All_html/2_ckg_network.html', 'r') as html_file:
+file_path = (section_dir / '../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/4_Html/1_All_html/2_ckg_network.html').resolve().as_posix()
+with open(file_path, 'r') as html_file:
     html_content = html_file.read()
 
 
@@ -58,8 +61,8 @@ st.markdown(
     ),
     unsafe_allow_html=True)
 
-
-with open('example_data/Basic_example_vuegen_demo_notebook/4_Html/1_All_html/3_multiqc_report.html', 'r', encoding='utf-8') as f:
+file_path = (section_dir / '../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/4_Html/1_All_html/3_multiqc_report.html').resolve().as_posix()
+with open(file_path, 'r', encoding='utf-8') as f:
     html_content = f.read()
 
 st.components.v1.html(html_content, height=600, scrolling=True)

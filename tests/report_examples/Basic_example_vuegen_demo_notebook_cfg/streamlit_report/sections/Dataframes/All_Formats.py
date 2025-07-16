@@ -1,8 +1,10 @@
+from pathlib import Path
 from st_aggrid import AgGrid, GridOptionsBuilder
 from vuegen import table_utils
 import pandas as pd
 import streamlit as st
 df_index = 1
+section_dir = Path(__file__).resolve().parent.parent
 
 
 st.markdown(
@@ -28,7 +30,8 @@ st.markdown(
     ),
     unsafe_allow_html=True)
 
-df = pd.read_csv('example_data/Basic_example_vuegen_demo_notebook/2_Dataframes/1_All_formats/1_phyla_correlation_network_csv.csv')
+file_path = (section_dir / '../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/2_Dataframes/1_All_formats/1_phyla_correlation_network_csv.csv').resolve().as_posix()
+df = pd.read_csv(file_path)
 
 
 # Displays a DataFrame using AgGrid with configurable options.
@@ -67,12 +70,14 @@ st.markdown(
     unsafe_allow_html=True)
 
 selected_sheet = 0
-sheet_names = table_utils.get_sheet_names("example_data/Basic_example_vuegen_demo_notebook/2_Dataframes/1_All_formats/2_abundance_table_example_xls.xls")
+file_path = (section_dir / '../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/2_Dataframes/1_All_formats/2_abundance_table_example_xls.xls').resolve().as_posix()
+sheet_names = table_utils.get_sheet_names(file_path)
 selected_sheet = st.selectbox("Select a sheet to display",
                               options=sheet_names,
                 )
 
-df = pd.read_excel('example_data/Basic_example_vuegen_demo_notebook/2_Dataframes/1_All_formats/2_abundance_table_example_xls.xls', sheet_name=selected_sheet)
+file_path = (section_dir / '../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/2_Dataframes/1_All_formats/2_abundance_table_example_xls.xls').resolve()
+df = pd.read_excel(file_path, sheet_name=selected_sheet)
 
 
 # Displays a DataFrame using AgGrid with configurable options.
@@ -110,7 +115,8 @@ st.markdown(
     ),
     unsafe_allow_html=True)
 
-df = pd.read_table('example_data/Basic_example_vuegen_demo_notebook/2_Dataframes/1_All_formats/3_sample_info_example_txt.txt')
+file_path = (section_dir / '../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/2_Dataframes/1_All_formats/3_sample_info_example_txt.txt').resolve().as_posix()
+df = pd.read_table(file_path)
 
 
 # Displays a DataFrame using AgGrid with configurable options.
@@ -148,7 +154,8 @@ st.markdown(
     ),
     unsafe_allow_html=True)
 
-df = pd.read_parquet('example_data/Basic_example_vuegen_demo_notebook/2_Dataframes/1_All_formats/4_sample_info_example_parquet.parquet')
+file_path = (section_dir / '../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/2_Dataframes/1_All_formats/4_sample_info_example_parquet.parquet').resolve().as_posix()
+df = pd.read_parquet(file_path)
 
 
 # Displays a DataFrame using AgGrid with configurable options.

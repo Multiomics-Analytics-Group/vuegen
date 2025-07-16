@@ -1,7 +1,9 @@
+from pathlib import Path
 import altair as alt
 import json
 import requests
 import streamlit as st
+section_dir = Path(__file__).resolve().parent.parent
 
 
 st.markdown(
@@ -28,7 +30,8 @@ st.markdown(
     unsafe_allow_html=True)
 
 
-with open('example_data/Basic_example_vuegen_demo_notebook/1_Plots/1_Interactive_plots/1_top_species_plot_by_biome_plotly.json', 'r') as plot_file:
+file_path = (section_dir / '../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/1_Plots/1_Interactive_plots/1_top_species_plot_by_biome_plotly.json').resolve().as_posix()
+with open(file_path, 'r') as plot_file:
     plot_json = json.load(plot_file)
 
 # Keep only 'data' and 'layout' sections
@@ -49,7 +52,8 @@ st.markdown(
     unsafe_allow_html=True)
 
 
-with open('example_data/Basic_example_vuegen_demo_notebook/1_Plots/1_Interactive_plots/2_multiline_plot_altair.json', 'r') as plot_file:
+file_path = (section_dir / '../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/1_Plots/1_Interactive_plots/2_multiline_plot_altair.json').resolve().as_posix()
+with open(file_path, 'r') as plot_file:
     plot_json = json.load(plot_file)
 
 altair_plot = alt.Chart.from_dict(plot_json)
@@ -65,7 +69,8 @@ st.markdown(
     unsafe_allow_html=True)
 
 
-with open('example_data/Basic_example_vuegen_demo_notebook/1_Plots/1_Interactive_plots/3_pie_plot_countries_plotly.json', 'r') as plot_file:
+file_path = (section_dir / '../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/1_Plots/1_Interactive_plots/3_pie_plot_countries_plotly.json').resolve().as_posix()
+with open(file_path, 'r') as plot_file:
     plot_json = json.load(plot_file)
 
 # Keep only 'data' and 'layout' sections
@@ -86,7 +91,8 @@ st.markdown(
     unsafe_allow_html=True)
 
 
-with open('example_data/Basic_example_vuegen_demo_notebook/1_Plots/1_Interactive_plots/4_pie_plots_biomes_plotly.json', 'r') as plot_file:
+file_path = (section_dir / '../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/1_Plots/1_Interactive_plots/4_pie_plots_biomes_plotly.json').resolve().as_posix()
+with open(file_path, 'r') as plot_file:
     plot_json = json.load(plot_file)
 
 # Keep only 'data' and 'layout' sections
@@ -107,7 +113,8 @@ st.markdown(
     unsafe_allow_html=True)
 
 
-with open('example_data/Basic_example_vuegen_demo_notebook/1_Plots/1_Interactive_plots/5_saline_metagenomics_samples_map_altair.json', 'r') as plot_file:
+file_path = (section_dir / '../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/1_Plots/1_Interactive_plots/5_saline_metagenomics_samples_map_altair.json').resolve().as_posix()
+with open(file_path, 'r') as plot_file:
     plot_json = json.load(plot_file)
 
 altair_plot = alt.Chart.from_dict(plot_json)
@@ -123,7 +130,8 @@ st.markdown(
     unsafe_allow_html=True)
 
 
-with open('example_data/Basic_example_vuegen_demo_notebook/1_Plots/1_Interactive_plots/description.md', 'r') as markdown_file:
+file_path = (section_dir / '../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/1_Plots/1_Interactive_plots/description.md').resolve().as_posix()
+with open(file_path, 'r') as markdown_file:
     markdown_content = markdown_file.read()
 
 st.markdown(markdown_content, unsafe_allow_html=True)
