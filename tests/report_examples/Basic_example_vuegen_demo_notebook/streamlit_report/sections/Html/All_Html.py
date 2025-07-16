@@ -1,8 +1,6 @@
 from pathlib import Path
-
 import requests
 import streamlit as st
-
 section_dir = Path(__file__).resolve().parent.parent
 
 
