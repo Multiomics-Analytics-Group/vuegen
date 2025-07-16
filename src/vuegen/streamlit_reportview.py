@@ -289,10 +289,10 @@ close-streamlit-app-with-button-click/35132/5
                     textwrap.dedent(
                         f"""\
                     # Streamlit Report
-                    
+
                     This report was generated using the Vuegen library.
                     Executed from: `{Path.cwd()}`
-                    
+
                     Written to: `{self.section_dir.resolve()}`
 
                     Folder cannot be moved from above path, but can be executed
