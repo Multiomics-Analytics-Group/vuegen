@@ -280,6 +280,27 @@ close-streamlit-app-with-button-click/35132/5
 
             # Create Python files for each section and its subsections and plots
             self._generate_sections(output_dir=output_dir)
+
+            # Save README.md to the output directory
+            fpath = self.section_dir.parent / "README.md"
+            with open(fpath, "w", encoding="utf-8") as f:
+
+                f.write(
+                    textwrap.dedent(
+                        f"""\
+                    # Streamlit Report
+                    
+                    This report was generated using the Vuegen library.
+                    Executed from: `{Path.cwd()}`
+                    
+                    Written to: `{self.section_dir.resolve()}`
+
+                    Folder cannot be moved from above path, but can be executed
+                    from anywhere on the system.
+                    """
+                    )
+                )
+
         except Exception as e:
             self.report.logger.error(
                 "An error occurred while generating the report: %s",
