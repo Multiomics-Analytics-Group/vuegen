@@ -292,7 +292,7 @@ close-streamlit-app-with-button-click/35132/5
 
                     This report was generated using the Vuegen library:
                     https://github.com/Multiomics-Analytics-Group/vuegen
-                    
+
                     Executed from: `{Path.cwd()}`
 
                     Written to: `{self.section_dir.resolve()}`
