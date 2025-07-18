@@ -384,7 +384,7 @@ class ConfigManager:
                     file_in_main_section_dir.name.lower() == "description.md"
                     or "home_image" in file_in_main_section_dir.name.lower()
                 ):
-                    continue  # Skip description files and home_image in the main section
+                    continue  # Skip description file and home_image in the main section
                 component_config = self._create_component_config_fromfile(
                     file_in_main_section_dir
                 )
