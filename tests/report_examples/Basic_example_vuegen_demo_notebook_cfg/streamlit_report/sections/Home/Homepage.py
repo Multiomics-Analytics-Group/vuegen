@@ -1,10 +1,11 @@
 import streamlit as st
-
 st.markdown(
-    (
-        "<p style='text-align: center; "
-        "color: #000000;'>A general description of the report.</p>"
-    ),
+    '''
+    <p style='text-align: center;
+    color: #000000;'>
+    A general description of the report.
+    </p>
+    ''',
     unsafe_allow_html=True)
 
 

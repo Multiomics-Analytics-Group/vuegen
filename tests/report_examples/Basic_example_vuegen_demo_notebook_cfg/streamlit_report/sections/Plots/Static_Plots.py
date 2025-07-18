@@ -2,53 +2,58 @@ from pathlib import Path
 import streamlit as st
 section_dir = Path(__file__).resolve().parent.parent
 
-
 st.markdown(
-    (
-        "<h3 style='text-align: center; "
-        "color: #023558;'>Static Plots</h3>"
-    ),
+    '''
+    <h3 style='text-align: center;
+    color: #023558;'>
+    Static Plots
+    </h3>
+    ''',
     unsafe_allow_html=True)
 
-
 st.markdown(
-    (
-        "<h4 style='text-align: center; "
-        "color: #2b8cbe;'>Number Samples Per Study</h4>"
-    ),
+    '''
+    <h4 style='text-align: center;
+    color: #2b8cbe;'>
+    Number Samples Per Study
+    </h4>
+    ''',
     unsafe_allow_html=True)
 
 plot_file_path = (section_dir / '../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/1_Plots/2_Static_plots/1_number_samples_per_study.png').resolve().as_posix()
 st.image(plot_file_path, caption='', use_column_width=True)
 
-
 st.markdown(
-    (
-        "<h4 style='text-align: center; "
-        "color: #2b8cbe;'>Animal Metagenomics Samples Map</h4>"
-    ),
+    '''
+    <h4 style='text-align: center;
+    color: #2b8cbe;'>
+    Animal Metagenomics Samples Map
+    </h4>
+    ''',
     unsafe_allow_html=True)
 
 plot_file_path = (section_dir / '../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/1_Plots/2_Static_plots/2_animal_metagenomics_samples_map.png').resolve().as_posix()
 st.image(plot_file_path, caption='', use_column_width=True)
 
-
 st.markdown(
-    (
-        "<h4 style='text-align: center; "
-        "color: #2b8cbe;'>Alpha Diversity Host Associated Samples</h4>"
-    ),
+    '''
+    <h4 style='text-align: center;
+    color: #2b8cbe;'>
+    Alpha Diversity Host Associated Samples
+    </h4>
+    ''',
     unsafe_allow_html=True)
 
 plot_file_path = (section_dir / '../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/1_Plots/2_Static_plots/3_alpha_diversity_host_associated_samples.png').resolve().as_posix()
 st.image(plot_file_path, caption='', use_column_width=True)
 
-
 st.markdown(
-    (
-        "<h4 style='text-align: center; "
-        "color: #2b8cbe;'>Graphical overview of VueGen workflow and components</h4>"
-    ),
+    '''
+    <h4 style='text-align: center;
+    color: #2b8cbe;'>
+    Graphical overview of VueGen workflow and components
+    </h4>
+    ''',
     unsafe_allow_html=True)
 
 plot_file_path = 'https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/vuegen_graph_abstract.png'
