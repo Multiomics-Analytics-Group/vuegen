@@ -108,9 +108,10 @@ def get_report(
             report_type=report_type,
             streamlit_autorun=streamlit_autorun,
             static_dir=static_files_dir,
+            sections_dir=sections_dir,
         )
-        st_report.generate_report(output_dir=sections_dir)
-        st_report.run_report(output_dir=sections_dir)
+        st_report.generate_report()
+        st_report.run_report()
     else:
         # Check if Quarto is installed
         if shutil.which("quarto") is None and not hasattr(
