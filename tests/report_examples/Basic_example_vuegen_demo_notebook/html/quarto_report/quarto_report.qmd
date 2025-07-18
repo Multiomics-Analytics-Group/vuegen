@@ -53,6 +53,8 @@ report_dir = Path().cwd()
 
 A general description of the report.
 
+![](../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/home_image.png){fig-alt= width=90%}
+
 # Plots
 ## Interactive Plots
 Optional description for section.

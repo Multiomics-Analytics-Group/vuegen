@@ -7,6 +7,8 @@ st.markdown(
     ),
     unsafe_allow_html=True)
 
+
+st.image('docs/example_data/Basic_example_vuegen_demo_notebook/home_image.png', use_column_width=True)
 footer = '''
 <style type="text/css">
 .footer {
