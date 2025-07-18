@@ -84,7 +84,7 @@ def clean_trailing_links(content):
 
 
 def process_readme(readme_path, output_dir):
-    readme = Path(readme_path).read_text()
+    readme = Path(readme_path).read_text(encoding="utf-8")
 
     # Extract links from README
     links = extract_links_from_readme(readme)
@@ -104,11 +104,11 @@ def process_readme(readme_path, output_dir):
             (output_dir / filename).write_text(myst_content)
             print(f"Generated {filename}")
         else:
-            print(f"Warning: Section '{section_title}' not found in README")
+            raise ValueError(f"Section '{section_title}' not found in README")
 
     # Include CONTRIBUTING.md with its own link references
     contrib_path = readme_path.parent / "CONTRIBUTING.md"
-    if contrib_path.exists():
+    try:
         raw_contrib = contrib_path.read_text()
         contrib_links = extract_links_from_readme(raw_contrib)
 
@@ -121,8 +121,8 @@ def process_readme(readme_path, output_dir):
         # Write output
         (output_dir / "contributing.md").write_text(contrib_converted)
         print("Generated contributing.md")
-    else:
-        print("Warning: CONTRIBUTING.md not found")
+    except FileNotFoundError as e:
+        raise FileNotFoundError(f"CONTRIBUTING.md not found at {contrib_path}") from e
 
 
 if __name__ == "__main__":
