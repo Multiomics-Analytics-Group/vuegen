@@ -424,13 +424,13 @@ close-streamlit-app-with-button-click/35132/5
             )
 
         text = text.strip()  # get rid of new lines
-        text = textwrap.indent(text, "              ")
+        text = textwrap.indent(text, "                ")
         ret = textwrap.dedent(
             f"""\
             st.markdown(
                 '''
                 <{tag} style='text-align: {text_align};
-                color: {color};'>\n  {text}
+                color: {color};'>\n{text}
                 </{tag}>
                 ''',
                 unsafe_allow_html=True)

@@ -211,7 +211,7 @@ class ConfigManager:
         """
         description_file = folder_path / "description.md"
         if description_file.exists():
-            ret = description_file.read_text().strip().replace("\n", "\n  ")
+            ret = description_file.read_text().strip()
             return f"{ret}\n"
         return ""
 
