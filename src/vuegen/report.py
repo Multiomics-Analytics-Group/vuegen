@@ -100,6 +100,22 @@ class DataFrameFormat(StrEnum):
         return f".{self.name.lower()}"
 
 
+class ImageFormat(StrEnum):
+    """Enum representing supported image file formats."""
+
+    PNG = auto()
+    JPG = auto()
+    JPEG = auto()
+    SVG = auto()
+    GIF = auto()
+    WEBP = auto()
+
+    @property
+    def value_with_dot(self):
+        """Return the file extension with the dot."""
+        return f".{self.name.lower()}"
+
+
 @dataclass
 class Component:
     """
