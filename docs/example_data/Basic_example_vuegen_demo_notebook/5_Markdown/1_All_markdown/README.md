@@ -1,8 +1,8 @@
 <!-- <div align="center">
-  <img width="300px" src="images/vuegen_logo.svg">
+  <img width="300px" src="images/logo/vuegen_logo.svg">
 </div> -->
 
-![VueGen Logo](https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/vuegen_logo.png)
+![VueGen Logo](https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/logo/vuegen_logo.png)
 
 <p align="center">
    VueGen is a Python library that automates the creation of scientific reports.
