@@ -1,0 +1,12 @@
+report:
+  title: VueGen Chatbot Case Study
+  description: This report demonstrates how to use the chatbot component in VueGen
+sections:
+- title: Chatbot Example
+  subsections:
+  - title: Ollama-style streaming chatbot
+    components:
+    - title: ChatBot Component
+      component_type: chatbot
+      api_url: http://localhost:11434/api/chat
+      model: llama3.2

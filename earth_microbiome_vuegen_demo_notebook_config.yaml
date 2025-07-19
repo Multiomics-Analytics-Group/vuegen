@@ -1,27 +1,19 @@
 report:
   description: "The Earth Microbiome Project (EMP) is a systematic attempt to characterize\
     \ global microbial taxonomic and functional diversity for the benefit of the planet\
-    \ and humankind. \n  It aimed to sample the Earth\u2019s microbial communities\
-    \ at an unprecedented scale in order to advance our understanding of the organizing\
-    \ biogeographic principles that govern microbial community structure. \n  The\
-    \ EMP dataset is generated from samples that individual researchers have compiled\
-    \ and contributed to the EMP. \n  The result is both a reference database giving\
+    \ and humankind. \nIt aimed to sample the Earth\u2019s microbial communities at\
+    \ an unprecedented scale in order to advance our understanding of the organizing\
+    \ biogeographic principles that govern microbial community structure. \nThe EMP\
+    \ dataset is generated from samples that individual researchers have compiled\
+    \ and contributed to the EMP. \nThe result is both a reference database giving\
     \ global context to DNA sequence data and a framework for incorporating data from\
     \ future studies, fostering increasingly complete characterization of Earth\u2019\
-    s microbial diversity.\n  \n  You can find more information about the Earth Microbiome\
+    s microbial diversity.\n\nYou can find more information about the Earth Microbiome\
     \ Project at https://earthmicrobiome.org/ and in the [original article](https://www.nature.com/articles/nature24621).\n"
   graphical_abstract: https://raw.githubusercontent.com/ElDeveloper/cogs220/master/emp-logo.svg
   logo: https://raw.githubusercontent.com/ElDeveloper/cogs220/master/emp-logo.svg
   title: Earth Microbiome Vuegen Demo Notebook
 sections:
-- components:
-  - caption: ''
-    component_type: markdown
-    description: ''
-    file_path: /home/runner/work/vuegen/vuegen/docs/example_data/Earth_microbiome_vuegen_demo_notebook/description.md
-    title: Description
-  description: Components added to homepage.
-  title: ''
 - components: []
   description: This section contains the exploratory data analysis of the Earth Microbiome
     Project (EMP) dataset.

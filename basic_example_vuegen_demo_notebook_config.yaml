@@ -1,19 +1,19 @@
 report:
   description: 'A general description of the report.
 
+
+    It should test all major components which are available
+
+    to be integrated into VueGen.
+
+
+    Check our tests folder for examples of report files used to generate actual reports.
+
     '
-  graphical_abstract: https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/vuegen_logo.svg
-  logo: https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/vuegen_logo.svg
+  graphical_abstract: https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/logo/vuegen_logo.png
+  logo: https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/logo/vuegen_logo.png
   title: Basic Example Vuegen Demo Notebook
 sections:
-- components:
-  - caption: ''
-    component_type: markdown
-    description: ''
-    file_path: /home/runner/work/vuegen/vuegen/docs/example_data/Basic_example_vuegen_demo_notebook/description.md
-    title: Description
-  description: Components added to homepage.
-  title: ''
 - components: []
   description: This section contains example plots
   subsections:

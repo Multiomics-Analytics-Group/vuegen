@@ -1,13 +1,13 @@
 # Predefined Directory Case Study - Configuration File
 
-The [configuration file](https://github.com/Multiomics-Analytics-Group/vuegen/blob/main/docs/example_config_files/Basic_example_vuegen_demo_notebook_config.yaml) of the basic case study using a predefined directory is presented below: 
+The [configuration file](https://github.com/Multiomics-Analytics-Group/vuegen/blob/main/docs/example_config_files/Basic_example_vuegen_demo_notebook_config.yaml) of the basic case study using a predefined directory is presented below:
 
 ```yaml
 report:
   title: Basic Example Vuegen Demo Notebook
   description: A general description of the report.
-  graphical_abstract: https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/vuegen_logo.svg
-  logo: https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/vuegen_logo.svg
+  graphical_abstract: https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/logo/vuegen_logo.png
+  logo: https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/logo/vuegen_logo.png
 sections:
 - title: Plots
   description: This section contains example plots.
