@@ -5,28 +5,31 @@ import requests
 import streamlit as st
 section_dir = Path(__file__).resolve().parent.parent
 
-
 st.markdown(
-    (
-        "<h3 style='text-align: center; "
-        "color: #023558;'>Interactive Plots</h3>"
-    ),
+    '''
+    <h3 style='text-align: center;
+    color: #023558;'>
+    Interactive Plots
+    </h3>
+    ''',
     unsafe_allow_html=True)
 
-
 st.markdown(
-    (
-        "<p style='text-align: center; "
-        "color: #000000;'>Optional description for section.</p>"
-    ),
+    '''
+    <p style='text-align: center;
+    color: #000000;'>
+    Optional description for section.
+    </p>
+    ''',
     unsafe_allow_html=True)
 
-
 st.markdown(
-    (
-        "<h4 style='text-align: center; "
-        "color: #2b8cbe;'>Top Species Plot By Biome Plotly</h4>"
-    ),
+    '''
+    <h4 style='text-align: center;
+    color: #2b8cbe;'>
+    Top Species Plot By Biome Plotly
+    </h4>
+    ''',
     unsafe_allow_html=True)
 
 
@@ -43,12 +46,13 @@ plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'}
                                 for entry in plot_json.get('data', [])]
 st.plotly_chart(plot_json, use_container_width=True)
 
-
 st.markdown(
-    (
-        "<h4 style='text-align: center; "
-        "color: #2b8cbe;'>Multiline Plot Altair</h4>"
-    ),
+    '''
+    <h4 style='text-align: center;
+    color: #2b8cbe;'>
+    Multiline Plot Altair
+    </h4>
+    ''',
     unsafe_allow_html=True)
 
 
@@ -60,12 +64,13 @@ altair_plot = alt.Chart.from_dict(plot_json)
 st.vega_lite_chart(json.loads(altair_plot.to_json()),
                    use_container_width=True)
 
-
 st.markdown(
-    (
-        "<h4 style='text-align: center; "
-        "color: #2b8cbe;'>Pie Plot Countries Plotly</h4>"
-    ),
+    '''
+    <h4 style='text-align: center;
+    color: #2b8cbe;'>
+    Pie Plot Countries Plotly
+    </h4>
+    ''',
     unsafe_allow_html=True)
 
 
@@ -82,12 +87,13 @@ plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'}
                                 for entry in plot_json.get('data', [])]
 st.plotly_chart(plot_json, use_container_width=True)
 
-
 st.markdown(
-    (
-        "<h4 style='text-align: center; "
-        "color: #2b8cbe;'>Pie Plots Biomes Plotly</h4>"
-    ),
+    '''
+    <h4 style='text-align: center;
+    color: #2b8cbe;'>
+    Pie Plots Biomes Plotly
+    </h4>
+    ''',
     unsafe_allow_html=True)
 
 
@@ -104,12 +110,13 @@ plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'}
                                 for entry in plot_json.get('data', [])]
 st.plotly_chart(plot_json, use_container_width=True)
 
-
 st.markdown(
-    (
-        "<h4 style='text-align: center; "
-        "color: #2b8cbe;'>Saline Metagenomics Samples Map Altair</h4>"
-    ),
+    '''
+    <h4 style='text-align: center;
+    color: #2b8cbe;'>
+    Saline Metagenomics Samples Map Altair
+    </h4>
+    ''',
     unsafe_allow_html=True)
 
 
@@ -121,12 +128,13 @@ altair_plot = alt.Chart.from_dict(plot_json)
 st.vega_lite_chart(json.loads(altair_plot.to_json()),
                    use_container_width=True)
 
-
 st.markdown(
-    (
-        "<h4 style='text-align: center; "
-        "color: #2b8cbe;'>Plotly Plot R</h4>"
-    ),
+    '''
+    <h4 style='text-align: center;
+    color: #2b8cbe;'>
+    Plotly Plot R
+    </h4>
+    ''',
     unsafe_allow_html=True)
 
 
@@ -143,12 +151,13 @@ plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'}
                                 for entry in plot_json.get('data', [])]
 st.plotly_chart(plot_json, use_container_width=True)
 
-
 st.markdown(
-    (
-        "<h4 style='text-align: center; "
-        "color: #2b8cbe;'>Description</h4>"
-    ),
+    '''
+    <h4 style='text-align: center;
+    color: #2b8cbe;'>
+    Description
+    </h4>
+    ''',
     unsafe_allow_html=True)
 
 

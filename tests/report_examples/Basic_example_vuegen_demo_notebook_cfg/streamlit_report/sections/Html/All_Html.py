@@ -3,20 +3,22 @@ import requests
 import streamlit as st
 section_dir = Path(__file__).resolve().parent.parent
 
-
 st.markdown(
-    (
-        "<h3 style='text-align: center; "
-        "color: #023558;'>All Html</h3>"
-    ),
+    '''
+    <h3 style='text-align: center;
+    color: #023558;'>
+    All Html
+    </h3>
+    ''',
     unsafe_allow_html=True)
 
-
 st.markdown(
-    (
-        "<h4 style='text-align: center; "
-        "color: #2b8cbe;'>Plot</h4>"
-    ),
+    '''
+    <h4 style='text-align: center;
+    color: #2b8cbe;'>
+    Plot
+    </h4>
+    ''',
     unsafe_allow_html=True)
 
 file_path = (section_dir / '../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/4_Html/1_All_html/1_plot.html').resolve().as_posix()
@@ -25,12 +27,13 @@ with open(file_path, 'r', encoding='utf-8') as f:
 
 st.components.v1.html(html_content, height=600, scrolling=True)
 
-
 st.markdown(
-    (
-        "<h4 style='text-align: center; "
-        "color: #2b8cbe;'>Ckg Network</h4>"
-    ),
+    '''
+    <h4 style='text-align: center;
+    color: #2b8cbe;'>
+    Ckg Network
+    </h4>
+    ''',
     unsafe_allow_html=True)
 
 
@@ -53,12 +56,13 @@ net_html_height = 1200 if control_layout else 630
 # Load HTML into HTML component for display on Streamlit
 st.components.v1.html(html_content, height=net_html_height)
 
-
 st.markdown(
-    (
-        "<h4 style='text-align: center; "
-        "color: #2b8cbe;'>Multiqc Report</h4>"
-    ),
+    '''
+    <h4 style='text-align: center;
+    color: #2b8cbe;'>
+    Multiqc Report
+    </h4>
+    ''',
     unsafe_allow_html=True)
 
 file_path = (section_dir / '../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/4_Html/1_All_html/3_multiqc_report.html').resolve().as_posix()

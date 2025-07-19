@@ -7,12 +7,13 @@ import streamlit as st
 st.set_page_config(layout="wide",
                    page_title="Basic Example Vuegen Demo Notebook")
 
-
 st.markdown(
-    (
-        "<h1 style='text-align: center; "
-        "color: #023858;'>Basic Example Vuegen Demo Notebook</h1>"
-    ),
+    '''
+    <h1 style='text-align: center;
+    color: #023858;'>
+    Basic Example Vuegen Demo Notebook
+    </h1>
+    ''',
     unsafe_allow_html=True)
 
 

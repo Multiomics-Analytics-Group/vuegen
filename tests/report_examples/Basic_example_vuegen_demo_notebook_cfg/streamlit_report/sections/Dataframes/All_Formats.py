@@ -6,28 +6,31 @@ import streamlit as st
 df_index = 1
 section_dir = Path(__file__).resolve().parent.parent
 
-
 st.markdown(
-    (
-        "<h3 style='text-align: center; "
-        "color: #023558;'>All Formats</h3>"
-    ),
+    '''
+    <h3 style='text-align: center;
+    color: #023558;'>
+    All Formats
+    </h3>
+    ''',
     unsafe_allow_html=True)
 
-
 st.markdown(
-    (
-        "<p style='text-align: center; "
-        "color: #000000;'>This subsection contains example dataframes.</p>"
-    ),
+    '''
+    <p style='text-align: center;
+    color: #000000;'>
+    This subsection contains example dataframes.
+    </p>
+    ''',
     unsafe_allow_html=True)
 
-
 st.markdown(
-    (
-        "<h4 style='text-align: center; "
-        "color: #2b8cbe;'>Phyla Correlation Network Csv</h4>"
-    ),
+    '''
+    <h4 style='text-align: center;
+    color: #2b8cbe;'>
+    Phyla Correlation Network Csv
+    </h4>
+    ''',
     unsafe_allow_html=True)
 
 file_path = (section_dir / '../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/2_Dataframes/1_All_formats/1_phyla_correlation_network_csv.csv').resolve().as_posix()
@@ -61,12 +64,13 @@ st.download_button(
     mime='text/csv',
     key=f"download_button_{df_index}")
 df_index += 1
-
 st.markdown(
-    (
-        "<h4 style='text-align: center; "
-        "color: #2b8cbe;'>Abundance Table Example Xls</h4>"
-    ),
+    '''
+    <h4 style='text-align: center;
+    color: #2b8cbe;'>
+    Abundance Table Example Xls
+    </h4>
+    ''',
     unsafe_allow_html=True)
 
 selected_sheet = 0
@@ -107,12 +111,13 @@ st.download_button(
     mime='text/csv',
     key=f"download_button_{df_index}")
 df_index += 1
-
 st.markdown(
-    (
-        "<h4 style='text-align: center; "
-        "color: #2b8cbe;'>Sample Info Example Txt</h4>"
-    ),
+    '''
+    <h4 style='text-align: center;
+    color: #2b8cbe;'>
+    Sample Info Example Txt
+    </h4>
+    ''',
     unsafe_allow_html=True)
 
 file_path = (section_dir / '../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/2_Dataframes/1_All_formats/3_sample_info_example_txt.txt').resolve().as_posix()
@@ -146,12 +151,13 @@ st.download_button(
     mime='text/csv',
     key=f"download_button_{df_index}")
 df_index += 1
-
 st.markdown(
-    (
-        "<h4 style='text-align: center; "
-        "color: #2b8cbe;'>Sample Info Example Parquet</h4>"
-    ),
+    '''
+    <h4 style='text-align: center;
+    color: #2b8cbe;'>
+    Sample Info Example Parquet
+    </h4>
+    ''',
     unsafe_allow_html=True)
 
 file_path = (section_dir / '../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/2_Dataframes/1_All_formats/4_sample_info_example_parquet.parquet').resolve().as_posix()

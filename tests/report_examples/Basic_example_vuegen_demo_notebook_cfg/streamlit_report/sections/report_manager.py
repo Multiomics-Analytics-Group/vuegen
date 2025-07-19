@@ -10,12 +10,13 @@ st.set_page_config(layout="wide",
 )
 st.logo("https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/logo/vuegen_logo.png")
 
-
 st.markdown(
-    (
-        "<h1 style='text-align: center; "
-        "color: #023858;'>Basic Example Vuegen Demo Notebook</h1>"
-    ),
+    '''
+    <h1 style='text-align: center;
+    color: #023858;'>
+    Basic Example Vuegen Demo Notebook
+    </h1>
+    ''',
     unsafe_allow_html=True)
 
 

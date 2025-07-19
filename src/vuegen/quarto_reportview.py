@@ -129,7 +129,7 @@ class QuartoReportView(r.ReportView):
 
             # Add description of the report
             if self.report.description:
-                qmd_content.append(f"""{self.report.description}""")
+                qmd_content.append(self.report.description)
 
             # If available add the graphical abstract
             if self.report.graphical_abstract:
