@@ -26,18 +26,19 @@ include-in-header:
 include-after-body:
     text: |
         <footer class="footer">
-            This report was generated with 
+            This report was generated with
             <a href="https://github.com/Multiomics-Analytics-Group/vuegen" target="_blank">
-                <img src="https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/vuegen_logo.svg" alt="VueGen" width="65px">
+                <img src="https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/HEAD/docs/images/logo/vuegen_logo.svg" alt="VueGen" width="65px">
             </a>
-            | Copyright 2025 <a href="https://github.com/Multiomics-Analytics-Group" target="_blank">Multiomics Network Analytics Group (MoNA)</a>
+            | Copyright 2025 <a href="https://github.com/Multiomics-Analytics-Group" target="_blank">
+            Multiomics Network Analytics Group (MoNA)</a>
         </footer>
 ---
 
 ```{python}
 #| label: 'Imports'
 from itables import show, init_notebook_mode
-import IPython.display as display
+from pathlib import Path
 import altair as alt
 import json
 import pandas as pd
@@ -46,14 +47,15 @@ import requests
 
 
 init_notebook_mode(all_interactive=True)
+report_dir = Path().cwd()
 ```
 
 The Earth Microbiome Project (EMP) is a systematic attempt to characterize global microbial taxonomic and functional diversity for the benefit of the planet and humankind. 
-  It aimed to sample the Earth’s microbial communities at an unprecedented scale in order to advance our understanding of the organizing biogeographic principles that govern microbial community structure. 
-  The EMP dataset is generated from samples that individual researchers have compiled and contributed to the EMP. 
-  The result is both a reference database giving global context to DNA sequence data and a framework for incorporating data from future studies, fostering increasingly complete characterization of Earth’s microbial diversity.
-  
-  You can find more information about the Earth Microbiome Project at https://earthmicrobiome.org/ and in the [original article](https://www.nature.com/articles/nature24621).
+It aimed to sample the Earth’s microbial communities at an unprecedented scale in order to advance our understanding of the organizing biogeographic principles that govern microbial community structure. 
+The EMP dataset is generated from samples that individual researchers have compiled and contributed to the EMP. 
+The result is both a reference database giving global context to DNA sequence data and a framework for incorporating data from future studies, fostering increasingly complete characterization of Earth’s microbial diversity.
+
+You can find more information about the Earth Microbiome Project at https://earthmicrobiome.org/ and in the [original article](https://www.nature.com/articles/nature24621).
 
 ![](https://raw.githubusercontent.com/ElDeveloper/cogs220/master/emp-logo.svg){fig-alt= width=90%}
 
@@ -66,7 +68,7 @@ This section contains the exploratory data analysis of the Earth Microbiome Proj
 #| label: 'Metadata Random Subset 10'
 #| fig-cap: ""
 
-df = pd.read_csv('../example_data/Earth_microbiome_vuegen_demo_notebook/1_Exploratory_data_analysis/1_sample_exploration/1_metadata_random_subset.csv')
+df = pd.read_csv(report_dir / '../example_data/Earth_microbiome_vuegen_demo_notebook/1_Exploratory_data_analysis/1_sample_exploration/1_metadata_random_subset.csv')
 
 show(df, classes="display nowrap compact", lengthMenu=[3, 5, 10])
 ```
@@ -75,42 +77,48 @@ show(df, classes="display nowrap compact", lengthMenu=[3, 5, 10])
 ![](../example_data/Earth_microbiome_vuegen_demo_notebook/1_Exploratory_data_analysis/1_sample_exploration/2_animal_samples_map.png){fig-alt= width=90%}
 
 ### Plant Samples Map
+
 ```{python}
 #| label: 'Plant Samples Map 43'
 #| fig-cap: ""
 
-with open('../example_data/Earth_microbiome_vuegen_demo_notebook/1_Exploratory_data_analysis/1_sample_exploration/3_plant_samples_map.json', 'r') as plot_file:
+with open(report_dir /'../example_data/Earth_microbiome_vuegen_demo_notebook/1_Exploratory_data_analysis/1_sample_exploration/3_plant_samples_map.json', 'r') as plot_file:
     plot_json = json.load(plot_file)
 
 # Keep only 'data' and 'layout' sections
-plot_json = {key: plot_json[key] for key in plot_json if key in ['data', 'layout']}
-
+plot_json = {key: plot_json[key] for key in plot_json
+                if key in ['data', 'layout']
+            }
 # Remove 'frame' section in 'data'
-plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'} for entry in plot_json.get('data', [])]
-
+plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'}
+                            for entry in plot_json.get('data', [])
+                    ]
 # Convert JSON to string
 plot_json_str = json.dumps(plot_json)
-
 # Create the plotly plot
 fig_plotly = pio.from_json(plot_json_str)
-fig_plotly.update_layout(autosize=False, width=950, height=400, margin=dict(b=50, t=50, l=50, r=50))
+fig_plotly.update_layout(autosize=False, width=950, height=400,
+                         margin=dict(b=50, t=50, l=50, r=50)
+                         )
 
 fig_plotly.show()
 ```
 
 ### Saline Samples Map
+
 ```{python}
 #| label: 'Saline Samples Map 44'
 #| fig-cap: ""
 
-with open('../example_data/Earth_microbiome_vuegen_demo_notebook/1_Exploratory_data_analysis/1_sample_exploration/4_saline_samples_map.json', 'r') as plot_file:
+with open(report_dir /'../example_data/Earth_microbiome_vuegen_demo_notebook/1_Exploratory_data_analysis/1_sample_exploration/4_saline_samples_map.json', 'r') as plot_file:
     plot_json = json.load(plot_file)
 
 # Convert JSON to string
 plot_json_str = json.dumps(plot_json)
 
-# Create the plotly plot
-fig_altair = alt.Chart.from_json(plot_json_str).properties(width=900, height=370)
+# Create the altair plot
+fig_altair = alt.Chart.from_json(plot_json_str
+                ).properties(width=900, height=370)
 
 fig_altair
 ```
@@ -128,25 +136,29 @@ This subsection contains the alpha diversity analysis of the EMP dataset.
 ![](../example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/1_alpha_diversity/1_alpha_diversity_host_associated_samples.png){fig-alt= width=90%}
 
 ### Alpha Diversity Free Living Samples
+
 ```{python}
 #| label: 'Alpha Diversity Free Living Samples 47'
 #| fig-cap: ""
 
-with open('../example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/1_alpha_diversity/2_alpha_diversity_free_living_samples.json', 'r') as plot_file:
+with open(report_dir /'../example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/1_alpha_diversity/2_alpha_diversity_free_living_samples.json', 'r') as plot_file:
     plot_json = json.load(plot_file)
 
 # Keep only 'data' and 'layout' sections
-plot_json = {key: plot_json[key] for key in plot_json if key in ['data', 'layout']}
-
+plot_json = {key: plot_json[key] for key in plot_json
+                if key in ['data', 'layout']
+            }
 # Remove 'frame' section in 'data'
-plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'} for entry in plot_json.get('data', [])]
-
+plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'}
+                            for entry in plot_json.get('data', [])
+                    ]
 # Convert JSON to string
 plot_json_str = json.dumps(plot_json)
-
 # Create the plotly plot
 fig_plotly = pio.from_json(plot_json_str)
-fig_plotly.update_layout(autosize=False, width=950, height=400, margin=dict(b=50, t=50, l=50, r=50))
+fig_plotly.update_layout(autosize=False, width=950, height=400,
+                         margin=dict(b=50, t=50, l=50, r=50)
+                         )
 
 fig_plotly.show()
 ```
@@ -156,25 +168,29 @@ fig_plotly.show()
 ![](../example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/2_average_copy_number/1_average_copy_number_emp_ontology_level2.png){fig-alt= width=90%}
 
 ### Average Copy Number Emp Ontology Level3
+
 ```{python}
 #| label: 'Average Copy Number Emp Ontology Level3 49'
 #| fig-cap: ""
 
-with open('../example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/2_average_copy_number/2_average_copy_number_emp_ontology_level3.json', 'r') as plot_file:
+with open(report_dir /'../example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/2_average_copy_number/2_average_copy_number_emp_ontology_level3.json', 'r') as plot_file:
     plot_json = json.load(plot_file)
 
 # Keep only 'data' and 'layout' sections
-plot_json = {key: plot_json[key] for key in plot_json if key in ['data', 'layout']}
-
+plot_json = {key: plot_json[key] for key in plot_json
+                if key in ['data', 'layout']
+            }
 # Remove 'frame' section in 'data'
-plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'} for entry in plot_json.get('data', [])]
-
+plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'}
+                            for entry in plot_json.get('data', [])
+                    ]
 # Convert JSON to string
 plot_json_str = json.dumps(plot_json)
-
 # Create the plotly plot
 fig_plotly = pio.from_json(plot_json_str)
-fig_plotly.update_layout(autosize=False, width=950, height=400, margin=dict(b=50, t=50, l=50, r=50))
+fig_plotly.update_layout(autosize=False, width=950, height=400,
+                         margin=dict(b=50, t=50, l=50, r=50)
+                         )
 
 fig_plotly.show()
 ```
@@ -185,55 +201,63 @@ fig_plotly.show()
 #| label: 'Nestedness Random Subset 11'
 #| fig-cap: ""
 
-df = pd.read_csv('../example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/3_nestedness/1_nestedness_random_subset.csv')
+df = pd.read_csv(report_dir / '../example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/3_nestedness/1_nestedness_random_subset.csv')
 
 show(df, classes="display nowrap compact", lengthMenu=[3, 5, 10])
 ```
 
 ### All Samples
+
 ```{python}
 #| label: 'All Samples 50'
 #| fig-cap: ""
 
-with open('../example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/3_nestedness/2_all_samples.json', 'r') as plot_file:
+with open(report_dir /'../example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/3_nestedness/2_all_samples.json', 'r') as plot_file:
     plot_json = json.load(plot_file)
 
 # Keep only 'data' and 'layout' sections
-plot_json = {key: plot_json[key] for key in plot_json if key in ['data', 'layout']}
-
+plot_json = {key: plot_json[key] for key in plot_json
+                if key in ['data', 'layout']
+            }
 # Remove 'frame' section in 'data'
-plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'} for entry in plot_json.get('data', [])]
-
+plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'}
+                            for entry in plot_json.get('data', [])
+                    ]
 # Convert JSON to string
 plot_json_str = json.dumps(plot_json)
-
 # Create the plotly plot
 fig_plotly = pio.from_json(plot_json_str)
-fig_plotly.update_layout(autosize=False, width=950, height=400, margin=dict(b=50, t=50, l=50, r=50))
+fig_plotly.update_layout(autosize=False, width=950, height=400,
+                         margin=dict(b=50, t=50, l=50, r=50)
+                         )
 
 fig_plotly.show()
 ```
 
 ### Plant Samples
+
 ```{python}
 #| label: 'Plant Samples 51'
 #| fig-cap: ""
 
-with open('../example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/3_nestedness/3_plant_samples.json', 'r') as plot_file:
+with open(report_dir /'../example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/3_nestedness/3_plant_samples.json', 'r') as plot_file:
     plot_json = json.load(plot_file)
 
 # Keep only 'data' and 'layout' sections
-plot_json = {key: plot_json[key] for key in plot_json if key in ['data', 'layout']}
-
+plot_json = {key: plot_json[key] for key in plot_json
+                if key in ['data', 'layout']
+            }
 # Remove 'frame' section in 'data'
-plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'} for entry in plot_json.get('data', [])]
-
+plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'}
+                            for entry in plot_json.get('data', [])
+                    ]
 # Convert JSON to string
 plot_json_str = json.dumps(plot_json)
-
 # Create the plotly plot
 fig_plotly = pio.from_json(plot_json_str)
-fig_plotly.update_layout(autosize=False, width=950, height=400, margin=dict(b=50, t=50, l=50, r=50))
+fig_plotly.update_layout(autosize=False, width=950, height=400,
+                         margin=dict(b=50, t=50, l=50, r=50)
+                         )
 
 fig_plotly.show()
 ```
@@ -259,7 +283,7 @@ This subsection contains the Shannon entropy analysis of the EMP dataset.
 #| label: 'Phyla Counts Subset 12'
 #| fig-cap: ""
 
-df = pd.read_csv('../example_data/Earth_microbiome_vuegen_demo_notebook/3_Network_analysis/1_phyla_association_networks/1_phyla_counts_subset.csv')
+df = pd.read_csv(report_dir / '../example_data/Earth_microbiome_vuegen_demo_notebook/3_Network_analysis/1_phyla_association_networks/1_phyla_counts_subset.csv')
 
 show(df, classes="display nowrap compact", lengthMenu=[3, 5, 10])
 ```
@@ -271,7 +295,9 @@ show(df, classes="display nowrap compact", lengthMenu=[3, 5, 10])
 
 
 <div style="text-align: center;">
-<iframe src="../quarto_report/static/Phyla_Correlation_Network_With_0.5_Threshold_Edgelist.html" alt="Phyla Correlation Network With 0.5 Threshold Edgelist plot" width="800px" height="630px"></iframe>
+<iframe src="static/Phyla_Correlation_Network_With_0.5_Threshold_Edgelist.html" alt="Phyla Correlation Network With 0.5 Threshold Edgelist plot"
+        width="800px" height="630px">
+</iframe>
 </div>
 
 ### Phyla Correlation Network With 0.5 Threshold
