@@ -270,6 +270,10 @@ You can create a new conda environment with Python 3.12 and the `jupyter` and `v
 conda create -n vuegen_gui -c conda-forge -c bioconda python=3.12 jupyter vuegen
 ```
 
+The exact Python version used for the release is specified on the
+[releases](https://github.com/Multiomics-Analytics-Group/vuegen/releases/latest) page
+as we observed that sometimes the exact Python version is required to run the GUI.
+
 > [!WARNING]
 > If you have errors with the `vuegen` package, you can install it separately using pip, as explained in the installation section.
 >
