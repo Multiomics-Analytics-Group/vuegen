@@ -211,8 +211,30 @@ class ConfigManager:
         """
         description_file = folder_path / "description.md"
         if description_file.exists():
-            ret = description_file.read_text().strip().replace("\n", "\n  ")
+            ret = description_file.read_text().strip()
             return f"{ret}\n"
+        return ""
+
+    def _read_home_image_file(self, folder_path: Path) -> str:
+        """
+        Looks for an image file named 'home_image' with any supported image extension
+        in the given folder.
+
+        Parameters
+        ----------
+        folder_path : Path
+            Path to the folder where the 'home_image' file might be located.
+
+        Returns
+        -------
+        str
+            Path to the 'home_image' image file as a string if found, otherwise an
+            empty string.
+        """
+        for image_format in r.ImageFormat:
+            candidate = folder_path / f"home_image{image_format.value_with_dot}"
+            if candidate.exists() and candidate.is_file():
+                return str(candidate)
         return ""
 
     def _create_subsect_config_fromdir(
@@ -334,7 +356,7 @@ class ConfigManager:
                 # This will be used for the home section of a report
                 "title": self._create_title_fromdir(base_dir_path.name),
                 "description": self._read_description_file(base_dir_path),
-                "graphical_abstract": "",
+                "graphical_abstract": self._read_home_image_file(base_dir_path),
                 "logo": "",
             },
             "sections": [],
@@ -358,8 +380,11 @@ class ConfigManager:
             # could be single plots?
             else:
                 file_in_main_section_dir = section_dir
-                if file_in_main_section_dir.name.lower() == "description.md":
-                    continue  # Skip description files in the main section
+                if (
+                    file_in_main_section_dir.name.lower() == "description.md"
+                    or "home_image" in file_in_main_section_dir.name.lower()
+                ):
+                    continue  # Skip description file and home_image in the main section
                 component_config = self._create_component_config_fromfile(
                     file_in_main_section_dir
                 )

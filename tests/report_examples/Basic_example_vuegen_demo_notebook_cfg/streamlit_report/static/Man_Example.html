@@ -1,0 +1,179 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        
+            <script src="lib/bindings/utils.js"></script>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/dist/vis-network.min.css" integrity="sha512-WgxfT5LWjfszlPHXRmBWHkV2eceiWTOBvrKCNbdgDYTHrT2AeLCGbF4sZlZw3UMN3WtL0tGUoIAKsu8mllg/XA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            
+        
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+        <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
+          crossorigin="anonymous"
+        />
+        <script
+          src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+          crossorigin="anonymous"
+        ></script>
+
+
+        <center>
+          <h1></h1>
+        </center>
+        <style type="text/css">
+
+             #mynetwork {
+                 width: 100%;
+                 height: 600px;
+                 background-color: white;
+                 border: 1px solid lightgray;
+                 position: relative;
+                 float: left;
+             }
+
+             
+
+             
+             #config {
+                 float: left;
+                 width: 400px;
+                 height: 600px;
+             }
+             
+
+             
+        </style>
+    </head>
+
+
+    <body>
+        <div class="card" style="width: 100%">
+            
+            
+            <div id="mynetwork" class="card-body"></div>
+        </div>
+
+        
+        
+            <div id="config"></div>
+        
+
+        <script type="text/javascript">
+
+              // initialize global variables.
+              var edges;
+              var nodes;
+              var allNodes;
+              var allEdges;
+              var nodeColors;
+              var originalNodes;
+              var network;
+              var container;
+              var options, data;
+              var filter = {
+                  item : '',
+                  property : '',
+                  value : []
+              };
+
+              
+
+              
+
+              // This method is responsible for drawing the graph, returns the drawn network
+              function drawGraph() {
+                  var container = document.getElementById('mynetwork');
+
+                  
+
+                  // parsing and collecting nodes and edges from the python
+                  nodes = new vis.DataSet([{"SUID": 2765, "borderWidth": 2, "borderWidthSelected": 2.5, "cluster": 2.0, "color": "#97c2fc", "degree": 3.0, "font": {"size": 12}, "id": "2765", "label": "Acinetobacter_lwoffii", "name": "Acinetobacter_lwoffii", "selected": false, "shape": "dot", "shared name": "Acinetobacter_lwoffii", "size": 17}, {"SUID": 2769, "borderWidth": 2, "borderWidthSelected": 2.5, "cluster": 2.0, "color": "#97c2fc", "degree": 4.0, "font": {"size": 12}, "id": "2769", "label": "Acinetobacter_rhizosphaerae", "name": "Acinetobacter_rhizosphaerae", "selected": false, "shape": "dot", "shared name": "Acinetobacter_rhizosphaerae", "size": 30}, {"SUID": 2763, "borderWidth": 2, "borderWidthSelected": 2.5, "cluster": 2.0, "color": "#97c2fc", "degree": 4.0, "font": {"size": 12}, "id": "2763", "label": "Acinetobacter_johnsonii", "name": "Acinetobacter_johnsonii", "selected": false, "shape": "dot", "shared name": "Acinetobacter_johnsonii", "size": 30}, {"SUID": 2761, "borderWidth": 2, "borderWidthSelected": 2.5, "cluster": 2.0, "color": "#97c2fc", "degree": 3.0, "font": {"size": 12}, "id": "2761", "label": "Acinetobacter_guillouiae", "name": "Acinetobacter_guillouiae", "selected": false, "shape": "dot", "shared name": "Acinetobacter_guillouiae", "size": 17}, {"SUID": 2759, "borderWidth": 2, "borderWidthSelected": 2.5, "cluster": 2.0, "color": "#97c2fc", "degree": 2.0, "font": {"size": 12}, "id": "2759", "label": "Paracoccus_marcusii", "name": "Paracoccus_marcusii", "selected": false, "shape": "dot", "shared name": "Paracoccus_marcusii", "size": 5}, {"SUID": 2757, "borderWidth": 2, "borderWidthSelected": 2.5, "cluster": 1.0, "color": "#97c2fc", "degree": 3.0, "font": {"size": 12}, "id": "2757", "label": "Collinsella_aerofaciens", "name": "Collinsella_aerofaciens", "selected": false, "shape": "dot", "shared name": "Collinsella_aerofaciens", "size": 17}, {"SUID": 2767, "borderWidth": 2, "borderWidthSelected": 2.5, "cluster": 1.0, "color": "#97c2fc", "degree": 3.0, "font": {"size": 12}, "id": "2767", "label": "Eubacterium_biforme", "name": "Eubacterium_biforme", "selected": false, "shape": "dot", "shared name": "Eubacterium_biforme", "size": 17}, {"SUID": 2755, "borderWidth": 2, "borderWidthSelected": 2.5, "cluster": 1.0, "color": "#97c2fc", "degree": 3.0, "font": {"size": 12}, "id": "2755", "label": "Bifidobacterium_longum", "name": "Bifidobacterium_longum", "selected": false, "shape": "dot", "shared name": "Bifidobacterium_longum", "size": 17}, {"SUID": 2753, "borderWidth": 2, "borderWidthSelected": 2.5, "cluster": 1.0, "color": "#97c2fc", "degree": 3.0, "font": {"size": 12}, "id": "2753", "label": "Bifidobacterium_adolescentis", "name": "Bifidobacterium_adolescentis", "selected": false, "shape": "dot", "shared name": "Bifidobacterium_adolescentis", "size": 17}]);
+                  edges = new vis.DataSet([{"SUID": 2797, "adja": 0.6296684, "asso": 0.725709, "data.key.column": 2866247, "diss": 0.3703316, "from": "2765", "interaction": "interacts with", "name": "Acinetobacter_lwoffii (interacts with) Acinetobacter_rhizosphaerae", "selected": false, "shared interaction": "interacts with", "shared name": "Acinetobacter_lwoffii (interacts with) Acinetobacter_rhizosphaerae", "sign": 1.0, "to": "2769", "width": 1}, {"SUID": 2795, "adja": 0.6337456, "asso": 0.7317154, "data.key.column": 2866244, "diss": 0.3662544, "from": "2763", "interaction": "interacts with", "name": "Acinetobacter_johnsonii (interacts with) Acinetobacter_rhizosphaerae", "selected": false, "shared interaction": "interacts with", "shared name": "Acinetobacter_johnsonii (interacts with) Acinetobacter_rhizosphaerae", "sign": 1.0, "to": "2769", "width": 1}, {"SUID": 2793, "adja": 0.643511, "asso": 0.7458311, "data.key.column": 2866241, "diss": 0.356489, "from": "2763", "interaction": "interacts with", "name": "Acinetobacter_johnsonii (interacts with) Acinetobacter_lwoffii", "selected": false, "shared interaction": "interacts with", "shared name": "Acinetobacter_johnsonii (interacts with) Acinetobacter_lwoffii", "sign": 1.0, "to": "2765", "width": 1}, {"SUID": 2791, "adja": 0.6342043, "asso": 0.732387, "data.key.column": 2866238, "diss": 0.3657957, "from": "2761", "interaction": "interacts with", "name": "Acinetobacter_guillouiae (interacts with) Acinetobacter_rhizosphaerae", "selected": false, "shared interaction": "interacts with", "shared name": "Acinetobacter_guillouiae (interacts with) Acinetobacter_rhizosphaerae", "sign": 1.0, "to": "2769", "width": 1}, {"SUID": 2789, "adja": 0.6212919, "asso": 0.7131603, "data.key.column": 2866235, "diss": 0.3787081, "from": "2761", "interaction": "interacts with", "name": "Acinetobacter_guillouiae (interacts with) Acinetobacter_lwoffii", "selected": false, "shared interaction": "interacts with", "shared name": "Acinetobacter_guillouiae (interacts with) Acinetobacter_lwoffii", "sign": 1.0, "to": "2765", "width": 1}, {"SUID": 2787, "adja": 0.6236925, "asso": 0.7167854, "data.key.column": 2866232, "diss": 0.3763075, "from": "2761", "interaction": "interacts with", "name": "Acinetobacter_guillouiae (interacts with) Acinetobacter_johnsonii", "selected": false, "shared interaction": "interacts with", "shared name": "Acinetobacter_guillouiae (interacts with) Acinetobacter_johnsonii", "sign": 1.0, "to": "2763", "width": 1}, {"SUID": 2785, "adja": 0.6133873, "asso": 0.7010612, "data.key.column": 2866229, "diss": 0.3866127, "from": "2759", "interaction": "interacts with", "name": "Paracoccus_marcusii (interacts with) Acinetobacter_rhizosphaerae", "selected": false, "shared interaction": "interacts with", "shared name": "Paracoccus_marcusii (interacts with) Acinetobacter_rhizosphaerae", "sign": 1.0, "to": "2769", "width": 1}, {"SUID": 2783, "adja": 0.6141385, "asso": 0.7022219, "data.key.column": 2866226, "diss": 0.3858615, "from": "2759", "interaction": "interacts with", "name": "Paracoccus_marcusii (interacts with) Acinetobacter_johnsonii", "selected": false, "shared interaction": "interacts with", "shared name": "Paracoccus_marcusii (interacts with) Acinetobacter_johnsonii", "sign": 1.0, "to": "2763", "width": 1}, {"SUID": 2781, "adja": 0.6259318, "asso": 0.720146, "data.key.column": 2866223, "diss": 0.3740682, "from": "2757", "interaction": "interacts with", "name": "Collinsella_aerofaciens (interacts with) Eubacterium_biforme", "selected": false, "shared interaction": "interacts with", "shared name": "Collinsella_aerofaciens (interacts with) Eubacterium_biforme", "sign": 1.0, "to": "2767", "width": 1}, {"SUID": 2779, "adja": 0.6169789, "asso": 0.7065896, "data.key.column": 2866220, "diss": 0.3830211, "from": "2755", "interaction": "interacts with", "name": "Bifidobacterium_longum (interacts with) Eubacterium_biforme", "selected": false, "shared interaction": "interacts with", "shared name": "Bifidobacterium_longum (interacts with) Eubacterium_biforme", "sign": 1.0, "to": "2767", "width": 1}, {"SUID": 2777, "adja": 0.6205256, "asso": 0.7119983, "data.key.column": 2866217, "diss": 0.3794744, "from": "2755", "interaction": "interacts with", "name": "Bifidobacterium_longum (interacts with) Collinsella_aerofaciens", "selected": false, "shared interaction": "interacts with", "shared name": "Bifidobacterium_longum (interacts with) Collinsella_aerofaciens", "sign": 1.0, "to": "2757", "width": 1}, {"SUID": 2775, "adja": 0.6167951, "asso": 0.7063081, "data.key.column": 2866214, "diss": 0.3832049, "from": "2753", "interaction": "interacts with", "name": "Bifidobacterium_adolescentis (interacts with) Eubacterium_biforme", "selected": false, "shared interaction": "interacts with", "shared name": "Bifidobacterium_adolescentis (interacts with) Eubacterium_biforme", "sign": 1.0, "to": "2767", "width": 1}, {"SUID": 2773, "adja": 0.6211992, "asso": 0.71302, "data.key.column": 2866211, "diss": 0.3788008, "from": "2753", "interaction": "interacts with", "name": "Bifidobacterium_adolescentis (interacts with) Collinsella_aerofaciens", "selected": false, "shared interaction": "interacts with", "shared name": "Bifidobacterium_adolescentis (interacts with) Collinsella_aerofaciens", "sign": 1.0, "to": "2757", "width": 1}, {"SUID": 2771, "adja": 0.6282301, "asso": 0.7235742, "data.key.column": 2866208, "diss": 0.3717699, "from": "2753", "interaction": "interacts with", "name": "Bifidobacterium_adolescentis (interacts with) Bifidobacterium_longum", "selected": false, "shared interaction": "interacts with", "shared name": "Bifidobacterium_adolescentis (interacts with) Bifidobacterium_longum", "sign": 1.0, "to": "2755", "width": 1}]);
+
+                  nodeColors = {};
+                  allNodes = nodes.get({ returnType: "Object" });
+                  for (nodeId in allNodes) {
+                    nodeColors[nodeId] = allNodes[nodeId].color;
+                  }
+                  allEdges = edges.get({ returnType: "Object" });
+                  // adding nodes and edges to the graph
+                  data = {nodes: nodes, edges: edges};
+
+                  var options = {
+    "configure": {
+        "enabled": true,
+        "filter": [
+            "physics"
+        ]
+    },
+    "edges": {
+        "color": {
+            "inherit": true
+        },
+        "smooth": {
+            "enabled": true,
+            "type": "dynamic"
+        }
+    },
+    "interaction": {
+        "dragNodes": true,
+        "hideEdgesOnDrag": false,
+        "hideNodesOnDrag": false
+    },
+    "physics": {
+        "enabled": true,
+        "forceAtlas2Based": {
+            "avoidOverlap": 0,
+            "centralGravity": 0.005,
+            "damping": 0.4,
+            "gravitationalConstant": -30,
+            "springConstant": 0.1,
+            "springLength": 100
+        },
+        "solver": "forceAtlas2Based",
+        "stabilization": {
+            "enabled": true,
+            "fit": true,
+            "iterations": 1000,
+            "onlyDynamicEdges": false,
+            "updateInterval": 50
+        }
+    }
+};
+
+                  
+
+
+                  
+                  // if this network requires displaying the configure window,
+                  // put it in its div
+                  options.configure["container"] = document.getElementById("config");
+                  
+
+                  network = new vis.Network(container, data, options);
+
+                  
+
+                  
+
+                  
+
+
+                  
+
+                  return network;
+
+              }
+              drawGraph();
+        </script>
+    </body>
+</html>

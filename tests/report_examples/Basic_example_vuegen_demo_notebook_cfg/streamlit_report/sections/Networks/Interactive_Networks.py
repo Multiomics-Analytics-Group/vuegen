@@ -16,7 +16,7 @@ st.markdown(
     '''
     <p style='text-align: center;
     color: #000000;'>
-    Optional description for subsection.
+    Optional description for subsection
     </p>
     ''',
     unsafe_allow_html=True)

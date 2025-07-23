@@ -4,17 +4,12 @@ st.markdown(
     <p style='text-align: center;
     color: #000000;'>
     A general description of the report.
-
-    It should test all major components which are available
-    to be integrated into VueGen.
-
-    Check our tests folder for examples of report files used to generate actual reports.
     </p>
     ''',
     unsafe_allow_html=True)
 
 
-st.image('docs/example_data/Basic_example_vuegen_demo_notebook/home_image.png', use_column_width=True)
+st.image('https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/logo/vuegen_logo.png', use_column_width=True)
 footer = '''
 <style type="text/css">
 .footer {

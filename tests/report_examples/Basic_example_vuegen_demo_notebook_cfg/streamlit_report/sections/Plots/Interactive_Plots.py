@@ -132,29 +132,6 @@ st.markdown(
     '''
     <h4 style='text-align: center;
     color: #2b8cbe;'>
-    Plotly Plot R
-    </h4>
-    ''',
-    unsafe_allow_html=True)
-
-
-file_path = (section_dir / '../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/1_Plots/1_Interactive_plots/6_plotly_plot_R.json').resolve().as_posix()
-with open(file_path, 'r') as plot_file:
-    plot_json = json.load(plot_file)
-
-# Keep only 'data' and 'layout' sections
-plot_json = {key: plot_json[key] for key in plot_json
-                                 if key in ['data', 'layout']}
-
-# Remove 'frame' section in 'data'
-plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'}
-                                for entry in plot_json.get('data', [])]
-st.plotly_chart(plot_json, use_container_width=True)
-
-st.markdown(
-    '''
-    <h4 style='text-align: center;
-    color: #2b8cbe;'>
     Description
     </h4>
     ''',

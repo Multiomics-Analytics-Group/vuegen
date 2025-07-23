@@ -7,12 +7,13 @@ import streamlit as st
 st.set_page_config(layout="wide",
                    page_title="Chatbot example")
 
-
 st.markdown(
-    (
-        "<h1 style='text-align: center; "
-        "color: #023858;'>Chatbot example</h1>"
-    ),
+    '''
+    <h1 style='text-align: center;
+    color: #023858;'>
+    Chatbot example
+    </h1>
+    ''',
     unsafe_allow_html=True)
 
 

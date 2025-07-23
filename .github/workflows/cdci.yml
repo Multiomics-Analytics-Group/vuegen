@@ -120,6 +120,15 @@ jobs:
             echo "Error: One or more protected files have been modified."
             exit 1
           fi
+      - name: streamlit report based on predefined config file
+        run: |
+          cd docs
+          vuegen -c example_config_files/Basic_example_vuegen_demo_notebook_config.yaml -output_dir ../tests/report_examples/Basic_example_vuegen_demo_notebook_cfg
+          # Check for changes
+          if git diff ../tests/report_examples | grep .; then
+            echo "Error: One or more protected files have been modified."
+            exit 1
+          fi
       - name: check streamlit report files for chatbot API
         run: |
           vuegen -c docs/example_config_files/Chatbot_example_config.yaml -output_dir tests/report_examples/chat_bot
@@ -210,7 +219,7 @@ jobs:
       - name: Build executable
         run: |
           cd gui
-          pyinstaller -n vuegen_gui --onefile --windowed --collect-all pyvis --collect-all streamlit --collect-all st_aggrid --collect-all customtkinter --collect-all quarto_cli --collect-all plotly --collect-all _plotly_utils --collect-all traitlets --collect-all referencing --collect-all rpds --collect-all tenacity --collect-all pandas --collect-all numpy --collect-all matplotlib --collect-all openpyxl --collect-all xlrd --collect-all nbformat --collect-all nbclient --collect-all altair --collect-all itables --collect-all kaleido --collect-all pyarrow --collect-all dataframe_image --collect-all narwhals --collect-all PIL --collect-all vl_convert --collect-all typing-extensions --add-data ../docs/example_data/Basic_example_vuegen_demo_notebook:example_data/Basic_example_vuegen_demo_notebook --add-data ../docs/images/vuegen_logo.png:. app.py
+          pyinstaller -n vuegen_gui --onefile --windowed --collect-all pyvis --collect-all streamlit --collect-all st_aggrid --collect-all customtkinter --collect-all quarto_cli --collect-all plotly --collect-all _plotly_utils --collect-all traitlets --collect-all referencing --collect-all rpds --collect-all tenacity --collect-all pandas --collect-all numpy --collect-all matplotlib --collect-all openpyxl --collect-all xlrd --collect-all nbformat --collect-all nbclient --collect-all altair --collect-all itables --collect-all kaleido --collect-all pyarrow --collect-all dataframe_image --collect-all narwhals --collect-all PIL --collect-all vl_convert --collect-all typing-extensions --add-data ../docs/example_data/Basic_example_vuegen_demo_notebook:example_data/Basic_example_vuegen_demo_notebook --add-data ../docs/images/logo/vuegen_logo.png:. app.py
         # --windowed only for mac, see:
         # https://pyinstaller.org/en/stable/usage.html#building-macos-app-bundles
         # 'Under macOS, PyInstaller always builds a UNIX executable in dist.'

@@ -50,6 +50,7 @@ class StreamlitReportView(r.WebAppReportView):
         report_type: r.ReportType,
         streamlit_autorun: bool = False,
         static_dir: str = STATIC_FILES_DIR,
+        sections_dir: str = SECTIONS_DIR,
     ):
         """Initialize ReportView with the report and report type.
 
@@ -86,8 +87,9 @@ class StreamlitReportView(r.WebAppReportView):
         }
 
         self.static_dir = static_dir
+        self.section_dir = sections_dir
 
-    def generate_report(self, output_dir: str = SECTIONS_DIR) -> None:
+    def generate_report(self, output_dir: str = None) -> None:
         """
         Generates the Streamlit report and creates Python files for each section
         and its subsections and plots.
@@ -98,6 +100,10 @@ class StreamlitReportView(r.WebAppReportView):
             The folder where the generated report files will be saved
             (default is SECTIONS_DIR).
         """
+        if output_dir is not None:
+            # ? does this imply changes to the static dir
+            self.section_dir = Path(output_dir).resolve()
+        output_dir = Path(self.section_dir)
         self.report.logger.debug(
             "Generating '%s' report in directory: '%s'", self.report_type, output_dir
         )
@@ -274,6 +280,29 @@ close-streamlit-app-with-button-click/35132/5
 
             # Create Python files for each section and its subsections and plots
             self._generate_sections(output_dir=output_dir)
+
+            # Save README.md to the output directory
+            fpath = self.section_dir.parent / "README.md"
+            with open(fpath, "w", encoding="utf-8") as f:
+
+                f.write(
+                    textwrap.dedent(
+                        f"""\
+                    # Streamlit Report
+
+                    This report was generated using the Vuegen library:
+                    https://github.com/Multiomics-Analytics-Group/vuegen
+
+                    Executed from: `{Path.cwd()}`
+
+                    Written to: `{self.section_dir.resolve()}`
+
+                    Folder cannot be moved from above path, but can be executed
+                    from anywhere on the system.
+                    """
+                    )
+                )
+
         except Exception as e:
             self.report.logger.error(
                 "An error occurred while generating the report: %s",
@@ -282,7 +311,7 @@ close-streamlit-app-with-button-click/35132/5
             )
             raise
 
-    def run_report(self, output_dir: str = SECTIONS_DIR) -> None:
+    def run_report(self, output_dir: str = None) -> None:
         """
         Runs the generated Streamlit report.
 
@@ -291,6 +320,9 @@ close-streamlit-app-with-button-click/35132/5
         output_dir : str, optional
             The folder where the report was generated (default is SECTIONS_DIR).
         """
+        if output_dir is not None:
+            self.report.logger.warning("The output_dir parameter is deprecated.")
+        output_dir = Path(self.section_dir)
         if self.streamlit_autorun:
             self.report.logger.info(
                 "Running '%s' %s report.", self.report.title, self.report_type
@@ -392,17 +424,19 @@ close-streamlit-app-with-button-click/35132/5
             )
 
         text = text.strip()  # get rid of new lines
-
-        return textwrap.dedent(
-            f"""
+        text = textwrap.indent(text, "                ")
+        ret = textwrap.dedent(
+            f"""\
             st.markdown(
-                (
-                    "<{tag} style='text-align: {text_align}; "
-                    "color: {color};'>{text}</{tag}>"
-                ),
+                '''
+                <{tag} style='text-align: {text_align};
+                color: {color};'>\n{text}
+                </{tag}>
+                ''',
                 unsafe_allow_html=True)
             """
         )
+        return ret
 
     def _generate_home_section(
         self,
@@ -657,10 +691,17 @@ close-streamlit-app-with-button-click/35132/5
                 # If the file path is a URL, keep the file path as is
                 if is_url(plot.file_path):
                     plot_file_path = plot.file_path
+                    plot_content.append(f"plot_file_path = '{plot_file_path}'")
                 else:  # If it's a local file
-                    plot_file_path = get_relative_file_path(plot.file_path).as_posix()
+                    plot_file_path = get_relative_file_path(
+                        plot.file_path, relative_to=self.section_dir
+                    ).as_posix()
+                    plot_content.append(
+                        f"plot_file_path = (section_dir / '{plot_file_path}')"
+                        ".resolve().as_posix()"
+                    )
                 plot_content.append(
-                    f"\nst.image('{plot_file_path}', "
+                    "st.image(plot_file_path,"
                     f" caption='{plot.caption}', use_column_width=True)\n"
                 )
             elif plot.plot_type == r.PlotType.PLOTLY:
@@ -699,11 +740,14 @@ close-streamlit-app-with-button-click/35132/5
                         )
                     )
                 else:
-                    fpath = Path(html_plot_file).resolve().relative_to(Path.cwd())
+                    fpath = get_relative_file_path(
+                        html_plot_file, relative_to=self.section_dir
+                    ).as_posix()
                     plot_content.append(
                         textwrap.dedent(
                             f"""
-                            with open('{fpath}', 'r') as html_file:
+                            file_path = (section_dir / '{fpath}').resolve().as_posix()
+                            with open(file_path, 'r') as html_file:
                                 html_content = html_file.read()
                             """
                         )
@@ -770,10 +814,13 @@ close-streamlit-app-with-button-click/35132/5
                 plot_json = json.loads(response.text)\n"""
             )
         else:  # If it's a local file
-            plot_rel_path = get_relative_file_path(plot.file_path)
+            plot_rel_path = get_relative_file_path(
+                plot.file_path, relative_to=self.section_dir
+            ).as_posix()
             plot_code = textwrap.dedent(
                 f"""
-                with open('{plot_rel_path.as_posix()}', 'r') as plot_file:
+                file_path = (section_dir / '{plot_rel_path}').resolve().as_posix()
+                with open(file_path, 'r') as plot_file:
                     plot_json = json.load(plot_file)\n"""
             )
 
@@ -864,11 +911,14 @@ close-streamlit-app-with-button-click/35132/5
                 sheet_names = table_utils.get_sheet_names(df_file_path.as_posix())
                 if len(sheet_names) > 1:
                     # If there are multiple sheets, ask the user to select one
-                    fpath = df_file_path.as_posix()
+                    fpath = get_relative_file_path(
+                        dataframe.file_path, relative_to=self.section_dir
+                    ).as_posix()
                     dataframe_content.append(
                         textwrap.dedent(
                             f"""\
-                        sheet_names = table_utils.get_sheet_names("{fpath}")
+                        file_path = (section_dir / '{fpath}').resolve().as_posix()
+                        sheet_names = table_utils.get_sheet_names(file_path)
                         selected_sheet = st.selectbox("Select a sheet to display",
                                                       options=sheet_names,
                                         )
@@ -877,18 +927,27 @@ close-streamlit-app-with-button-click/35132/5
                     )
 
             # Load the DataFrame using the correct function
-            read_function = read_function_mapping[file_extension]
+            df_file_path = get_relative_file_path(
+                dataframe.file_path, relative_to=self.section_dir
+            ).as_posix()
+            read_function = read_function_mapping[file_extension].__name__
             if file_extension in [
                 r.DataFrameFormat.XLS.value_with_dot,
                 r.DataFrameFormat.XLSX.value_with_dot,
             ]:
                 dataframe_content.append(
-                    f"df = pd.{read_function.__name__}('{df_file_path.as_posix()}',"
-                    " sheet_name=selected_sheet)\n"
+                    textwrap.dedent(
+                        f"""\
+                    file_path = (section_dir / '{df_file_path}').resolve()
+                    df = pd.{read_function}(file_path, sheet_name=selected_sheet)
+                    """
+                    )
                 )
             else:
                 dataframe_content.append(
-                    f"df = pd.{read_function.__name__}('{df_file_path.as_posix()}')\n"
+                    f"file_path = (section_dir / '{df_file_path}'"
+                    ").resolve().as_posix()\n"
+                    f"df = pd.{read_function}(file_path)\n"
                 )
             # ! Alternative to select box: iterate over sheets in DataFrame
             # Displays a DataFrame using AgGrid with configurable options.
@@ -982,11 +1041,15 @@ close-streamlit-app-with-button-click/35132/5
                     )
                 )
             else:  # If it's a local file
-                md_rel_path = get_relative_file_path(markdown.file_path)
+                md_rel_path = get_relative_file_path(
+                    markdown.file_path, relative_to=self.section_dir
+                ).as_posix()
+
                 markdown_content.append(
                     textwrap.dedent(
                         f"""
-                        with open('{md_rel_path.as_posix()}', 'r') as markdown_file:
+                        file_path = (section_dir / '{md_rel_path}').resolve().as_posix()
+                        with open(file_path, 'r') as markdown_file:
                             markdown_content = markdown_file.read()
                         """
                     )
@@ -1052,13 +1115,16 @@ close-streamlit-app-with-button-click/35132/5
                     )
                 )
             else:  # If it's a local file
-                html_rel_path = get_relative_file_path(html.file_path).as_posix()
+                html_rel_path = get_relative_file_path(
+                    html.file_path, relative_to=self.section_dir
+                ).as_posix()
                 html_content.append(
                     textwrap.dedent(
-                        f"""
-                        with open('{html_rel_path}', 'r', encoding='utf-8') as f:
-                            html_content = f.read()
-                        """
+                        f"""\
+                    file_path = (section_dir / '{html_rel_path}').resolve().as_posix()
+                    with open(file_path, 'r', encoding='utf-8') as f:
+                        html_content = f.read()
+                    """
                     )
                 )
 
@@ -1376,7 +1442,11 @@ close-streamlit-app-with-button-click/35132/5
         }
 
         component_type = component.component_type
-        component_imports = ["import streamlit as st"]
+        component_imports = [
+            "import streamlit as st",
+            "from pathlib import Path",
+            "section_dir = Path(__file__).resolve().parent.parent",
+        ]
 
         # Add relevant imports based on component type and visualization tool
         if component_type == r.ComponentType.PLOT:
