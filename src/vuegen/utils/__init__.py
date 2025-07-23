@@ -816,6 +816,23 @@ def get_logger(
     return logger, log_file
 
 
+def strip_unicode(text: str) -> str:
+    """
+    Strip Unicode characters from the given text.
+
+    Parameters
+    ----------
+    text : str
+        The input text from which to strip Unicode characters.
+
+    Returns
+    -------
+    str
+        The text with Unicode characters removed.
+    """
+    return "".join(c for c in text if ord(c) < 128)
+
+
 def get_completion_message(report_type: str, config_path: str) -> str:
     """
     Generate a formatted completion message after report generation.
