@@ -332,11 +332,23 @@ This advanced case study demonstrates the application of VueGen in a real-world 
 > The EMP case study is available online as [HTML][emp-html-demo] and [Streamlit][emp-st-demo] reports.
 > The [configuration file][emp-config] is available in the `docs/example_config_files` folder, and the [directory][emp-dir] with example data is in the `docs/example_data` folder.
 
-### 3. ChatBot Component
+### 3. APICall Component
+
+This case study focuses on the `APICall` component, which enables interaction with external APIs by using HTTP methods such as **GET** and **POST**. The retrieved data is displayed in the report, allowing users to integrate external data sources into their anlyses. This component is restricted to **Streamlit** reports.
+
+🔗 [![Open in Colab][colab_badge]][colab_link_apicall]
+
+> [!NOTE]
+> A [configuration file example][apicall-config] for the apicall component is available in 
+the `docs/example_config_files` folder.
+
+### 4. ChatBot Component
 
 This case study highlights VueGen’s capability to embed a chatbot component into a report subsection,
 enabling interactive conversations inside the report. This component is streamlit-specific and is not
 available for other report types.
+
+🔗 [![Open in Colab][colab_badge]][colab_link_chatbot]
 
 Two API modes are supported:
 
@@ -356,11 +368,11 @@ Two API modes are supported:
   - `links`: a list of source URLs (optional)
   - `HTML content`: an HTML snippet with a Pyvis network visualization (optional)
 
-This response structure is currently customized for an internal knowledge graph assistant, but VueGen is being actively developed
-to support more flexible and general-purpose response formats in future releases.
+This response structure is currently customized for an internal knowledge graph assistant, but VueGen is being actively developed to support more flexible and general-purpose response formats in future releases.
 
 > [!NOTE]
-> You can see a [configuration file example][config-chatbot] for the chatbot component in the `docs/example_config_files` folder.
+> A [configuration file example][chatbot-config] for the chatbot component is available 
+in the `docs/example_config_files` folder.
 
 ## Web application deployment
 
@@ -443,7 +455,6 @@ We appreciate your feedback! If you have any comments, suggestions, or run into 
 [emp-st-demo]: https://earth-microbiome-vuegen-demo.streamlit.app/
 [ollama_chat]: https://github.com/ollama/ollama/blob/main/docs/api.md#generate-a-chat-completion
 [ollama]: https://ollama.com/
-[config-chatbot]: https://github.com/Multiomics-Analytics-Group/vuegen/blob/main/docs/example_config_files/Chatbot_example_config.yaml
 [issues]: https://github.com/Multiomics-Analytics-Group/vuegen/issues
 [pulls]: https://github.com/Multiomics-Analytics-Group/vuegen/pulls
 [vuegen-article]: https://doi.org/10.1093/bioadv/vbaf149
@@ -462,6 +473,10 @@ We appreciate your feedback! If you have any comments, suggestions, or run into 
 [emp]: https://earthmicrobiome.org/
 [emp-config]: https://github.com/Multiomics-Analytics-Group/vuegen/blob/main/docs/example_config_files/Earth_microbiome_vuegen_demo_notebook_config
 [emp-dir]: https://github.com/Multiomics-Analytics-Group/vuegen/blob/main/docs/example_data/Earth_microbiome_vuegen_demo_notebook
+[colab_link_apicall]: https://colab.research.google.com/github/Multiomics-Analytics-Group/vuegen/blob/main/docs/vuegen_apicall_case_study.ipynb
+[apicall-config]: https://github.com/Multiomics-Analytics-Group/vuegen/blob/main/docs/example_config_files/APIcall_example_config.yaml
+[colab_link_chatbot]: https://colab.research.google.com/github/Multiomics-Analytics-Group/vuegen/blob/main/docs/vuegen_chatbot_case_study.ipynb
+[chatbot-config]: https://github.com/Multiomics-Analytics-Group/vuegen/blob/main/docs/example_config_files/Chatbot_example_config.yaml
 [conda-download]: https://conda-forge.org/download/
 [gui-readme]: https://github.com/Multiomics-Analytics-Group/vuegen/blob/main/gui/README.md
 [pyinstaller]: https://pyinstaller.org/
