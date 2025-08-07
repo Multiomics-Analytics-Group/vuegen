@@ -445,7 +445,7 @@ We appreciate your feedback! If you have any comments, suggestions, or run into 
 [vuegen-conda]: https://anaconda.org/bioconda/vuegen
 [vuegen-docker-quay]: https://quay.io/repository/dtu_biosustain_dsp/vuegen
 [docker-folder]: https://github.com/Multiomics-Analytics-Group/nf-vuegen/tree/main/Docker
-[vuegen-license]: https://github.com/Multiomics-Analytics-Group/vuegen/blob/main/LICENSE
+[vuegen-license]: https://github.com/Multiomics-Analytics-Group/vuegen/blob/main/LICENSE.md
 [cc-by-shield]: https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg
 [vuegen-class-diag-att]: https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/vuegen_classdiagram_withattmeth.pdf
 [vuegen-docs]: https://vuegen.readthedocs.io/
