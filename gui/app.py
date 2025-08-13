@@ -99,7 +99,7 @@ elif app_path.parent.name == "gui":
         / "Basic_example_vuegen_demo_notebook"
     ).resolve()
     logo_path = (
-        app_path.parent.parent / "docs" / "images" / "vuegen_logo.png"
+        app_path.parent.parent / "docs" / "images" / "logo" / "vuegen_logo.png"
     )  # 1000x852 pixels
 else:
     path_to_example_data = "docs/example_data/Basic_example_vuegen_demo_notebook"
