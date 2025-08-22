@@ -28,7 +28,7 @@ preferred-citation:
       given-names: "Alberto"
       orcid: "http://orcid.org/0000-0002-9163-7730"
   title: "VueGen: Automating the generation of scientific reports"
-  journal: "bioRxiv"
+  journal: "Bioinformatics Advances"
   year: 2025
-  doi: "10.1101/2025.03.05.641152"
-  url: "https://www.biorxiv.org/content/10.1101/2025.03.05.641152v1"
+  doi: "10.1093/bioadv/vbaf149"
+  url: "https://doi.org/10.1093/bioadv/vbaf149"

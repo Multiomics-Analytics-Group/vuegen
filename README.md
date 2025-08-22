@@ -6,8 +6,8 @@
 
 | Information           | Links                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | :-------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Package**           | [![PyPI Latest Release](https://img.shields.io/pypi/v/vuegen.svg)][vuegen-pypi] [![Conda Latest Release](https://img.shields.io/conda/v/bioconda/vuegen.svg)][vuegen-conda] [![Supported versions](https://img.shields.io/pypi/pyversions/vuegen.svg)][vuegen-pypi] [![Docker Repository on Quay](https://quay.io/repository/dtu_biosustain_dsp/vuegen/status "Docker Repository on Quay")][vuegen-docker-quay] [![License](https://img.shields.io/github/license/Multiomics-Analytics-Group/vuegen)][vuegen-license] |
-| **Documentation**     | [![View - Documentation](https://img.shields.io/badge/view-Documentation-blue?style=flat)][vuegen-docs] [![made-with-sphinx-doc](https://img.shields.io/badge/Made%20with-Sphinx-1f425f.svg)](https://www.sphinx-doc.org/) ![Docs](https://readthedocs.org/projects/vuegen/badge/?style=flat)                                                                                                                                                                                                                         |
+| **Package**           | [![PyPI Latest Release](https://img.shields.io/pypi/v/vuegen.svg)][vuegen-pypi] [![Conda Latest Release](https://img.shields.io/conda/v/bioconda/vuegen.svg)][vuegen-conda] [![Supported versions](https://img.shields.io/pypi/pyversions/vuegen.svg)][vuegen-pypi] [![Docker Repository on Quay](https://quay.io/repository/dtu_biosustain_dsp/vuegen/status "Docker Repository on Quay")][vuegen-docker-quay] [![License](https://img.shields.io/github/license/Multiomics-Analytics-Group/vuegen)][vuegen-license]|
+| **Documentation**     | [![View - Documentation](https://img.shields.io/badge/view-Documentation-blue?style=flat)][vuegen-docs] [![made-with-sphinx-doc](https://img.shields.io/badge/Made%20with-Sphinx-1f425f.svg)](https://www.sphinx-doc.org/) ![Docs](https://readthedocs.org/projects/vuegen/badge/?style=flat) [![CC BY 4.0][cc-by-shield]][vuegen-license]|
 | **Build**             | [![CI](https://github.com/Multiomics-Analytics-Group/vuegen/actions/workflows/cdci.yml/badge.svg)][ci-gh-action] [![Docs](https://github.com/Multiomics-Analytics-Group/vuegen/actions/workflows/docs.yml/badge.svg)][ci-docs]                                                                                                                                                                                                                                                                                        |
 | **Examples**          | [![HTML5](https://img.shields.io/badge/html5-%23E34F26.svg?style=for-the-badge&logo=html5&logoColor=white)][emp-html-demo] [![Streamlit](https://img.shields.io/badge/Streamlit-%23FE4B4B.svg?style=for-the-badge&logo=streamlit&logoColor=white)][emp-st-demo]                                                                                                                                                                                                                                                       |
 | **Discuss on GitHub** | [![GitHub issues](https://img.shields.io/github/issues/Multiomics-Analytics-Group/vuegen)][issues] [![GitHub pull requests](https://img.shields.io/github/issues-pr/Multiomics-Analytics-Group/vuegen)][pulls]                                                                                                                                                                                                                                                                                                        |
@@ -21,6 +21,7 @@
 - [GUI](#gui)
 - [Case studies](#case-studies)
 - [Web application deployment](#web-application-deployment)
+- [License](#license)
 - [Contributing](#contributing)
 - [Credits and acknowledgements](#credits-and-acknowledgements)
 - [Citation](#citation)
@@ -335,11 +336,23 @@ This advanced case study demonstrates the application of VueGen in a real-world 
 > The EMP case study is available online as [HTML][emp-html-demo] and [Streamlit][emp-st-demo] reports.
 > The [configuration file][emp-config] is available in the `docs/example_config_files` folder, and the [directory][emp-dir] with example data is in the `docs/example_data` folder.
 
-### 3. ChatBot Component
+### 3. APICall Component
+
+This case study focuses on the `APICall` component, which enables interaction with external APIs by using HTTP methods such as **GET** and **POST**. The retrieved data is displayed in the report, allowing users to integrate external data sources into their anlyses. This component is restricted to **Streamlit** reports.
+
+🔗 [![Open in Colab][colab_badge]][colab_link_apicall]
+
+> [!NOTE]
+> A [configuration file example][apicall-config] for the apicall component is available in 
+the `docs/example_config_files` folder.
+
+### 4. ChatBot Component
 
 This case study highlights VueGen’s capability to embed a chatbot component into a report subsection,
 enabling interactive conversations inside the report. This component is streamlit-specific and is not
 available for other report types.
+
+🔗 [![Open in Colab][colab_badge]][colab_link_chatbot]
 
 Two API modes are supported:
 
@@ -359,11 +372,11 @@ Two API modes are supported:
   - `links`: a list of source URLs (optional)
   - `HTML content`: an HTML snippet with a Pyvis network visualization (optional)
 
-This response structure is currently customized for an internal knowledge graph assistant, but VueGen is being actively developed
-to support more flexible and general-purpose response formats in future releases.
+This response structure is currently customized for an internal knowledge graph assistant, but VueGen is being actively developed to support more flexible and general-purpose response formats in future releases.
 
 > [!NOTE]
-> You can see a [configuration file example][config-chatbot] for the chatbot component in the `docs/example_config_files` folder.
+> A [configuration file example][chatbot-config] for the chatbot component is available 
+in the `docs/example_config_files` folder.
 
 ## Web application deployment
 
@@ -382,6 +395,14 @@ Convert your Streamlit application into a desktop app by packaging it as an exec
 Run Streamlit apps directly in the browser with [stlite][stlite_repo], a WebAssembly port of Streamlit powered by Pyodide, eliminating the need for a server. It also allows packaging apps as standalone desktop executables using stlite desktop.
 
 These options provide flexibility depending on whether the goal is online accessibility, lightweight execution, or local application distribution.
+
+## License
+
+The code in this repository is licensed under the **MIT License**, allowing you to use, modify, and distribute it freely as long as you include the original copyright and license notice.
+
+The documentation and other creative content are licensed under the **Creative Commons Attribution 4.0 International (CC BY 4.0) License**, meaning you are free to share and adapt it with proper attribution.
+
+Full details for both licenses can be found in the [LICENSE][vuegen-license] file.
 
 ## Contributing
 
@@ -428,7 +449,8 @@ We appreciate your feedback! If you have any comments, suggestions, or run into 
 [vuegen-conda]: https://anaconda.org/bioconda/vuegen
 [vuegen-docker-quay]: https://quay.io/repository/dtu_biosustain_dsp/vuegen
 [docker-folder]: https://github.com/Multiomics-Analytics-Group/nf-vuegen/tree/main/Docker
-[vuegen-license]: https://github.com/Multiomics-Analytics-Group/vuegen/blob/main/LICENSE
+[vuegen-license]: https://github.com/Multiomics-Analytics-Group/vuegen/blob/main/LICENSE.md
+[cc-by-shield]: https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg
 [vuegen-class-diag-att]: https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/vuegen_classdiagram_withattmeth.pdf
 [vuegen-docs]: https://vuegen.readthedocs.io/
 [ci-gh-action]: https://github.com/Multiomics-Analytics-Group/vuegen/actions/workflows/cdci.yml
@@ -437,7 +459,6 @@ We appreciate your feedback! If you have any comments, suggestions, or run into 
 [emp-st-demo]: https://earth-microbiome-vuegen-demo.streamlit.app/
 [ollama_chat]: https://github.com/ollama/ollama/blob/main/docs/api.md#generate-a-chat-completion
 [ollama]: https://ollama.com/
-[config-chatbot]: https://github.com/Multiomics-Analytics-Group/vuegen/blob/main/docs/example_config_files/Chatbot_example_config.yaml
 [issues]: https://github.com/Multiomics-Analytics-Group/vuegen/issues
 [pulls]: https://github.com/Multiomics-Analytics-Group/vuegen/pulls
 [vuegen-article]: https://doi.org/10.1093/bioadv/vbaf149
@@ -456,6 +477,10 @@ We appreciate your feedback! If you have any comments, suggestions, or run into 
 [emp]: https://earthmicrobiome.org/
 [emp-config]: https://github.com/Multiomics-Analytics-Group/vuegen/blob/main/docs/example_config_files/Earth_microbiome_vuegen_demo_notebook_config
 [emp-dir]: https://github.com/Multiomics-Analytics-Group/vuegen/blob/main/docs/example_data/Earth_microbiome_vuegen_demo_notebook
+[colab_link_apicall]: https://colab.research.google.com/github/Multiomics-Analytics-Group/vuegen/blob/main/docs/vuegen_apicall_case_study.ipynb
+[apicall-config]: https://github.com/Multiomics-Analytics-Group/vuegen/blob/main/docs/example_config_files/APIcall_example_config.yaml
+[colab_link_chatbot]: https://colab.research.google.com/github/Multiomics-Analytics-Group/vuegen/blob/main/docs/vuegen_chatbot_case_study.ipynb
+[chatbot-config]: https://github.com/Multiomics-Analytics-Group/vuegen/blob/main/docs/example_config_files/Chatbot_example_config.yaml
 [conda-download]: https://conda-forge.org/download/
 [gui-readme]: https://github.com/Multiomics-Analytics-Group/vuegen/blob/main/gui/README.md
 [pyinstaller]: https://pyinstaller.org/
