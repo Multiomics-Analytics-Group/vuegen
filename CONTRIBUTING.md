@@ -9,7 +9,7 @@ integrated into the project.
 ## Contributor Agreement
 
 By contributing, you agree that we may redistribute your work under [our
-license](LICENSE). In exchange, we will address your issues and/or assess
+license](LICENSE.md). In exchange, we will address your issues and/or assess
 your change proposal as promptly as we can, and help you become a member of our
 community.
 
@@ -236,7 +236,7 @@ This contribution guide was modified under the [Creative Commons Attribution 4.0
 [general-pr-template]: https://github.com/Multiomics-Analytics-Group/vuegen/blob/main/.github/PULL_REQUEST_TEMPLATE.md
 [numpy-docstring-guide]: https://numpydoc.readthedocs.io/en/latest/format.html
 [pytest-docs]: https://docs.pytest.org/en/stable
-[cicd-workflow]: https://github.com/Multiomics-Analytics-Group/vuecore/blob/main/.github/workflows/cdci.yml
+[cicd-workflow]: https://github.com/Multiomics-Analytics-Group/vuegen/blob/main/.github/workflows/cdci.yml
 [vuegen-pypi]: https://pypi.org/project/vuegen/
 [releases-vuegen]: https://github.com/Multiomics-Analytics-Group/vuegen/releases
 [soft-cp-guides]: https://software-carpentry.org/lessons/
