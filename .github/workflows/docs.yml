@@ -63,3 +63,24 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: docs/
           publish_branch: streamlit-report-example
+
+  changelog:
+    name: Update changelog
+    if: github.event_name == 'release' && github.event.action == 'published'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main branch
+        uses: actions/checkout@v4
+        with:
+          ref: main 
+
+      - name: Update CHANGELOG.md
+        uses: rhysd/changelog-from-release/action@v3
+        with:
+          file: CHANGELOG.md
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          header: |
+            # Release Notes
+
+            All notable changes to this project are documented in this file. It was automatically generated with
+            the [changelog-from-release](https://github.com/rhysd/changelog-from-release) tool.
