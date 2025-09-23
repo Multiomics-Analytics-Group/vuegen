@@ -119,9 +119,8 @@ In brief, we use [GitHub flow][github-flow] to manage changes:
 
 #### PR General Guidelines
 
-We have a general [PR template][general-pr-template] that is loaded autmatically when you open a new PR. 
-
-Before you submit a PR, check that it meets these guidelines:
+We have a general [PR template][general-pr-template] that is loaded autmatically when you open 
+a new PR. Before you submit a PR, check that it meets these guidelines:
 
 1. The pull request should include tests.
 2. If the pull request adds functionality, the docs should be updated. Put
