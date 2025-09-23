@@ -106,7 +106,7 @@ def process_readme(readme_path, output_dir):
         else:
             raise ValueError(f"Section '{section_title}' not found in README")
 
-    # Include CONTRIBUTING.md with its own link references
+    # Copy CONTRIBUTING.md with its own link references
     contrib_path = readme_path.parent / "CONTRIBUTING.md"
     try:
         raw_contrib = contrib_path.read_text()
@@ -123,6 +123,15 @@ def process_readme(readme_path, output_dir):
         print("Generated contributing.md")
     except FileNotFoundError as e:
         raise FileNotFoundError(f"CONTRIBUTING.md not found at {contrib_path}") from e
+
+    # Copy CHANGELOG.md to the output directory
+    changelog_path = readme_path.parent / "CHANGELOG.md"
+    try:
+        raw_changelog = changelog_path.read_text()
+        (output_dir / "changelog.md").write_text(raw_changelog)
+        print("Generated changelog.md")
+    except FileNotFoundError as e:
+        raise FileNotFoundError(f"CHANGELOG.md not found at {changelog_path}") from e
 
 
 if __name__ == "__main__":

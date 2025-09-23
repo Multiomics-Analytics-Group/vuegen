@@ -50,6 +50,7 @@ reference/vuegen
 sections_readme/contributing
 sections_readme/credits
 sections_readme/contact
+sections_readme/changelog
 ```
 
 ```{toctree}
