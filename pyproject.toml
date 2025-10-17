@@ -13,7 +13,7 @@ version = "0.0.0"
 
 [tool.poetry.dependencies]
 python = ">=3.9,<3.9.7 || >3.9.7,<4.0"
-streamlit = "1.39.0"
+streamlit = "^1.39.0"
 streamlit-aggrid = "*"
 quarto-cli = "*"
 plotly = "^5.15.0"
@@ -26,7 +26,7 @@ nbclient = "^0.10.0"
 matplotlib = "^3.9.2"
 altair = { extras = ["save"], version = "*" }
 itables = "^2.2.2"
-kaleido = "0.2.0"
+kaleido = "^0.2.0"
 vl-convert-python = "^1.7.0"
 dataframe-image = "^0.2.6"
 strenum = { version = "^0.4.15", python = "<3.11" }
