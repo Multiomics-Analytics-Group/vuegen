@@ -230,10 +230,7 @@ jobs:
       - name: Install quarto tools
         run: |
           quarto install chromium
-          cd docs
-          vuegen -dir example_data/Earth_microbiome_vuegen_demo_notebook -rt pdf -qt_checks
-        # quarto install tinytex --no-prompt
-        # ERROR: Unable to determine latest release for rstudio/tinytex-releases
+          quarto install tinytex --no-prompt
       - name: Quarto check
         run: |
           quarto check -h
