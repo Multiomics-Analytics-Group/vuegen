@@ -40,7 +40,7 @@ jobs:
       - name: Install dependencies for testing
         run: |
           pip install pytest
-          pip install -e .
+          pip install .
       - name: Run tests
         run: python -m pytest tests
       - name: Execute streamlit report
@@ -225,30 +225,23 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: "pip" # caching pip dependencies
           cache-dependency-path: "**/pyproject.toml"
-      - name: Install VueGen GUI and pyinstaller
+      - name: Install VueGen GUI dependencies
         run: |
           pip install --upgrade pip
           pip install ".[gui]"
-      - name: Install quarto tools (windows)
-        if: startsWith(matrix.os.runner, 'windows')
+      - name: Install quarto tools
         run: |
           quarto install chromium
           quarto install tinytex --no-prompt
-      - name: Install quarto tools
-        if: startsWith(matrix.os.runner, 'macos')
-        run: |
-          quarto install chromium
-          cd docs
-          vuegen -dir example_data/Earth_microbiome_vuegen_demo_notebook -rt pdf -qt_checks
-        # quarto install tinytex --no-prompt
-        # ERROR: Unable to determine latest release for rstudio/tinytex-releases
       - name: Quarto check
         run: |
           quarto check -h
           quarto check
-      - name: Install pyinstaller and build executable
+      # installing with vuegen lead to a subtle bug installing tinytex through quarto
+      - name: Install pyinstaller
+        run: pip install pyinstaller
+      - name: Build executable
         run: |
-          pip install pyinstaller
           cd gui
           pyinstaller -n vuegen_gui --onefile --windowed --collect-all pyvis --collect-all streamlit --collect-all st_aggrid --collect-all customtkinter --collect-all quarto_cli --collect-all plotly --collect-all _plotly_utils --collect-all traitlets --collect-all referencing --collect-all rpds --collect-all tenacity --collect-all pandas --collect-all numpy --collect-all matplotlib --collect-all openpyxl --collect-all xlrd --collect-all nbformat --collect-all nbclient --collect-all altair --collect-all itables --collect-all kaleido --collect-all pyarrow --collect-all dataframe_image --collect-all narwhals --collect-all PIL --collect-all vl_convert --collect-all typing-extensions --add-data ../docs/example_data/Basic_example_vuegen_demo_notebook:example_data/Basic_example_vuegen_demo_notebook --add-data ../docs/images/logo/vuegen_logo.png:. app.py
         # --windowed only for mac, see:
