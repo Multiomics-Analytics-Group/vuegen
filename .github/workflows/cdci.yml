@@ -209,7 +209,7 @@ jobs:
     #   - other-reports
     strategy:
       matrix:
-        python-version: ["3.12"]
+        python-version: ["3.13"]
         os:
           # https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/running-variations-of-jobs-in-a-workflow#example-using-a-multi-dimension-matrix
           - runner: "macos-14"
