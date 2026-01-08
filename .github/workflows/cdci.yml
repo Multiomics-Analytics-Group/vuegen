@@ -229,10 +229,19 @@ jobs:
         run: |
           pip install --upgrade pip
           pip install ".[gui]" pyinstaller
-      - name: Install quarto tools
+      - name: Install quarto tools (windows)
+        if: startsWith(matrix.os.runner, 'windows')
         run: |
           quarto install chromium
           quarto install tinytex --no-prompt
+      - name: Install quarto tools
+        if: startsWith(matrix.os.runner, 'macos')
+        run: |
+          quarto install chromium
+          cd docs
+          vuegen -dir example_data/Earth_microbiome_vuegen_demo_notebook -rt pdf -qt_checks
+        # quarto install tinytex --no-prompt
+        # ERROR: Unable to determine latest release for rstudio/tinytex-releases
       - name: Quarto check
         run: |
           quarto check -h
