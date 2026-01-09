@@ -21,7 +21,7 @@ jobs:
       - uses: psf/black@stable
         with:
           # ! for now (format output files of vuegen for streamlit)
-          src: "./src"  
+          src: "./src"
       - uses: isort/isort-action@v1
         with:
           # ! should be removed once all imports are correctly sorted
@@ -32,7 +32,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: "pip" # caching pip dependencies
           cache-dependency-path: "**/pyproject.toml"
-      - name: lint package code with ruff 
+      - name: lint package code with ruff
         run: |
           python -m pip install --upgrade pip
           pip install ruff
@@ -40,7 +40,7 @@ jobs:
       - name: Install dependencies for testing
         run: |
           pip install pytest
-          pip install -e .
+          pip install .
       - name: Run tests
         run: python -m pytest tests
       - name: Execute streamlit report
@@ -50,11 +50,17 @@ jobs:
           vuegen --config example_data/Earth_microbiome_vuegen_demo_notebook/Earth_microbiome_vuegen_demo_notebook_config.yaml
 
   other-reports:
-    name: Integration tests
+    name: Reports - ${{ matrix.os.label }}, ${{ matrix.python-version }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
+        os:
+          # https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/running-variations-of-jobs-in-a-workflow#example-using-a-multi-dimension-matrix
+          # - runner: "macos-14"
+          #   label: "macos-14-arm64"
+          - runner: "ubuntu-latest"
+            label: "ubuntu-latest-x64"
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python ${{ matrix.python-version }}
@@ -66,7 +72,13 @@ jobs:
       - name: Install dependencies
         run: |
           pip install --upgrade pip
-          pip install -e "."
+          pip install "."
+      - name: Quarto check
+        run: |
+          quarto check -h
+          quarto check
+          quarto install chromium
+          quarto install tinytex --no-prompt
       - name: Execute streamlit report (to check)
         run: |
           cd docs
@@ -144,7 +156,7 @@ jobs:
             echo "Error: One or more protected files have been modified."
             exit 1
           fi
-      - name: check for changes in quarto report files 
+      - name: check for changes in quarto report files
         run: |
           # write quarto based report to test folder
           for format in html pdf docx odt revealjs pptx jupyter; do
@@ -181,7 +193,7 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
 
   build-executable:
-    name: Build-exe-${{ matrix.os.label }}
+    name: Build-binary-${{ matrix.os.label }}
     runs-on: ${{ matrix.os.runner }}
     if: |
       (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
@@ -192,13 +204,14 @@ jobs:
       - test
       - other-reports
     strategy:
+      fail-fast: false
       matrix:
-        python-version: ["3.12"]
+        python-version: ["3.13"]
         os:
           # https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/running-variations-of-jobs-in-a-workflow#example-using-a-multi-dimension-matrix
-          - runner: "macos-13"
-            label: "macos-13-x64"
-          - runner: "macos-15"
+          - runner: "macos-14"
+            label: "macos-14-arm64"
+          - runner: "macos-latest"
             label: "macos-15-arm64"
           - runner: "windows-latest"
             label: "windows-x64"
@@ -207,17 +220,27 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install VueGen GUI and pyinstaller
+          cache: "pip" # caching pip dependencies
+          cache-dependency-path: "**/pyproject.toml"
+      - name: Install VueGen GUI dependencies
         run: |
-          python -m pip install ".[gui]" pyinstaller
+          pip install --upgrade pip
+          pip install ".[gui]"
       - name: Install quarto tools
         run: |
           quarto install chromium
-          quarto install tinytex
+          quarto install tinytex --no-prompt
+      - name: Quarto check
+        run: |
+          quarto check -h
+          quarto check
+      # installing with vuegen lead to a subtle bug installing tinytex through quarto
+      - name: Install pyinstaller
+        run: pip install pyinstaller
       - name: Build executable
         run: |
           cd gui
-          pyinstaller -n vuegen_gui --onefile --windowed --collect-all pyvis --collect-all streamlit --collect-all st_aggrid --collect-all customtkinter --collect-all quarto_cli --collect-all plotly --collect-all _plotly_utils --collect-all traitlets --collect-all referencing --collect-all rpds --collect-all tenacity --collect-all pandas --collect-all numpy --collect-all matplotlib --collect-all openpyxl --collect-all xlrd --collect-all nbformat --collect-all nbclient --collect-all altair --collect-all itables --collect-all kaleido --collect-all pyarrow --collect-all dataframe_image --collect-all narwhals --collect-all PIL --collect-all vl_convert --collect-all typing-extensions --add-data ../docs/example_data/Basic_example_vuegen_demo_notebook:example_data/Basic_example_vuegen_demo_notebook --add-data ../docs/images/logo/vuegen_logo.png:. app.py
+          pyinstaller -n vuegen_gui --onefile --windowed --collect-all pyvis --collect-all streamlit --collect-all st_aggrid --collect-all customtkinter --collect-all quarto_cli --collect-all plotly --collect-all _plotly_utils --collect-all traitlets --collect-all referencing --collect-all rpds --collect-all tenacity --collect-all pandas --collect-all numpy --collect-all matplotlib --collect-all openpyxl --collect-all xlrd --collect-all nbformat --collect-all nbclient --collect-all altair --collect-all rfc3987_syntax --collect-all itables --collect-all kaleido --collect-all pyarrow --collect-all dataframe_image --collect-all narwhals --collect-all PIL --collect-all vl_convert --collect-all typing-extensions --add-data ../docs/example_data/Basic_example_vuegen_demo_notebook:example_data/Basic_example_vuegen_demo_notebook --add-data ../docs/images/logo/vuegen_logo.png:. app.py
         # --windowed only for mac, see:
         # https://pyinstaller.org/en/stable/usage.html#building-macos-app-bundles
         # 'Under macOS, PyInstaller always builds a UNIX executable in dist.'
@@ -240,9 +263,24 @@ jobs:
           cd gui/dist/
           ls -lh
           echo "Zip .app folder"
-          zip -r vuegen_gui_${{ matrix.os.label }}.zip vuegen_gui.app/
+          zip -r vuegen_gui_${{ matrix.os.label }}.zip vuegen_gui.app
           echo "Uploading..."
           gh release upload $GITHUB_REF_NAME vuegen_gui_${{ matrix.os.label }}.zip
+        # .app is folder that needs to be zipped
+      - name: Upload MacOS terminal application to a GitHub Release)
+        if: startsWith(matrix.os.runner, 'macos') && startsWith(github.ref, 'refs/tags')
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo GITHUB_REF_NAME $GITHUB_REF_NAME
+          echo "Uploading vuegen_gui_${{ matrix.os.label }} to release $GITHUB_REF_NAME"
+          echo "Available files in build folder: gui/dist/"
+          cd gui/dist/
+          ls -lh
+          echo "Zip single file"
+          zip -r vuegen_gui_${{ matrix.os.label }}.zip vuegen_gui
+          echo "Uploading..."
+          gh release upload $GITHUB_REF_NAME vuegen_gui_${{ matrix.os.label }}_terminal.zip
         # .app is folder that needs to be zipped
       - name: Upload Windows Executable to a GitHub Release
         if: startsWith(matrix.os.runner, 'windows') && startsWith(github.ref, 'refs/tags')
