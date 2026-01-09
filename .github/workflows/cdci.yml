@@ -208,6 +208,7 @@ jobs:
       - test
       - other-reports
     strategy:
+      fail-fast: false
       matrix:
         python-version: ["3.13"]
         os:
@@ -266,9 +267,24 @@ jobs:
           cd gui/dist/
           ls -lh
           echo "Zip .app folder"
-          zip -r vuegen_gui_${{ matrix.os.label }}.zip 'vuegen_gui.app'
+          zip -r vuegen_gui_${{ matrix.os.label }}.zip vuegen_gui.app
           echo "Uploading..."
           gh release upload $GITHUB_REF_NAME vuegen_gui_${{ matrix.os.label }}.zip
+        # .app is folder that needs to be zipped
+      - name: Upload MacOS terminal application to a GitHub Release)
+        if: startsWith(matrix.os.runner, 'macos') && startsWith(github.ref, 'refs/tags')
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo GITHUB_REF_NAME $GITHUB_REF_NAME
+          echo "Uploading vuegen_gui_${{ matrix.os.label }} to release $GITHUB_REF_NAME"
+          echo "Available files in build folder: gui/dist/"
+          cd gui/dist/
+          ls -lh
+          echo "Zip single file"
+          zip -r vuegen_gui_${{ matrix.os.label }}.zip vuegen_gui
+          echo "Uploading..."
+          gh release upload $GITHUB_REF_NAME vuegen_gui_${{ matrix.os.label }}_terminal.zip
         # .app is folder that needs to be zipped
       - name: Upload Windows Executable to a GitHub Release
         if: startsWith(matrix.os.runner, 'windows') && startsWith(github.ref, 'refs/tags')
