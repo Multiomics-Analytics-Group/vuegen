@@ -451,6 +451,18 @@ Ayala-Ruano, S., Webel, H., & Santos, A. (2025). _VueGen: Automating the generat
 
 We appreciate your feedback! If you have any comments, suggestions, or run into issues while using VueGen, feel free to [open an issue][new-issue] in this repository. Your input helps us make VueGen better for everyone.
 
+## FAQ
+
+<details>
+  <summary>Interactive Plots are not shown correctly</summary>
+
+1. Make sure to export your interactive plots from Plotly or Altair in JSON format, not as standalone HTML files.
+2. It is best to use VueGen within the environment you created your plots. If you gather it from many sources and
+   see compatibility issues, consider recreating the plots in a single environment. Failing examples are more than welcome
+   via [GitHub issues](https://github.com/Multiomics-Analytics-Group/vuegen/issues/new/choose) (you need a GitHub account).
+
+</details>
+
 [streamlit]: https://streamlit.io/
 [vuegen-pypi]: https://pypi.org/project/vuegen/
 [vuegen-conda]: https://anaconda.org/bioconda/vuegen

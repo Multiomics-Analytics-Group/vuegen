@@ -7,7 +7,7 @@
 :relative-images:
 ```
 
-```{toctree} 
+```{toctree}
 :maxdepth: 1
 :caption: Overview
 
@@ -18,6 +18,7 @@ sections_readme/gui
 sections_readme/case_studies
 sections_readme/web_app_deploy
 sections_readme/citation
+sections_readme/faq
 ```
 
 ```{toctree}
@@ -43,7 +44,7 @@ vuegen_chatbot_case_study_configfile
 reference/vuegen
 ```
 
-```{toctree} 
+```{toctree}
 :maxdepth: 1
 :caption: Project Support
 
