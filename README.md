@@ -463,6 +463,15 @@ We appreciate your feedback! If you have any comments, suggestions, or run into 
 
 </details>
 
+<details>
+  <summary>Old JSON Plots stopped working.</summary>
+
+We have seen differently structured JSON file from plotlyjs before version 3. If you
+have such old files and encouter issue, please consider sharing them via
+[GitHub issues](https://github.com/Multiomics-Analytics-Group/vuegen/issues/new/choose).
+
+</details>
+
 [streamlit]: https://streamlit.io/
 [vuegen-pypi]: https://pypi.org/project/vuegen/
 [vuegen-conda]: https://anaconda.org/bioconda/vuegen
