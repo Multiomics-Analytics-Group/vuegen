@@ -223,12 +223,10 @@ class QuartoReportView(r.ReportView):
             fname_qmd_report = self.output_dir / f"{self.BASE_DIR}.qmd"
             with open(fname_qmd_report, "w", encoding="utf-8") as quarto_report:
                 quarto_report.write(yaml_header)
-                quarto_report.write(
-                    f"""\n```{{python}}
+                quarto_report.write(f"""\n```{{python}}
 #| label: 'Imports'
 {report_formatted_imports}
-```\n\n"""
-                )
+```\n\n""")
                 quarto_report.write("\n".join(qmd_content))
                 self.report.logger.info(
                     "Created qmd script to render the app: %s", fname_qmd_report
@@ -329,8 +327,7 @@ class QuartoReportView(r.ReportView):
             A formatted YAML header string customized for the specified output format.
         """
         # Base YAML header with title
-        yaml_header = textwrap.dedent(
-            f"""\
+        yaml_header = textwrap.dedent(f"""\
             ---
             title: {self.report.title}
             fig-align: center
@@ -338,13 +335,11 @@ class QuartoReportView(r.ReportView):
               echo: false
               output: asis
             jupyter: python3
-            format:"""
-        )
+            format:""")
         # Define format-specific YAML configurations
         # \u007b is { and \u007d is }
         format_configs = {
-            r.ReportType.HTML: textwrap.dedent(
-                f"""
+            r.ReportType.HTML: textwrap.dedent(f"""
                   html:
                     toc: true
                     toc-location: left
@@ -371,12 +366,10 @@ class QuartoReportView(r.ReportView):
                             </a>
                             | Copyright 2025 <a href="{GITHUB_ORG_URL}" target="_blank">
                             {ORG}</a>
-                        </footer>"""
-            ),
+                        </footer>"""),
             # \u007b is { and \u007d is }
             r.ReportType.PDF: textwrap.indent(
-                textwrap.dedent(
-                    f"""
+                textwrap.dedent(f"""
                       pdf:
                         toc: false
                         fig-align: center
@@ -390,28 +383,22 @@ class QuartoReportView(r.ReportView):
                                 \\lofoot\u007bThis report was generated with
                                 \\href{{{REPO_URL}}}{{VueGen}} | \\copyright{{}} 2025
                                  \\href{GITHUB_ORG_URL_BRACKETS}\u007b{ORG}\u007d\u007d
-                                \\rofoot{{\\pagemark}}"""
-                ),
+                                \\rofoot{{\\pagemark}}"""),
                 "  ",
             ),
             r.ReportType.DOCX: textwrap.indent(
-                textwrap.dedent(
-                    """
+                textwrap.dedent("""
                     docx:
-                      toc: false"""
-                ),
+                      toc: false"""),
                 "  ",
             ),
             r.ReportType.ODT: textwrap.indent(
-                textwrap.dedent(
-                    """
+                textwrap.dedent("""
                     odt:
-                      toc: false"""
-                ),
+                      toc: false"""),
                 "  ",
             ),
-            r.ReportType.REVEALJS: textwrap.dedent(
-                f"""
+            r.ReportType.REVEALJS: textwrap.dedent(f"""
                   revealjs:
                     toc: false
                     smaller: true
@@ -439,19 +426,15 @@ class QuartoReportView(r.ReportView):
                             </a>
                             | Copyright 2025 <a href="{GITHUB_ORG_URL}"
                              target="_blank">{ORG}</a>
-                        </footer>"""
-            ),
+                        </footer>"""),
             r.ReportType.PPTX: textwrap.indent(
-                textwrap.dedent(
-                    """
+                textwrap.dedent("""
                     pptx:
                       toc: false
-                      output: true"""
-                ),
+                      output: true"""),
                 "  ",
             ),
-            r.ReportType.JUPYTER: textwrap.dedent(
-                f"""
+            r.ReportType.JUPYTER: textwrap.dedent(f"""
                   html:
                     toc: true
                     toc-location: left
@@ -478,8 +461,7 @@ class QuartoReportView(r.ReportView):
                             </a>
                             | Copyright 2025 <a href="{GITHUB_ORG_URL}"
                              target="_blank">{ORG}</a>
-                        </footer>"""
-            ),
+                        </footer>"""),
         }
         # Create a key based on the report type and format
         key = self.report_type
@@ -692,36 +674,29 @@ class QuartoReportView(r.ReportView):
             The generated plot code as a string.
         """
         # Initialize plot code with common structure
-        plot_code = textwrap.dedent(
-            f"""
+        plot_code = textwrap.dedent(f"""
             ```{{python}}
             #| label: '{plot.title} {plot.id}'
             #| fig-cap: ""
-            """
-        )
+            """)
         # If the file path is a URL, generate code to fetch content via requests
         if is_url(plot.file_path):
-            plot_code += textwrap.dedent(
-                f"""
+            plot_code += textwrap.dedent(f"""
                 response = requests.get('{plot.file_path}')
                 response.raise_for_status()
                 plot_json = response.text
-                """
-            )
+                """)
         else:  # If it's a local file
             plot_rel_path = get_relative_file_path(
                 plot.file_path, relative_to=self.output_dir
             ).as_posix()
-            plot_code += textwrap.dedent(
-                f"""
+            plot_code += textwrap.dedent(f"""
 with open(report_dir /'{plot_rel_path}', 'r') as plot_file:
     plot_json = json.load(plot_file)
-"""
-            )
+""")
         # Add specific code for each visualization tool
         if plot.plot_type == r.PlotType.PLOTLY:
-            plot_code += textwrap.dedent(
-                """
+            plot_code += textwrap.dedent("""
                 # Keep only 'data' and 'layout' sections
                 plot_json = {key: plot_json[key] for key in plot_json
                                 if key in ['data', 'layout']
@@ -737,19 +712,16 @@ with open(report_dir /'{plot_rel_path}', 'r') as plot_file:
                 fig_plotly.update_layout(autosize=False, width=950, height=400,
                                          margin=dict(b=50, t=50, l=50, r=50)
                                          )
-                """
-            )
+                """)
         elif plot.plot_type == r.PlotType.ALTAIR:
-            plot_code += textwrap.dedent(
-                """
+            plot_code += textwrap.dedent("""
                 # Convert JSON to string
                 plot_json_str = json.dumps(plot_json)
 
                 # Create the altair plot
                 fig_altair = alt.Chart.from_json(plot_json_str
                                 ).properties(width=900, height=370)
-                """
-            )
+                """)
         elif plot.plot_type == r.PlotType.INTERACTIVE_NETWORK:
             # Generate the HTML embedding for interactive networks
             if is_url(plot.file_path) and plot.file_path.endswith(".html"):
@@ -760,15 +732,13 @@ with open(report_dir /'{plot_rel_path}', 'r') as plot_file:
                 )
 
             # Embed the HTML file in an iframe
-            plot_code = textwrap.dedent(
-                f"""
+            plot_code = textwrap.dedent(f"""
                 <div style="text-align: center;">
                 <iframe src="{iframe_src}" alt="{plot.title} plot"
                         width="800px" height="630px">
                 </iframe>
                 </div>
-                """
-            )
+                """)
         return plot_code
 
     def _generate_dataframe_content(self, dataframe) -> List[str]:
@@ -790,15 +760,11 @@ with open(report_dir /'{plot_rel_path}', 'r') as plot_file:
         dataframe_content.append(f"### {dataframe.title}")
 
         # Append header for DataFrame loading
-        dataframe_content.append(
-            textwrap.dedent(
-                f"""\
+        dataframe_content.append(textwrap.dedent(f"""\
                 ```{{python}}
                 #| label: '{dataframe.title} {dataframe.id}'
                 #| fig-cap: ""
-                """
-            )
-        )
+                """))
         # Mapping of file extensions to read functions
         read_function_mapping = table_utils.read_function_mapping
         try:
@@ -856,15 +822,11 @@ with open(report_dir /'{plot_rel_path}', 'r') as plot_file:
             if sheet_names:
                 for sheet_name in sheet_names[1:]:
                     dataframe_content.append(f"#### {sheet_name}")
-                    dataframe_content.append(
-                        textwrap.dedent(
-                            f"""\
+                    dataframe_content.append(textwrap.dedent(f"""\
                     ```{{python}}
                     #| label: '{dataframe.title} {dataframe.id} {sheet_name}'
                     #| fig-cap: ""
-                    """
-                        )
-                    )
+                    """))
                     dataframe_content.append(
                         f"df = pd.{read_function.__name__}"
                         f"(report_dir / '{df_file_path}', "
@@ -913,35 +875,25 @@ with open(report_dir /'{plot_rel_path}', 'r') as plot_file:
 
         try:
             # Initialize md code with common structure
-            markdown_content.append(
-                textwrap.dedent(
-                    f"""
+            markdown_content.append(textwrap.dedent(f"""
                     ```{{python}}
                     #| label: '{markdown.title} {markdown.id}'
                     #| fig-cap: ""
-                    """
-                )
-            )
+                    """))
             # If the file path is a URL, generate code to fetch content via requests
             if is_url(markdown.file_path):
-                markdown_content.append(
-                    textwrap.dedent(
-                        f"""\
+                markdown_content.append(textwrap.dedent(f"""\
                     response = requests.get('{markdown.file_path}')
                     response.raise_for_status()
                     markdown_content = response.text
-                    """
-                    )
-                )
+                    """))
             else:  # If it's a local file
                 md_rel_path = get_relative_file_path(
                     markdown.file_path, relative_to=self.output_dir
                 )
-                markdown_content.append(
-                    f"""
+                markdown_content.append(f"""
 with open(report_dir / '{md_rel_path.as_posix()}', 'r') as markdown_file:
-    markdown_content = markdown_file.read()\n"""
-                )
+    markdown_content = markdown_file.read()\n""")
 
             # Code to display md content
             markdown_content.append("""display.Markdown(markdown_content)\n```\n""")
@@ -1037,14 +989,12 @@ with open(report_dir / '{md_rel_path.as_posix()}', 'r') as markdown_file:
                 html_file_path = get_relative_file_path(
                     html.file_path, relative_to=self.output_dir
                 )
-            iframe_code = textwrap.dedent(
-                f"""
+            iframe_code = textwrap.dedent(f"""
                 <div style="text-align: center;">
                 <iframe src="{html_file_path.as_posix()}" alt="{html.title}"
                         width="950px" height="530px"></iframe>
                 </div>
-                """
-            )
+                """)
             html_content.append(iframe_code)
 
         except Exception as e:

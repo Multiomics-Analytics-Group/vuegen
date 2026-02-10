@@ -131,38 +131,26 @@ class StreamlitReportView(r.WebAppReportView):
             self.report.logger.debug("Processing app navigation code.")
             # Define the Streamlit imports and report manager content
             report_manag_content = []
-            report_manag_content.append(
-                textwrap.dedent(
-                    """\
+            report_manag_content.append(textwrap.dedent("""\
                     import os
                     import time
 
                     import psutil
                     import streamlit as st
-                    """
-                )
-            )
+                    """))
             if self.report.logo:
-                report_manag_content.append(
-                    textwrap.dedent(
-                        f"""\
+                report_manag_content.append(textwrap.dedent(f"""\
                         st.set_page_config(layout="wide",
                                            page_title="{self.report.title}",
                                            page_icon="{self.report.logo}"
                         )
                         st.logo("{self.report.logo}")
-                        """
-                    )
-                )
+                        """))
             else:
-                report_manag_content.append(
-                    textwrap.dedent(
-                        f"""\
+                report_manag_content.append(textwrap.dedent(f"""\
                         st.set_page_config(layout="wide",
                                            page_title="{self.report.title}")
-                        """
-                    )
-                )
+                        """))
             report_manag_content.append(
                 self._format_text(
                     text=self.report.title, type="header", level=1, color="#023858"
@@ -245,9 +233,7 @@ class StreamlitReportView(r.WebAppReportView):
                 )
 
             # Add navigation object to the home page content
-            report_manag_content.append(
-                textwrap.dedent(
-                    """\
+            report_manag_content.append(textwrap.dedent("""\
                     report_nav = st.navigation(sections_pages)
 
                     # Following https://discuss.streamlit.io/t/\
@@ -265,9 +251,7 @@ close-streamlit-app-with-button-click/35132/5
 
 
                     report_nav.run()
-                    """
-                )
-            )
+                    """))
 
             # Write the navigation and general content to a Python file
             with open(
@@ -285,9 +269,7 @@ close-streamlit-app-with-button-click/35132/5
             fpath = self.section_dir.parent / "README.md"
             with open(fpath, "w", encoding="utf-8") as f:
 
-                f.write(
-                    textwrap.dedent(
-                        f"""\
+                f.write(textwrap.dedent(f"""\
                     # Streamlit Report
 
                     This report was generated using the Vuegen library:
@@ -299,9 +281,7 @@ close-streamlit-app-with-button-click/35132/5
 
                     Folder cannot be moved from above path, but can be executed
                     from anywhere on the system.
-                    """
-                    )
-                )
+                    """))
 
         except Exception as e:
             self.report.logger.error(
@@ -425,8 +405,7 @@ close-streamlit-app-with-button-click/35132/5
 
         text = text.strip()  # get rid of new lines
         text = textwrap.indent(text, "                ")
-        ret = textwrap.dedent(
-            f"""\
+        ret = textwrap.dedent(f"""\
             st.markdown(
                 '''
                 <{tag} style='text-align: {text_align};
@@ -434,8 +413,7 @@ close-streamlit-app-with-button-click/35132/5
                 </{tag}>
                 ''',
                 unsafe_allow_html=True)
-            """
-        )
+            """)
         return ret
 
     def _generate_home_section(
@@ -730,33 +708,23 @@ close-streamlit-app-with-button-click/35132/5
 
                 # Determine whether the file path is a URL or a local file
                 if is_url(html_plot_file):
-                    plot_content.append(
-                        textwrap.dedent(
-                            f"""
+                    plot_content.append(textwrap.dedent(f"""
                             response = requests.get('{html_plot_file}')
                             response.raise_for_status()
                             html_content = response.text
-                            """
-                        )
-                    )
+                            """))
                 else:
                     fpath = get_relative_file_path(
                         html_plot_file, relative_to=self.section_dir
                     ).as_posix()
-                    plot_content.append(
-                        textwrap.dedent(
-                            f"""
+                    plot_content.append(textwrap.dedent(f"""
                             file_path = (section_dir / '{fpath}').resolve().as_posix()
                             with open(file_path, 'r') as html_file:
                                 html_content = html_file.read()
-                            """
-                        )
-                    )
+                            """))
 
                 # Append the code for additional information (nodes and edges count)
-                plot_content.append(
-                    textwrap.dedent(
-                        f"""
+                plot_content.append(textwrap.dedent(f"""
                         st.markdown(("<p style='text-align: center; color: black;'> "
                                     "<b>Number of nodes:</b> {num_nodes} </p>"),
                                     unsafe_allow_html=True)
@@ -764,9 +732,7 @@ close-streamlit-app-with-button-click/35132/5
                                      " <b>Number of relationships:</b> {num_edges}"
                                      " </p>"),
                                     unsafe_allow_html=True)
-                        """
-                    )
-                )
+                        """))
 
                 # Add the specific code for visualization
                 plot_content.append(self._generate_plot_code(plot))
@@ -807,27 +773,22 @@ close-streamlit-app-with-button-click/35132/5
         """
         # If the file path is a URL, generate code to fetch content via requests
         if is_url(plot.file_path):
-            plot_code = textwrap.dedent(
-                f"""
+            plot_code = textwrap.dedent(f"""
                 response = requests.get('{plot.file_path}')
                 response.raise_for_status()
-                plot_json = json.loads(response.text)\n"""
-            )
+                plot_json = json.loads(response.text)\n""")
         else:  # If it's a local file
             plot_rel_path = get_relative_file_path(
                 plot.file_path, relative_to=self.section_dir
             ).as_posix()
-            plot_code = textwrap.dedent(
-                f"""
+            plot_code = textwrap.dedent(f"""
                 file_path = (section_dir / '{plot_rel_path}').resolve().as_posix()
                 with open(file_path, 'r') as plot_file:
-                    plot_json = json.load(plot_file)\n"""
-            )
+                    plot_json = json.load(plot_file)\n""")
 
         # Add specific code for each visualization tool
         if plot.plot_type == r.PlotType.PLOTLY:
-            plot_code += textwrap.dedent(
-                """
+            plot_code += textwrap.dedent("""
                 # Keep only 'data' and 'layout' sections
                 plot_json = {key: plot_json[key] for key in plot_json
                                                  if key in ['data', 'layout']}
@@ -835,26 +796,21 @@ close-streamlit-app-with-button-click/35132/5
                 # Remove 'frame' section in 'data'
                 plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'}
                                                 for entry in plot_json.get('data', [])]
-                st.plotly_chart(plot_json, use_container_width=True)\n"""
-            )
+                st.plotly_chart(plot_json, use_container_width=True)\n""")
 
         elif plot.plot_type == r.PlotType.ALTAIR:
-            plot_code += textwrap.dedent(
-                """
+            plot_code += textwrap.dedent("""
                 altair_plot = alt.Chart.from_dict(plot_json)
                 st.vega_lite_chart(json.loads(altair_plot.to_json()),
-                                   use_container_width=True)\n"""
-            )
+                                   use_container_width=True)\n""")
 
         elif plot.plot_type == r.PlotType.INTERACTIVE_NETWORK:
-            plot_code = textwrap.dedent(
-                """\
+            plot_code = textwrap.dedent("""\
                 # Streamlit checkbox for controlling the layout
                 control_layout = st.checkbox('Add panel to control layout', value=True)
                 net_html_height = 1200 if control_layout else 630
                 # Load HTML into HTML component for display on Streamlit
-                st.components.v1.html(html_content, height=net_html_height)\n"""
-            )
+                st.components.v1.html(html_content, height=net_html_height)\n""")
         return plot_code
 
     def _generate_dataframe_content(self, dataframe) -> List[str]:
@@ -914,17 +870,13 @@ close-streamlit-app-with-button-click/35132/5
                     fpath = get_relative_file_path(
                         dataframe.file_path, relative_to=self.section_dir
                     ).as_posix()
-                    dataframe_content.append(
-                        textwrap.dedent(
-                            f"""\
+                    dataframe_content.append(textwrap.dedent(f"""\
                         file_path = (section_dir / '{fpath}').resolve().as_posix()
                         sheet_names = table_utils.get_sheet_names(file_path)
                         selected_sheet = st.selectbox("Select a sheet to display",
                                                       options=sheet_names,
                                         )
-                        """
-                        )
-                    )
+                        """))
 
             # Load the DataFrame using the correct function
             df_file_path = get_relative_file_path(
@@ -935,14 +887,10 @@ close-streamlit-app-with-button-click/35132/5
                 r.DataFrameFormat.XLS.value_with_dot,
                 r.DataFrameFormat.XLSX.value_with_dot,
             ]:
-                dataframe_content.append(
-                    textwrap.dedent(
-                        f"""\
+                dataframe_content.append(textwrap.dedent(f"""\
                     file_path = (section_dir / '{df_file_path}').resolve()
                     df = pd.{read_function}(file_path, sheet_name=selected_sheet)
-                    """
-                    )
-                )
+                    """))
             else:
                 dataframe_content.append(
                     f"file_path = (section_dir / '{df_file_path}'"
@@ -951,9 +899,7 @@ close-streamlit-app-with-button-click/35132/5
                 )
             # ! Alternative to select box: iterate over sheets in DataFrame
             # Displays a DataFrame using AgGrid with configurable options.
-            dataframe_content.append(
-                textwrap.dedent(
-                    """
+            dataframe_content.append(textwrap.dedent("""
                     # Displays a DataFrame using AgGrid with configurable options.
                     grid_builder = GridOptionsBuilder.from_dataframe(df)
                     grid_builder.configure_default_column(editable=True,
@@ -980,9 +926,7 @@ close-streamlit-app-with-button-click/35132/5
                         file_name=f"dataframe_{df_index}.csv",
                         mime='text/csv',
                         key=f"download_button_{df_index}")
-                    df_index += 1"""
-                )
-            )
+                    df_index += 1"""))
         except Exception as e:
             self.report.logger.error(
                 "Error generating content for DataFrame: %s. Error: %s",
@@ -1031,29 +975,21 @@ close-streamlit-app-with-button-click/35132/5
         try:
             # If the file path is a URL, generate code to fetch content via requests
             if is_url(markdown.file_path):
-                markdown_content.append(
-                    textwrap.dedent(
-                        f"""
+                markdown_content.append(textwrap.dedent(f"""
                         response = requests.get('{markdown.file_path}')
                         response.raise_for_status()
                         markdown_content = response.text
-                        """
-                    )
-                )
+                        """))
             else:  # If it's a local file
                 md_rel_path = get_relative_file_path(
                     markdown.file_path, relative_to=self.section_dir
                 ).as_posix()
 
-                markdown_content.append(
-                    textwrap.dedent(
-                        f"""
+                markdown_content.append(textwrap.dedent(f"""
                         file_path = (section_dir / '{md_rel_path}').resolve().as_posix()
                         with open(file_path, 'r') as markdown_file:
                             markdown_content = markdown_file.read()
-                        """
-                    )
-                )
+                        """))
             # Code to display md content
             markdown_content.append(
                 "st.markdown(markdown_content, unsafe_allow_html=True)\n"
@@ -1105,28 +1041,20 @@ close-streamlit-app-with-button-click/35132/5
         try:
             if is_url(html.file_path):
                 # If it's a URL, fetch content dynamically
-                textwrap.dedent(
-                    html_content.append(
-                        f"""
+                textwrap.dedent(html_content.append(f"""
                         response = requests.get('{html.file_path}')
                         response.raise_for_status()
                         html_content = response.text
-                        """
-                    )
-                )
+                        """))
             else:  # If it's a local file
                 html_rel_path = get_relative_file_path(
                     html.file_path, relative_to=self.section_dir
                 ).as_posix()
-                html_content.append(
-                    textwrap.dedent(
-                        f"""\
+                html_content.append(textwrap.dedent(f"""\
                     file_path = (section_dir / '{html_rel_path}').resolve().as_posix()
                     with open(file_path, 'r', encoding='utf-8') as f:
                         html_content = f.read()
-                    """
-                    )
-                )
+                    """))
 
             # Display HTML content using Streamlit
             html_content.append(
@@ -1284,8 +1212,7 @@ close-streamlit-app-with-button-click/35132/5
         if chatbot.model:
             # --- Ollama-style streaming chatbot ---
             # all other codeblocks pasted in need to be on this indentation level
-            code_block = textwrap.dedent(
-                f"""
+            code_block = textwrap.dedent(f"""
                 {init_messages_block}
                 # Function to send prompt to Ollama API
                 def generate_query(messages):
@@ -1334,14 +1261,12 @@ close-streamlit-app-with-button-click/35132/5
                     st.session_state.messages.append(parsed_response)
                     with st.chat_message("assistant"):
                         st.write_stream(response_generator(parsed_response["content"]))
-                """
-            )
+                """)
             chatbot_content.append(code_block)
 
         else:
             # --- Standard (non-streaming) API chatbot ---
-            code_block = textwrap.dedent(
-                f"""
+            code_block = textwrap.dedent(f"""
                 {init_messages_block}
 
                 # Function to send prompt to standard API
@@ -1391,8 +1316,7 @@ close-streamlit-app-with-button-click/35132/5
                                     )
                         else:
                             st.error("Failed to get response from API")
-                    """
-            )
+                    """)
             chatbot_content.append(code_block)
 
         if chatbot.caption:

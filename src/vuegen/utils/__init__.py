@@ -835,8 +835,7 @@ def get_completion_message(report_type: str, config_path: str) -> str:
     border = "─" * 65  # Creates a separator line
 
     if report_type == "streamlit":
-        message = textwrap.dedent(
-            f"""
+        message = textwrap.dedent(f"""
             🚀 Streamlit Report Generated!
 
             📂 All scripts to build the Streamlit app are available at:
@@ -853,11 +852,9 @@ def get_completion_message(report_type: str, config_path: str) -> str:
 
             ⚙️ Configuration file used:
                 {config_path}
-            """
-        )
+            """)
     else:
-        message = textwrap.dedent(
-            f"""
+        message = textwrap.dedent(f"""
             🚀 {report_type.capitalize()} Report Generated!
 
             📂 Your {report_type} report is available at:
@@ -871,8 +868,7 @@ def get_completion_message(report_type: str, config_path: str) -> str:
 
             ⚙️ Configuration file used:
                 {config_path}
-            """
-        )
+            """)
 
     return f"{message}\n{border}"
 
@@ -891,8 +887,7 @@ def generate_footer() -> str:
     str
         A formatted HTML string representing the footer.
     """
-    footer = textwrap.dedent(
-        f"""
+    footer = textwrap.dedent(f"""
         <style type="text/css">
         .footer \u007b
             position: relative;
@@ -910,8 +905,7 @@ def generate_footer() -> str:
                 {ORG}
             </a>
         </footer>
-        """
-    )
+        """)
     return footer
 
 
