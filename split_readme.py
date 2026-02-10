@@ -13,6 +13,7 @@ SECTION_MAPPING = {
     "Citation": "citation.md",
     "Credits and acknowledgements": "credits.md",
     "Contact and feedback": "contact.md",
+    "FAQ": "faq.md",
 }
 
 
