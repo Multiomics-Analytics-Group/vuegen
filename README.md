@@ -4,14 +4,14 @@
    VueGen is a Python package that automates the creation of scientific reports.
 </p>
 
-| Information           | Links                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| :-------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Package**           | [![PyPI Latest Release](https://img.shields.io/pypi/v/vuegen.svg)][vuegen-pypi] [![Conda Latest Release](https://img.shields.io/conda/v/bioconda/vuegen.svg)][vuegen-conda] [![Supported versions](https://img.shields.io/pypi/pyversions/vuegen.svg)][vuegen-pypi] [![Docker Repository on Quay](https://quay.io/repository/dtu_biosustain_dsp/vuegen/status "Docker Repository on Quay")][vuegen-docker-quay] [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)][mit-license]|
-| **Documentation**     | [![View - Documentation](https://img.shields.io/badge/view-Documentation-blue?style=flat)][vuegen-docs] [![made-with-sphinx-doc](https://img.shields.io/badge/Made%20with-Sphinx-1f425f.svg)](https://www.sphinx-doc.org/) ![Docs](https://readthedocs.org/projects/vuegen/badge/?style=flat) [![CC BY 4.0][cc-by-shield]][vuegen-license]|
-| **Build**             | [![CI](https://github.com/Multiomics-Analytics-Group/vuegen/actions/workflows/cdci.yml/badge.svg)][ci-gh-action] [![Docs](https://github.com/Multiomics-Analytics-Group/vuegen/actions/workflows/docs.yml/badge.svg)][ci-docs]                                                                                                                                                                                                                                                                                        |
-| **Examples**          | [![HTML5](https://img.shields.io/badge/html5-%23E34F26.svg?style=for-the-badge&logo=html5&logoColor=white)][emp-html-demo] [![Streamlit](https://img.shields.io/badge/Streamlit-%23FE4B4B.svg?style=for-the-badge&logo=streamlit&logoColor=white)][emp-st-demo]                                                                                                                                                                                                                                                       |
-| **Discuss on GitHub** | [![GitHub issues](https://img.shields.io/github/issues/Multiomics-Analytics-Group/vuegen)][issues] [![GitHub pull requests](https://img.shields.io/github/issues-pr/Multiomics-Analytics-Group/vuegen)][pulls]                                                                                                                                                                                                                                                                                                        |
-| **Cite**              | [![DOI:10.1093/bioadv/vbaf149](https://img.shields.io/badge/DOI-10.1093/bioadv/vbaf149-074359.svg)][vuegen-article]                                                                                                                                                                                                                                                                                                                                                                                            |
+| Information           | Links                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| :-------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Package**           | [![PyPI Latest Release](https://img.shields.io/pypi/v/vuegen.svg)][vuegen-pypi] [![Conda Latest Release](https://img.shields.io/conda/v/bioconda/vuegen.svg)][vuegen-conda] [![Supported versions](https://img.shields.io/pypi/pyversions/vuegen.svg)][vuegen-pypi] [![Docker Repository on Quay](https://quay.io/repository/dtu_biosustain_dsp/vuegen/status "Docker Repository on Quay")][vuegen-docker-quay] [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)][mit-license] |
+| **Documentation**     | [![View - Documentation](https://img.shields.io/badge/view-Documentation-blue?style=flat)][vuegen-docs] [![made-with-sphinx-doc](https://img.shields.io/badge/Made%20with-Sphinx-1f425f.svg)](https://www.sphinx-doc.org/) ![Docs](https://readthedocs.org/projects/vuegen/badge/?style=flat) [![CC BY 4.0][cc-by-shield]][vuegen-license]                                                                                                                                                          |
+| **Build**             | [![CI](https://github.com/Multiomics-Analytics-Group/vuegen/actions/workflows/cdci.yml/badge.svg)][ci-gh-action] [![Docs](https://github.com/Multiomics-Analytics-Group/vuegen/actions/workflows/docs.yml/badge.svg)][ci-docs]                                                                                                                                                                                                                                                                      |
+| **Examples**          | [![HTML5](https://img.shields.io/badge/html5-%23E34F26.svg?style=for-the-badge&logo=html5&logoColor=white)][emp-html-demo] [![Streamlit](https://img.shields.io/badge/Streamlit-%23FE4B4B.svg?style=for-the-badge&logo=streamlit&logoColor=white)][emp-st-demo]                                                                                                                                                                                                                                     |
+| **Discuss on GitHub** | [![GitHub issues](https://img.shields.io/github/issues/Multiomics-Analytics-Group/vuegen)][issues] [![GitHub pull requests](https://img.shields.io/github/issues-pr/Multiomics-Analytics-Group/vuegen)][pulls]                                                                                                                                                                                                                                                                                      |
+| **Cite**              | [![DOI:10.1093/bioadv/vbaf149](https://img.shields.io/badge/DOI-10.1093/bioadv/vbaf149-074359.svg)][vuegen-article]                                                                                                                                                                                                                                                                                                                                                                                 |
 
 ## Table of contents:
 
@@ -26,6 +26,7 @@
 - [Credits and acknowledgements](#credits-and-acknowledgements)
 - [Citation](#citation)
 - [Contact and feedback](#contact-and-feedback)
+- [FAQ](#faq)
 
 ## About the project
 
@@ -129,7 +130,6 @@ vuegen --directory docs/example_data/Earth_microbiome_vuegen_demo_notebook --rep
 > By default, the `streamlit_autorun` argument is set to False, but you can use it in case you want to automatically run the streamlit app.
 > You can also specify the output directory with the `--output_directory` argumument, which defaults to the current working directory.
 > See all available arguments with the `--help` option.
-
 
 ### Folder structure
 
@@ -343,8 +343,8 @@ This case study focuses on the `APICall` component, which enables interaction wi
 🔗 [![Open in Colab][colab_badge]][colab_link_apicall]
 
 > [!NOTE]
-> A [configuration file example][apicall-config] for the apicall component is available in 
-the `docs/example_config_files` folder.
+> A [configuration file example][apicall-config] for the apicall component is available in
+> the `docs/example_config_files` folder.
 
 ### 4. ChatBot Component
 
@@ -375,8 +375,8 @@ Two API modes are supported:
 This response structure is currently customized for an internal knowledge graph assistant, but VueGen is being actively developed to support more flexible and general-purpose response formats in future releases.
 
 > [!NOTE]
-> A [configuration file example][chatbot-config] for the chatbot component is available 
-in the `docs/example_config_files` folder.
+> A [configuration file example][chatbot-config] for the chatbot component is available
+> in the `docs/example_config_files` folder.
 
 ## Web application deployment
 
@@ -406,13 +406,13 @@ Full details for both licenses can be found in the [LICENSE][vuegen-license] fil
 
 ## Contributing
 
-VueGen is an open-source project, and we welcome contributions of all kinds via GitHub issues and pull requests. 
-You can report bugs, suggest improvements, propose new features, or implement changes. 
+VueGen is an open-source project, and we welcome contributions of all kinds via GitHub issues and pull requests.
+You can report bugs, suggest improvements, propose new features, or implement changes.
 
-We follow the [Conventional Commits][conventional-commits] specification for commit messages and use the 
+We follow the [Conventional Commits][conventional-commits] specification for commit messages and use the
 [changelog-from-release][changelog-from-release-repo] tool to automatically generate the [CHANGELOG](CHANGELOG.md).
 
-Please follow the guidelines in the [CONTRIBUTING](CONTRIBUTING.md) file to ensure that your contribution is 
+Please follow the guidelines in the [CONTRIBUTING](CONTRIBUTING.md) file to ensure that your contribution is
 easily integrated into the project.
 
 ## Credits and acknowledgements
@@ -450,6 +450,27 @@ Ayala-Ruano, S., Webel, H., & Santos, A. (2025). _VueGen: Automating the generat
 ## Contact and feedback
 
 We appreciate your feedback! If you have any comments, suggestions, or run into issues while using VueGen, feel free to [open an issue][new-issue] in this repository. Your input helps us make VueGen better for everyone.
+
+## FAQ
+
+<details>
+  <summary>Interactive Plots are not shown correctly</summary>
+
+1. Make sure to export your interactive plots from Plotly or Altair in JSON format, not as standalone HTML files.
+2. It is best to use VueGen within the environment you created your plots. If you gather it from many sources and
+   see compatibility issues, consider recreating the plots in a single environment. Failing examples are more than welcome
+   via [GitHub issues](https://github.com/Multiomics-Analytics-Group/vuegen/issues/new/choose) (you need a GitHub account).
+
+</details>
+
+<details>
+  <summary>Old JSON Plots stopped working.</summary>
+
+We have seen differently structured JSON file from plotlyjs before version 3. If you
+have such old files and encouter issue, please consider sharing them via
+[GitHub issues](https://github.com/Multiomics-Analytics-Group/vuegen/issues/new/choose).
+
+</details>
 
 [streamlit]: https://streamlit.io/
 [vuegen-pypi]: https://pypi.org/project/vuegen/
