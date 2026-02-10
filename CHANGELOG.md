@@ -4,11 +4,15 @@ All notable changes to this project are documented in this file. It was automati
 the [changelog-from-release](https://github.com/rhysd/changelog-from-release) tool.
 
 <a id="v0.6.0"></a>
-# [v0.6.0](https://github.com/Multiomics-Analytics-Group/vuegen/releases/tag/v0.6.0) - 2026-02-09
+# [v0.6.0 (relax dependency pinning)](https://github.com/Multiomics-Analytics-Group/vuegen/releases/tag/v0.6.0) - 2026-02-10
+
+Maintenance release, which might break workflows as the pinned versions are gone.
 
 ## What's Changed
 * :wrench: loosen versions by [@enryH](https://github.com/enryH) in [#166](https://github.com/Multiomics-Analytics-Group/vuegen/pull/166)
 * 🚧 update runner images by [@enryH](https://github.com/enryH) in [#170](https://github.com/Multiomics-Analytics-Group/vuegen/pull/170)
+* :art: format with latest black version by [@enryH](https://github.com/enryH) in [#172](https://github.com/Multiomics-Analytics-Group/vuegen/pull/172)
+* :memo: start FAQ section by [@enryH](https://github.com/enryH) in [#171](https://github.com/Multiomics-Analytics-Group/vuegen/pull/171)
 
 
 **Full Changelog**: https://github.com/Multiomics-Analytics-Group/vuegen/compare/v0.5.1...v0.6.0
