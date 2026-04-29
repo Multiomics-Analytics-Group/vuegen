@@ -1,4 +1,5 @@
 from pathlib import Path
+import base64
 import requests
 import streamlit as st
 section_dir = Path(__file__).resolve().parent.parent
@@ -24,8 +25,14 @@ st.markdown(
 file_path = (section_dir / '../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/4_Html/1_All_html/1_plot.html').resolve().as_posix()
 with open(file_path, 'r', encoding='utf-8') as f:
     html_content = f.read()
-
-st.components.v1.html(html_content, height=600, scrolling=True)
+html_bytes = html_content.encode()
+if len(html_bytes) > 5 * 1024 * 1024:
+    st.warning(
+        "This HTML file is large (>5MB) and may not open "
+        "correctly in all browsers via the link below."
+    )
+html_b64 = base64.b64encode(html_bytes).decode()
+st.link_button("Open in browser", f"data:text/html;base64,{html_b64}")
 
 st.markdown(
     '''
@@ -68,8 +75,14 @@ st.markdown(
 file_path = (section_dir / '../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/4_Html/1_All_html/3_multiqc_report.html').resolve().as_posix()
 with open(file_path, 'r', encoding='utf-8') as f:
     html_content = f.read()
-
-st.components.v1.html(html_content, height=600, scrolling=True)
+html_bytes = html_content.encode()
+if len(html_bytes) > 5 * 1024 * 1024:
+    st.warning(
+        "This HTML file is large (>5MB) and may not open "
+        "correctly in all browsers via the link below."
+    )
+html_b64 = base64.b64encode(html_bytes).decode()
+st.link_button("Open in browser", f"data:text/html;base64,{html_b64}")
 
 footer = '''
 <style type="text/css">
