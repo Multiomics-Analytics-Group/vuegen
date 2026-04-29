@@ -55,6 +55,7 @@ class PlotType(StrEnum):
     PLOTLY = auto()
     ALTAIR = auto()
     INTERACTIVE_NETWORK = auto()
+    PDF = auto()
 
 
 class NetworkFormat(StrEnum):

@@ -155,6 +155,9 @@ class ConfigManager:
                     "Could not parse JSON file %s: %s", file_path, e, exc_info=True
                 )
                 component_config["plot_type"] = "unknown"
+        elif file_ext == ".pdf":
+            component_config["component_type"] = r.ComponentType.PLOT.value
+            component_config["plot_type"] = r.PlotType.PDF.value
         elif file_ext == ".md":
             component_config["component_type"] = r.ComponentType.MARKDOWN.value
         else:
