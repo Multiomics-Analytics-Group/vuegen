@@ -1040,12 +1040,10 @@ close-streamlit-app-with-button-click/35132/5
 
         try:
             if is_url(html.file_path):
-                # If it's a URL, fetch content dynamically
-                textwrap.dedent(html_content.append(f"""
-                        response = requests.get('{html.file_path}')
-                        response.raise_for_status()
-                        html_content = response.text
-                        """))
+                # If it's a URL, provide a link button to open in a new browser tab
+                html_content.append(
+                    f"st.link_button('Open in browser', '{html.file_path}')\n"
+                )
             else:  # If it's a local file
                 html_rel_path = get_relative_file_path(
                     html.file_path, relative_to=self.section_dir
@@ -1054,12 +1052,15 @@ close-streamlit-app-with-button-click/35132/5
                     file_path = (section_dir / '{html_rel_path}').resolve().as_posix()
                     with open(file_path, 'r', encoding='utf-8') as f:
                         html_content = f.read()
+                    html_bytes = html_content.encode()
+                    if len(html_bytes) > 5 * 1024 * 1024:
+                        st.warning(
+                            "This HTML file is large (>5MB) and may not open "
+                            "correctly in all browsers via the link below."
+                        )
+                    html_b64 = base64.b64encode(html_bytes).decode()
+                    st.link_button("Open in browser", f"data:text/html;base64,{{html_b64}}")
                     """))
-
-            # Display HTML content using Streamlit
-            html_content.append(
-                "st.components.v1.html(html_content, height=600, scrolling=True)\n"
-            )
 
         except Exception as e:
             self.report.logger.error(
@@ -1384,6 +1385,8 @@ close-streamlit-app-with-button-click/35132/5
         elif component_type == r.ComponentType.DATAFRAME:
             component_imports.extend(components_imports["dataframe"])
             component_imports.append("df_index = 1")
+        elif component_type == r.ComponentType.HTML:
+            component_imports.append("import base64")
 
         # Return the list of import statements
         return component_imports
