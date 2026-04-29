@@ -816,7 +816,9 @@ def get_logger(
     return logger, log_file
 
 
-def get_completion_message(report_type: str, config_path: str) -> str:
+def get_completion_message(
+    report_type: str, config_path: str, output_dir: Optional[str] = None
+) -> str:
     """
     Generate a formatted completion message after report generation.
 
@@ -826,6 +828,9 @@ def get_completion_message(report_type: str, config_path: str) -> str:
         The type of report generated (e.g., "streamlit", "html").
     config_path : str
         The path to the configuration file used for generating the report.
+    output_dir : str, optional
+        The directory where the report was generated. If not provided, default
+        directory names are used in the message.
 
     Returns
     -------
@@ -835,36 +840,44 @@ def get_completion_message(report_type: str, config_path: str) -> str:
     border = "─" * 65  # Creates a separator line
 
     if report_type == "streamlit":
+        if output_dir is not None:
+            sections_dir = Path(output_dir) / "sections"
+        else:
+            sections_dir = Path("streamlit_report") / "sections"
         message = textwrap.dedent(f"""
             🚀 Streamlit Report Generated!
 
             📂 All scripts to build the Streamlit app are available at:
-                streamlit_report/sections
+                {sections_dir}
 
             ▶️ To run the Streamlit app, use the following command:
-                streamlit run streamlit_report/sections/report_manager.py
+                streamlit run {sections_dir / "report_manager.py"}
 
             ✨ You can extend the report by adding new files to the input directory or
                updating the config file.
 
             🛠️ Advanced users can modify the Python scripts directly in:
-                streamlit_report/sections
+                {sections_dir}
 
             ⚙️ Configuration file used:
                 {config_path}
             """)
     else:
+        if output_dir is not None:
+            report_dir = Path(output_dir)
+        else:
+            report_dir = Path("quarto_report")
         message = textwrap.dedent(f"""
             🚀 {report_type.capitalize()} Report Generated!
 
             📂 Your {report_type} report is available at:
-                quarto_report
+                {report_dir}
 
             ✨ You can extend the report by adding new files to the input directory or
                updating the config file.
 
             🛠️ Advanced users can modify the report template directly in:
-                quarto_report/quarto_report.qmd
+                {report_dir / f"{report_dir.name}.qmd"}
 
             ⚙️ Configuration file used:
                 {config_path}
