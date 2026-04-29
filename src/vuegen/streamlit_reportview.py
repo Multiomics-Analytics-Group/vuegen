@@ -682,6 +682,24 @@ close-streamlit-app-with-button-click/35132/5
                     "st.image(plot_file_path,"
                     f" caption='{plot.caption}', use_column_width=True)\n"
                 )
+            elif plot.plot_type == r.PlotType.PDF:
+                # If the file path is a URL, download the PDF bytes
+                if is_url(plot.file_path):
+                    plot_content.append(textwrap.dedent(f"""
+                            response = requests.get('{plot.file_path}')
+                            response.raise_for_status()
+                            pdf_data = response.content
+                            """))
+                else:  # If it's a local file
+                    pdf_rel_path = get_relative_file_path(
+                        plot.file_path, relative_to=self.section_dir
+                    ).as_posix()
+                    plot_content.append(textwrap.dedent(f"""
+                            pdf_file_path = (section_dir / '{pdf_rel_path}').resolve()
+                            with open(pdf_file_path, 'rb') as pdf_file:
+                                pdf_data = pdf_file.read()
+                            """))
+                plot_content.append("st.pdf(pdf_data, use_container_width=True)\n")
             elif plot.plot_type == r.PlotType.PLOTLY:
                 plot_content.append(self._generate_plot_code(plot))
             elif plot.plot_type == r.PlotType.ALTAIR:
@@ -1355,6 +1373,7 @@ close-streamlit-app-with-button-click/35132/5
                 ],
                 r.PlotType.PLOTLY: ["import json", "import requests"],
                 r.PlotType.INTERACTIVE_NETWORK: ["import requests"],
+                r.PlotType.PDF: ["import requests"],
             },
             "dataframe": [
                 "import pandas as pd",

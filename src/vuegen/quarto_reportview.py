@@ -596,6 +596,10 @@ class QuartoReportView(r.ReportView):
                 plot_content.append(
                     self._generate_image_content(plot.file_path, width="90%")
                 )
+            elif plot.plot_type == r.PlotType.PDF:
+                plot_content.append(
+                    self._generate_pdf_content(plot.file_path)
+                )
             elif plot.plot_type == r.PlotType.PLOTLY:
                 plot_content.append(self._generate_plot_code(plot))
                 if self.is_report_static:
@@ -1042,6 +1046,32 @@ with open(report_dir / '{md_rel_path.as_posix()}', 'r') as markdown_file:
             ).as_posix()
 
         return f"""![]({src}){{fig-alt={alt_text} width={width}}}\n"""
+
+    def _generate_pdf_content(self, pdf_path: str) -> str:
+        """
+        Embed a PDF file in the report using an HTML iframe.
+
+        Parameters
+        ----------
+        pdf_path : str
+            Path to the PDF file or a URL to the PDF.
+
+        Returns
+        -------
+        str
+            The formatted PDF embed content as an HTML iframe.
+        """
+        if is_url(pdf_path):
+            src = pdf_path
+        else:
+            src = get_relative_file_path(
+                pdf_path, relative_to=self.output_dir
+            ).as_posix()
+
+        return (
+            f"""<iframe src="{src}" width="100%" height="600px" """
+            """style="border:none;"></iframe>\n"""
+        )
 
     def _generate_component_imports(self, component: r.Component) -> List[str]:
         """
