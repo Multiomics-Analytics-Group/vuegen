@@ -8,6 +8,7 @@ streamlit report footer is also in this file.
 from __future__ import annotations
 
 import argparse
+import importlib.metadata
 import json
 import logging
 import os
@@ -30,6 +31,11 @@ except ImportError:
     from strenum import StrEnum
 
 from vuegen.constants import GITHUB_ORG_URL, LOGO_URL, ORG, REPO_URL, TIMEOUT
+
+try:
+    _VUEGEN_VERSION = importlib.metadata.version("vuegen")
+except importlib.metadata.PackageNotFoundError:
+    _VUEGEN_VERSION = "unknown"
 
 
 # CHECKS
@@ -258,6 +264,13 @@ def get_parser(prog_name: str, others: Optional[dict] = None) -> argparse.Namesp
 
     # Initialize argument parser
     parser = argparse.ArgumentParser(prog=prog_name, **others)
+
+    # Add version argument
+    parser.add_argument(
+        "--version",
+        action="version",
+        version=f"%(prog)s {_VUEGEN_VERSION}",
+    )
 
     # Add arguments
     parser.add_argument(
