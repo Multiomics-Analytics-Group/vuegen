@@ -1,6 +1,7 @@
 """QuartoReportView class for generating Quarto reports."""
 
 import os
+import re
 import subprocess
 import sys
 import textwrap
@@ -76,6 +77,34 @@ class QuartoReportView(r.ReportView):
             r.ComponentType.MARKDOWN: self._generate_markdown_content,
             r.ComponentType.HTML: self._generate_html_content,
         }
+        # Track used cell labels to ensure uniqueness across the whole report
+        self._used_labels: dict = {}
+
+    def _get_unique_label(self, label: str) -> str:
+        """
+        Return a unique Quarto cell label, appending a counter suffix if needed.
+
+        Quarto requires all cell labels to be unique within a document. This
+        method tracks all previously used labels (normalized the same way Quarto
+        does: lowercase, non-alphanumeric characters replaced by hyphens) and
+        appends a counter suffix when a collision is detected.
+
+        Parameters
+        ----------
+        label : str
+            The proposed cell label string.
+
+        Returns
+        -------
+        str
+            A unique cell label string.
+        """
+        normalized = re.sub(r"[^a-z0-9]+", "-", label.lower()).strip("-")
+        if normalized not in self._used_labels:
+            self._used_labels[normalized] = 0
+            return label
+        self._used_labels[normalized] += 1
+        return f"{label}-{self._used_labels[normalized]}"
 
     def generate_report(self, output_dir: Optional[Path] = None) -> None:
         """
@@ -674,9 +703,10 @@ class QuartoReportView(r.ReportView):
             The generated plot code as a string.
         """
         # Initialize plot code with common structure
+        plot_label = self._get_unique_label(f"{plot.title} {plot.id}")
         plot_code = textwrap.dedent(f"""
             ```{{python}}
-            #| label: '{plot.title} {plot.id}'
+            #| label: '{plot_label}'
             #| fig-cap: ""
             """)
         # If the file path is a URL, generate code to fetch content via requests
@@ -760,9 +790,10 @@ with open(report_dir /'{plot_rel_path}', 'r') as plot_file:
         dataframe_content.append(f"### {dataframe.title}")
 
         # Append header for DataFrame loading
+        dataframe_label = self._get_unique_label(f"{dataframe.title} {dataframe.id}")
         dataframe_content.append(textwrap.dedent(f"""\
                 ```{{python}}
-                #| label: '{dataframe.title} {dataframe.id}'
+                #| label: '{dataframe_label}'
                 #| fig-cap: ""
                 """))
         # Mapping of file extensions to read functions
@@ -822,9 +853,12 @@ with open(report_dir /'{plot_rel_path}', 'r') as plot_file:
             if sheet_names:
                 for sheet_name in sheet_names[1:]:
                     dataframe_content.append(f"#### {sheet_name}")
+                    sheet_label = self._get_unique_label(
+                        f"{dataframe.title} {dataframe.id} {sheet_name}"
+                    )
                     dataframe_content.append(textwrap.dedent(f"""\
                     ```{{python}}
-                    #| label: '{dataframe.title} {dataframe.id} {sheet_name}'
+                    #| label: '{sheet_label}'
                     #| fig-cap: ""
                     """))
                     dataframe_content.append(
@@ -875,9 +909,10 @@ with open(report_dir /'{plot_rel_path}', 'r') as plot_file:
 
         try:
             # Initialize md code with common structure
+            markdown_label = self._get_unique_label(f"{markdown.title} {markdown.id}")
             markdown_content.append(textwrap.dedent(f"""
                     ```{{python}}
-                    #| label: '{markdown.title} {markdown.id}'
+                    #| label: '{markdown_label}'
                     #| fig-cap: ""
                     """))
             # If the file path is a URL, generate code to fetch content via requests
