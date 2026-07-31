@@ -315,6 +315,21 @@ def get_parser(prog_name: str, others: Optional[dict] = None) -> argparse.Namesp
             "Ignored if a config file is provided."
         ),
     )
+    parser.add_argument(
+        "-eft",
+        "--exclude_file_types",
+        nargs="+",
+        default=None,
+        metavar="EXT",
+        help=(
+            "One or more file extensions to exclude when scanning the input directory "
+            "(e.g. csv png or .csv .png). When files with the same name exist in "
+            "multiple formats, the excluded types are dropped first; remaining "
+            "duplicates are resolved automatically by preferring interactive/richer "
+            "formats over plain-text or static ones. "
+            "Ignored if a config file is provided."
+        ),
+    )
     # Parse arguments
     return parser
 

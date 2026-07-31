@@ -5,6 +5,7 @@ for reports from YAML config files.
 import json
 import logging
 import os
+from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Union
 
@@ -18,7 +19,12 @@ class ConfigManager:
     objects.
     """
 
-    def __init__(self, logger: Optional[logging.Logger] = None, max_depth: int = 2):
+    def __init__(
+        self,
+        logger: Optional[logging.Logger] = None,
+        max_depth: int = 2,
+        exclude_file_types: Optional[List[str]] = None,
+    ):
         """
         Initializes the ConfigManager with a logger.
 
@@ -31,11 +37,25 @@ class ConfigManager:
             The maximum depth of the directory structure to consider when generating
             the report config from a directory.
             The default is 2, which means it will include sections and subsections.
+        exclude_file_types : list of str, optional
+            File extensions to exclude when scanning directories (e.g. ``["csv", "png"]``
+            or ``[".csv", ".png"]``).  Both forms with and without a leading dot are
+            accepted.  When the same file stem exists in multiple formats the excluded
+            extensions are removed first; then, if more than one format still remains,
+            the format with the highest built-in priority is kept automatically.
         """
         if logger is None:
             logger, _ = get_logger("report")
         self.logger = logger
         self.max_depth = max_depth
+        # Normalise to lower-case extensions that always start with a dot.
+        if exclude_file_types:
+            self.exclude_file_types: List[str] = [
+                ext if ext.startswith(".") else f".{ext}"
+                for ext in (e.lower() for e in exclude_file_types)
+            ]
+        else:
+            self.exclude_file_types = []
 
     def _create_title_fromdir(self, file_dirname: str) -> str:
         """
@@ -56,6 +76,109 @@ class ConfigManager:
         parts = name.split("_", 1)
         title = parts[1] if parts[0].isdigit() and len(parts) > 1 else name
         return title.replace("_", " ").title()
+
+    # Priority order used when deduplicating files that share the same stem.
+    # Extensions listed earlier are preferred over those listed later.
+    _DEDUP_PRIORITY: List[str] = [
+        ".json",     # interactive plotly / altair
+        ".html",     # interactive network / HTML content
+        ".xlsx",     # Excel spreadsheet (preferred over plain-text tabular)
+        ".xls",
+        ".parquet",
+        ".cyjs",     # Cytoscape network
+        ".graphml",
+        ".gexf",
+        ".gml",
+        ".csv",
+        ".txt",
+        ".md",
+        ".svg",
+        ".png",
+        ".gif",
+        ".webp",
+        ".jpg",
+        ".jpeg",
+    ]
+
+    def _filter_files_by_type(self, files: List[Path]) -> List[Path]:
+        """
+        Filter *file* paths according to the configured exclusions and deduplication
+        rules.  Directory entries are returned unchanged.
+
+        The method performs two passes:
+
+        1. **Exclusion** – any file whose extension (lower-case) appears in
+           ``self.exclude_file_types`` is dropped and a debug message is logged.
+        2. **Deduplication** – when two or more files share the same stem *and* are
+           all supported formats, only the file whose extension has the highest
+           priority in :attr:`_DEDUP_PRIORITY` is kept; the others are logged and
+           dropped.  Files whose extension is not in ``_DEDUP_PRIORITY`` are always
+           kept.
+
+        Parameters
+        ----------
+        files : list of Path
+            Candidate file paths (may include directories; those are passed through
+            without modification).
+
+        Returns
+        -------
+        list of Path
+            The filtered list, preserving the original order of the kept entries.
+        """
+        kept: List[Path] = []
+        skipped_for_dedup: List[Path] = []
+
+        # --- pass 1: exclusion ---
+        after_exclusion: List[Path] = []
+        for path in files:
+            if path.is_dir():
+                after_exclusion.append(path)
+                continue
+            if path.suffix.lower() in self.exclude_file_types:
+                self.logger.debug(
+                    "Excluding file (type excluded): %s", path
+                )
+                continue
+            after_exclusion.append(path)
+
+        # --- pass 2: deduplication (files only) ---
+        # Build a mapping stem -> list[Path] for files that have a priority entry.
+        stem_map: Dict[str, List[Path]] = defaultdict(list)
+        non_priority: List[Path] = []  # dirs or files not in _DEDUP_PRIORITY
+
+        for path in after_exclusion:
+            if path.is_dir():
+                non_priority.append(path)
+            elif path.suffix.lower() in self._DEDUP_PRIORITY:
+                stem_map[path.stem].append(path)
+            else:
+                non_priority.append(path)
+
+        # For each stem group, keep only the highest-priority extension.
+        priority_index = {ext: i for i, ext in enumerate(self._DEDUP_PRIORITY)}
+        for stem, candidates in stem_map.items():
+            if len(candidates) == 1:
+                kept.append(candidates[0])
+            else:
+                best = min(
+                    candidates,
+                    key=lambda p: priority_index.get(p.suffix.lower(), len(self._DEDUP_PRIORITY)),
+                )
+                for candidate in candidates:
+                    if candidate != best:
+                        self.logger.info(
+                            "Skipping '%s' in favour of '%s' (same stem, lower priority).",
+                            candidate.name,
+                            best.name,
+                        )
+                        skipped_for_dedup.append(candidate)
+                kept.append(best)
+
+        # Re-merge and restore original ordering
+        kept_set = set(kept) | set(non_priority)
+        result = [p for p in after_exclusion if p in kept_set]
+        return result
 
     def _create_component_config_fromfile(self, file_path: Path) -> Dict[str, str]:
         """
@@ -253,9 +376,9 @@ class ConfigManager:
         Dict[str, Union[str, List[Dict]]]
             The subsection config.
         """
-        # Sort files by number prefix
-        sorted_files = self._sort_paths_by_numprefix(
-            list(subsection_dir_path.iterdir())
+        # Sort files by number prefix, then apply exclusion/deduplication
+        sorted_files = self._filter_files_by_type(
+            self._sort_paths_by_numprefix(list(subsection_dir_path.iterdir()))
         )
         components = []
         for file in sorted_files:
@@ -302,9 +425,9 @@ class ConfigManager:
         Dict[str, Union[str, List[Dict]]]
             The section config.
         """
-        # Sort subsections by number prefix
-        sorted_subsections = self._sort_paths_by_numprefix(
-            list(section_dir_path.iterdir())
+        # Sort subsections by number prefix, then apply exclusion/deduplication
+        sorted_subsections = self._filter_files_by_type(
+            self._sort_paths_by_numprefix(list(section_dir_path.iterdir()))
         )
 
         subsections = []
@@ -362,8 +485,10 @@ class ConfigManager:
             "sections": [],
         }
 
-        # Sort sections by their number prefix
-        sorted_sections = self._sort_paths_by_numprefix(list(base_dir_path.iterdir()))
+        # Sort sections by their number prefix, then apply exclusion/deduplication
+        sorted_sections = self._filter_files_by_type(
+            self._sort_paths_by_numprefix(list(base_dir_path.iterdir()))
+        )
 
         main_section_config = {
             "title": self._create_title_fromdir(base_dir_path.name),

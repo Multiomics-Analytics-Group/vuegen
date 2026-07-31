@@ -50,6 +50,7 @@ def main():
         streamlit_autorun=args.streamlit_autorun,
         quarto_checks=args.quarto_checks,
         max_depth=args.max_depth,
+        exclude_file_types=args.exclude_file_types,
     )
 
     # Print completion message
