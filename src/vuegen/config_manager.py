@@ -11,6 +11,27 @@ from typing import Dict, List, Optional, Tuple, Union
 from . import report as r
 from .utils import assert_enum_value, get_logger, is_pyvis_html
 
+DESCRIPTION_FILE_NAME = "description.md"
+
+
+def is_description_file(file_path: Path) -> bool:
+    """
+    Checks whether a file is a description file, which is used to describe the
+    report, section or subsection it is placed in, and therefore must not be
+    added as a separate (markdown) component.
+
+    Parameters
+    ----------
+    file_path : Path
+        The file path to check.
+
+    Returns
+    -------
+    bool
+        True if the file is a description file, False otherwise.
+    """
+    return file_path.name.lower() == DESCRIPTION_FILE_NAME
+
 
 class ConfigManager:
     """
@@ -209,7 +230,7 @@ class ConfigManager:
         str
             Content of the description.md file if found, otherwise an empty string.
         """
-        description_file = folder_path / "description.md"
+        description_file = folder_path / DESCRIPTION_FILE_NAME
         if description_file.exists():
             ret = description_file.read_text().strip()
             return f"{ret}\n"
@@ -260,6 +281,14 @@ class ConfigManager:
         components = []
         for file in sorted_files:
             if file.is_file():
+                # The description file is rendered as the subsection description.
+                # Nested folders have no description of their own, so their
+                # description file is dropped.
+                if is_description_file(file):
+                    self.logger.debug(
+                        "Not adding description file as component: %s", file
+                    )
+                    continue
                 component_config = self._create_component_config_fromfile(file)
                 # Skip unsupported files
                 if component_config is None:
@@ -316,6 +345,13 @@ class ConfigManager:
                 file_in_subsection_dir = (
                     subsection_dir  # ! maybe take more generic names?
                 )
+                # The description file is rendered as the section description
+                if is_description_file(file_in_subsection_dir):
+                    self.logger.debug(
+                        "Not adding description file as component: %s",
+                        file_in_subsection_dir,
+                    )
+                    continue
                 component_config = self._create_component_config_fromfile(
                     file_in_subsection_dir
                 )
@@ -381,7 +417,7 @@ class ConfigManager:
             else:
                 file_in_main_section_dir = section_dir
                 if (
-                    file_in_main_section_dir.name.lower() == "description.md"
+                    is_description_file(file_in_main_section_dir)
                     or "home_image" in file_in_main_section_dir.name.lower()
                 ):
                     continue  # Skip description file and home_image in the main section
