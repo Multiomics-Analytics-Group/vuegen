@@ -150,7 +150,9 @@ class ConfigManager:
                 else:
                     component_config["plot_type"] = r.PlotType.PLOTLY.value
             except Exception:
-                self.logger.exception("Could not parse JSON file %s", file_path)
+                self.logger.warning(
+                    "Could not parse JSON file %s", file_path, exc_info=True
+                )
                 component_config["plot_type"] = "unknown"
         elif file_ext == ".md":
             component_config["component_type"] = r.ComponentType.MARKDOWN.value
