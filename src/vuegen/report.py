@@ -624,9 +624,7 @@ class APICall(Component):
         # but we'll include it here if needed for values from a config file
         self.request_body = request_body or {}
 
-    def make_api_request(
-        self, dynamic_request_body: dict | None = None
-    ) -> dict | None:
+    def make_api_request(self, dynamic_request_body: dict | None = None) -> dict | None:
         """
         Sends an HTTP request to the specified API and returns the JSON response.
         It allows overriding the request body dynamically.
