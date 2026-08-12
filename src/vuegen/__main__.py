@@ -34,7 +34,7 @@ def main():
         sys.exit(1)  # otherwise could resort to either or ?
 
     # Define logger suffix based on report type and name
-    logger_suffix = f"{report_type}_report_{str(report_name)}"
+    logger_suffix = f"{report_type}_report_{report_name!s}"
 
     # Initialize logger
     logger, logfile = get_logger(f"{logger_suffix}")
