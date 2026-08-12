@@ -18,7 +18,7 @@ st.markdown(
     '''
     <p style='text-align: center;
     color: #000000;'>
-    Optional description for section.
+    Interactive plots - Optional description for section.
     </p>
     ''',
     unsafe_allow_html=True)

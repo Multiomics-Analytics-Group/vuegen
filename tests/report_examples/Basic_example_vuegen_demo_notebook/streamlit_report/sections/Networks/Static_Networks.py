@@ -13,6 +13,15 @@ st.markdown(
 
 st.markdown(
     '''
+    <p style='text-align: center;
+    color: #000000;'>
+    Static networks.
+    </p>
+    ''',
+    unsafe_allow_html=True)
+
+st.markdown(
+    '''
     <h4 style='text-align: center;
     color: #2b8cbe;'>
     Phyla Correlation Network
