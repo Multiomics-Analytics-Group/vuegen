@@ -21,7 +21,7 @@ def get_report(
     quarto_checks: bool = False,
     output_dir: Path | None = None,
     max_depth: int = 2,  # section and subsection folders
-    exclude_file_types: list = None,
+    exclude_file_types: list | None = None,
 ) -> tuple[str, str]:
     """
     Generate and run a report based on the specified engine.

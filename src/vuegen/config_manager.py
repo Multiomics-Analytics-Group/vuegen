@@ -20,9 +20,9 @@ class ConfigManager:
 
     def __init__(
         self,
-        logger: Optional[logging.Logger] = None,
+        logger: logging.Logger | None = None,
         max_depth: int = 2,
-        exclude_file_types: Optional[List[str]] = None,
+        exclude_file_types: list[str] | None = None,
     ):
         """
         Initializes the ConfigManager with a logger.
@@ -37,11 +37,12 @@ class ConfigManager:
             the report config from a directory.
             The default is 2, which means it will include sections and subsections.
         exclude_file_types : list of str, optional
-            File extensions to exclude when scanning directories (e.g. ``["csv", "png"]``
-            or ``[".csv", ".png"]``).  Both forms with and without a leading dot are
-            accepted.  When the same file stem exists in multiple formats the excluded
-            extensions are removed first; then, if more than one format still remains,
-            the format with the highest built-in priority is kept automatically.
+            File extensions to exclude when scanning directories (e.g.
+            ``["csv", "png"]`` or ``[".csv", ".png"]``).  Both forms with and without a
+            leading dot are accepted.  When the same file stem exists in multiple
+            formats the excluded extensions are removed first; then, if more than one
+            format still remains, the format with the highest built-in priority is kept
+            automatically.
         """
         if logger is None:
             logger, _ = get_logger("report")
@@ -49,7 +50,7 @@ class ConfigManager:
         self.max_depth = max_depth
         # Normalise to lower-case extensions that always start with a dot.
         if exclude_file_types:
-            self.exclude_file_types: List[str] = [
+            self.exclude_file_types: list[str] = [
                 ext if ext.startswith(".") else f".{ext}"
                 for ext in (e.lower() for e in exclude_file_types)
             ]
@@ -78,7 +79,7 @@ class ConfigManager:
 
     # Priority order used when deduplicating files that share the same stem.
     # Extensions listed earlier are preferred over those listed later.
-    _DEDUP_PRIORITY: List[str] = [
+    _DEDUP_PRIORITY: tuple[str] = (
         ".json",  # interactive plotly / altair
         ".html",  # interactive network / HTML content
         ".xlsx",  # Excel spreadsheet (preferred over plain-text tabular)
@@ -97,9 +98,9 @@ class ConfigManager:
         ".webp",
         ".jpg",
         ".jpeg",
-    ]
+    )
 
-    def _filter_files_by_type(self, files: List[Path]) -> List[Path]:
+    def _filter_files_by_type(self, files: list[Path]) -> list[Path]:
         """
         Filter *file* paths according to the configured exclusions and deduplication
         rules.  Directory entries are returned unchanged.
@@ -125,11 +126,11 @@ class ConfigManager:
         list of Path
             The filtered list, preserving the original order of the kept entries.
         """
-        kept: List[Path] = []
-        skipped_for_dedup: List[Path] = []
+        kept: list[Path] = []
+        skipped_for_dedup: list[Path] = []
 
         # --- pass 1: exclusion ---
-        after_exclusion: List[Path] = []
+        after_exclusion: list[Path] = []
         for path in files:
             if path.is_dir():
                 after_exclusion.append(path)
@@ -141,8 +142,8 @@ class ConfigManager:
 
         # --- pass 2: deduplication (files only) ---
         # Build a mapping stem -> list[Path] for files that have a priority entry.
-        stem_map: Dict[str, List[Path]] = defaultdict(list)
-        non_priority: List[Path] = []  # dirs or files not in _DEDUP_PRIORITY
+        stem_map: dict[str, list[Path]] = defaultdict(list)
+        non_priority: list[Path] = []  # dirs or files not in _DEDUP_PRIORITY
 
         for path in after_exclusion:
             if path.is_dir():
@@ -154,7 +155,7 @@ class ConfigManager:
 
         # For each stem group, keep only the highest-priority extension.
         priority_index = {ext: i for i, ext in enumerate(self._DEDUP_PRIORITY)}
-        for stem, candidates in stem_map.items():
+        for candidates in stem_map.values():
             if len(candidates) == 1:
                 kept.append(candidates[0])
             else:
@@ -167,7 +168,8 @@ class ConfigManager:
                 for candidate in candidates:
                     if candidate != best:
                         self.logger.info(
-                            "Skipping '%s' in favour of '%s' (same stem, lower priority).",
+                            "Skipping '%s' in favour of '%s' "
+                            "(same stem, lower priority).",
                             candidate.name,
                             best.name,
                         )
@@ -179,7 +181,7 @@ class ConfigManager:
         result = [p for p in after_exclusion if p in kept_set]
         return result
 
-    def _create_component_config_fromfile(self, file_path: Path) -> Dict[str, str]:
+    def _create_component_config_fromfile(self, file_path: Path) -> dict[str, str]:
         """
         Infers a component config from a file, including component type, plot type,
         and additional fields.
