@@ -80,12 +80,12 @@ class ConfigManager:
     # Priority order used when deduplicating files that share the same stem.
     # Extensions listed earlier are preferred over those listed later.
     _DEDUP_PRIORITY: List[str] = [
-        ".json",     # interactive plotly / altair
-        ".html",     # interactive network / HTML content
-        ".xlsx",     # Excel spreadsheet (preferred over plain-text tabular)
+        ".json",  # interactive plotly / altair
+        ".html",  # interactive network / HTML content
+        ".xlsx",  # Excel spreadsheet (preferred over plain-text tabular)
         ".xls",
         ".parquet",
-        ".cyjs",     # Cytoscape network
+        ".cyjs",  # Cytoscape network
         ".graphml",
         ".gexf",
         ".gml",
@@ -136,9 +136,7 @@ class ConfigManager:
                 after_exclusion.append(path)
                 continue
             if path.suffix.lower() in self.exclude_file_types:
-                self.logger.debug(
-                    "Excluding file (type excluded): %s", path
-                )
+                self.logger.debug("Excluding file (type excluded): %s", path)
                 continue
             after_exclusion.append(path)
 
@@ -163,7 +161,9 @@ class ConfigManager:
             else:
                 best = min(
                     candidates,
-                    key=lambda p: priority_index.get(p.suffix.lower(), len(self._DEDUP_PRIORITY)),
+                    key=lambda p: priority_index.get(
+                        p.suffix.lower(), len(self._DEDUP_PRIORITY)
+                    ),
                 )
                 for candidate in candidates:
                     if candidate != best:
