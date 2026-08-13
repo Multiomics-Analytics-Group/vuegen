@@ -441,14 +441,25 @@ close-streamlit-app-with-button-click/35132/5
             # Create the home page content
             home_content = []
             home_content.append("import streamlit as st")
+            if self.report.graphical_abstract:
+                home_content.append("from pathlib import Path\n")
+                home_content.append(
+                    "section_dir = Path(__file__).resolve().parent.parent\n"
+                )
+            home_content.append("\n")
             if self.report.description:
                 home_content.append(
                     self._format_text(text=self.report.description, type="paragraph")
                 )
             if self.report.graphical_abstract:
+                plot_file_path = get_relative_file_path(
+                    self.report.graphical_abstract, relative_to=self.section_dir
+                ).as_posix()
                 home_content.append(
-                    f"\nst.image('{self.report.graphical_abstract}', "
-                    "use_column_width=True)"
+                    f"plot_file_path = Path('{plot_file_path}').resolve().as_posix()"
+                )
+                home_content.append(
+                    f"\nst.image(section_dir / '{plot_file_path}', use_column_width=True)"
                 )
 
             # add components content to page (if any)
