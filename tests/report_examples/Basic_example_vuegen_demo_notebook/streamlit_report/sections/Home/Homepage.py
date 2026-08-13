@@ -1,4 +1,10 @@
 import streamlit as st
+from pathlib import Path
+
+section_dir = Path(__file__).resolve().parent.parent
+
+
+
 st.markdown(
     '''
     <p style='text-align: center;
@@ -14,8 +20,9 @@ st.markdown(
     ''',
     unsafe_allow_html=True)
 
+plot_file_path = '../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/home_image.png'
 
-st.image('docs/example_data/Basic_example_vuegen_demo_notebook/home_image.png', use_column_width=True)
+st.image((section_dir / plot_file_path).resolve().as_posix(), use_column_width=True)
 footer = '''
 <style type="text/css">
 .footer {

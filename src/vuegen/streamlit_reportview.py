@@ -455,11 +455,10 @@ close-streamlit-app-with-button-click/35132/5
                 plot_file_path = get_relative_file_path(
                     self.report.graphical_abstract, relative_to=self.section_dir
                 ).as_posix()
+                home_content.append(f"plot_file_path = '{plot_file_path}'")
                 home_content.append(
-                    f"plot_file_path = Path('{plot_file_path}').resolve().as_posix()"
-                )
-                home_content.append(
-                    f"\nst.image(section_dir / '{plot_file_path}', use_column_width=True)"
+                    "\nst.image((section_dir / plot_file_path).resolve().as_posix()"
+                    ", use_column_width=True)"
                 )
 
             # add components content to page (if any)
