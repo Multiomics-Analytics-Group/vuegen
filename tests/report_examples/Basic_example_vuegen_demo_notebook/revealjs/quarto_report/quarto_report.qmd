@@ -379,3 +379,5 @@ display.Markdown(markdown_content)
 ```
 
 :::
+
+# Empty Folder

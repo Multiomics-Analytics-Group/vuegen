@@ -336,3 +336,5 @@ with open(report_dir / '../../../../../docs/example_data/Basic_example_vuegen_de
 
 display.Markdown(markdown_content)
 ```
+
+# Empty Folder
