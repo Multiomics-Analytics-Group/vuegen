@@ -7,7 +7,6 @@ import logging
 import os
 from collections import defaultdict
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Union
 
 from . import report as r
 from .utils import assert_enum_value, get_logger, is_pyvis_html
@@ -273,9 +272,9 @@ class ConfigManager:
                     component_config["plot_type"] = r.PlotType.ALTAIR.value
                 else:
                     component_config["plot_type"] = r.PlotType.PLOTLY.value
-            except Exception as e:
+            except Exception:
                 self.logger.warning(
-                    "Could not parse JSON file %s: %s", file_path, e, exc_info=True
+                    "Could not parse JSON file %s", file_path, exc_info=True
                 )
                 component_config["plot_type"] = "unknown"
         elif file_ext == ".md":
@@ -291,7 +290,7 @@ class ConfigManager:
 
         return component_config
 
-    def _sort_paths_by_numprefix(self, paths: List[Path]) -> List[Path]:
+    def _sort_paths_by_numprefix(self, paths: list[Path]) -> list[Path]:
         """
         Sorts a list of Paths by numeric prefixes in their names, placing non-numeric
         items at the end.
@@ -362,7 +361,7 @@ class ConfigManager:
 
     def _create_subsect_config_fromdir(
         self, subsection_dir_path: Path, level: int = 2
-    ) -> Dict[str, Union[str, List[Dict]]]:
+    ) -> dict[str, str | list[dict]]:
         """
         Creates subsection config from a directory.
 
@@ -411,7 +410,7 @@ class ConfigManager:
 
     def _create_sect_config_fromdir(
         self, section_dir_path: Path
-    ) -> Dict[str, Union[str, List[Dict]]]:
+    ) -> dict[str, str | list[dict]]:
         """
         Creates section config from a directory.
 
@@ -455,7 +454,7 @@ class ConfigManager:
 
     def create_yamlconfig_fromdir(
         self, base_dir: str
-    ) -> Tuple[Dict[str, Union[str, List[Dict]]], Path]:
+    ) -> tuple[dict[str, str | list[dict]], Path]:
         """
         Generates a YAML-compatible config file from a directory. It also returns the
         resolved folder path.
@@ -790,9 +789,7 @@ class ConfigManager:
             try:
                 parsed_body = json.loads(request_body)
             except json.JSONDecodeError as e:
-                self.logger.error(
-                    "Failed to parse request_body JSON: %s", e, exc_info=True
-                )
+                self.logger.exception("Failed to parse request_body JSON")
                 raise ValueError("Invalid JSON in request_body.") from e
 
         return r.APICall(
