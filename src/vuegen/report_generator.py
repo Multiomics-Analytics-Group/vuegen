@@ -14,12 +14,12 @@ from .utils import assert_enum_value, get_logger, load_yaml_config, write_yaml_c
 
 def get_report(
     report_type: str,
-    logger: logging.Logger = None,
-    config_path: str = None,
-    dir_path: str = None,
+    logger: logging.Logger | None = None,
+    config_path: str | None = None,
+    dir_path: str | None = None,
     streamlit_autorun: bool = False,
     quarto_checks: bool = False,
-    output_dir: Path = None,
+    output_dir: Path | None = None,
     max_depth: int = 2,  # section and subsection folders
 ) -> tuple[str, str]:
     """
