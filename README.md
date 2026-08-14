@@ -140,26 +140,26 @@ Here is an example layout:
 ```
 report_folder/
 ├── section1/
+│   ├── description.md
 │   ├── table1.tsv
-│   ├── description.md
 │   └── subsection1/
+│       ├── chart.json
 │       ├── description.md
-│       ├──chart.json
 │       ├── image1.png
-│       └──table2.csv
+│       └── table2.csv
 ├── section2/
-│   ├── image2.jpg
 │   ├── description.md
+│   ├── image2.jpg
 │   ├── subsection1/
 │   │   ├── description.md
-│   │   ├── summary_table.xls
-│   │   └── network_plot.graphml
+│   │   ├── network_plot.graphml
+│   │   └── summary_table.xls
 │   └── subsection2/
 │       ├── description.md
 │       ├── report.html
 │       └── summary.md
 ├── description.md
-├── overview.png
+└── home_image.png
 ```
 
 The titles for sections, subsections, and components are extracted from the corresponding folder and file names, and afterward, users can add descriptions, captions, and other details to the configuration file. Component types are inferred from the file extensions and names.
