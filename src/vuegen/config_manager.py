@@ -222,17 +222,26 @@ class ConfigManager:
         Parameters
         ----------
         folder_path : Path
-            Path to the folder where description.md might be located.
+            Path to the folder where description.md might be located. File name is
+            case-insensitive, so Description.md, DESCRIPTION.MD, etc. will also be
+            recognized.
 
         Returns
         -------
         str
             Content of the description.md file if found, otherwise an empty string.
+
+        Raises
+        ------
+        ValueError
+            If the provided path is not a directory.
         """
-        description_file = folder_path / DESCRIPTION_FILE_NAME
-        if description_file.exists():
-            ret = description_file.read_text().strip()
-            return f"{ret}\n"
+        if not folder_path.is_dir():
+            raise ValueError(f"Provided path is not a directory: {folder_path}")
+        for candidate in sorted(folder_path.iterdir()):
+            if candidate.is_file() and is_description_file(candidate):
+                ret = candidate.read_text().strip()
+                return f"{ret}\n"
         return ""
 
     def _read_home_image_file(self, folder_path: Path) -> str:
