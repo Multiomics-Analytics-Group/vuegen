@@ -440,18 +440,25 @@ close-streamlit-app-with-button-click/35132/5
 
             # Create the home page content
             home_content = []
+            # imports:
             home_content.append("import streamlit as st")
-            if self.report.graphical_abstract:
+            if self.report.graphical_abstract and not is_url(
+                self.report.graphical_abstract
+            ):
                 home_content.append("from pathlib import Path\n")
                 home_content.append(
                     "section_dir = Path(__file__).resolve().parent.parent\n"
                 )
             home_content.append("\n")
+            # description if available
             if self.report.description:
                 home_content.append(
                     self._format_text(text=self.report.description, type="paragraph")
                 )
-            if self.report.graphical_abstract:
+            # graphical abstract if available (local or URL)
+            if self.report.graphical_abstract and not is_url(
+                self.report.graphical_abstract
+            ):
                 plot_file_path = get_relative_file_path(
                     self.report.graphical_abstract, relative_to=self.section_dir
                 ).as_posix()
@@ -460,6 +467,13 @@ close-streamlit-app-with-button-click/35132/5
                     "\nst.image((section_dir / plot_file_path).resolve().as_posix()"
                     ", use_column_width=True)"
                 )
+            if self.report.graphical_abstract and is_url(
+                self.report.graphical_abstract
+            ):
+                home_content.append(
+                    f"plot_file_path = '{self.report.graphical_abstract}'"
+                )
+                home_content.append("st.image(plot_file_path, use_column_width=True)\n")
 
             # add components content to page (if any)
 
