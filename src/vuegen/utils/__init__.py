@@ -28,6 +28,7 @@ try:
     from enum import StrEnum
 except ImportError:
     from strenum import StrEnum
+import vuegen
 from vuegen.constants import GITHUB_ORG_URL, LOGO_URL, ORG, REPO_URL, TIMEOUT
 
 
@@ -249,8 +250,6 @@ def get_parser(prog_name: str, others: dict | None = None) -> argparse.Namespace
     AssertionError
         If prog_name is not a string or others is not a dictionary.
     """
-    import vuegen
-
     if others is None:
         others = {}
     # Preconditions
