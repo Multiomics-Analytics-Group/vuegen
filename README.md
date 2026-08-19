@@ -133,26 +133,33 @@ vuegen --directory docs/example_data/Earth_microbiome_vuegen_demo_notebook --rep
 
 ### Folder structure
 
-Your input directory should follow a **nested folder structure**, where first-level folders are treated as **sections** and second-level folders as **subsections**, containing the components (plots, tables, networks, Markdown text, and HTML files). If the component files are in the first-level folders, an `overview` subsection will be created automatically.
+Your input directory should follow a **nested folder structure**, where first-level folders are treated as **sections** and second-level folders as **subsections**, containing the components (plots, tables, networks, Markdown text, and HTML files). If the component files are in the first-level folders, an `overview` subsection will be created automatically. It's good practice to include a `description.md` file in each section and subsection to provide context and explanations for the contents. The `description.md` files are rendered as the section or subsection description, and they are not added as components in the report.
 
 Here is an example layout:
 
 ```
 report_folder/
 ├── section1/
+│   ├── description.md
 │   ├── table1.tsv
 │   └── subsection1/
-│       ├── table2.csv
+│       ├── chart.json
+│       ├── description.md
 │       ├── image1.png
-│       └── chart.json
+│       └── table2.csv
 ├── section2/
+│   ├── description.md
 │   ├── image2.jpg
 │   ├── subsection1/
-│   │   ├── summary_table.xls
-│   │   └── network_plot.graphml
+│   │   ├── description.md
+│   │   ├── network_plot.graphml
+│   │   └── summary_table.xls
 │   └── subsection2/
+│       ├── description.md
 │       ├── report.html
 │       └── summary.md
+├── description.md
+└── home_image.png
 ```
 
 The titles for sections, subsections, and components are extracted from the corresponding folder and file names, and afterward, users can add descriptions, captions, and other details to the configuration file. Component types are inferred from the file extensions and names.
