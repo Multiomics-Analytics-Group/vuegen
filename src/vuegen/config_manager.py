@@ -81,18 +81,19 @@ class ConfigManager:
         self.logger = logger
         self.max_depth = max_depth
 
-    def _create_title_fromdir(self, file_dirname: str, is_dir: bool = False) -> str:
+    def create_title(self, name: str, is_dir: bool = False) -> str:
         """
-        Infers title from a file or directory, removing leading numeric prefixes.
+        Infers a title from a file or directory name, removing leading numeric
+        prefixes.
 
         Parameters
         ----------
-        file_dirname : str
+        name : str
             The file or directory name to infer the title from.
         is_dir : bool, optional
             Whether the name belongs to a directory. Directory names have no
             extension, so nothing is stripped after a dot (e.g. ``Test._Species``
-            stays ``Test Species`` instead of becoming ``Test``).
+            stays ``Test. Species`` instead of becoming ``Test``).
             The default is False, i.e. the name is treated as a file name.
 
         Returns
@@ -101,7 +102,7 @@ class ConfigManager:
             A title generated from the file or directory name.
         """
         # Only file names carry an extension which should not end up in the title
-        name = file_dirname if is_dir else os.path.splitext(file_dirname)[0]
+        name = name if is_dir else os.path.splitext(name)[0]
         # Remove leading numbers and underscores if they exist. Any other dot is
         # kept, as it can be part of the name, e.g. an abbreviation.
         _, title = split_numprefix(name)
@@ -126,7 +127,7 @@ class ConfigManager:
         component_config = {}
 
         # Add title, file path, and description
-        component_config["title"] = self._create_title_fromdir(file_path.name)
+        component_config["title"] = self.create_title(file_path.name)
         component_config["file_path"] = (
             file_path.resolve().as_posix()
         )  # ! needs to be posix for all OS support
@@ -345,7 +346,7 @@ class ConfigManager:
                 components.extend(nested_components["components"])
 
         subsection_config = {
-            "title": self._create_title_fromdir(subsection_dir_path.name, is_dir=True),
+            "title": self.create_title(subsection_dir_path.name, is_dir=True),
             "description": self._read_description_file(subsection_dir_path),
             "components": components,
         }
@@ -395,7 +396,7 @@ class ConfigManager:
                     components.append(component_config)
 
         section_config = {
-            "title": self._create_title_fromdir(section_dir_path.name, is_dir=True),
+            "title": self.create_title(section_dir_path.name, is_dir=True),
             "description": self._read_description_file(section_dir_path),
             "subsections": subsections,
             "components": components,
@@ -426,7 +427,7 @@ class ConfigManager:
         yaml_config = {
             "report": {
                 # This will be used for the home section of a report
-                "title": self._create_title_fromdir(base_dir_path.name, is_dir=True),
+                "title": self.create_title(base_dir_path.name, is_dir=True),
                 "description": self._read_description_file(base_dir_path),
                 "graphical_abstract": self._read_home_image_file(base_dir_path),
                 "logo": "",
@@ -438,7 +439,7 @@ class ConfigManager:
         sorted_sections = self._sort_paths_by_numprefix(list(base_dir_path.iterdir()))
 
         main_section_config = {
-            "title": self._create_title_fromdir(base_dir_path.name, is_dir=True),
+            "title": self.create_title(base_dir_path.name, is_dir=True),
             "description": "",
             "components": [],
         }
