@@ -13,10 +13,10 @@ import logging
 import os
 import sys
 import textwrap
-from datetime import datetime
+from collections.abc import Iterable
+from datetime import datetime, timezone
 from io import StringIO
 from pathlib import Path
-from typing import Iterable, Optional, Type
 from urllib.parse import urlparse
 
 import networkx as nx
@@ -53,7 +53,7 @@ def check_path(filepath: Path) -> bool:
 
 
 def assert_enum_value(
-    enum_class: Type[StrEnum], value: str, logger: logging.Logger
+    enum_class: type[StrEnum], value: str, logger: logging.Logger
 ) -> StrEnum:
     """
     Validate that the given value is a valid member of the specified enumeration class.
@@ -228,7 +228,7 @@ def get_relative_file_path(
     return rel_path
 
 
-def get_parser(prog_name: str, others: Optional[dict] = None) -> argparse.Namespace:
+def get_parser(prog_name: str, others: dict | None = None) -> argparse.Namespace:
     """
     Initiates argparse.ArgumentParser() and adds common arguments.
 
@@ -689,17 +689,19 @@ def get_time(incl_time: bool = True, incl_timezone: bool = True) -> str:
 
     # MAIN FUNCTION
     # getting current time and timezone
-    the_time = datetime.now()
-    timezone = datetime.now().astimezone().tzname()
+    the_time = datetime.now(tz=timezone.utc).astimezone()
+    timezone_name = the_time.tzname()
     # convert date parts to string
 
     # putting date parts into one string
     if incl_time and incl_timezone:
-        fname = the_time.isoformat(sep="_", timespec="seconds") + "_" + timezone
+        fname = the_time.isoformat(sep="_", timespec="seconds") + "_" + timezone_name
     elif incl_time:
         fname = the_time.isoformat(sep="_", timespec="seconds")
     elif incl_timezone:
-        fname = "_".join([the_time.isoformat(sep="_", timespec="hours")[:-3], timezone])
+        fname = "_".join(
+            [the_time.isoformat(sep="_", timespec="hours")[:-3], timezone_name]
+        )
     else:
         y = str(the_time.year)
         m = str(the_time.month)
@@ -951,7 +953,7 @@ def sort_imports(imp: Iterable[str]) -> tuple[list[str], list[str]]:
     imports_statements, setup_statements = [], []
     for line in imp:
         line = line.strip()  # just for safety
-        if line.startswith("from ") or line.startswith("import "):
+        if line.startswith(("from ", "import ")):
             imports_statements.append(line)
         else:
             setup_statements.append(line)

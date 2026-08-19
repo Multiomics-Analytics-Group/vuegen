@@ -5,7 +5,6 @@ import subprocess
 import sys
 import textwrap
 from pathlib import Path
-from typing import List, Optional
 
 import networkx as nx
 
@@ -28,7 +27,7 @@ class QuartoReportView(r.ReportView):
         report: r.Report,
         report_type: r.ReportType,
         quarto_checks: bool = False,
-        output_dir: Optional[Path] = BASE_DIR,
+        output_dir: Path | None = BASE_DIR,
         static_dir: str = STATIC_FILES_DIR,
     ):
         """_summary_
@@ -77,7 +76,7 @@ class QuartoReportView(r.ReportView):
             r.ComponentType.HTML: self._generate_html_content,
         }
 
-    def generate_report(self, output_dir: Optional[Path] = None) -> None:
+    def generate_report(self, output_dir: Path | None = None) -> None:
         """
         Generates the qmd file of the quarto report. It creates code for rendering
         each section and its subsections with all components.
@@ -232,15 +231,13 @@ class QuartoReportView(r.ReportView):
                     "Created qmd script to render the app: %s", fname_qmd_report
                 )
 
-        except Exception as e:
-            self.report.logger.error(
-                "An error occurred while generating the report: %s",
-                e,
-                exc_info=True,
+        except Exception:
+            self.report.logger.exception(
+                "An error occurred while generating the report",
             )
             raise
 
-    def run_report(self, output_dir: Optional[Path] = None) -> None:
+    def run_report(self, output_dir: Path | None = None) -> None:
         """
         Runs the generated quarto report.
 
@@ -306,13 +303,11 @@ class QuartoReportView(r.ReportView):
                 self.report.title,
                 self.report_type,
             )
-        except subprocess.CalledProcessError as e:
-            self.report.logger.error(
-                "Error running '%s' %s report: %s",
+        except subprocess.CalledProcessError:
+            self.report.logger.exception(
+                "Error running '%s' %s report",
                 self.report.title,
                 self.report_type,
-                e,
-                exc_info=True,
             )
             raise
 
@@ -517,7 +512,7 @@ class QuartoReportView(r.ReportView):
         self,
         subsection,
         is_report_revealjs,
-    ) -> tuple[List[str], List[str]]:
+    ) -> tuple[list[str], list[str]]:
         """
         Generate code to render components (plots, dataframes, markdown) in the given
         subsection, creating imports and content for the subsection based on the
@@ -560,7 +555,7 @@ class QuartoReportView(r.ReportView):
         )
         return subsection_content, subsection_imports
 
-    def _generate_plot_content(self, plot) -> List[str]:
+    def _generate_plot_content(self, plot) -> list[str]:
         """
         Generate content for a plot component based on the report type.
 
@@ -638,14 +633,12 @@ class QuartoReportView(r.ReportView):
                     plot_content.append(self._generate_plot_code(plot, html_plot_file))
             else:
                 self.report.logger.warning("Unsupported plot type: %s", plot.plot_type)
-        except Exception as e:
-            self.report.logger.error(
-                "Error generating content for '%s' plot '%s' '%s': %s",
+        except Exception:
+            self.report.logger.exception(
+                "Error generating content for '%s' plot '%s' '%s'",
                 plot.plot_type,
                 plot.id,
                 plot.title,
-                e,
-                exc_info=True,
             )
             raise
 
@@ -741,7 +734,7 @@ with open(report_dir /'{plot_rel_path}', 'r') as plot_file:
                 """)
         return plot_code
 
-    def _generate_dataframe_content(self, dataframe) -> List[str]:
+    def _generate_dataframe_content(self, dataframe) -> list[str]:
         """
         Generate content for a DataFrame component based on the report type.
 
@@ -837,12 +830,10 @@ with open(report_dir /'{plot_rel_path}', 'r') as plot_file:
                         self._show_dataframe(dataframe, suffix=sheet_name)
                     )
 
-        except Exception as e:
-            self.report.logger.error(
-                "Error generating content for DataFrame: %s. Error: %s",
+        except Exception:
+            self.report.logger.exception(
+                "Error generating content for DataFrame: %s",
                 dataframe.title,
-                e,
-                exc_info=True,
             )
             raise
         # Add caption if available
@@ -855,7 +846,7 @@ with open(report_dir /'{plot_rel_path}', 'r') as plot_file:
         )
         return dataframe_content
 
-    def _generate_markdown_content(self, markdown) -> List[str]:
+    def _generate_markdown_content(self, markdown) -> list[str]:
         """
         Adds markdown content to the report.
 
@@ -898,12 +889,10 @@ with open(report_dir / '{md_rel_path.as_posix()}', 'r') as markdown_file:
             # Code to display md content
             markdown_content.append("""display.Markdown(markdown_content)\n```\n""")
 
-        except Exception as e:
-            self.report.logger.error(
-                "Error generating content for Markdown: %s. Error: %s",
+        except Exception:
+            self.report.logger.exception(
+                "Error generating content for Markdown: %s",
                 markdown.title,
-                e,
-                exc_info=True,
             )
             raise
 
@@ -916,7 +905,7 @@ with open(report_dir / '{md_rel_path.as_posix()}', 'r') as markdown_file:
         )
         return markdown_content
 
-    def _show_dataframe(self, dataframe, suffix: Optional[str] = None) -> List[str]:
+    def _show_dataframe(self, dataframe, suffix: str | None = None) -> list[str]:
         """
         Appends either a static image or an interactive representation of a DataFrame
         to the content list.
@@ -961,7 +950,7 @@ with open(report_dir / '{md_rel_path.as_posix()}', 'r') as markdown_file:
 
         return dataframe_content
 
-    def _generate_html_content(self, html) -> List[str]:
+    def _generate_html_content(self, html) -> list[str]:
         """
         Adds an HTML component to the report.
 
@@ -997,12 +986,10 @@ with open(report_dir / '{md_rel_path.as_posix()}', 'r') as markdown_file:
                 """)
             html_content.append(iframe_code)
 
-        except Exception as e:
-            self.report.logger.error(
-                "Error generating content for HTML: %s. Error: %s",
+        except Exception:
+            self.report.logger.exception(
+                "Error generating content for HTML: %s",
                 html.title,
-                e,
-                exc_info=True,
             )
             raise
 
@@ -1043,7 +1030,7 @@ with open(report_dir / '{md_rel_path.as_posix()}', 'r') as markdown_file:
 
         return f"""![]({src}){{fig-alt={alt_text} width={width}}}\n"""
 
-    def _generate_component_imports(self, component: r.Component) -> List[str]:
+    def _generate_component_imports(self, component: r.Component) -> list[str]:
         """
         Generate necessary imports for a component of the report.
 

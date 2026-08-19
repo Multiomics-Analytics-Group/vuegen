@@ -62,8 +62,11 @@ Check our tests folder for examples of report files used to generate actual repo
 ![](../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/home_image.png){fig-alt= width=90%}
 
 # Plots
+Some interactive and static plots.
+
+
 ## Interactive Plots
-Optional description for section.
+Interactive plots - Optional description for section.
 
 
 ::: {.panel-tabset}
@@ -221,6 +224,9 @@ fig_plotly.show()
 :::
 
 ## Static Plots
+Static plots.
+
+
 ::: {.panel-tabset}
 
 ### Number Samples Per Study
@@ -235,6 +241,10 @@ fig_plotly.show()
 :::
 
 # Dataframes
+Data from `csv`, `xls`, `txt`, `.parquet` and `xlsx` files - displayed as tables using
+aggrid.
+
+
 ## All Formats
 ::: {.panel-tabset}
 
@@ -301,6 +311,9 @@ show(df, classes="display nowrap compact", lengthMenu=[3, 5, 10])
 :::
 
 # Networks
+Interactive and static networks.
+
+
 ## Interactive Networks
 Optional description for subsection.
 
@@ -322,6 +335,9 @@ Optional description for subsection.
 :::
 
 ## Static Networks
+Static networks.
+
+
 ::: {.panel-tabset}
 
 ### Phyla Correlation Network
@@ -331,6 +347,10 @@ Optional description for subsection.
 
 # Html
 ## All Html
+Different `html` files - some are not displayed great. Link these as an alternative
+using a markdown file.
+
+
 ::: {.panel-tabset}
 
 ### Plot
@@ -363,12 +383,15 @@ Optional description for subsection.
 
 # Markdown
 ## All Markdown
+This is the README.md from the repository (needs to be updated manually as of now).
+
+
 ::: {.panel-tabset}
 
 ### Readme
 
 ```{python}
-#| label: 'Readme 3'
+#| label: 'Readme 1'
 #| fig-cap: ""
 
 
