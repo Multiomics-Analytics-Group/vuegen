@@ -827,7 +827,7 @@ def get_logger(
 
 
 def get_completion_message(
-    report_type: str, config_path: str, output_dir: Optional[str] = None
+    report_type: str, config_path: str, output_dir: str | None = None
 ) -> str:
     """
     Generate a formatted completion message after report generation.
