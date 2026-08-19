@@ -32,6 +32,30 @@ def is_description_file(file_path: Path) -> bool:
     return file_path.name.lower() == DESCRIPTION_FILE_NAME
 
 
+def split_numprefix(name: str) -> tuple[int | None, str]:
+    """
+    Splits a leading numbering prefix from a file or directory name. The prefix
+    can be written with or without a trailing dot, i.e. both ``1_Section`` and
+    ``1._Section`` are recognized.
+
+    Parameters
+    ----------
+    name : str
+        The file or directory name to split.
+
+    Returns
+    -------
+    tuple[int | None, str]
+        The number of the prefix (None if the name has no numbering prefix) and
+        the name without the prefix (the full name if there is no prefix).
+    """
+    prefix, sep, rest = name.partition("_")
+    number = prefix.rstrip(".")
+    if sep and number.isdigit():
+        return int(number), rest
+    return None, name
+
+
 class ConfigManager:
     """
     Class for handling metadata of reports from YAML config file and creating report
@@ -57,24 +81,31 @@ class ConfigManager:
         self.logger = logger
         self.max_depth = max_depth
 
-    def _create_title_fromdir(self, file_dirname: str) -> str:
+    def _create_title(self, name: str, is_dir: bool = False) -> str:
         """
-        Infers title from a file or directory, removing leading numeric prefixes.
+        Infers a title from a file or directory name, removing leading numeric
+        prefixes.
 
         Parameters
         ----------
-        file_dirname : str
+        name : str
             The file or directory name to infer the title from.
+        is_dir : bool, optional
+            Whether the name belongs to a directory. Directory names have no
+            extension, so nothing is stripped after a dot (e.g. ``Test._Species``
+            stays ``Test. Species`` instead of becoming ``Test``).
+            The default is False, i.e. the name is treated as a file name.
 
         Returns
         -------
         str
             A title generated from the file or directory name.
         """
-        # Remove leading numbers and underscores if they exist
-        name = os.path.splitext(file_dirname)[0]
-        parts = name.split("_", 1)
-        title = parts[1] if parts[0].isdigit() and len(parts) > 1 else name
+        # Only file names carry an extension which should not end up in the title
+        name = name if is_dir else os.path.splitext(name)[0]
+        # Remove leading numbers and underscores if they exist. Any other dot is
+        # kept, as it can be part of the name, e.g. an abbreviation.
+        _, title = split_numprefix(name)
         return title.replace("_", " ").title()
 
     def _create_component_config_fromfile(self, file_path: Path) -> dict[str, str]:
@@ -96,7 +127,7 @@ class ConfigManager:
         component_config = {}
 
         # Add title, file path, and description
-        component_config["title"] = self._create_title_fromdir(file_path.name)
+        component_config["title"] = self._create_title(file_path.name)
         component_config["file_path"] = (
             file_path.resolve().as_posix()
         )  # ! needs to be posix for all OS support
@@ -205,13 +236,11 @@ class ConfigManager:
         """
 
         def get_sort_key(path: Path) -> tuple:
-            parts = path.name.split("_", 1)
-            if parts[0].isdigit():
-                numeric_prefix = int(parts[0])
-            else:
+            number, _ = split_numprefix(path.name)
+            if number is None:
                 # Non-numeric prefixes go to the end
-                numeric_prefix = float("inf")
-            return numeric_prefix, path.name.lower()
+                number = float("inf")
+            return number, path.name.lower()
 
         return sorted(paths, key=get_sort_key)
 
@@ -317,7 +346,7 @@ class ConfigManager:
                 components.extend(nested_components["components"])
 
         subsection_config = {
-            "title": self._create_title_fromdir(subsection_dir_path.name),
+            "title": self._create_title(subsection_dir_path.name, is_dir=True),
             "description": self._read_description_file(subsection_dir_path),
             "components": components,
         }
@@ -367,7 +396,7 @@ class ConfigManager:
                     components.append(component_config)
 
         section_config = {
-            "title": self._create_title_fromdir(section_dir_path.name),
+            "title": self._create_title(section_dir_path.name, is_dir=True),
             "description": self._read_description_file(section_dir_path),
             "subsections": subsections,
             "components": components,
@@ -398,7 +427,7 @@ class ConfigManager:
         yaml_config = {
             "report": {
                 # This will be used for the home section of a report
-                "title": self._create_title_fromdir(base_dir_path.name),
+                "title": self._create_title(base_dir_path.name, is_dir=True),
                 "description": self._read_description_file(base_dir_path),
                 "graphical_abstract": self._read_home_image_file(base_dir_path),
                 "logo": "",
@@ -410,7 +439,7 @@ class ConfigManager:
         sorted_sections = self._sort_paths_by_numprefix(list(base_dir_path.iterdir()))
 
         main_section_config = {
-            "title": self._create_title_fromdir(base_dir_path.name),
+            "title": self._create_title(base_dir_path.name, is_dir=True),
             "description": "",
             "components": [],
         }
