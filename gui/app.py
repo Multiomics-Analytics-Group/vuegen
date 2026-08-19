@@ -1,22 +1,24 @@
 """GUI for vuegen command-line tool.
 
-usage: VueGen [-h] [-c CONFIG] [-dir DIRECTORY] [-rt REPORT_TYPE]
-              [-st_autorun]
+usage: VueGen [-h] [-v] [-c CONFIG] [-d DIRECTORY] [-r REPORT_TYPE] [-o OUTPUT_DIRECTORY]
+[-s] [-q] [-m MAX_DEPTH]
 
-optional arguments:
-  -h, --help            show this help message and exit
-  -c CONFIG, --config CONFIG
-                        Path to the YAML configuration file.
-  -dir DIRECTORY, --directory DIRECTORY
-                        Path to the directory from which the YAML
-                        config will be inferred.
-  -rt REPORT_TYPE, --report_type REPORT_TYPE
-                        Type of the report to generate (streamlit,
-                        html, pdf, docx, odt, revealjs, pptx, or
-                        jupyter).
-  -st_autorun, --streamlit_autorun
-                        Automatically run the Streamlit app after
-                        report generation.
+options:
+  -h, --help            show this help message and exit -v, --version         show
+  program's version number and exit -c, --config CONFIG   Path to the YAML configuration
+  file. -d, --directory DIRECTORY
+                        Path to the directory from which the YAML config will be inferred.
+  -r, --report-type REPORT_TYPE
+                        Type of the report to generate: streamlit, html, pdf, docx, odt,
+                        revealjs, pptx, or jupyter.
+  -o, --output-directory OUTPUT_DIRECTORY
+                        Path to the output directory for the generated report.
+  -s, --streamlit-autorun
+                        Automatically run the Streamlit app after report generation.
+  -q, --quarto-checks   Check if Quarto is installed and available for report generation.
+  -m, --max-depth MAX_DEPTH
+                        Maximum depth for the recursive search of files in the input
+                        directory. Ignored if a config file is provided.
 """
 
 import os
