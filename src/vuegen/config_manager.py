@@ -81,7 +81,7 @@ class ConfigManager:
         self.logger = logger
         self.max_depth = max_depth
 
-    def create_title(self, name: str, is_dir: bool = False) -> str:
+    def _create_title(self, name: str, is_dir: bool = False) -> str:
         """
         Infers a title from a file or directory name, removing leading numeric
         prefixes.
@@ -127,7 +127,7 @@ class ConfigManager:
         component_config = {}
 
         # Add title, file path, and description
-        component_config["title"] = self.create_title(file_path.name)
+        component_config["title"] = self._create_title(file_path.name)
         component_config["file_path"] = (
             file_path.resolve().as_posix()
         )  # ! needs to be posix for all OS support
@@ -346,7 +346,7 @@ class ConfigManager:
                 components.extend(nested_components["components"])
 
         subsection_config = {
-            "title": self.create_title(subsection_dir_path.name, is_dir=True),
+            "title": self._create_title(subsection_dir_path.name, is_dir=True),
             "description": self._read_description_file(subsection_dir_path),
             "components": components,
         }
@@ -396,7 +396,7 @@ class ConfigManager:
                     components.append(component_config)
 
         section_config = {
-            "title": self.create_title(section_dir_path.name, is_dir=True),
+            "title": self._create_title(section_dir_path.name, is_dir=True),
             "description": self._read_description_file(section_dir_path),
             "subsections": subsections,
             "components": components,
@@ -427,7 +427,7 @@ class ConfigManager:
         yaml_config = {
             "report": {
                 # This will be used for the home section of a report
-                "title": self.create_title(base_dir_path.name, is_dir=True),
+                "title": self._create_title(base_dir_path.name, is_dir=True),
                 "description": self._read_description_file(base_dir_path),
                 "graphical_abstract": self._read_home_image_file(base_dir_path),
                 "logo": "",
@@ -439,7 +439,7 @@ class ConfigManager:
         sorted_sections = self._sort_paths_by_numprefix(list(base_dir_path.iterdir()))
 
         main_section_config = {
-            "title": self.create_title(base_dir_path.name, is_dir=True),
+            "title": self._create_title(base_dir_path.name, is_dir=True),
             "description": "",
             "components": [],
         }

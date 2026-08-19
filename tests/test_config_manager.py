@@ -1,15 +1,15 @@
 from vuegen.config_manager import ConfigManager
 
 
-def test_create_title_fromdir_keeps_dots_in_folder_names():
+def test_create_title_keeps_dots_in_folder_names():
     cm = ConfigManager()
     # Folder names have no extension, so nothing after a dot may be stripped
     # A dot within the name is kept, it can be part of the name (abbreviation)
-    assert cm._create_title_fromdir("Test._Species", is_dir=True) == "Test. Species"
-    assert cm._create_title_fromdir("1._Species", is_dir=True) == "Species"
-    assert cm._create_title_fromdir("v1.2_results", is_dir=True) == "V1.2 Results"
+    assert cm._create_title("Test._Species", is_dir=True) == "Test. Species"
+    assert cm._create_title("1._Species", is_dir=True) == "Species"
+    assert cm._create_title("v1.2_results", is_dir=True) == "V1.2 Results"
     # File names still lose their extension
-    assert cm._create_title_fromdir("1_my_table.csv") == "My Table"
+    assert cm._create_title("1_my_table.csv") == "My Table"
 
 
 def test_create_yamlconfig_fromdir_keeps_dots_in_folder_names(tmp_path):
