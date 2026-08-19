@@ -10,6 +10,51 @@ from pathlib import Path
 from . import report as r
 from .utils import assert_enum_value, get_logger, is_pyvis_html
 
+DESCRIPTION_FILE_NAME = "description.md"
+
+
+def is_description_file(file_path: Path) -> bool:
+    """
+    Checks whether a file is a description file, which is used to describe the
+    report, section or subsection it is placed in, and therefore must not be
+    added as a separate (markdown) component.
+
+    Parameters
+    ----------
+    file_path : Path
+        The file path to check.
+
+    Returns
+    -------
+    bool
+        True if the file is a description file, False otherwise.
+    """
+    return file_path.name.lower() == DESCRIPTION_FILE_NAME
+
+
+def split_numprefix(name: str) -> tuple[int | None, str]:
+    """
+    Splits a leading numbering prefix from a file or directory name. The prefix
+    can be written with or without a trailing dot, i.e. both ``1_Section`` and
+    ``1._Section`` are recognized.
+
+    Parameters
+    ----------
+    name : str
+        The file or directory name to split.
+
+    Returns
+    -------
+    tuple[int | None, str]
+        The number of the prefix (None if the name has no numbering prefix) and
+        the name without the prefix (the full name if there is no prefix).
+    """
+    prefix, sep, rest = name.partition("_")
+    number = prefix.rstrip(".")
+    if sep and number.isdigit():
+        return int(number), rest
+    return None, name
+
 
 class ConfigManager:
     """
@@ -36,24 +81,31 @@ class ConfigManager:
         self.logger = logger
         self.max_depth = max_depth
 
-    def _create_title_fromdir(self, file_dirname: str) -> str:
+    def _create_title(self, name: str, is_dir: bool = False) -> str:
         """
-        Infers title from a file or directory, removing leading numeric prefixes.
+        Infers a title from a file or directory name, removing leading numeric
+        prefixes.
 
         Parameters
         ----------
-        file_dirname : str
+        name : str
             The file or directory name to infer the title from.
+        is_dir : bool, optional
+            Whether the name belongs to a directory. Directory names have no
+            extension, so nothing is stripped after a dot (e.g. ``Test._Species``
+            stays ``Test. Species`` instead of becoming ``Test``).
+            The default is False, i.e. the name is treated as a file name.
 
         Returns
         -------
         str
             A title generated from the file or directory name.
         """
-        # Remove leading numbers and underscores if they exist
-        name = os.path.splitext(file_dirname)[0]
-        parts = name.split("_", 1)
-        title = parts[1] if parts[0].isdigit() and len(parts) > 1 else name
+        # Only file names carry an extension which should not end up in the title
+        name = name if is_dir else os.path.splitext(name)[0]
+        # Remove leading numbers and underscores if they exist. Any other dot is
+        # kept, as it can be part of the name, e.g. an abbreviation.
+        _, title = split_numprefix(name)
         return title.replace("_", " ").title()
 
     def _create_component_config_fromfile(self, file_path: Path) -> dict[str, str]:
@@ -75,7 +127,7 @@ class ConfigManager:
         component_config = {}
 
         # Add title, file path, and description
-        component_config["title"] = self._create_title_fromdir(file_path.name)
+        component_config["title"] = self._create_title(file_path.name)
         component_config["file_path"] = (
             file_path.resolve().as_posix()
         )  # ! needs to be posix for all OS support
@@ -184,13 +236,11 @@ class ConfigManager:
         """
 
         def get_sort_key(path: Path) -> tuple:
-            parts = path.name.split("_", 1)
-            if parts[0].isdigit():
-                numeric_prefix = int(parts[0])
-            else:
+            number, _ = split_numprefix(path.name)
+            if number is None:
                 # Non-numeric prefixes go to the end
-                numeric_prefix = float("inf")
-            return numeric_prefix, path.name.lower()
+                number = float("inf")
+            return number, path.name.lower()
 
         return sorted(paths, key=get_sort_key)
 
@@ -201,17 +251,26 @@ class ConfigManager:
         Parameters
         ----------
         folder_path : Path
-            Path to the folder where description.md might be located.
+            Path to the folder where description.md might be located. File name is
+            case-insensitive, so Description.md, DESCRIPTION.MD, etc. will also be
+            recognized.
 
         Returns
         -------
         str
             Content of the description.md file if found, otherwise an empty string.
+
+        Raises
+        ------
+        ValueError
+            If the provided path is not a directory.
         """
-        description_file = folder_path / "description.md"
-        if description_file.exists():
-            ret = description_file.read_text().strip()
-            return f"{ret}\n"
+        if not folder_path.is_dir():
+            raise ValueError(f"Provided path is not a directory: {folder_path}")
+        for candidate in sorted(folder_path.iterdir()):
+            if candidate.is_file() and is_description_file(candidate):
+                ret = candidate.read_text().strip()
+                return f"{ret}\n"
         return ""
 
     def _read_home_image_file(self, folder_path: Path) -> str:
@@ -259,6 +318,14 @@ class ConfigManager:
         components = []
         for file in sorted_files:
             if file.is_file():
+                # The description file is rendered as the subsection description.
+                # Nested folders have no description of their own, so their
+                # description file is dropped.
+                if is_description_file(file):
+                    self.logger.debug(
+                        "Not adding description file as component: %s", file
+                    )
+                    continue
                 component_config = self._create_component_config_fromfile(file)
                 # Skip unsupported files
                 if component_config is None:
@@ -279,7 +346,7 @@ class ConfigManager:
                 components.extend(nested_components["components"])
 
         subsection_config = {
-            "title": self._create_title_fromdir(subsection_dir_path.name),
+            "title": self._create_title(subsection_dir_path.name, is_dir=True),
             "description": self._read_description_file(subsection_dir_path),
             "components": components,
         }
@@ -315,6 +382,13 @@ class ConfigManager:
                 file_in_subsection_dir = (
                     subsection_dir  # ! maybe take more generic names?
                 )
+                # The description file is rendered as the section description
+                if is_description_file(file_in_subsection_dir):
+                    self.logger.debug(
+                        "Not adding description file as component: %s",
+                        file_in_subsection_dir,
+                    )
+                    continue
                 component_config = self._create_component_config_fromfile(
                     file_in_subsection_dir
                 )
@@ -322,7 +396,7 @@ class ConfigManager:
                     components.append(component_config)
 
         section_config = {
-            "title": self._create_title_fromdir(section_dir_path.name),
+            "title": self._create_title(section_dir_path.name, is_dir=True),
             "description": self._read_description_file(section_dir_path),
             "subsections": subsections,
             "components": components,
@@ -353,7 +427,7 @@ class ConfigManager:
         yaml_config = {
             "report": {
                 # This will be used for the home section of a report
-                "title": self._create_title_fromdir(base_dir_path.name),
+                "title": self._create_title(base_dir_path.name, is_dir=True),
                 "description": self._read_description_file(base_dir_path),
                 "graphical_abstract": self._read_home_image_file(base_dir_path),
                 "logo": "",
@@ -365,7 +439,7 @@ class ConfigManager:
         sorted_sections = self._sort_paths_by_numprefix(list(base_dir_path.iterdir()))
 
         main_section_config = {
-            "title": self._create_title_fromdir(base_dir_path.name),
+            "title": self._create_title(base_dir_path.name, is_dir=True),
             "description": "",
             "components": [],
         }
@@ -380,7 +454,7 @@ class ConfigManager:
             else:
                 file_in_main_section_dir = section_dir
                 if (
-                    file_in_main_section_dir.name.lower() == "description.md"
+                    is_description_file(file_in_main_section_dir)
                     or "home_image" in file_in_main_section_dir.name.lower()
                 ):
                     continue  # Skip description file and home_image in the main section

@@ -14,6 +14,16 @@ st.markdown(
 
 st.markdown(
     '''
+    <p style='text-align: center;
+    color: #000000;'>
+    Different `html` files - some are not displayed great. Link these as an alternative
+    using a markdown file.
+    </p>
+    ''',
+    unsafe_allow_html=True)
+
+st.markdown(
+    '''
     <h4 style='text-align: center;
     color: #2b8cbe;'>
     Plot
