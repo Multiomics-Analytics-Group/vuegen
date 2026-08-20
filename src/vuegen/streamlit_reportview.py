@@ -239,7 +239,7 @@ class StreamlitReportView(r.WebAppReportView):
 close-streamlit-app-with-button-click/35132/5
                     exit_app = st.sidebar.button("Shut Down App",
                                                  icon=":material/power_off:",
-                                                 use_container_width=True)
+                                                 width='stretch')
                     if exit_app:
                         st.toast("Shutting down the app...")
                         time.sleep(1)
@@ -448,7 +448,7 @@ close-streamlit-app-with-button-click/35132/5
             if self.report.graphical_abstract:
                 home_content.append(
                     f"\nst.image('{self.report.graphical_abstract}', "
-                    "use_column_width=True)"
+                    "width='stretch')"
                 )
 
             # add components content to page (if any)
@@ -673,7 +673,7 @@ close-streamlit-app-with-button-click/35132/5
                     )
                 plot_content.append(
                     "st.image(plot_file_path,"
-                    f" caption='{plot.caption}', use_column_width=True)\n"
+                    f" caption='{plot.caption}', width='stretch')\n"
                 )
             elif plot.plot_type in (r.PlotType.PLOTLY, r.PlotType.ALTAIR):
                 plot_content.append(self._generate_plot_code(plot))
@@ -785,13 +785,13 @@ close-streamlit-app-with-button-click/35132/5
                 # Remove 'frame' section in 'data'
                 plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'}
                                                 for entry in plot_json.get('data', [])]
-                st.plotly_chart(plot_json, use_container_width=True)\n""")
+                st.plotly_chart(plot_json, width='stretch')\n""")
 
         elif plot.plot_type == r.PlotType.ALTAIR:
             plot_code += textwrap.dedent("""
                 altair_plot = alt.Chart.from_dict(plot_json)
                 st.vega_lite_chart(json.loads(altair_plot.to_json()),
-                                   use_container_width=True)\n""")
+                                   width='stretch')\n""")
 
         elif plot.plot_type == r.PlotType.INTERACTIVE_NETWORK:
             plot_code = textwrap.dedent("""\
