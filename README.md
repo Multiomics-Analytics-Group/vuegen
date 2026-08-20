@@ -123,12 +123,12 @@ nf-core modules install vuegen
 Run VueGen using a directory with the following command:
 
 ```bash
-vuegen --directory docs/example_data/Earth_microbiome_vuegen_demo_notebook --report_type streamlit
+vuegen --directory docs/example_data/Earth_microbiome_vuegen_demo_notebook --report-type streamlit
 ```
 
 > [!NOTE]
 > By default, the `streamlit_autorun` argument is set to False, but you can use it in case you want to automatically run the streamlit app.
-> You can also specify the output directory with the `--output_directory` argumument, which defaults to the current working directory.
+> You can also specify the output directory with the `--output-directory` argumument, which defaults to the current working directory.
 > See all available arguments with the `--help` option.
 
 ### Folder structure
@@ -170,7 +170,7 @@ The order of sections, subsections, and components can be defined using numerica
 It's also possible to provide a configuration file instead of a directory:
 
 ```bash
-vuegen --config docs/example_config_files/Earth_microbiome_vuegen_demo_notebook.yaml --report_type streamlit
+vuegen --config docs/example_config_files/Earth_microbiome_vuegen_demo_notebook.yaml --report-type streamlit
 ```
 
 If a configuration file is given, users can specify titles and descriptions for sections and subsections, as well as component paths and required attributes, such as file format and delimiter for dataframes, plot types, and other details.
@@ -196,7 +196,7 @@ Instead of installing VueGen locally, you can run it directly from a Docker cont
 docker run --rm \
   -v "$(pwd)/docs/example_data/Earth_microbiome_vuegen_demo_notebook:/home/appuser/Earth_microbiome_vuegen_demo_notebook" \
   -v "$(pwd)/output_docker:/home/appuser/streamlit_report" \
-  quay.io/dtu_biosustain_dsp/vuegen:v0.3.2-docker --directory /home/appuser/Earth_microbiome_vuegen_demo_notebook --report_type streamlit
+  quay.io/dtu_biosustain_dsp/vuegen:v0.3.2-docker --directory /home/appuser/Earth_microbiome_vuegen_demo_notebook --report-type streamlit
 ```
 
 ### Running VueGen with Nextflow and nf-core
@@ -229,7 +229,7 @@ workflow {
 You can run the pipeline with the following command:
 
 ```bash
-nextflow run main.nf --directory docs/example_data/Basic_example_vuegen_demo_notebook --report_type html
+nextflow run main.nf --directory docs/example_data/Basic_example_vuegen_demo_notebook --report-type html
 ```
 
 > [!NOTE]

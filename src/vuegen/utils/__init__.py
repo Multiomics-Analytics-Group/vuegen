@@ -259,15 +259,13 @@ def get_parser(prog_name: str, others: dict | None = None) -> argparse.Namespace
     # Initialize argument parser
     parser = argparse.ArgumentParser(prog=prog_name, **others)
 
-    # Add version argument
+    # Add arguments
     parser.add_argument(
         "-v",
         "--version",
         action="version",
         version=f"%(prog)s {vuegen.__version__}",
     )
-
-    # Add arguments
     parser.add_argument(
         "-c",
         "--config",
@@ -276,48 +274,53 @@ def get_parser(prog_name: str, others: dict | None = None) -> argparse.Namespace
         help="Path to the YAML configuration file.",
     )
     parser.add_argument(
-        "-dir",
+        "-d",
         "--directory",
         type=str,
         default=None,
         help="Path to the directory from which the YAML config will be inferred.",
     )
     parser.add_argument(
-        "-rt",
-        "--report_type",
+        "-r",
+        "--report-type",
         type=str,
         default="streamlit",
+        dest="report_type",
         help=(
             "Type of the report to generate: streamlit, html, pdf, docx, odt, revealjs,"
             " pptx, or jupyter."
         ),
     )
     parser.add_argument(
-        "-output_dir",
-        "--output_directory",
+        "-o",
+        "--output-directory",
         type=str,
         default=None,
+        dest="output_directory",
         help="Path to the output directory for the generated report.",
     )
     parser.add_argument(
-        "-st_autorun",
-        "--streamlit_autorun",
+        "-s",
+        "--streamlit-autorun",
         action="store_true",  # Automatically sets True if the flag is passed
         default=False,
+        dest="streamlit_autorun",
         help="Automatically run the Streamlit app after report generation.",
     )
     parser.add_argument(
-        "-qt_checks",
-        "--quarto_checks",
+        "-q",
+        "--quarto-checks",
         action="store_true",  # Automatically sets True if the flag is passed
         default=False,
+        dest="quarto_checks",
         help="Check if Quarto is installed and available for report generation.",
     )
     parser.add_argument(
-        "-mdep",
-        "--max_depth",
+        "-m",
+        "--max-depth",
         type=int,
         default=2,
+        dest="max_depth",
         help=(
             "Maximum depth for the recursive search of files in the input directory. "
             "Ignored if a config file is provided."
