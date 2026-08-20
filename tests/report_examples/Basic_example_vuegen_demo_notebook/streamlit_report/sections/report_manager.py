@@ -38,6 +38,8 @@ sections_pages['Html'] = [All_Html]
 All_Markdown = st.Page('Markdown/All_Markdown.py', title='All Markdown')
 sections_pages['Markdown'] = [All_Markdown]
 
+sections_pages['Empty Folder'] = []
+
 report_nav = st.navigation(sections_pages)
 
 # Following https://discuss.streamlit.io/t/close-streamlit-app-with-button-click/35132/5

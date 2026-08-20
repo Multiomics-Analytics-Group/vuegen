@@ -625,6 +625,16 @@ close-streamlit-app-with-button-click/35132/5
         )
         subsection_content.extend(all_components)
 
+        # Ensure base imports are always present even when no components are found
+        base_imports = [
+            "import streamlit as st",
+            "from pathlib import Path",
+            "section_dir = Path(__file__).resolve().parent.parent",
+        ]
+        for imp in base_imports:
+            if imp not in subsection_imports:
+                subsection_imports.append(imp)
+
         if not has_chatbot:
             # Define the footer variable and add it to the home page content
             subsection_content.append("footer = '''" + generate_footer() + "'''\n")
