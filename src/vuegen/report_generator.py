@@ -21,6 +21,7 @@ def get_report(
     quarto_checks: bool = False,
     output_dir: Path | None = None,
     max_depth: int = 2,  # section and subsection folders
+    exclude_file_types: list | None = None,
 ) -> tuple[str, str]:
     """
     Generate and run a report based on the specified engine.
@@ -49,6 +50,13 @@ def get_report(
         The maximum depth of the directory structure to consider when generating the
         report. The default is 2, which means it will include sections and subsections.
         The parater is only used when 'dir_path' is used.
+    exclude_file_types : list of str, optional
+        File extensions to exclude when scanning the input directory
+        (e.g. ``["csv", "png"]``).  Both forms with and without a leading dot are
+        accepted.  When the same file stem exists in multiple formats, excluded
+        extensions are removed first; then, if duplicates remain, the format with the
+        highest built-in priority is kept automatically.
+        This parameter is only used when 'dir_path' is provided.
 
     Raises
     ------
@@ -80,7 +88,9 @@ def get_report(
         logger, _ = get_logger("report", folder=_folder)
 
     # Create the config manager object
-    config_manager = ConfigManager(logger, max_depth=max_depth)
+    config_manager = ConfigManager(
+        logger, max_depth=max_depth, exclude_file_types=exclude_file_types
+    )
 
     if dir_path:
         # Generate configuration from the provided directory

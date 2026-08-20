@@ -121,7 +121,7 @@ jobs:
           cd docs
           vuegen -d example_data/Earth_microbiome_vuegen_demo_notebook -r jupyter
           vuegen -c example_data/Earth_microbiome_vuegen_demo_notebook/Earth_microbiome_vuegen_demo_notebook_config.yaml -r jupyter
-      - name: quarto html report based on predefined config file
+      - name: quarto html report based on predefined config file (quarto, basic example)
         run: |
           cd docs
           vuegen -c example_config_files/Basic_example_vuegen_demo_notebook_config.yaml -o ../tests/report_examples/Basic_example_vuegen_demo_notebook_cfg/html -r html
@@ -130,7 +130,7 @@ jobs:
             echo "Error: One or more protected files have been modified."
             exit 1
           fi
-      - name: streamlit report based on predefined config file
+      - name: streamlit report based on predefined config file (streamlit, basic example)
         run: |
           cd docs
           vuegen -c example_config_files/Basic_example_vuegen_demo_notebook_config.yaml -o ../tests/report_examples/Basic_example_vuegen_demo_notebook_cfg
@@ -139,7 +139,7 @@ jobs:
             echo "Error: One or more protected files have been modified."
             exit 1
           fi
-      - name: check streamlit report files for chatbot API
+      - name: check streamlit report files for chatbot API (streamlit, chatbot example)
         run: |
           vuegen -c docs/example_config_files/Chatbot_example_config.yaml -o tests/report_examples/chat_bot
           if git diff tests/report_examples | grep .; then
@@ -147,7 +147,7 @@ jobs:
             echo "Error: One or more protected files have been modified."
             exit 1
           fi
-      - name: check for changes in report files
+      - name: check for changes in report files (streamlit, basic example)
         run: |
           # write streamlit report to test folder 
           vuegen -d docs/example_data/Basic_example_vuegen_demo_notebook -o tests/report_examples/Basic_example_vuegen_demo_notebook
@@ -156,7 +156,7 @@ jobs:
             echo "Error: One or more protected files have been modified."
             exit 1
           fi
-      - name: check for changes in quarto report files
+      - name: check for changes in report files (quarto, basic example)
         run: |
           # write quarto based report to test folder
           for format in html pdf docx odt revealjs pptx jupyter; do
@@ -168,6 +168,15 @@ jobs:
               exit 1
             fi
           done
+      - name: Check exclusion of files in report (streamlit, basic example)
+        run: |
+          # write streamlit report to test folder 
+          vuegen -d docs/example_data/Basic_example_vuegen_demo_notebook -o tests/report_examples/Basic_example_vuegen_demo_notebook_exclude -eft png csv
+          # Check for changes
+          if git diff tests/report_examples | grep .; then
+            echo "Error: One or more protected files have been modified."
+            exit 1
+          fi
 
   publish:
     name: Publish package to PyPI
