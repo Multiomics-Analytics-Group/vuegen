@@ -1,5 +1,6 @@
-import streamlit as st
 from pathlib import Path
+
+import streamlit as st
 
 section_dir = Path(__file__).resolve().parent.parent
 
@@ -15,7 +16,7 @@ st.markdown(
     to be integrated into VueGen.
 
     Check our tests folder for examples of report files used to generate actual reports:
-    [basic_example_vuegen_demo_notebook](https://github.com/Multiomics-Analytics-Group/vuegen/blob/copilot/update-cli-message-output-dir/docs/example_data/Basic_example_vuegen_demo_notebook)
+    [basic_example_vuegen_demo_notebook](https://github.com/Multiomics-Analytics-Group/vuegen/blob/main/docs/example_data/Basic_example_vuegen_demo_notebook)
     </p>
     ''',
     unsafe_allow_html=True)
