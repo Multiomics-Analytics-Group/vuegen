@@ -778,6 +778,10 @@ close-streamlit-app-with-button-click/35132/5
         # Add specific code for each visualization tool
         if plot.plot_type == r.PlotType.PLOTLY:
             plot_code += textwrap.dedent("""
+                # Decode binary TypedArray fields produced by Plotly without
+                # pretty-print (e.g. R's plotly_json(pretty = FALSE))
+                plot_json = plot_utils.decode_plotly_json(plot_json)
+
                 # Keep only 'data' and 'layout' sections
                 plot_json = {key: plot_json[key] for key in plot_json
                                                  if key in ['data', 'layout']}
@@ -1334,7 +1338,11 @@ close-streamlit-app-with-button-click/35132/5
                     "import altair as alt",
                     "import requests",
                 ],
-                r.PlotType.PLOTLY: ["import json", "import requests"],
+                r.PlotType.PLOTLY: [
+                    "import json",
+                    "import requests",
+                    "from vuegen import plot_utils",
+                ],
                 r.PlotType.INTERACTIVE_NETWORK: ["import requests"],
             },
             "dataframe": [
