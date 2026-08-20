@@ -1,6 +1,5 @@
-from pathlib import Path
-
 import streamlit as st
+from pathlib import Path
 
 section_dir = Path(__file__).resolve().parent.parent
 
