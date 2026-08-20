@@ -28,7 +28,7 @@ try:
     from enum import StrEnum
 except ImportError:
     from strenum import StrEnum
-
+import vuegen
 from vuegen.constants import GITHUB_ORG_URL, LOGO_URL, ORG, REPO_URL, TIMEOUT
 
 
@@ -261,6 +261,12 @@ def get_parser(prog_name: str, others: dict | None = None) -> argparse.Namespace
 
     # Add arguments
     parser.add_argument(
+        "-v",
+        "--version",
+        action="version",
+        version=f"%(prog)s {vuegen.__version__}",
+    )
+    parser.add_argument(
         "-c",
         "--config",
         type=str,
@@ -268,48 +274,53 @@ def get_parser(prog_name: str, others: dict | None = None) -> argparse.Namespace
         help="Path to the YAML configuration file.",
     )
     parser.add_argument(
-        "-dir",
+        "-d",
         "--directory",
         type=str,
         default=None,
         help="Path to the directory from which the YAML config will be inferred.",
     )
     parser.add_argument(
-        "-rt",
-        "--report_type",
+        "-r",
+        "--report-type",
         type=str,
         default="streamlit",
+        dest="report_type",
         help=(
             "Type of the report to generate: streamlit, html, pdf, docx, odt, revealjs,"
             " pptx, or jupyter."
         ),
     )
     parser.add_argument(
-        "-output_dir",
-        "--output_directory",
+        "-o",
+        "--output-directory",
         type=str,
         default=None,
+        dest="output_directory",
         help="Path to the output directory for the generated report.",
     )
     parser.add_argument(
-        "-st_autorun",
-        "--streamlit_autorun",
+        "-s",
+        "--streamlit-autorun",
         action="store_true",  # Automatically sets True if the flag is passed
         default=False,
+        dest="streamlit_autorun",
         help="Automatically run the Streamlit app after report generation.",
     )
     parser.add_argument(
-        "-qt_checks",
-        "--quarto_checks",
+        "-q",
+        "--quarto-checks",
         action="store_true",  # Automatically sets True if the flag is passed
         default=False,
+        dest="quarto_checks",
         help="Check if Quarto is installed and available for report generation.",
     )
     parser.add_argument(
-        "-mdep",
-        "--max_depth",
+        "-m",
+        "--max-depth",
         type=int,
         default=2,
+        dest="max_depth",
         help=(
             "Maximum depth for the recursive search of files in the input directory. "
             "Ignored if a config file is provided."
@@ -833,7 +844,9 @@ def get_logger(
     return logger, log_file
 
 
-def get_completion_message(report_type: str, config_path: str) -> str:
+def get_completion_message(
+    report_type: str, config_path: str, output_dir: str | None = None
+) -> str:
     """
     Generate a formatted completion message after report generation.
 
@@ -843,6 +856,9 @@ def get_completion_message(report_type: str, config_path: str) -> str:
         The type of report generated (e.g., "streamlit", "html").
     config_path : str
         The path to the configuration file used for generating the report.
+    output_dir : str, optional
+        The directory where the report was generated. If not provided, default
+        directory names are used in the message.
 
     Returns
     -------
@@ -852,36 +868,44 @@ def get_completion_message(report_type: str, config_path: str) -> str:
     border = "─" * 65  # Creates a separator line
 
     if report_type == "streamlit":
+        if output_dir is not None:
+            sections_dir = Path(output_dir) / "sections"
+        else:
+            sections_dir = Path("streamlit_report") / "sections"
         message = textwrap.dedent(f"""
             🚀 Streamlit Report Generated!
 
             📂 All scripts to build the Streamlit app are available at:
-                streamlit_report/sections
+                {sections_dir}
 
             ▶️ To run the Streamlit app, use the following command:
-                streamlit run streamlit_report/sections/report_manager.py
+                streamlit run {sections_dir / "report_manager.py"}
 
             ✨ You can extend the report by adding new files to the input directory or
                updating the config file.
 
             🛠️ Advanced users can modify the Python scripts directly in:
-                streamlit_report/sections
+                {sections_dir}
 
             ⚙️ Configuration file used:
                 {config_path}
             """)
     else:
+        if output_dir is not None:
+            report_dir = Path(output_dir)
+        else:
+            report_dir = Path("quarto_report")
         message = textwrap.dedent(f"""
             🚀 {report_type.capitalize()} Report Generated!
 
             📂 Your {report_type} report is available at:
-                quarto_report
+                {report_dir}
 
             ✨ You can extend the report by adding new files to the input directory or
                updating the config file.
 
             🛠️ Advanced users can modify the report template directly in:
-                quarto_report/quarto_report.qmd
+                {report_dir / f"{report_dir.name}.qmd"}
 
             ⚙️ Configuration file used:
                 {config_path}
