@@ -705,10 +705,7 @@ close-streamlit-app-with-button-click/35132/5
                         f"plot_file_path = (section_dir / '{plot_file_path}')"
                         ".resolve().as_posix()"
                     )
-                plot_content.append(
-                    "st.image(plot_file_path,"
-                    f" caption='{plot.caption}', use_column_width=True)\n"
-                )
+                plot_content.append("st.image(plot_file_path, use_column_width=True)\n")
             elif plot.plot_type in (r.PlotType.PLOTLY, r.PlotType.ALTAIR):
                 plot_content.append(self._generate_plot_code(plot))
             elif plot.plot_type == r.PlotType.INTERACTIVE_NETWORK:
@@ -771,6 +768,12 @@ close-streamlit-app-with-button-click/35132/5
                 plot.title,
             )
             raise
+
+        # Add caption if available (for all plot types)
+        if plot.caption:
+            plot_content.append(
+                self._format_text(text=plot.caption, type="caption", text_align="left")
+            )
 
         self.report.logger.info(
             "Successfully generated content for plot '%s': '%s'",

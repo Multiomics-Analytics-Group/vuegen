@@ -30,7 +30,7 @@ st.markdown(
     unsafe_allow_html=True)
 
 plot_file_path = (section_dir / '../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/1_Plots/2_Static_plots/1_number_samples_per_study.png').resolve().as_posix()
-st.image(plot_file_path, caption='', use_column_width=True)
+st.image(plot_file_path, use_column_width=True)
 
 st.markdown(
     '''
@@ -42,7 +42,7 @@ st.markdown(
     unsafe_allow_html=True)
 
 plot_file_path = (section_dir / '../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/1_Plots/2_Static_plots/2_animal_metagenomics_samples_map.png').resolve().as_posix()
-st.image(plot_file_path, caption='', use_column_width=True)
+st.image(plot_file_path, use_column_width=True)
 
 st.markdown(
     '''
@@ -54,7 +54,7 @@ st.markdown(
     unsafe_allow_html=True)
 
 plot_file_path = (section_dir / '../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/1_Plots/2_Static_plots/3_alpha_diversity_host_associated_samples.png').resolve().as_posix()
-st.image(plot_file_path, caption='', use_column_width=True)
+st.image(plot_file_path, use_column_width=True)
 
 footer = '''
 <style type="text/css">
