@@ -257,7 +257,9 @@ class ConfigManager:
             sibling_non_md = [
                 p
                 for p in file_path.parent.iterdir()
-                if p.stem == file_path.stem and p.suffix.lower() != ".md" and p.is_file()
+                if p.stem == file_path.stem
+                and p.suffix.lower() != ".md"
+                and p.is_file()
             ]
             if sibling_non_md:
                 return None
