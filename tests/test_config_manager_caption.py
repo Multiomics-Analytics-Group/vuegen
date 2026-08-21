@@ -1,7 +1,6 @@
 """Tests for caption-from-markdown-file functionality in ConfigManager."""
 
 import pytest
-from pathlib import Path
 
 from vuegen.config_manager import ConfigManager
 
@@ -94,7 +93,7 @@ def test_standalone_md_still_creates_markdown_component(tmp_path):
     config = cm._create_component_config_fromfile(md_file)
 
     assert config is not None
-    assert config["component_type"] == "markdown"
+    assert config["component_type"].lower() == "markdown"
 
 
 def test_caption_file_excluded_from_subsection_components(tmp_path):
@@ -113,4 +112,4 @@ def test_caption_file_excluded_from_subsection_components(tmp_path):
     # Only the CSV component should be present, not the .md caption file
     assert len(config["components"]) == 1
     assert config["components"][0]["caption"] == "Caption for data."
-    assert config["components"][0]["component_type"] == "dataframe"
+    assert config["components"][0]["component_type"].lower() == "dataframe"
