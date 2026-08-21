@@ -1,17 +1,24 @@
 import streamlit as st
+from pathlib import Path
+section_dir = Path(__file__).resolve().parent.parent
 
+st.markdown(
+    '''
+    <h3 style='text-align: center;
+    color: #023558;'>
+    Static Networks
+    </h3>
+    ''',
+    unsafe_allow_html=True)
 
 st.markdown(
     '''
     <p style='text-align: center;
     color: #000000;'>
-    A general description of the report.
+    Static networks.
     </p>
     ''',
     unsafe_allow_html=True)
-
-plot_file_path = 'https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/logo/vuegen_logo.png'
-st.image(plot_file_path, use_column_width=True)
 
 footer = '''
 <style type="text/css">

@@ -5,11 +5,56 @@ for reports from YAML config files.
 import json
 import logging
 import os
+from collections import defaultdict
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Union
 
 from . import report as r
 from .utils import assert_enum_value, get_logger, is_pyvis_html
+
+DESCRIPTION_FILE_NAME = "description.md"
+
+
+def is_description_file(file_path: Path) -> bool:
+    """
+    Checks whether a file is a description file, which is used to describe the
+    report, section or subsection it is placed in, and therefore must not be
+    added as a separate (markdown) component.
+
+    Parameters
+    ----------
+    file_path : Path
+        The file path to check.
+
+    Returns
+    -------
+    bool
+        True if the file is a description file, False otherwise.
+    """
+    return file_path.name.lower() == DESCRIPTION_FILE_NAME
+
+
+def split_numprefix(name: str) -> tuple[int | None, str]:
+    """
+    Splits a leading numbering prefix from a file or directory name. The prefix
+    can be written with or without a trailing dot, i.e. both ``1_Section`` and
+    ``1._Section`` are recognized.
+
+    Parameters
+    ----------
+    name : str
+        The file or directory name to split.
+
+    Returns
+    -------
+    tuple[int | None, str]
+        The number of the prefix (None if the name has no numbering prefix) and
+        the name without the prefix (the full name if there is no prefix).
+    """
+    prefix, sep, rest = name.partition("_")
+    number = prefix.rstrip(".")
+    if sep and number.isdigit():
+        return int(number), rest
+    return None, name
 
 
 class ConfigManager:
@@ -18,7 +63,12 @@ class ConfigManager:
     objects.
     """
 
-    def __init__(self, logger: Optional[logging.Logger] = None, max_depth: int = 2):
+    def __init__(
+        self,
+        logger: logging.Logger | None = None,
+        max_depth: int = 2,
+        exclude_file_types: list[str] | None = None,
+    ):
         """
         Initializes the ConfigManager with a logger.
 
@@ -31,33 +81,159 @@ class ConfigManager:
             The maximum depth of the directory structure to consider when generating
             the report config from a directory.
             The default is 2, which means it will include sections and subsections.
+        exclude_file_types : list of str, optional
+            File extensions to exclude when scanning directories (e.g.
+            ``["csv", "png"]`` or ``[".csv", ".png"]``).  Both forms with and without a
+            leading dot are accepted.  When the same file stem exists in multiple
+            formats the excluded extensions are removed first; then, if more than one
+            format still remains, the format with the highest built-in priority is kept
+            automatically.
         """
         if logger is None:
             logger, _ = get_logger("report")
         self.logger = logger
         self.max_depth = max_depth
+        # Normalise to lower-case extensions that always start with a dot.
+        if exclude_file_types:
+            self.exclude_file_types: list[str] = [
+                ext if ext.startswith(".") else f".{ext}"
+                for ext in (e.lower() for e in exclude_file_types)
+            ]
+        else:
+            self.exclude_file_types = []
 
-    def _create_title_fromdir(self, file_dirname: str) -> str:
+    def _create_title(self, name: str, is_dir: bool = False) -> str:
         """
-        Infers title from a file or directory, removing leading numeric prefixes.
+        Infers a title from a file or directory name, removing leading numeric
+        prefixes.
 
         Parameters
         ----------
-        file_dirname : str
+        name : str
             The file or directory name to infer the title from.
+        is_dir : bool, optional
+            Whether the name belongs to a directory. Directory names have no
+            extension, so nothing is stripped after a dot (e.g. ``Test._Species``
+            stays ``Test. Species`` instead of becoming ``Test``).
+            The default is False, i.e. the name is treated as a file name.
 
         Returns
         -------
         str
             A title generated from the file or directory name.
         """
-        # Remove leading numbers and underscores if they exist
-        name = os.path.splitext(file_dirname)[0]
-        parts = name.split("_", 1)
-        title = parts[1] if parts[0].isdigit() and len(parts) > 1 else name
+        # Only file names carry an extension which should not end up in the title
+        name = name if is_dir else os.path.splitext(name)[0]
+        # Remove leading numbers and underscores if they exist. Any other dot is
+        # kept, as it can be part of the name, e.g. an abbreviation.
+        _, title = split_numprefix(name)
         return title.replace("_", " ").title()
 
-    def _create_component_config_fromfile(self, file_path: Path) -> Dict[str, str]:
+    # Priority order used when deduplicating files that share the same stem.
+    # Extensions listed earlier are preferred over those listed later.
+    _DEDUP_PRIORITY: tuple[str] = (
+        ".json",  # interactive plotly / altair
+        ".html",  # interactive network / HTML content
+        ".xlsx",  # Excel spreadsheet (preferred over plain-text tabular)
+        ".xls",
+        ".parquet",
+        ".cyjs",  # Cytoscape network
+        ".graphml",
+        ".gexf",
+        ".gml",
+        ".csv",
+        ".txt",
+        ".md",
+        ".svg",
+        ".png",
+        ".gif",
+        ".webp",
+        ".jpg",
+        ".jpeg",
+    )
+
+    def _filter_files_by_type(self, files: list[Path]) -> list[Path]:
+        """
+        Filter *file* paths according to the configured exclusions and deduplication
+        rules.  Directory entries are returned unchanged.
+
+        The method performs two passes:
+
+        1. **Exclusion** – any file whose extension (lower-case) appears in
+           ``self.exclude_file_types`` is dropped and a debug message is logged.
+        2. **Deduplication** – when two or more files share the same stem *and* are
+           all supported formats, only the file whose extension has the highest
+           priority in :attr:`_DEDUP_PRIORITY` is kept; the others are logged and
+           dropped.  Files whose extension is not in ``_DEDUP_PRIORITY`` are always
+           kept.
+
+        Parameters
+        ----------
+        files : list of Path
+            Candidate file paths (may include directories; those are passed through
+            without modification).
+
+        Returns
+        -------
+        list of Path
+            The filtered list, preserving the original order of the kept entries.
+        """
+        kept: list[Path] = []
+        skipped_for_dedup: list[Path] = []
+
+        # --- pass 1: exclusion ---
+        after_exclusion: list[Path] = []
+        for path in files:
+            if path.is_dir():
+                after_exclusion.append(path)
+                continue
+            if path.suffix.lower() in self.exclude_file_types:
+                self.logger.debug("Excluding file (type excluded): %s", path)
+                continue
+            after_exclusion.append(path)
+
+        # --- pass 2: deduplication (files only) ---
+        # Build a mapping stem -> list[Path] for files that have a priority entry.
+        stem_map: dict[str, list[Path]] = defaultdict(list)
+        non_priority: list[Path] = []  # dirs or files not in _DEDUP_PRIORITY
+
+        for path in after_exclusion:
+            if path.is_dir():
+                non_priority.append(path)
+            elif path.suffix.lower() in self._DEDUP_PRIORITY:
+                stem_map[path.stem].append(path)
+            else:
+                non_priority.append(path)
+
+        # For each stem group, keep only the highest-priority extension.
+        priority_index = {ext: i for i, ext in enumerate(self._DEDUP_PRIORITY)}
+        for candidates in stem_map.values():
+            if len(candidates) == 1:
+                kept.append(candidates[0])
+            else:
+                best = min(
+                    candidates,
+                    key=lambda p: priority_index.get(
+                        p.suffix.lower(), len(self._DEDUP_PRIORITY)
+                    ),
+                )
+                for candidate in candidates:
+                    if candidate != best:
+                        self.logger.info(
+                            "Skipping '%s' in favour of '%s' "
+                            "(same stem, lower priority).",
+                            candidate.name,
+                            best.name,
+                        )
+                        skipped_for_dedup.append(candidate)
+                kept.append(best)
+
+        # Re-merge and restore original ordering
+        kept_set = set(kept) | set(non_priority)
+        result = [p for p in after_exclusion if p in kept_set]
+        return result
+
+    def _create_component_config_fromfile(self, file_path: Path) -> dict[str, str]:
         """
         Infers a component config from a file, including component type, plot type,
         and additional fields.
@@ -87,7 +263,7 @@ class ConfigManager:
                 return None
 
         # Add title, file path, and description
-        component_config["title"] = self._create_title_fromdir(file_path.name)
+        component_config["title"] = self._create_title(file_path.name)
         component_config["file_path"] = (
             file_path.resolve().as_posix()
         )  # ! needs to be posix for all OS support
@@ -166,9 +342,9 @@ class ConfigManager:
                     component_config["plot_type"] = r.PlotType.ALTAIR.value
                 else:
                     component_config["plot_type"] = r.PlotType.PLOTLY.value
-            except Exception as e:
+            except Exception:
                 self.logger.warning(
-                    "Could not parse JSON file %s: %s", file_path, e, exc_info=True
+                    "Could not parse JSON file %s", file_path, exc_info=True
                 )
                 component_config["plot_type"] = "unknown"
         elif file_ext == ".md":
@@ -184,7 +360,7 @@ class ConfigManager:
 
         return component_config
 
-    def _sort_paths_by_numprefix(self, paths: List[Path]) -> List[Path]:
+    def _sort_paths_by_numprefix(self, paths: list[Path]) -> list[Path]:
         """
         Sorts a list of Paths by numeric prefixes in their names, placing non-numeric
         items at the end.
@@ -201,13 +377,11 @@ class ConfigManager:
         """
 
         def get_sort_key(path: Path) -> tuple:
-            parts = path.name.split("_", 1)
-            if parts[0].isdigit():
-                numeric_prefix = int(parts[0])
-            else:
+            number, _ = split_numprefix(path.name)
+            if number is None:
                 # Non-numeric prefixes go to the end
-                numeric_prefix = float("inf")
-            return numeric_prefix, path.name.lower()
+                number = float("inf")
+            return number, path.name.lower()
 
         return sorted(paths, key=get_sort_key)
 
@@ -240,17 +414,26 @@ class ConfigManager:
         Parameters
         ----------
         folder_path : Path
-            Path to the folder where description.md might be located.
+            Path to the folder where description.md might be located. File name is
+            case-insensitive, so Description.md, DESCRIPTION.MD, etc. will also be
+            recognized.
 
         Returns
         -------
         str
             Content of the description.md file if found, otherwise an empty string.
+
+        Raises
+        ------
+        ValueError
+            If the provided path is not a directory.
         """
-        description_file = folder_path / "description.md"
-        if description_file.exists():
-            ret = description_file.read_text().strip()
-            return f"{ret}\n"
+        if not folder_path.is_dir():
+            raise ValueError(f"Provided path is not a directory: {folder_path}")
+        for candidate in sorted(folder_path.iterdir()):
+            if candidate.is_file() and is_description_file(candidate):
+                ret = candidate.read_text().strip()
+                return f"{ret}\n"
         return ""
 
     def _read_home_image_file(self, folder_path: Path) -> str:
@@ -277,7 +460,7 @@ class ConfigManager:
 
     def _create_subsect_config_fromdir(
         self, subsection_dir_path: Path, level: int = 2
-    ) -> Dict[str, Union[str, List[Dict]]]:
+    ) -> dict[str, str | list[dict]]:
         """
         Creates subsection config from a directory.
 
@@ -291,13 +474,21 @@ class ConfigManager:
         Dict[str, Union[str, List[Dict]]]
             The subsection config.
         """
-        # Sort files by number prefix
-        sorted_files = self._sort_paths_by_numprefix(
-            list(subsection_dir_path.iterdir())
+        # Sort files by number prefix, then apply exclusion/deduplication
+        sorted_files = self._filter_files_by_type(
+            self._sort_paths_by_numprefix(list(subsection_dir_path.iterdir()))
         )
         components = []
         for file in sorted_files:
             if file.is_file():
+                # The description file is rendered as the subsection description.
+                # Nested folders have no description of their own, so their
+                # description file is dropped.
+                if is_description_file(file):
+                    self.logger.debug(
+                        "Not adding description file as component: %s", file
+                    )
+                    continue
                 component_config = self._create_component_config_fromfile(file)
                 # Skip unsupported files
                 if component_config is None:
@@ -318,7 +509,7 @@ class ConfigManager:
                 components.extend(nested_components["components"])
 
         subsection_config = {
-            "title": self._create_title_fromdir(subsection_dir_path.name),
+            "title": self._create_title(subsection_dir_path.name, is_dir=True),
             "description": self._read_description_file(subsection_dir_path),
             "components": components,
         }
@@ -326,7 +517,7 @@ class ConfigManager:
 
     def _create_sect_config_fromdir(
         self, section_dir_path: Path
-    ) -> Dict[str, Union[str, List[Dict]]]:
+    ) -> dict[str, str | list[dict]]:
         """
         Creates section config from a directory.
 
@@ -340,9 +531,9 @@ class ConfigManager:
         Dict[str, Union[str, List[Dict]]]
             The section config.
         """
-        # Sort subsections by number prefix
-        sorted_subsections = self._sort_paths_by_numprefix(
-            list(section_dir_path.iterdir())
+        # Sort subsections by number prefix, then apply exclusion/deduplication
+        sorted_subsections = self._filter_files_by_type(
+            self._sort_paths_by_numprefix(list(section_dir_path.iterdir()))
         )
 
         subsections = []
@@ -354,6 +545,13 @@ class ConfigManager:
                 file_in_subsection_dir = (
                     subsection_dir  # ! maybe take more generic names?
                 )
+                # The description file is rendered as the section description
+                if is_description_file(file_in_subsection_dir):
+                    self.logger.debug(
+                        "Not adding description file as component: %s",
+                        file_in_subsection_dir,
+                    )
+                    continue
                 component_config = self._create_component_config_fromfile(
                     file_in_subsection_dir
                 )
@@ -361,7 +559,7 @@ class ConfigManager:
                     components.append(component_config)
 
         section_config = {
-            "title": self._create_title_fromdir(section_dir_path.name),
+            "title": self._create_title(section_dir_path.name, is_dir=True),
             "description": self._read_description_file(section_dir_path),
             "subsections": subsections,
             "components": components,
@@ -370,7 +568,7 @@ class ConfigManager:
 
     def create_yamlconfig_fromdir(
         self, base_dir: str
-    ) -> Tuple[Dict[str, Union[str, List[Dict]]], Path]:
+    ) -> tuple[dict[str, str | list[dict]], Path]:
         """
         Generates a YAML-compatible config file from a directory. It also returns the
         resolved folder path.
@@ -392,7 +590,7 @@ class ConfigManager:
         yaml_config = {
             "report": {
                 # This will be used for the home section of a report
-                "title": self._create_title_fromdir(base_dir_path.name),
+                "title": self._create_title(base_dir_path.name, is_dir=True),
                 "description": self._read_description_file(base_dir_path),
                 "graphical_abstract": self._read_home_image_file(base_dir_path),
                 "logo": "",
@@ -400,11 +598,13 @@ class ConfigManager:
             "sections": [],
         }
 
-        # Sort sections by their number prefix
-        sorted_sections = self._sort_paths_by_numprefix(list(base_dir_path.iterdir()))
+        # Sort sections by their number prefix, then apply exclusion/deduplication
+        sorted_sections = self._filter_files_by_type(
+            self._sort_paths_by_numprefix(list(base_dir_path.iterdir()))
+        )
 
         main_section_config = {
-            "title": self._create_title_fromdir(base_dir_path.name),
+            "title": self._create_title(base_dir_path.name, is_dir=True),
             "description": "",
             "components": [],
         }
@@ -419,7 +619,7 @@ class ConfigManager:
             else:
                 file_in_main_section_dir = section_dir
                 if (
-                    file_in_main_section_dir.name.lower() == "description.md"
+                    is_description_file(file_in_main_section_dir)
                     or "home_image" in file_in_main_section_dir.name.lower()
                 ):
                     continue  # Skip description file and home_image in the main section
@@ -703,9 +903,7 @@ class ConfigManager:
             try:
                 parsed_body = json.loads(request_body)
             except json.JSONDecodeError as e:
-                self.logger.error(
-                    "Failed to parse request_body JSON: %s", e, exc_info=True
-                )
+                self.logger.exception("Failed to parse request_body JSON")
                 raise ValueError("Invalid JSON in request_body.") from e
 
         return r.APICall(
