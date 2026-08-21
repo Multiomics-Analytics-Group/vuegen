@@ -644,7 +644,7 @@ class QuartoReportView(r.ReportView):
 
         # Add caption if available
         if plot.caption:
-            plot_content.append(f">{plot.caption}\n")
+            plot_content.append(f"{plot.caption}\n")
 
         self.report.logger.info(
             "Successfully generated content for plot: '%s'", plot.title

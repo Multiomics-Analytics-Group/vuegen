@@ -107,7 +107,7 @@ fig_altair = alt.Chart.from_json(plot_json_str
 fig_altair
 ```
 
->A plot generated using Altair, a declarative statistical visualization library for Python.
+A plot generated using Altair, a declarative statistical visualization library for Python.
 
 ### Pie Plot Countries Plotly
 
@@ -137,7 +137,7 @@ fig_plotly.update_layout(autosize=False, width=950, height=400,
 fig_plotly.show()
 ```
 
->A plot generated using Plotly, via the Python library.
+A plot generated using Plotly, via the Python library.
 
 ### Pie Plots Biomes Plotly
 
@@ -167,7 +167,7 @@ fig_plotly.update_layout(autosize=False, width=950, height=400,
 fig_plotly.show()
 ```
 
->A plot generated using Plotly, via the Python library.
+A plot generated using Plotly, via the Python library.
 
 ### Saline Metagenomics Samples Map Altair
 
@@ -192,7 +192,7 @@ fig_altair
 ### Number Samples Per Study
 ![](../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/1_Plots/2_Static_plots/1_number_samples_per_study.png){fig-alt= width=90%}
 
->Histogram: How many studies had a certain amount of samples.
+Histogram: How many studies had a certain amount of samples.
 
 ### Animal Metagenomics Samples Map
 ![](../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/1_Plots/2_Static_plots/2_animal_metagenomics_samples_map.png){fig-alt= width=90%}
@@ -203,7 +203,7 @@ fig_altair
 ### Graphical overview of VueGen workflow and components
 ![](https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/vuegen_graph_abstract.png){fig-alt= width=90%}
 
->The diagram illustrates the processing pipeline of VueGen, starting from either a directory or a YAML configuration file. Reports consist of hierarchical sections and subsections, each containing various components such as plots, dataframes, Markdown, HTML, and data retrieved via API calls.
+The diagram illustrates the processing pipeline of VueGen, starting from either a directory or a YAML configuration file. Reports consist of hierarchical sections and subsections, each containing various components such as plots, dataframes, Markdown, HTML, and data retrieved via API calls.
 
 # Dataframes
 ## All Formats
