@@ -206,6 +206,8 @@ fig_plotly.write_image("static/Plotly_Plot_R.png")
 
 ![](static/Plotly_Plot_R.png){fig-alt= width=90%}
 
+>A plotly plot created using R.
+
 ## Static Plots
 Static plots.
 

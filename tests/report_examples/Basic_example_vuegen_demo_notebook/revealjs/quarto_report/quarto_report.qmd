@@ -222,6 +222,8 @@ fig_plotly.update_layout(autosize=False, width=950, height=400,
 fig_plotly.show()
 ```
 
+>A plotly plot created using R.
+
 :::
 
 ## Static Plots
