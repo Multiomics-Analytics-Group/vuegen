@@ -143,13 +143,12 @@ class ConfigManager:
         ".gml",
         ".csv",
         ".txt",
-        ".md",
         ".svg",
         ".png",
-        ".gif",
-        ".webp",
         ".jpg",
         ".jpeg",
+        ".gif",
+        ".webp",
     )
 
     def _filter_files_by_type(self, files: list[Path]) -> list[Path]:
@@ -203,6 +202,7 @@ class ConfigManager:
             elif path.suffix.lower() in self._DEDUP_PRIORITY:
                 stem_map[path.stem].append(path)
             else:
+                # files not in _DEDUP_PRIORITY are always kept
                 non_priority.append(path)
 
         # For each stem group, keep only the highest-priority extension.

@@ -59,6 +59,27 @@ def test_caption_populated_for_png(tmp_path):
     assert config["caption"] == "Figure caption here."
 
 
+def test_yamlconfig_scan_retains_static_image_with_caption(tmp_path):
+    """Same-stem static image plus .md becomes one captioned static plot."""
+    cm = ConfigManager()
+    section_dir = tmp_path / "Results"
+    section_dir.mkdir()
+    png_file = section_dir / "figure.png"
+    png_file.write_bytes(b"\x89PNG\r\n")
+    caption_file = section_dir / "figure.md"
+    caption_file.write_text("Figure caption here.")
+
+    yaml_data, _ = cm.create_yamlconfig_fromdir(str(tmp_path))
+
+    (section,) = yaml_data["sections"]
+    assert len(section["components"]) == 1
+    (component,) = section["components"]
+    assert component["file_path"].endswith("figure.png")
+    assert component["component_type"].lower() == "plot"
+    assert component["plot_type"].lower() == "static"
+    assert component["caption"] == "Figure caption here."
+
+
 def test_caption_empty_when_no_companion_md(tmp_path):
     """Caption is empty string when no companion .md file is present."""
     cm = ConfigManager()
