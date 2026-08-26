@@ -143,13 +143,12 @@ class ConfigManager:
         ".gml",
         ".csv",
         ".txt",
-        ".md",
         ".svg",
         ".png",
-        ".gif",
-        ".webp",
         ".jpg",
         ".jpeg",
+        ".gif",
+        ".webp",
     )
 
     def _filter_files_by_type(self, files: list[Path]) -> list[Path]:
@@ -203,6 +202,7 @@ class ConfigManager:
             elif path.suffix.lower() in self._DEDUP_PRIORITY:
                 stem_map[path.stem].append(path)
             else:
+                # files not in _DEDUP_PRIORITY are always kept
                 non_priority.append(path)
 
         # For each stem group, keep only the highest-priority extension.
@@ -251,13 +251,31 @@ class ConfigManager:
         file_ext = file_path.suffix.lower()
         component_config = {}
 
+        # A .md file whose stem matches another file in the same directory
+        # is treated as a caption file, not a standalone Markdown component.
+        if file_ext == ".md":
+            sibling_non_md = [
+                p
+                for p in file_path.parent.iterdir()
+                if p.stem == file_path.stem
+                and p.suffix.lower() != ".md"
+                and p.is_file()
+            ]
+            if sibling_non_md:
+                return None
+
         # Add title, file path, and description
         component_config["title"] = self._create_title(file_path.name)
         component_config["file_path"] = (
             file_path.resolve().as_posix()
         )  # ! needs to be posix for all OS support
         component_config["description"] = ""
-        component_config["caption"] = ""  # ? It is not populated here
+        # Populate caption from a companion .md file when the current file is
+        # not itself a markdown file.
+        if file_ext != ".md":
+            component_config["caption"] = self._read_caption_file(file_path)
+        else:
+            component_config["caption"] = ""
 
         # Infer component config
         if file_ext in [
@@ -368,6 +386,28 @@ class ConfigManager:
             return number, path.name.lower()
 
         return sorted(paths, key=get_sort_key)
+
+    def _read_caption_file(self, file_path: Path) -> str:
+        """
+        Reads the content of a companion markdown caption file if it exists.
+
+        A caption file has the same stem as ``file_path`` but with a ``.md``
+        extension and must reside in the same directory.
+
+        Parameters
+        ----------
+        file_path : Path
+            The data or plot file whose companion caption file is sought.
+
+        Returns
+        -------
+        str
+            Content of the companion ``.md`` file if found, otherwise an empty string.
+        """
+        caption_file = file_path.with_suffix(".md")
+        if caption_file.exists():
+            return caption_file.read_text().strip()
+        return ""
 
     def _read_description_file(self, folder_path: Path) -> str:
         """

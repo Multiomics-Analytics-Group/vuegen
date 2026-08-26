@@ -151,6 +151,15 @@ plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'}
                                 for entry in plot_json.get('data', [])]
 st.plotly_chart(plot_json, use_container_width=True)
 
+st.markdown(
+    '''
+    <p style='text-align: left;
+    color: #000000;'>
+    A plotly plot created using R.
+    </p>
+    ''',
+    unsafe_allow_html=True)
+
 footer = '''
 <style type="text/css">
 .footer {
