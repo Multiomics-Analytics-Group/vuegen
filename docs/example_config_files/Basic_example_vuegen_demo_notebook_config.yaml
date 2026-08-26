@@ -19,19 +19,19 @@ sections:
     - title: Multiline Plot Altair
       file_path: example_data/Basic_example_vuegen_demo_notebook/1_Plots/1_Interactive_plots/2_multiline_plot_altair.json
       description: ''
-      caption: ''
+      caption: A plot generated using Altair, a declarative statistical visualization library for Python.
       component_type: plot
       plot_type: altair
     - title: Pie Plot Countries Plotly
       file_path: example_data/Basic_example_vuegen_demo_notebook/1_Plots/1_Interactive_plots/3_pie_plot_countries_plotly.json
       description: ''
-      caption: ''
+      caption: A plot generated using Plotly, via the Python library.
       component_type: plot
       plot_type: plotly
     - title: Pie Plots Biomes Plotly
       file_path: example_data/Basic_example_vuegen_demo_notebook/1_Plots/1_Interactive_plots/4_pie_plots_biomes_plotly.json
       description: ''
-      caption: ''
+      caption: 'A plot generated using Plotly, via the Python library.'
       component_type: plot
       plot_type: plotly
     - title: Saline Metagenomics Samples Map Altair
@@ -51,7 +51,7 @@ sections:
     - title: Number Samples Per Study
       file_path: example_data/Basic_example_vuegen_demo_notebook/1_Plots/2_Static_plots/1_number_samples_per_study.png
       description: ''
-      caption: ''
+      caption: 'Histogram: How many studies had a certain amount of samples.'
       component_type: plot
       plot_type: static
     - title: Animal Metagenomics Samples Map

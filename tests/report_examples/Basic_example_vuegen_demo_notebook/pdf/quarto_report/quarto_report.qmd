@@ -42,13 +42,17 @@ A general description of the report.
 It should test all major components which are available
 to be integrated into VueGen.
 
-Check our tests folder for examples of report files used to generate actual reports.
+Check our tests folder for examples of report files used to generate actual reports:
+[basic_example_vuegen_demo_notebook](https://github.com/Multiomics-Analytics-Group/vuegen/blob/main/docs/example_data/Basic_example_vuegen_demo_notebook)
 
 ![](../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/home_image.png){fig-alt= width=90%}
 
 # Plots
+Some interactive and static plots.
+
+
 ## Interactive Plots
-Optional description for section.
+Interactive plots - Optional description for section.
 
 
 ### Top Species Plot By Biome Plotly
@@ -213,7 +217,12 @@ fig_plotly.write_image("static/Plotly_Plot_R.png")
 
 ![](static/Plotly_Plot_R.png){fig-alt= width=90%}
 
+A plotly plot created using R.
+
 ## Static Plots
+Static plots.
+
+
 ### Number Samples Per Study
 ![](../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/1_Plots/2_Static_plots/1_number_samples_per_study.png){fig-alt= width=90%}
 
@@ -224,6 +233,10 @@ fig_plotly.write_image("static/Plotly_Plot_R.png")
 ![](../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/1_Plots/2_Static_plots/3_alpha_diversity_host_associated_samples.png){fig-alt= width=90%}
 
 # Dataframes
+Data from `csv`, `xls`, `txt`, `.parquet` and `xlsx` files - displayed as tables using
+aggrid.
+
+
 ## All Formats
 ### Phyla Correlation Network Csv
 ```{python}
@@ -298,6 +311,9 @@ df.dfi.export('static/Example_Xlsx.png', max_rows=10, max_cols=5, table_conversi
 ![](static/Example_Xlsx.png){fig-alt= width=90%}
 
 # Networks
+Interactive and static networks.
+
+
 ## Interactive Networks
 Optional description for subsection.
 
@@ -310,11 +326,18 @@ Optional description for subsection.
 ![](static/Man_Example.png){fig-alt= width=90%}
 
 ## Static Networks
+Static networks.
+
+
 ### Phyla Correlation Network
 ![](../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/3_Networks/2_Static_networks/1_phyla_correlation_network.png){fig-alt= width=90%}
 
 # Html
 ## All Html
+Different `html` files - some are not displayed great. Link these as an alternative
+using a markdown file.
+
+
 ### Ckg Network
 **Number of nodes:** 33
 
@@ -324,10 +347,13 @@ Optional description for subsection.
 
 # Markdown
 ## All Markdown
+This is the README.md from the repository (needs to be updated manually as of now).
+
+
 ### Readme
 
 ```{python}
-#| label: 'Readme 3'
+#| label: 'Readme 1'
 #| fig-cap: ""
 
 
@@ -336,3 +362,5 @@ with open(report_dir / '../../../../../docs/example_data/Basic_example_vuegen_de
 
 display.Markdown(markdown_content)
 ```
+
+# Empty Folder

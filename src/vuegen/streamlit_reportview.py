@@ -8,7 +8,6 @@ import subprocess
 import sys
 import textwrap
 from pathlib import Path
-from typing import List
 
 from streamlit.web import cli as stcli
 
@@ -89,7 +88,7 @@ class StreamlitReportView(r.WebAppReportView):
         self.static_dir = static_dir
         self.section_dir = sections_dir
 
-    def generate_report(self, output_dir: str = None) -> None:
+    def generate_report(self, output_dir: str | None = None) -> None:
         """
         Generates the Streamlit report and creates Python files for each section
         and its subsections and plots.
@@ -283,15 +282,13 @@ close-streamlit-app-with-button-click/35132/5
                     from anywhere on the system.
                     """))
 
-        except Exception as e:
-            self.report.logger.error(
-                "An error occurred while generating the report: %s",
-                e,
-                exc_info=True,
+        except Exception:
+            self.report.logger.exception(
+                "An error occurred while generating the report",
             )
             raise
 
-    def run_report(self, output_dir: str = None) -> None:
+    def run_report(self, output_dir: str | None = None) -> None:
         """
         Runs the generated Streamlit report.
 
@@ -338,10 +335,8 @@ close-streamlit-app-with-button-click/35132/5
                     )
             except KeyboardInterrupt:
                 print("Streamlit process interrupted.")
-            except subprocess.CalledProcessError as e:
-                self.report.logger.error(
-                    "Error running Streamlit report: %s", e, exc_info=True
-                )
+            except subprocess.CalledProcessError:
+                self.report.logger.exception("Error running Streamlit report")
                 raise
         else:
             # If autorun is False, print instructions for manual execution
@@ -445,16 +440,40 @@ close-streamlit-app-with-button-click/35132/5
 
             # Create the home page content
             home_content = []
+            # imports:
             home_content.append("import streamlit as st")
+            if self.report.graphical_abstract and not is_url(
+                self.report.graphical_abstract
+            ):
+                home_content.append("from pathlib import Path\n")
+                home_content.append(
+                    "section_dir = Path(__file__).resolve().parent.parent\n"
+                )
+            home_content.append("\n")
+            # description if available
             if self.report.description:
                 home_content.append(
                     self._format_text(text=self.report.description, type="paragraph")
                 )
-            if self.report.graphical_abstract:
+            # graphical abstract if available (local or URL)
+            if self.report.graphical_abstract and not is_url(
+                self.report.graphical_abstract
+            ):
+                plot_file_path = get_relative_file_path(
+                    self.report.graphical_abstract, relative_to=self.section_dir
+                ).as_posix()
+                home_content.append(f"plot_file_path = '{plot_file_path}'")
                 home_content.append(
-                    f"\nst.image('{self.report.graphical_abstract}', "
-                    "use_column_width=True)"
+                    "\nst.image((section_dir / plot_file_path).resolve().as_posix()"
+                    ", use_column_width=True)"
                 )
+            if self.report.graphical_abstract and is_url(
+                self.report.graphical_abstract
+            ):
+                home_content.append(
+                    f"plot_file_path = '{self.report.graphical_abstract}'"
+                )
+                home_content.append("st.image(plot_file_path, use_column_width=True)\n")
 
             # add components content to page (if any)
 
@@ -477,10 +496,8 @@ close-streamlit-app-with-button-click/35132/5
             )
             report_manag_content.append("sections_pages['Home'] = [homepage]\n")
             self.report.logger.info("Home page added to the report manager content.")
-        except Exception as e:
-            self.report.logger.error(
-                "Error generating the home section: %s", e, exc_info=True
-            )
+        except Exception:
+            self.report.logger.exception("Error generating the home section")
             raise
 
     def _generate_sections(self, output_dir: str) -> None:
@@ -565,8 +582,8 @@ close-streamlit-app-with-button-click/35132/5
                         )
                         raise
 
-        except Exception as e:
-            self.report.logger.error("Error generating sections: %s", e, exc_info=True)
+        except Exception:
+            self.report.logger.exception("Error generating sections")
             raise
 
     def _combine_components(self, components: list[dict]) -> tuple[list, list, bool]:
@@ -598,7 +615,7 @@ close-streamlit-app-with-button-click/35132/5
         all_imports.extend(setup_statements)
         return all_contents, all_imports, has_chatbot
 
-    def _generate_subsection(self, subsection) -> tuple[List[str], List[str]]:
+    def _generate_subsection(self, subsection) -> tuple[list[str], list[str]]:
         """
         Generate code to render components (plots, dataframes, markdown) in the given
         subsection, creating imports and content for the subsection based on the
@@ -632,6 +649,16 @@ close-streamlit-app-with-button-click/35132/5
         )
         subsection_content.extend(all_components)
 
+        # Ensure base imports are always present even when no components are found
+        base_imports = [
+            "import streamlit as st",
+            "from pathlib import Path",
+            "section_dir = Path(__file__).resolve().parent.parent",
+        ]
+        for imp in base_imports:
+            if imp not in subsection_imports:
+                subsection_imports.append(imp)
+
         if not has_chatbot:
             # Define the footer variable and add it to the home page content
             subsection_content.append("footer = '''" + generate_footer() + "'''\n")
@@ -642,7 +669,7 @@ close-streamlit-app-with-button-click/35132/5
         )
         return subsection_content, subsection_imports
 
-    def _generate_plot_content(self, plot) -> List[str]:
+    def _generate_plot_content(self, plot) -> list[str]:
         """
         Generate content for a plot component based on the plot type
         (static or interactive).
@@ -678,13 +705,8 @@ close-streamlit-app-with-button-click/35132/5
                         f"plot_file_path = (section_dir / '{plot_file_path}')"
                         ".resolve().as_posix()"
                     )
-                plot_content.append(
-                    "st.image(plot_file_path,"
-                    f" caption='{plot.caption}', use_column_width=True)\n"
-                )
-            elif plot.plot_type == r.PlotType.PLOTLY:
-                plot_content.append(self._generate_plot_code(plot))
-            elif plot.plot_type == r.PlotType.ALTAIR:
+                plot_content.append("st.image(plot_file_path, use_column_width=True)\n")
+            elif plot.plot_type in (r.PlotType.PLOTLY, r.PlotType.ALTAIR):
                 plot_content.append(self._generate_plot_code(plot))
             elif plot.plot_type == r.PlotType.INTERACTIVE_NETWORK:
                 networkx_graph = plot.read_network()
@@ -738,16 +760,20 @@ close-streamlit-app-with-button-click/35132/5
                 plot_content.append(self._generate_plot_code(plot))
             else:
                 self.report.logger.warning("Unsupported plot type: %s", plot.plot_type)
-        except Exception as e:
-            self.report.logger.error(
-                "Error generating content for '%s' plot '%s' '%s': %s",
+        except Exception:
+            self.report.logger.exception(
+                "Error generating content for '%s' plot '%s' '%s'",
                 plot.plot_type,
                 plot.id,
                 plot.title,
-                e,
-                exc_info=True,
             )
             raise
+
+        # Add caption if available (for all plot types)
+        if plot.caption:
+            plot_content.append(
+                self._format_text(text=plot.caption, type="caption", text_align="left")
+            )
 
         self.report.logger.info(
             "Successfully generated content for plot '%s': '%s'",
@@ -813,7 +839,7 @@ close-streamlit-app-with-button-click/35132/5
                 st.components.v1.html(html_content, height=net_html_height)\n""")
         return plot_code
 
-    def _generate_dataframe_content(self, dataframe) -> List[str]:
+    def _generate_dataframe_content(self, dataframe) -> list[str]:
         """
         Generate content for a DataFrame component.
 
@@ -927,12 +953,10 @@ close-streamlit-app-with-button-click/35132/5
                         mime='text/csv',
                         key=f"download_button_{df_index}")
                     df_index += 1"""))
-        except Exception as e:
-            self.report.logger.error(
-                "Error generating content for DataFrame: %s. Error: %s",
+        except Exception:
+            self.report.logger.exception(
+                "Error generating content for DataFrame: %s",
                 dataframe.title,
-                e,
-                exc_info=True,
             )
             raise
 
@@ -950,7 +974,7 @@ close-streamlit-app-with-button-click/35132/5
         )
         return dataframe_content
 
-    def _generate_markdown_content(self, markdown) -> List[str]:
+    def _generate_markdown_content(self, markdown) -> list[str]:
         """
         Generate content for a Markdown component.
 
@@ -994,12 +1018,10 @@ close-streamlit-app-with-button-click/35132/5
             markdown_content.append(
                 "st.markdown(markdown_content, unsafe_allow_html=True)\n"
             )
-        except Exception as e:
-            self.report.logger.error(
-                "Error generating content for Markdown: %s. Error: %s",
+        except Exception:
+            self.report.logger.exception(
+                "Error generating content for Markdown: %s",
                 markdown.title,
-                e,
-                exc_info=True,
             )
             raise
 
@@ -1017,7 +1039,7 @@ close-streamlit-app-with-button-click/35132/5
         )
         return markdown_content
 
-    def _generate_html_content(self, html) -> List[str]:
+    def _generate_html_content(self, html) -> list[str]:
         """
         Generate content for an HTML component.
 
@@ -1061,12 +1083,10 @@ close-streamlit-app-with-button-click/35132/5
                 "st.components.v1.html(html_content, height=600, scrolling=True)\n"
             )
 
-        except Exception as e:
-            self.report.logger.error(
-                "Error generating content for HTML: %s. Error: %s",
+        except Exception:
+            self.report.logger.exception(
+                "Error generating content for HTML: %s",
                 html.title,
-                e,
-                exc_info=True,
             )
             raise
 
@@ -1082,7 +1102,7 @@ close-streamlit-app-with-button-click/35132/5
         )
         return html_content
 
-    def _generate_apicall_content(self, apicall) -> List[str]:
+    def _generate_apicall_content(self, apicall) -> list[str]:
         """
         Generate content for an API component. This method handles the API call and
         formats the response for display in the Streamlit app.
@@ -1108,12 +1128,10 @@ close-streamlit-app-with-button-click/35132/5
         try:
             apicall_response = apicall.make_api_request()
             apicall_content.append(f"""st.write({apicall_response})\n""")
-        except Exception as e:
-            self.report.logger.error(
-                "Error generating content for APICall: %s. Error: %s",
+        except Exception:
+            self.report.logger.exception(
+                "Error generating content for APICall: %s",
                 apicall.title,
-                e,
-                exc_info=True,
             )
             raise
 
@@ -1132,7 +1150,7 @@ close-streamlit-app-with-button-click/35132/5
         )
         return apicall_content
 
-    def _generate_chatbot_content(self, chatbot) -> List[str]:
+    def _generate_chatbot_content(self, chatbot) -> list[str]:
         """
         Generate content to render a ChatBot component, supporting standard and
         Ollama-style streaming APIs.
@@ -1328,7 +1346,7 @@ close-streamlit-app-with-button-click/35132/5
 
         return chatbot_content
 
-    def _generate_component_imports(self, component: r.Component) -> List[str]:
+    def _generate_component_imports(self, component: r.Component) -> list[str]:
         """
         Generate necessary imports for a component of the report.
 
