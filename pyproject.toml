@@ -12,7 +12,7 @@ repository = "https://github.com/Multiomics-Analytics-Group/vuegen"
 version = "0.0.0"
 
 [tool.poetry.dependencies]
-python = ">=3.9,<3.9.7 || >3.9.7,<4.0"
+python = ">=3.10,<4.0"
 streamlit = "^1.39.0"
 streamlit-aggrid = "*"
 quarto-cli = "*"

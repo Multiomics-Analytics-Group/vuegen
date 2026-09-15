@@ -1,4 +1,6 @@
 import streamlit as st
+
+
 st.markdown(
     '''
     <p style='text-align: center;
@@ -8,8 +10,9 @@ st.markdown(
     ''',
     unsafe_allow_html=True)
 
+plot_file_path = 'https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/logo/vuegen_logo.png'
+st.image(plot_file_path, use_column_width=True)
 
-st.image('https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/logo/vuegen_logo.png', use_column_width=True)
 footer = '''
 <style type="text/css">
 .footer {

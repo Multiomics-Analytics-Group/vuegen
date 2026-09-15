@@ -5,4 +5,7 @@ and VueGen compiles them into a structured report."""
 
 from importlib import metadata
 
-__version__ = metadata.version("vuegen")
+try:
+    __version__ = metadata.version("vuegen")
+except metadata.PackageNotFoundError:
+    __version__ = "unknown"
