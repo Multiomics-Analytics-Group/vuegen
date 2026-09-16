@@ -11,7 +11,7 @@ try:
 except ImportError:
     from strenum import StrEnum
 
-from typing import ClassVar, List, Optional
+from typing import ClassVar
 
 import matplotlib.pyplot as plt
 import networkx as nx
@@ -148,8 +148,8 @@ class Component:
     title: str
     component_type: ComponentType
     logger: logging.Logger
-    file_path: Optional[str] = None
-    caption: Optional[str] = None
+    file_path: str | None = None
+    caption: str | None = None
 
     def __post_init__(self):
         self.id = self._generate_id()
@@ -178,9 +178,9 @@ class Plot(Component):
         title: str,
         logger: logging.Logger,
         plot_type: PlotType,
-        file_path: str = None,
-        caption: str = None,
-        csv_network_format: Optional[CSVNetworkFormat] = None,
+        file_path: str | None = None,
+        caption: str | None = None,
+        csv_network_format: CSVNetworkFormat | None = None,
     ):
         """
         Initializes a Plot object.
@@ -256,13 +256,11 @@ class Plot(Component):
                 delimiter = "," if file_extension == ".csv" else "\\t"
                 try:
                     df_net = pd.read_csv(file_stream, delimiter=delimiter)
-                except pd.errors.ParserError as e:
-                    self.logger.error(
+                except pd.errors.ParserError:
+                    self.logger.exception(
                         "Error parsing CSV/TXT file %s. "
-                        "Please check the file format or delimiter: %s.",
+                        "Please check the file format or delimiter.",
                         self.file_path,
-                        e,
-                        exc_info=True,
                     )
 
                 if self.csv_network_format == CSVNetworkFormat.EDGELIST:
@@ -321,9 +319,7 @@ class Plot(Component):
             self.logger.info("Successfully read network from file: %s.", self.file_path)
             return G
         except Exception as e:
-            self.logger.error(
-                "Error occurred while reading network file: %s.", e, exc_info=True
-            )
+            self.logger.exception("Error occurred while reading network file")
             raise RuntimeError(
                 "An error occurred while reading the network file."
             ) from e
@@ -377,7 +373,7 @@ class Plot(Component):
             plt.clf()
             self.logger.info("Network image saved successfully at: %s.", output_file)
         except Exception as e:
-            self.logger.error("Failed to save the network image: %s.", e, exc_info=True)
+            self.logger.exception("Failed to save the network image")
             raise RuntimeError("Failed to save the network image.") from e
 
     def create_and_save_pyvis_network(self, G: nx.Graph, output_file: str) -> Network:
@@ -448,9 +444,7 @@ class Plot(Component):
             return net
 
         except Exception as e:
-            self.logger.error(
-                "Failed to create and save PyVis network: %s.", e, exc_info=True
-            )
+            self.logger.exception("Failed to create and save PyVis network")
             raise RuntimeError("Failed to create and save the PyVis network.") from e
 
     def _add_size_attribute(self, G: nx.Graph) -> nx.Graph:
@@ -520,9 +514,9 @@ class DataFrame(Component):
         title: str,
         logger: logging.Logger,
         file_format: DataFrameFormat,
-        file_path: str = None,
-        caption: str = None,
-        delimiter: Optional[str] = None,
+        file_path: str | None = None,
+        caption: str | None = None,
+        delimiter: str | None = None,
     ):
         """
         Initializes a DataFrame object.
@@ -547,8 +541,8 @@ class Markdown(Component):
         self,
         title: str,
         logger: logging.Logger,
-        file_path: str = None,
-        caption: str = None,
+        file_path: str | None = None,
+        caption: str | None = None,
     ):
         """
         Initializes a Markdown object.
@@ -571,8 +565,8 @@ class Html(Component):
         self,
         title: str,
         logger: logging.Logger,
-        file_path: str = None,
-        caption: str = None,
+        file_path: str | None = None,
+        caption: str | None = None,
     ):
         """
         Initializes an html object.
@@ -611,10 +605,10 @@ class APICall(Component):
         logger: logging.Logger,
         api_url: str,
         method: str = "GET",
-        caption: str = None,
-        headers: Optional[dict] = None,
-        params: Optional[dict] = None,
-        request_body: Optional[dict] = None,
+        caption: str | None = None,
+        headers: dict | None = None,
+        params: dict | None = None,
+        request_body: dict | None = None,
     ):
         super().__init__(
             title=title,
@@ -630,9 +624,7 @@ class APICall(Component):
         # but we'll include it here if needed for values from a config file
         self.request_body = request_body or {}
 
-    def make_api_request(
-        self, dynamic_request_body: Optional[dict] = None
-    ) -> Optional[dict]:
+    def make_api_request(self, dynamic_request_body: dict | None = None) -> dict | None:
         """
         Sends an HTTP request to the specified API and returns the JSON response.
         It allows overriding the request body dynamically.
@@ -676,8 +668,8 @@ class APICall(Component):
                 "Request successful with status code %d.", response.status_code
             )
             return response.json()
-        except requests.exceptions.RequestException as e:
-            self.logger.error("API request failed: %s", e, exc_info=True)
+        except requests.exceptions.RequestException:
+            self.logger.exception("API request failed")
             return None
 
 
@@ -705,10 +697,10 @@ class ChatBot(Component):
         title: str,
         logger: logging.Logger,
         api_url: str,
-        caption: str = None,
-        model: Optional[str] = None,
-        headers: Optional[dict] = None,
-        params: Optional[dict] = None,
+        caption: str | None = None,
+        model: str | None = None,
+        headers: dict | None = None,
+        params: dict | None = None,
     ):
         super().__init__(
             title=title,
@@ -755,9 +747,9 @@ class Subsection:
     _id_counter: ClassVar[int] = 0
     id: int = field(init=False)
     title: str
-    components: List["Component"] = field(default_factory=list)
-    description: Optional[str] = None
-    file_path: Optional[str] = None
+    components: list["Component"] = field(default_factory=list)
+    description: str | None = None
+    file_path: str | None = None
 
     def __post_init__(self):
         self.id = self._generate_id()
@@ -798,10 +790,10 @@ class Section:
     _id_counter: ClassVar[int] = 0
     id: int = field(init=False)
     title: str
-    subsections: List["Subsection"] = field(default_factory=list)
-    components: List["Component"] = field(default_factory=list)
-    description: Optional[str] = None
-    file_path: Optional[str] = None
+    subsections: list["Subsection"] = field(default_factory=list)
+    components: list["Component"] = field(default_factory=list)
+    description: str | None = None
+    file_path: str | None = None
 
     def __post_init__(self):
         self.id = self._generate_id()
@@ -835,10 +827,10 @@ class Report:
 
     title: str
     logger: logging.Logger
-    sections: List["Section"] = field(default_factory=list)
-    description: Optional[str] = None
-    graphical_abstract: Optional[str] = None
-    logo: Optional[str] = None
+    sections: list["Section"] = field(default_factory=list)
+    description: str | None = None
+    graphical_abstract: str | None = None
+    logo: str | None = None
 
 
 class ReportView(ABC):
@@ -952,7 +944,7 @@ class WebAppReportView(ReportView):
     @abstractmethod
     def _generate_subsection(
         self, subsection: Subsection
-    ) -> tuple[List[str], List[str]]:
+    ) -> tuple[list[str], list[str]]:
         """
         Generate code to render components (plots, dataframes, markdown) in the given
         subsection, creating imports and content for the subsection based on

@@ -81,7 +81,7 @@ Run VueGen using a directory with the following command:
 
 ```bash
 cd docs
-vuegen --directory example_data/Earth_microbiome_vuegen_demo_notebook --report_type streamlit
+vuegen --directory example_data/Earth_microbiome_vuegen_demo_notebook --report-type streamlit
 ```
 
 > 💡 If `vuegen` does not work, try `python -m vuegen` instead.
@@ -91,7 +91,7 @@ By default, the `streamlit_autorun` argument is set to False, but you can use it
 It's also possible to provide a configuration file instead of a directory:
 
 ```bash
-vuegen --config example_data/Earth_microbiome_vuegen_demo_notebook/Earth_microbiome_vuegen_demo_notebook_config.yaml --report_type streamlit
+vuegen --config example_data/Earth_microbiome_vuegen_demo_notebook/Earth_microbiome_vuegen_demo_notebook_config.yaml --report-type streamlit
 ```
 
 The current report types supported by VueGen are:

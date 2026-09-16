@@ -70,6 +70,15 @@ st.vega_lite_chart(json.loads(altair_plot.to_json()),
 
 st.markdown(
     '''
+    <p style='text-align: left;
+    color: #000000;'>
+    A plot generated using Altair, a declarative statistical visualization library for Python.
+    </p>
+    ''',
+    unsafe_allow_html=True)
+
+st.markdown(
+    '''
     <h4 style='text-align: center;
     color: #2b8cbe;'>
     Pie Plot Countries Plotly
@@ -96,6 +105,15 @@ st.plotly_chart(plot_json, use_container_width=True)
 
 st.markdown(
     '''
+    <p style='text-align: left;
+    color: #000000;'>
+    A plot generated using Plotly, via the Python library.
+    </p>
+    ''',
+    unsafe_allow_html=True)
+
+st.markdown(
+    '''
     <h4 style='text-align: center;
     color: #2b8cbe;'>
     Pie Plots Biomes Plotly
@@ -119,6 +137,15 @@ plot_json = {key: plot_json[key] for key in plot_json
 plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'}
                                 for entry in plot_json.get('data', [])]
 st.plotly_chart(plot_json, use_container_width=True)
+
+st.markdown(
+    '''
+    <p style='text-align: left;
+    color: #000000;'>
+    A plot generated using Plotly, via the Python library.
+    </p>
+    ''',
+    unsafe_allow_html=True)
 
 st.markdown(
     '''

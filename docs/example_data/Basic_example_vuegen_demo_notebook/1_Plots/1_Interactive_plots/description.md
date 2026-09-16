@@ -1,1 +1,1 @@
-Optional description for section.
+Interactive plots - Optional description for section.

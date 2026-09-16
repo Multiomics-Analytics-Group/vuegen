@@ -19,7 +19,7 @@ st.markdown(
     '''
     <p style='text-align: center;
     color: #000000;'>
-    Optional description for section.
+    Interactive plots - Optional description for section.
     </p>
     ''',
     unsafe_allow_html=True)
@@ -166,19 +166,12 @@ st.plotly_chart(plot_json, use_container_width=True)
 
 st.markdown(
     '''
-    <h4 style='text-align: center;
-    color: #2b8cbe;'>
-    Description
-    </h4>
+    <p style='text-align: left;
+    color: #000000;'>
+    A plotly plot created using R.
+    </p>
     ''',
     unsafe_allow_html=True)
-
-
-file_path = (section_dir / '../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/1_Plots/1_Interactive_plots/description.md').resolve().as_posix()
-with open(file_path, 'r') as markdown_file:
-    markdown_content = markdown_file.read()
-
-st.markdown(markdown_content, unsafe_allow_html=True)
 
 footer = '''
 <style type="text/css">

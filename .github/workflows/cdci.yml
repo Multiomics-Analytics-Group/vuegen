@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
     steps:
       - uses: actions/checkout@v4
       - uses: psf/black@stable
@@ -54,7 +54,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.10", "3.14"]
         os:
           # https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/running-variations-of-jobs-in-a-workflow#example-using-a-multi-dimension-matrix
           # - runner: "macos-14"
@@ -82,85 +82,85 @@ jobs:
       - name: Execute streamlit report (to check)
         run: |
           cd docs
-          vuegen -dir example_data/Earth_microbiome_vuegen_demo_notebook
-          # here we are testing that the generated config from the -dir call works
+          vuegen -d example_data/Earth_microbiome_vuegen_demo_notebook
+          # here we are testing that the generated config from the -d call works
           vuegen -c example_data/Earth_microbiome_vuegen_demo_notebook/Earth_microbiome_vuegen_demo_notebook_config.yaml
       # repeat for easier inspection on GitHub:
       - name: quarto html report
         run: |
           cd docs
-          vuegen -dir example_data/Earth_microbiome_vuegen_demo_notebook -rt html
-          vuegen -c example_data/Earth_microbiome_vuegen_demo_notebook/Earth_microbiome_vuegen_demo_notebook_config.yaml -rt html
+          vuegen -d example_data/Earth_microbiome_vuegen_demo_notebook -r html
+          vuegen -c example_data/Earth_microbiome_vuegen_demo_notebook/Earth_microbiome_vuegen_demo_notebook_config.yaml -r html
       - name: quarto pdf report
         run: |
           cd docs
-          vuegen -dir example_data/Earth_microbiome_vuegen_demo_notebook -rt pdf -qt_checks
-          vuegen -c example_data/Earth_microbiome_vuegen_demo_notebook/Earth_microbiome_vuegen_demo_notebook_config.yaml -rt pdf -qt_checks
+          vuegen -d example_data/Earth_microbiome_vuegen_demo_notebook -r pdf --quarto-checks
+          vuegen -c example_data/Earth_microbiome_vuegen_demo_notebook/Earth_microbiome_vuegen_demo_notebook_config.yaml -r pdf --quarto-checks
       - name: quarto docx report
         run: |
           cd docs
-          vuegen -dir example_data/Earth_microbiome_vuegen_demo_notebook -rt docx
-          vuegen -c example_data/Earth_microbiome_vuegen_demo_notebook/Earth_microbiome_vuegen_demo_notebook_config.yaml -rt docx
+          vuegen -d example_data/Earth_microbiome_vuegen_demo_notebook -r docx
+          vuegen -c example_data/Earth_microbiome_vuegen_demo_notebook/Earth_microbiome_vuegen_demo_notebook_config.yaml -r docx
       - name: quarto odt report
         run: |
           cd docs
-          vuegen -dir example_data/Earth_microbiome_vuegen_demo_notebook -rt odt
-          vuegen -c example_data/Earth_microbiome_vuegen_demo_notebook/Earth_microbiome_vuegen_demo_notebook_config.yaml -rt odt
+          vuegen -d example_data/Earth_microbiome_vuegen_demo_notebook -r odt
+          vuegen -c example_data/Earth_microbiome_vuegen_demo_notebook/Earth_microbiome_vuegen_demo_notebook_config.yaml -r odt
       - name: quarto revealjs report
         run: |
           cd docs
-          vuegen -dir example_data/Earth_microbiome_vuegen_demo_notebook -rt revealjs
-          vuegen -c example_data/Earth_microbiome_vuegen_demo_notebook/Earth_microbiome_vuegen_demo_notebook_config.yaml -rt revealjs
+          vuegen -d example_data/Earth_microbiome_vuegen_demo_notebook -r revealjs
+          vuegen -c example_data/Earth_microbiome_vuegen_demo_notebook/Earth_microbiome_vuegen_demo_notebook_config.yaml -r revealjs
       - name: quarto pptx report
         run: |
           cd docs
-          vuegen -dir example_data/Earth_microbiome_vuegen_demo_notebook -rt pptx
-          vuegen -c example_data/Earth_microbiome_vuegen_demo_notebook/Earth_microbiome_vuegen_demo_notebook_config.yaml -rt pptx
+          vuegen -d example_data/Earth_microbiome_vuegen_demo_notebook -r pptx
+          vuegen -c example_data/Earth_microbiome_vuegen_demo_notebook/Earth_microbiome_vuegen_demo_notebook_config.yaml -r pptx
       - name: quarto jupyter report
         run: |
           cd docs
-          vuegen -dir example_data/Earth_microbiome_vuegen_demo_notebook -rt jupyter
-          vuegen -c example_data/Earth_microbiome_vuegen_demo_notebook/Earth_microbiome_vuegen_demo_notebook_config.yaml -rt jupyter
-      - name: quarto html report based on predefined config file
+          vuegen -d example_data/Earth_microbiome_vuegen_demo_notebook -r jupyter
+          vuegen -c example_data/Earth_microbiome_vuegen_demo_notebook/Earth_microbiome_vuegen_demo_notebook_config.yaml -r jupyter
+      - name: quarto html report based on predefined config file (quarto, basic example)
         run: |
           cd docs
-          vuegen -c example_config_files/Basic_example_vuegen_demo_notebook_config.yaml -output_dir ../tests/report_examples/Basic_example_vuegen_demo_notebook_cfg/html -rt html
+          vuegen -c example_config_files/Basic_example_vuegen_demo_notebook_config.yaml -o ../tests/report_examples/Basic_example_vuegen_demo_notebook_cfg/html -r html
           # Check for changes
           if git diff ../tests/report_examples | grep .; then
             echo "Error: One or more protected files have been modified."
             exit 1
           fi
-      - name: streamlit report based on predefined config file
+      - name: streamlit report based on predefined config file (streamlit, basic example)
         run: |
           cd docs
-          vuegen -c example_config_files/Basic_example_vuegen_demo_notebook_config.yaml -output_dir ../tests/report_examples/Basic_example_vuegen_demo_notebook_cfg
+          vuegen -c example_config_files/Basic_example_vuegen_demo_notebook_config.yaml -o ../tests/report_examples/Basic_example_vuegen_demo_notebook_cfg
           # Check for changes
           if git diff ../tests/report_examples | grep .; then
             echo "Error: One or more protected files have been modified."
             exit 1
           fi
-      - name: check streamlit report files for chatbot API
+      - name: check streamlit report files for chatbot API (streamlit, chatbot example)
         run: |
-          vuegen -c docs/example_config_files/Chatbot_example_config.yaml -output_dir tests/report_examples/chat_bot
+          vuegen -c docs/example_config_files/Chatbot_example_config.yaml -o tests/report_examples/chat_bot
           if git diff tests/report_examples | grep .; then
             echo Failed for report: $format
             echo "Error: One or more protected files have been modified."
             exit 1
           fi
-      - name: check for changes in report files
+      - name: check for changes in report files (streamlit, basic example)
         run: |
           # write streamlit report to test folder 
-          vuegen -dir docs/example_data/Basic_example_vuegen_demo_notebook -output_dir tests/report_examples/Basic_example_vuegen_demo_notebook
+          vuegen -d docs/example_data/Basic_example_vuegen_demo_notebook -o tests/report_examples/Basic_example_vuegen_demo_notebook
           # Check for changes
           if git diff tests/report_examples | grep .; then
             echo "Error: One or more protected files have been modified."
             exit 1
           fi
-      - name: check for changes in quarto report files
+      - name: check for changes in report files (quarto, basic example)
         run: |
           # write quarto based report to test folder
           for format in html pdf docx odt revealjs pptx jupyter; do
-            vuegen -dir docs/example_data/Basic_example_vuegen_demo_notebook -output_dir tests/report_examples/Basic_example_vuegen_demo_notebook/$format  -rt $format 
+            vuegen -d docs/example_data/Basic_example_vuegen_demo_notebook -o tests/report_examples/Basic_example_vuegen_demo_notebook/$format  -r $format 
             # Check for changes
             if git diff tests/report_examples | grep .; then
               echo Failed for report: $format
@@ -168,6 +168,15 @@ jobs:
               exit 1
             fi
           done
+      - name: Check exclusion of files in report (streamlit, basic example)
+        run: |
+          # write streamlit report to test folder 
+          vuegen -d docs/example_data/Basic_example_vuegen_demo_notebook -o tests/report_examples/Basic_example_vuegen_demo_notebook_exclude -eft png csv
+          # Check for changes
+          if git diff tests/report_examples | grep .; then
+            echo "Error: One or more protected files have been modified."
+            exit 1
+          fi
 
   publish:
     name: Publish package to PyPI
