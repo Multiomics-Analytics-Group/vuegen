@@ -465,7 +465,7 @@ close-streamlit-app-with-button-click/35132/5
                 home_content.append(f"plot_file_path = '{plot_file_path}'")
                 home_content.append(
                     "\nst.image((section_dir / plot_file_path).resolve().as_posix()"
-                    ", use_column_width=True)"
+                    ", width='stretch')"
                 )
             if self.report.graphical_abstract and is_url(
                 self.report.graphical_abstract
@@ -473,7 +473,7 @@ close-streamlit-app-with-button-click/35132/5
                 home_content.append(
                     f"plot_file_path = '{self.report.graphical_abstract}'"
                 )
-                home_content.append("st.image(plot_file_path, use_column_width=True)\n")
+                home_content.append("st.image(plot_file_path, width='stretch')\n")
 
             # add components content to page (if any)
 
@@ -705,7 +705,7 @@ close-streamlit-app-with-button-click/35132/5
                         f"plot_file_path = (section_dir / '{plot_file_path}')"
                         ".resolve().as_posix()"
                     )
-                plot_content.append("st.image(plot_file_path, use_column_width=True)\n")
+                plot_content.append("st.image(plot_file_path, width='stretch')\n")
             elif plot.plot_type in (r.PlotType.PLOTLY, r.PlotType.ALTAIR):
                 plot_content.append(self._generate_plot_code(plot))
             elif plot.plot_type == r.PlotType.INTERACTIVE_NETWORK:
