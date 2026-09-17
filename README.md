@@ -115,7 +115,7 @@ nf-core modules install vuegen
 > [!NOTE]
 > You can read the offical documentation for the nf-core module [here][nf-vuegen-nf-core]. Also, the source code and additional details are available in the [nf-VueGen repository][nf-vuegen].
 
-## Execution
+## Example for Earth Microbiome Project data
 
 > [!IMPORTANT]
 > Here we use the `Earth_microbiome_vuegen_demo_notebook` [directory][emp-dir] and the `Earth_microbiome_vuegen_demo_notebook.yaml` [configuration file][emp-config] as examples, which are available in the `docs/example_data` and `docs/example_config_files` folders, respectively. Make sure to clone the VueGen's GitHub reposiotry to access these contents, or use your own directory and configuration file.
@@ -131,7 +131,7 @@ vuegen --directory docs/example_data/Earth_microbiome_vuegen_demo_notebook --rep
 > You can also specify the output directory with the `--output-directory` argumument, which defaults to the current working directory.
 > See all available arguments with the `--help` option.
 
-### Folder structure
+## Starting from a folder
 
 Your input directory should follow a **nested folder structure**, where first-level folders are treated as **sections** and second-level folders as **subsections**, containing the components (plots, tables, networks, Markdown text, and HTML files). If the component files are in the first-level folders, an `overview` subsection will be created automatically. It's good practice to include a `description.md` file in each section and subsection to provide context and explanations for the contents. The `description.md` files are rendered as the section or subsection description, and they are not added as components in the report.
 
@@ -162,12 +162,28 @@ report_folder/
 └── home_image.png
 ```
 
-The titles for sections, subsections, and components are extracted from the corresponding folder and file names, and afterward, users can add descriptions, captions, and other details to the configuration file. Component types are inferred from the file extensions and names.
-The order of sections, subsections, and components can be defined using numerical suffixes in folder and file names.
+The titles for sections, subsections, and components are extracted from the corresponding
+folder and file names, and afterward, users can add descriptions, captions, and other
+details to the configuration file. Component types are inferred from the file extensions
+and names. The order of sections, subsections, and components can be defined using
+numerical suffixes in folder and file names.
+
+Run for an initial `html` report the following command.
+
+```bash
+vuegen --directory report_folder --report-type html
+```
+
+This will create a config file which is used to build the report.
 
 ### Configuration file
 
-It's also possible to provide a configuration file instead of a directory:
+It's also possible to provide a configuration file instead of a directory. Most likely,
+you will want to create a configuration file from a directory, and then modify it to
+customize the report. The configuration file is in YAML format, which is human-readable
+and easy to edit. You can specify titles and descriptions for sections and subsections,
+as well as component paths and required attributes, such as file format and delimiter for
+dataframes, plot types, and other details.
 
 ```bash
 vuegen --config docs/example_config_files/Earth_microbiome_vuegen_demo_notebook.yaml --report-type streamlit
@@ -187,6 +203,8 @@ The current report types supported by VueGen are:
 - Reveal.js
 - PPTX
 - Jupyter
+
+## Running VueGen in Docker or nextflow
 
 ### Running VueGen with Docker
 
