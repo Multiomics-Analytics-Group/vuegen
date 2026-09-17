@@ -1,5 +1,6 @@
 set -e
 vuegen -d docs/example_data/Basic_example_vuegen_demo_notebook -o tests/report_examples/Basic_example_vuegen_demo_notebook
+vuegen -d docs/example_data/Basic_example_vuegen_demo_notebook -o tests/report_examples/Basic_example_vuegen_demo_notebook_exclude -eft png csv
 
 vuegen -d docs/example_data/Basic_example_vuegen_demo_notebook -o tests/report_examples/Basic_example_vuegen_demo_notebook/html -r html
 vuegen -d docs/example_data/Basic_example_vuegen_demo_notebook -o tests/report_examples/Basic_example_vuegen_demo_notebook/pdf -r pdf
