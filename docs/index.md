@@ -7,7 +7,16 @@
 :relative-images:
 ```
 
+Install using pip (details at [installation](sections_readme/installation.md)):
+
 ```bash
+$ pip install vuegen
+```
+
+and then run the command line interface (CLI) to see the available options:
+
+```bash
+$ vuegen --help
 usage: VueGen [-h] [-v] [-c CONFIG] [-d DIRECTORY] [-r REPORT_TYPE] [-o OUTPUT_DIRECTORY] [-s] [-q] [-m MAX_DEPTH] [-eft EXT [EXT ...]]
 
 options:
