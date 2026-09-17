@@ -25,7 +25,7 @@ file_path = (section_dir / '../../../../../docs/example_data/Basic_example_vuege
 with open(file_path, 'r', encoding='utf-8') as f:
     html_content = f.read()
 
-st.components.v1.html(html_content, height=600, scrolling=True)
+st.iframe(html_content, height=600)
 
 st.markdown(
     '''
@@ -54,7 +54,7 @@ st.markdown(("<p style='text-align: center; color: black;'>"
 control_layout = st.checkbox('Add panel to control layout', value=True)
 net_html_height = 1200 if control_layout else 630
 # Load HTML into HTML component for display on Streamlit
-st.components.v1.html(html_content, height=net_html_height)
+st.iframe(html_content, height=net_html_height)
 
 st.markdown(
     '''
@@ -69,7 +69,7 @@ file_path = (section_dir / '../../../../../docs/example_data/Basic_example_vuege
 with open(file_path, 'r', encoding='utf-8') as f:
     html_content = f.read()
 
-st.components.v1.html(html_content, height=600, scrolling=True)
+st.iframe(html_content, height=600)
 
 footer = '''
 <style type="text/css">

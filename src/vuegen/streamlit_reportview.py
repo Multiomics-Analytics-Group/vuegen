@@ -836,7 +836,7 @@ close-streamlit-app-with-button-click/35132/5
                 control_layout = st.checkbox('Add panel to control layout', value=True)
                 net_html_height = 1200 if control_layout else 630
                 # Load HTML into HTML component for display on Streamlit
-                st.components.v1.html(html_content, height=net_html_height)\n""")
+                st.iframe(html_content, height=net_html_height)\n""")
         return plot_code
 
     def _generate_dataframe_content(self, dataframe) -> list[str]:
@@ -1079,9 +1079,7 @@ close-streamlit-app-with-button-click/35132/5
                     """))
 
             # Display HTML content using Streamlit
-            html_content.append(
-                "st.components.v1.html(html_content, height=600, scrolling=True)\n"
-            )
+            html_content.append("st.iframe(html_content, height=600)\n")
 
         except Exception:
             self.report.logger.exception(
@@ -1210,7 +1208,7 @@ close-streamlit-app-with-button-click/35132/5
                             for link in content['links']:
                                 st.markdown(f"- [{link}]({link})")
                         if 'subgraph_pyvis' in content:
-                            st.components.v1.html(content['subgraph_pyvis'], height=600)
+                            st.iframe(content['subgraph_pyvis'], height=600)
                     else:
                         st.write(content)
             """,
@@ -1328,7 +1326,7 @@ close-streamlit-app-with-button-click/35132/5
                                     for link in response['links']:
                                         st.markdown(f"- [{{link}}]({{link}})")
                                 if 'subgraph_pyvis' in response:
-                                    st.components.v1.html(
+                                    st.iframe(
                                         response['subgraph_pyvis'],
                                         height=600
                                     )
