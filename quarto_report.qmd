@@ -126,7 +126,7 @@ fig_altair
 ### Physicochemical properties of the EMP samples
 ![](https://raw.githubusercontent.com/biocore/emp/master/methods/images/figureED1_physicochemical.png){fig-alt= width=90%}
 
->Pairwise scatter plots of available physicochemical metadat are shown for temperature, salinity, oxygen, and pH, and for phosphate, nitrate, and ammonium
+Pairwise scatter plots of available physicochemical metadat are shown for temperature, salinity, oxygen, and pH, and for phosphate, nitrate, and ammonium
 
 # Metagenomics
 ## Alpha Diversity
@@ -274,7 +274,7 @@ This subsection contains the Shannon entropy analysis of the EMP dataset.
 ### Specificity of sequences and higher taxonomic groups for environment
 ![](https://raw.githubusercontent.com/biocore/emp/master/methods/images/figure4_entropy.png){fig-alt= width=90%}
 
->a) Environment distribution in all genera and 400 randomly chosen tag sequence. b) and c) Shannon entropy within each taxonomic group.
+a) Environment distribution in all genera and 400 randomly chosen tag sequence. b) and c) Shannon entropy within each taxonomic group.
 
 # Network Analysis
 ## Phyla Association Networks
