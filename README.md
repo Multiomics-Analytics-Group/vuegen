@@ -17,7 +17,9 @@
 
 - [About the project](#about-the-project)
 - [Installation](#installation)
-- [Execution](#execution)
+- [Example for Earth Microbiome Project data](#example-for-earth-microbiome-project-data)
+- [Starting from a folder](#starting-from-a-folder)
+- [Running VueGen in Docker or nextflow](#running-vuegen-in-docker-or-nextflow)
 - [GUI](#gui)
 - [Case studies](#case-studies)
 - [Web application deployment](#web-application-deployment)
