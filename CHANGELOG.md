@@ -3,6 +3,36 @@
 All notable changes to this project are documented in this file. It was automatically generated with
 the [changelog-from-release](https://github.com/rhysd/changelog-from-release) tool.
 
+<a id="v0.7.0"></a>
+# [v0.7.0 💥](https://github.com/Multiomics-Analytics-Group/vuegen/releases/tag/v0.7.0) - 2026-09-18
+
+💥 In [#200](https://github.com/Multiomics-Analytics-Group/vuegen/issues/200) the cli interface was updated to a more standard interface. This will require you scripts to be updated.
+
+You can now add `plot.md` files for captions or descriptions of any component. just `component.md` for any component (keep the stem). This is now highlighed on the landing page of the docs.
+
+if you save `.csv` and `.xlsx` for data, only one is kept. There is now a preference order for files with the same name, but different suffixes. Alternativel you can exclude file types completly (for example `.html` from plotly exports if no other format was saved)
+
+## What's Changed - relevant
+* standardize CLI options by [@enryH](https://github.com/enryH) with [@Copilot](https://github.com/Copilot) in [#197](https://github.com/Multiomics-Analytics-Group/vuegen/pull/197)
+* feat: exclude file types and auto-deduplicate same-stem files when building reports from directories by [@enryH](https://github.com/enryH) with [@Copilot](https://github.com/Copilot) in [#194](https://github.com/Multiomics-Analytics-Group/vuegen/pull/194)
+* feat: populate component caption from companion .md file when building config from directory by [@enryH](https://github.com/enryH) with [@Copilot](https://github.com/Copilot) in [#195](https://github.com/Multiomics-Analytics-Group/vuegen/pull/195)
+
+* Add `--version` CLI option to vuegen by [@enryH](https://github.com/enryH) with [@Copilot](https://github.com/Copilot) in [#183](https://github.com/Multiomics-Analytics-Group/vuegen/pull/183)
+* Use actual output directory in CLI completion message by [@enryH](https://github.com/enryH) with [@Copilot](https://github.com/Copilot) in [#181](https://github.com/Multiomics-Analytics-Group/vuegen/pull/181)
+* Description md folders by [@enryH](https://github.com/enryH) in [#198](https://github.com/Multiomics-Analytics-Group/vuegen/pull/198)
+* :sparkles: Preserve species names for folder: A._species stays A. species (and not A) by [@enryH](https://github.com/enryH) in [#200](https://github.com/Multiomics-Analytics-Group/vuegen/pull/200)
+
+## What's Changed - housekeeping
+* Align `src/` with latest Ruff diagnostics by [@enryH](https://github.com/enryH) with [@Copilot](https://github.com/Copilot) in [#199](https://github.com/Multiomics-Analytics-Group/vuegen/pull/199)
+* Fix missing `import streamlit as st` in subsection files for empty folders by [@enryH](https://github.com/enryH) with [@Copilot](https://github.com/Copilot) in [#177](https://github.com/Multiomics-Analytics-Group/vuegen/pull/177)
+* Replace deprecated Streamlit width parameters with new API by [@enryH](https://github.com/enryH) with [@Copilot](https://github.com/Copilot) in [#196](https://github.com/Multiomics-Analytics-Group/vuegen/pull/196)
+* :art: exclude link definitions from FAQ and present minimal usage on landing page by [@enryH](https://github.com/enryH) in [#203](https://github.com/Multiomics-Analytics-Group/vuegen/pull/203)
+
+**Full Changelog**: https://github.com/Multiomics-Analytics-Group/vuegen/compare/v0.6.0...v0.7.0
+
+[Changes][v0.7.0]
+
+
 <a id="v0.6.0"></a>
 # [v0.6.0 (relax dependency pinning)](https://github.com/Multiomics-Analytics-Group/vuegen/releases/tag/v0.6.0) - 2026-02-10
 
@@ -230,6 +260,7 @@ More information regarding the app and builds can be found in the [GUI README](h
 [Changes][v0.1.0]
 
 
+[v0.7.0]: https://github.com/Multiomics-Analytics-Group/vuegen/compare/v0.6.0...v0.7.0
 [v0.6.0]: https://github.com/Multiomics-Analytics-Group/vuegen/compare/v0.5.1...v0.6.0
 [v0.5.1]: https://github.com/Multiomics-Analytics-Group/vuegen/compare/v0.5.0...v0.5.1
 [v0.5.0]: https://github.com/Multiomics-Analytics-Group/vuegen/compare/v0.4.1...v0.5.0
