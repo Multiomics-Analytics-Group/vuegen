@@ -48,7 +48,7 @@ st.markdown(("<p style='text-align: center; color: black;'>"
 control_layout = st.checkbox('Add panel to control layout', value=True)
 net_html_height = 1200 if control_layout else 630
 # Load HTML into HTML component for display on Streamlit
-st.components.v1.html(html_content, height=net_html_height)
+st.iframe(html_content, height=net_html_height)
 
 footer = '''
 <style type="text/css">

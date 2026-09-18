@@ -44,7 +44,7 @@ plot_json = {key: plot_json[key] for key in plot_json
 # Remove 'frame' section in 'data'
 plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'}
                                 for entry in plot_json.get('data', [])]
-st.plotly_chart(plot_json, use_container_width=True)
+st.plotly_chart(plot_json, width='stretch')
 
 st.markdown(
     '''
@@ -62,7 +62,7 @@ with open(file_path, 'r') as plot_file:
 
 altair_plot = alt.Chart.from_dict(plot_json)
 st.vega_lite_chart(json.loads(altair_plot.to_json()),
-                   use_container_width=True)
+                   width='stretch')
 
 st.markdown(
     '''
@@ -85,7 +85,7 @@ plot_json = {key: plot_json[key] for key in plot_json
 # Remove 'frame' section in 'data'
 plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'}
                                 for entry in plot_json.get('data', [])]
-st.plotly_chart(plot_json, use_container_width=True)
+st.plotly_chart(plot_json, width='stretch')
 
 st.markdown(
     '''
@@ -108,7 +108,7 @@ plot_json = {key: plot_json[key] for key in plot_json
 # Remove 'frame' section in 'data'
 plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'}
                                 for entry in plot_json.get('data', [])]
-st.plotly_chart(plot_json, use_container_width=True)
+st.plotly_chart(plot_json, width='stretch')
 
 st.markdown(
     '''
@@ -126,7 +126,7 @@ with open(file_path, 'r') as plot_file:
 
 altair_plot = alt.Chart.from_dict(plot_json)
 st.vega_lite_chart(json.loads(altair_plot.to_json()),
-                   use_container_width=True)
+                   width='stretch')
 
 st.markdown(
     '''
@@ -149,7 +149,7 @@ plot_json = {key: plot_json[key] for key in plot_json
 # Remove 'frame' section in 'data'
 plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'}
                                 for entry in plot_json.get('data', [])]
-st.plotly_chart(plot_json, use_container_width=True)
+st.plotly_chart(plot_json, width='stretch')
 
 st.markdown(
     '''
