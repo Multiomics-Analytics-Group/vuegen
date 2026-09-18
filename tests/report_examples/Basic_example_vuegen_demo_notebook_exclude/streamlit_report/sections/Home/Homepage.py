@@ -22,7 +22,7 @@ st.markdown(
 
 plot_file_path = '../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/home_image.png'
 
-st.image((section_dir / plot_file_path).resolve().as_posix(), use_column_width=True)
+st.image((section_dir / plot_file_path).resolve().as_posix(), width='stretch')
 footer = '''
 <style type="text/css">
 .footer {
