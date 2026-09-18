@@ -13,6 +13,15 @@ st.markdown(
 
 st.markdown(
     '''
+    <p style='text-align: center;
+    color: #000000;'>
+    Static plots.
+    </p>
+    ''',
+    unsafe_allow_html=True)
+
+st.markdown(
+    '''
     <h4 style='text-align: center;
     color: #2b8cbe;'>
     Number Samples Per Study
@@ -21,7 +30,7 @@ st.markdown(
     unsafe_allow_html=True)
 
 plot_file_path = (section_dir / '../../example_data/Basic_example_vuegen_demo_notebook/1_Plots/2_Static_plots/1_number_samples_per_study.png').resolve().as_posix()
-st.image(plot_file_path, caption='', use_column_width=True)
+st.image(plot_file_path, width='stretch')
 
 st.markdown(
     '''
@@ -33,7 +42,7 @@ st.markdown(
     unsafe_allow_html=True)
 
 plot_file_path = (section_dir / '../../example_data/Basic_example_vuegen_demo_notebook/1_Plots/2_Static_plots/2_animal_metagenomics_samples_map.png').resolve().as_posix()
-st.image(plot_file_path, caption='', use_column_width=True)
+st.image(plot_file_path, width='stretch')
 
 st.markdown(
     '''
@@ -45,7 +54,7 @@ st.markdown(
     unsafe_allow_html=True)
 
 plot_file_path = (section_dir / '../../example_data/Basic_example_vuegen_demo_notebook/1_Plots/2_Static_plots/3_alpha_diversity_host_associated_samples.png').resolve().as_posix()
-st.image(plot_file_path, caption='', use_column_width=True)
+st.image(plot_file_path, width='stretch')
 
 st.markdown(
     '''
@@ -57,7 +66,16 @@ st.markdown(
     unsafe_allow_html=True)
 
 plot_file_path = 'https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/vuegen_graph_abstract.png'
-st.image(plot_file_path, caption='The diagram illustrates the processing pipeline of VueGen, starting from either a directory or a YAML configuration file. Reports consist of hierarchical sections and subsections, each containing various components such as plots, dataframes, Markdown, HTML, and data retrieved via API calls.', use_column_width=True)
+st.image(plot_file_path, width='stretch')
+
+st.markdown(
+    '''
+    <p style='text-align: left;
+    color: #000000;'>
+    The diagram illustrates the processing pipeline of VueGen, starting from either a directory or a YAML configuration file. Reports consist of hierarchical sections and subsections, each containing various components such as plots, dataframes, Markdown, HTML, and data retrieved via API calls.
+    </p>
+    ''',
+    unsafe_allow_html=True)
 
 footer = '''
 <style type="text/css">

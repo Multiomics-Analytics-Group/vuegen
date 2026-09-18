@@ -48,23 +48,7 @@ st.markdown(("<p style='text-align: center; color: black;'>"
 control_layout = st.checkbox('Add panel to control layout', value=True)
 net_html_height = 1200 if control_layout else 630
 # Load HTML into HTML component for display on Streamlit
-st.components.v1.html(html_content, height=net_html_height)
-
-st.markdown(
-    '''
-    <h4 style='text-align: center;
-    color: #2b8cbe;'>
-    Description
-    </h4>
-    ''',
-    unsafe_allow_html=True)
-
-
-file_path = (section_dir / '../../example_data/Basic_example_vuegen_demo_notebook/3_Networks/1_Interactive_networks/description.md').resolve().as_posix()
-with open(file_path, 'r') as markdown_file:
-    markdown_content = markdown_file.read()
-
-st.markdown(markdown_content, unsafe_allow_html=True)
+st.iframe(html_content, height=net_html_height)
 
 footer = '''
 <style type="text/css">

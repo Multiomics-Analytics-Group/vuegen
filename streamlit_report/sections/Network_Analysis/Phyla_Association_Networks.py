@@ -83,7 +83,7 @@ st.markdown(("<p style='text-align: center; color: black;'>"
 control_layout = st.checkbox('Add panel to control layout', value=True)
 net_html_height = 1200 if control_layout else 630
 # Load HTML into HTML component for display on Streamlit
-st.components.v1.html(html_content, height=net_html_height)
+st.iframe(html_content, height=net_html_height)
 
 st.markdown(
     '''
@@ -95,7 +95,7 @@ st.markdown(
     unsafe_allow_html=True)
 
 plot_file_path = (section_dir / '../../example_data/Earth_microbiome_vuegen_demo_notebook/3_Network_analysis/1_phyla_association_networks/3_phyla_correlation_network_with_0.5_threshold.png').resolve().as_posix()
-st.image(plot_file_path, caption='', use_column_width=True)
+st.image(plot_file_path, width='stretch')
 
 footer = '''
 <style type="text/css">

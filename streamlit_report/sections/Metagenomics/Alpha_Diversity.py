@@ -32,7 +32,7 @@ st.markdown(
     unsafe_allow_html=True)
 
 plot_file_path = (section_dir / '../../example_data/Earth_microbiome_vuegen_demo_notebook/2_Metagenomics/1_alpha_diversity/1_alpha_diversity_host_associated_samples.png').resolve().as_posix()
-st.image(plot_file_path, caption='', use_column_width=True)
+st.image(plot_file_path, width='stretch')
 
 st.markdown(
     '''
@@ -55,7 +55,7 @@ plot_json = {key: plot_json[key] for key in plot_json
 # Remove 'frame' section in 'data'
 plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'}
                                 for entry in plot_json.get('data', [])]
-st.plotly_chart(plot_json, use_container_width=True)
+st.plotly_chart(plot_json, width='stretch')
 
 footer = '''
 <style type="text/css">

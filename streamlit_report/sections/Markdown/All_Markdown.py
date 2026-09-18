@@ -14,6 +14,15 @@ st.markdown(
 
 st.markdown(
     '''
+    <p style='text-align: center;
+    color: #000000;'>
+    This is the README.md from the repository (needs to be updated manually as of now).
+    </p>
+    ''',
+    unsafe_allow_html=True)
+
+st.markdown(
+    '''
     <h4 style='text-align: center;
     color: #2b8cbe;'>
     Readme

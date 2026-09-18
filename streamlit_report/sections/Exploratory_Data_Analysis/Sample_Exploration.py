@@ -68,7 +68,7 @@ st.markdown(
     unsafe_allow_html=True)
 
 plot_file_path = (section_dir / '../../example_data/Earth_microbiome_vuegen_demo_notebook/1_Exploratory_data_analysis/1_sample_exploration/2_animal_samples_map.png').resolve().as_posix()
-st.image(plot_file_path, caption='', use_column_width=True)
+st.image(plot_file_path, width='stretch')
 
 st.markdown(
     '''
@@ -91,7 +91,7 @@ plot_json = {key: plot_json[key] for key in plot_json
 # Remove 'frame' section in 'data'
 plot_json['data'] = [{k: v for k, v in entry.items() if k != 'frame'}
                                 for entry in plot_json.get('data', [])]
-st.plotly_chart(plot_json, use_container_width=True)
+st.plotly_chart(plot_json, width='stretch')
 
 st.markdown(
     '''
@@ -109,7 +109,7 @@ with open(file_path, 'r') as plot_file:
 
 altair_plot = alt.Chart.from_dict(plot_json)
 st.vega_lite_chart(json.loads(altair_plot.to_json()),
-                   use_container_width=True)
+                   width='stretch')
 
 st.markdown(
     '''
@@ -121,7 +121,16 @@ st.markdown(
     unsafe_allow_html=True)
 
 plot_file_path = 'https://raw.githubusercontent.com/biocore/emp/master/methods/images/figureED1_physicochemical.png'
-st.image(plot_file_path, caption='Pairwise scatter plots of available physicochemical metadat are shown for temperature, salinity, oxygen, and pH, and for phosphate, nitrate, and ammonium', use_column_width=True)
+st.image(plot_file_path, width='stretch')
+
+st.markdown(
+    '''
+    <p style='text-align: left;
+    color: #000000;'>
+    Pairwise scatter plots of available physicochemical metadat are shown for temperature, salinity, oxygen, and pH, and for phosphate, nitrate, and ammonium
+    </p>
+    ''',
+    unsafe_allow_html=True)
 
 footer = '''
 <style type="text/css">

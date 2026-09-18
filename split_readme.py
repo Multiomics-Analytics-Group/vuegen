@@ -1,19 +1,25 @@
 import re
 from pathlib import Path
 
-# Mapping section titles to their corresponding filenames
+# Mapping output filenames to their ordered README section titles
+# Comine more than one section into a single file if needed, e.g. for the home page.
+# Allows repetition section titles into different files.
 SECTION_MAPPING = {
-    "![VueGen Logo](https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/HEAD/docs/images/logo/vuegen_logo.svg)": "home_page.md",
-    "About the project": "about.md",
-    "Installation": "installation.md",
-    "Execution": "execution.md",
-    "GUI": "gui.md",
-    "Case studies": "case_studies.md",
-    "Web application deployment": "web_app_deploy.md",
-    "Citation": "citation.md",
-    "Credits and acknowledgements": "credits.md",
-    "Contact and feedback": "contact.md",
-    "FAQ": "faq.md",
+    "home_page.md": [
+        "![VueGen Logo](https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/HEAD/docs/images/logo/vuegen_logo.svg)",
+    ],
+    "folder_structure.md": ["Starting from a folder"],
+    "about.md": ["About the project"],
+    "installation.md": ["Installation"],
+    "example_earch_microbiome.md": ["Example for Earth Microbiome Project data"],
+    "container_execution.md": ["Running VueGen in Docker or nextflow"],
+    "gui.md": ["GUI"],
+    "case_studies.md": ["Case studies"],
+    "web_app_deploy.md": ["Web application deployment"],
+    "citation.md": ["Citation"],
+    "credits.md": ["Credits and acknowledgements"],
+    "contact.md": ["Contact and feedback"],
+    "faq.md": ["FAQ"],
 }
 
 
@@ -34,6 +40,12 @@ def extract_links_from_readme(readme):
         links[ref] = url
 
     return links
+
+
+def remove_link_definitions(content):
+    """Remove Markdown reference-style link definitions from content."""
+    content = re.sub(r"^\[[^\]]+\]:\s+\S+(?:\s+.*)?$", "", content, flags=re.MULTILINE)
+    return re.sub(r"\n{3,}", "\n\n", content).strip()
 
 
 def convert_gfm_to_sphinx(content, links):
@@ -68,22 +80,6 @@ def decrease_header_levels(content):
     return "\n".join(new_lines)
 
 
-def clean_trailing_links(content):
-    """Remove trailing links and clean up extra empty lines."""
-    # Remove [label]: link style
-    content = re.sub(r"^\[.+?\]:\s+\S+$", "", content, flags=re.MULTILINE)
-    # Remove (url): url style
-    content = re.sub(
-        r"^\(https?://[^\s)]+\):\s*https?://[^\s)]+$", "", content, flags=re.MULTILINE
-    )
-    content = re.sub(
-        r"^\(mailto:[^\s)]+\):\s*mailto:[^\s)]+$", "", content, flags=re.MULTILINE
-    )
-    # Remove empty lines
-    content = re.sub(r"\n{2,}", "\n\n", content).strip()
-    return content
-
-
 def process_readme(readme_path, output_dir):
     readme = Path(readme_path).read_text(encoding="utf-8")
 
@@ -93,19 +89,22 @@ def process_readme(readme_path, output_dir):
     # Create output directory
     output_dir.mkdir(exist_ok=True, parents=True)
 
-    for section_title, filename in SECTION_MAPPING.items():
-        content = extract_section(readme, section_title)
-        if content:
-            myst_content = (
-                f"## {section_title}\n\n{convert_gfm_to_sphinx(content, links)}"
-            )
-            if filename.lower() == "contact.md":
-                myst_content = clean_trailing_links(myst_content)
-            myst_content = decrease_header_levels(myst_content)
-            (output_dir / filename).write_text(myst_content)
-            print(f"Generated {filename}")
-        else:
-            raise ValueError(f"Section '{section_title}' not found in README")
+    for filename, section_titles in SECTION_MAPPING.items():
+        sections = []
+
+        for section_title in section_titles:
+            content = extract_section(readme, section_title)
+            content = remove_link_definitions(content)
+            if not content:
+                raise ValueError(f"Section '{section_title}' not found in README")
+
+            sections.append(f"## {section_title}\n\n{content}")
+
+        combined_content = "\n\n".join(sections)
+        myst_content = convert_gfm_to_sphinx(combined_content, links)
+        myst_content = decrease_header_levels(myst_content)
+        (output_dir / filename).write_text(myst_content)
+        print(f"Generated {filename}")
 
     # Copy CONTRIBUTING.md with its own link references
     contrib_path = readme_path.parent / "CONTRIBUTING.md"
@@ -113,11 +112,9 @@ def process_readme(readme_path, output_dir):
         raw_contrib = contrib_path.read_text()
         contrib_links = extract_links_from_readme(raw_contrib)
 
-        # Convert content
-        contrib_converted = convert_gfm_to_sphinx(raw_contrib, contrib_links)
-
-        # Remove trailing link definitions
-        contrib_converted = clean_trailing_links(contrib_converted)
+        # Remove reference definitions after collecting them, then convert links.
+        contrib_content = remove_link_definitions(raw_contrib)
+        contrib_converted = convert_gfm_to_sphinx(contrib_content, contrib_links)
 
         # Write output
         (output_dir / "contributing.md").write_text(contrib_converted)

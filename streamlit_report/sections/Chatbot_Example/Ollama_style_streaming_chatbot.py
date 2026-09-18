@@ -73,7 +73,7 @@ for message in st.session_state['messages']:
                 for link in content['links']:
                     st.markdown(f"- [{link}]({link})")
             if 'subgraph_pyvis' in content:
-                st.components.v1.html(content['subgraph_pyvis'], height=600)
+                st.iframe(content['subgraph_pyvis'], height=600)
         else:
             st.write(content)
 

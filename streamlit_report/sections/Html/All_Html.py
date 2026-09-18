@@ -14,6 +14,16 @@ st.markdown(
 
 st.markdown(
     '''
+    <p style='text-align: center;
+    color: #000000;'>
+    Different `html` files - some are not displayed great. Link these as an alternative
+    using a markdown file.
+    </p>
+    ''',
+    unsafe_allow_html=True)
+
+st.markdown(
+    '''
     <h4 style='text-align: center;
     color: #2b8cbe;'>
     Plot
@@ -25,7 +35,7 @@ file_path = (section_dir / '../../example_data/Basic_example_vuegen_demo_noteboo
 with open(file_path, 'r', encoding='utf-8') as f:
     html_content = f.read()
 
-st.components.v1.html(html_content, height=600, scrolling=True)
+st.iframe(html_content, height=600)
 
 st.markdown(
     '''
@@ -54,7 +64,7 @@ st.markdown(("<p style='text-align: center; color: black;'>"
 control_layout = st.checkbox('Add panel to control layout', value=True)
 net_html_height = 1200 if control_layout else 630
 # Load HTML into HTML component for display on Streamlit
-st.components.v1.html(html_content, height=net_html_height)
+st.iframe(html_content, height=net_html_height)
 
 st.markdown(
     '''
@@ -69,7 +79,7 @@ file_path = (section_dir / '../../example_data/Basic_example_vuegen_demo_noteboo
 with open(file_path, 'r', encoding='utf-8') as f:
     html_content = f.read()
 
-st.components.v1.html(html_content, height=600, scrolling=True)
+st.iframe(html_content, height=600)
 
 footer = '''
 <style type="text/css">

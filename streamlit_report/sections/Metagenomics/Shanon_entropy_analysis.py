@@ -30,7 +30,16 @@ st.markdown(
     unsafe_allow_html=True)
 
 plot_file_path = 'https://raw.githubusercontent.com/biocore/emp/master/methods/images/figure4_entropy.png'
-st.image(plot_file_path, caption='a) Environment distribution in all genera and 400 randomly chosen tag sequence. b) and c) Shannon entropy within each taxonomic group.', use_column_width=True)
+st.image(plot_file_path, width='stretch')
+
+st.markdown(
+    '''
+    <p style='text-align: left;
+    color: #000000;'>
+    a) Environment distribution in all genera and 400 randomly chosen tag sequence. b) and c) Shannon entropy within each taxonomic group.
+    </p>
+    ''',
+    unsafe_allow_html=True)
 
 footer = '''
 <style type="text/css">

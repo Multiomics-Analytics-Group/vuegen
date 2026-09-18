@@ -7,7 +7,9 @@ report:
     to be integrated into VueGen.
 
 
-    Check our tests folder for examples of report files used to generate actual reports.
+    Check our tests folder for examples of report files used to generate actual reports:
+
+    [basic_example_vuegen_demo_notebook](https://github.com/Multiomics-Analytics-Group/vuegen/blob/main/docs/example_data/Basic_example_vuegen_demo_notebook)
 
     '
   graphical_abstract: https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/logo/vuegen_logo.png
@@ -48,18 +50,13 @@ sections:
       file_path: /home/runner/work/vuegen/vuegen/docs/example_data/Basic_example_vuegen_demo_notebook/1_Plots/1_Interactive_plots/5_saline_metagenomics_samples_map_altair.json
       plot_type: altair
       title: Saline Metagenomics Samples Map Altair
-    - caption: ''
+    - caption: A plotly plot created using R.
       component_type: plot
       description: ''
       file_path: /home/runner/work/vuegen/vuegen/docs/example_data/Basic_example_vuegen_demo_notebook/1_Plots/1_Interactive_plots/6_plotly_plot_R.json
       plot_type: plotly
       title: Plotly Plot R
-    - caption: ''
-      component_type: markdown
-      description: ''
-      file_path: /home/runner/work/vuegen/vuegen/docs/example_data/Basic_example_vuegen_demo_notebook/1_Plots/1_Interactive_plots/description.md
-      title: Description
-    description: 'Optional description for section.
+    description: 'Interactive plots - Optional description for section.
 
       '
     title: Interactive Plots
@@ -91,11 +88,18 @@ sections:
       file_path: https://raw.githubusercontent.com/Multiomics-Analytics-Group/vuegen/main/docs/images/vuegen_graph_abstract.png
       plot_type: static
       title: "Graphical overview of VueGen\u2019s workflow and components"
-    description: ''
+    description: 'Static plots.
+
+      '
     title: Static Plots
   title: Plots
 - components: []
-  description: ''
+  description: 'Data from `csv`, `xls`, `txt`, `.parquet` and `xlsx` files - displayed
+    as tables using
+
+    aggrid.
+
+    '
   subsections:
   - components:
     - caption: ''
@@ -134,7 +138,9 @@ sections:
     title: All Formats
   title: Dataframes
 - components: []
-  description: ''
+  description: 'Interactive and static networks.
+
+    '
   subsections:
   - components:
     - caption: ''
@@ -143,11 +149,6 @@ sections:
       file_path: /home/runner/work/vuegen/vuegen/docs/example_data/Basic_example_vuegen_demo_notebook/3_Networks/1_Interactive_networks/1_man_example.graphml
       plot_type: interactive_network
       title: Man Example
-    - caption: ''
-      component_type: markdown
-      description: ''
-      file_path: /home/runner/work/vuegen/vuegen/docs/example_data/Basic_example_vuegen_demo_notebook/3_Networks/1_Interactive_networks/description.md
-      title: Description
     description: 'Optional description for subsection.
 
       '
@@ -159,7 +160,9 @@ sections:
       file_path: /home/runner/work/vuegen/vuegen/docs/example_data/Basic_example_vuegen_demo_notebook/3_Networks/2_Static_networks/1_phyla_correlation_network.png
       plot_type: static
       title: Phyla Correlation Network
-    description: ''
+    description: 'Static networks.
+
+      '
     title: Static Networks
   title: Networks
 - components: []
@@ -182,7 +185,12 @@ sections:
       description: ''
       file_path: /home/runner/work/vuegen/vuegen/docs/example_data/Basic_example_vuegen_demo_notebook/4_Html/1_All_html/3_multiqc_report.html
       title: Multiqc Report
-    description: ''
+    description: 'Different `html` files - some are not displayed great. Link these
+      as an alternative
+
+      using a markdown file.
+
+      '
     title: All Html
   title: Html
 - components: []
@@ -194,6 +202,13 @@ sections:
       description: ''
       file_path: /home/runner/work/vuegen/vuegen/docs/example_data/Basic_example_vuegen_demo_notebook/5_Markdown/1_All_markdown/README.md
       title: Readme
-    description: ''
+    description: 'This is the README.md from the repository (needs to be updated manually
+      as of now).
+
+      '
     title: All Markdown
   title: Markdown
+- components: []
+  description: ''
+  subsections: []
+  title: Empty Folder

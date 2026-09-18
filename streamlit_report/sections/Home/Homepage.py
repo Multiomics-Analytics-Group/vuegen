@@ -1,4 +1,6 @@
 import streamlit as st
+
+
 st.markdown(
     '''
     <p style='text-align: center;
@@ -13,8 +15,9 @@ st.markdown(
     ''',
     unsafe_allow_html=True)
 
+plot_file_path = 'https://raw.githubusercontent.com/ElDeveloper/cogs220/master/emp-logo.svg'
+st.image(plot_file_path, width='stretch')
 
-st.image('https://raw.githubusercontent.com/ElDeveloper/cogs220/master/emp-logo.svg', use_column_width=True)
 footer = '''
 <style type="text/css">
 .footer {
