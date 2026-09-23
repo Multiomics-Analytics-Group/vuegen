@@ -144,7 +144,7 @@ section and subsection to provide context and explanations for the contents. The
 `description.md` files are rendered as the section or subsection description, and they
 are not added as components in the report.
 
-A component such as `table1.tsv` can be accompanied by a `table1.md` file, which will be
+A component such as `table1.csv` can be accompanied by a `table1.md` file, which will be
 rendered as the caption for the table. The same applies to plots and networks, where a
 `chart.json` or `network_plot.graphml` file can have an accompanying `chart.md` or
 `network_plot.md` file for captions.
@@ -156,7 +156,7 @@ report_folder/
 ├── section1/
 │   ├── description.md
 │   ├── table1.md
-│   ├── table1.tsv
+│   ├── table1.csv
 │   └── subsection1/
 │       ├── chart.json
 │       ├── chart.md
