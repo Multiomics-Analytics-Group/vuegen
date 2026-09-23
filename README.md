@@ -135,7 +135,19 @@ vuegen --directory docs/example_data/Earth_microbiome_vuegen_demo_notebook --rep
 
 ## Starting from a folder
 
-Your input directory should follow a **nested folder structure**, where first-level folders are treated as **sections** and second-level folders as **subsections**, containing the components (plots, tables, networks, Markdown text, and HTML files). If the component files are in the first-level folders, an `overview` subsection will be created automatically. It's good practice to include a `description.md` file in each section and subsection to provide context and explanations for the contents. The `description.md` files are rendered as the section or subsection description, and they are not added as components in the report.
+Your input directory should follow a **nested folder structure**, where first-level
+folders are treated as **sections** and second-level folders as **subsections**,
+containing the components (plots, tables, networks, Markdown text, and HTML files). If
+the component files are in the first-level folders, an `overview` subsection will be
+created automatically. It's good practice to include a `description.md` file in each
+section and subsection to provide context and explanations for the contents. The
+`description.md` files are rendered as the section or subsection description, and they
+are not added as components in the report.
+
+A component such as `table1.csv` can be accompanied by a `table1.md` file, which will be
+rendered as the caption for the table. The same applies to plots and networks, where a
+`chart.json` or `network_plot.graphml` file can have an accompanying `chart.md` or
+`network_plot.md` file for captions.
 
 Here is an example layout:
 
@@ -143,22 +155,30 @@ Here is an example layout:
 report_folder/
 ├── section1/
 │   ├── description.md
-│   ├── table1.tsv
+│   ├── table1.md
+│   ├── table1.csv
 │   └── subsection1/
 │       ├── chart.json
+│       ├── chart.md
 │       ├── description.md
 │       ├── image1.png
-│       └── table2.csv
+│       ├── image1.md
+│       ├── table2.csv
+│       └── table2.md
 ├── section2/
 │   ├── description.md
 │   ├── image2.jpg
+│   ├── image2.md
 │   ├── subsection1/
 │   │   ├── description.md
 │   │   ├── network_plot.graphml
-│   │   └── summary_table.xls
+│   │   ├── network_plot.md
+│   │   ├── summary_table.xls
+│   │   └── summary_table.md
 │   └── subsection2/
 │       ├── description.md
 │       ├── report.html
+│       ├── report.md
 │       └── summary.md
 ├── description.md
 └── home_image.png
