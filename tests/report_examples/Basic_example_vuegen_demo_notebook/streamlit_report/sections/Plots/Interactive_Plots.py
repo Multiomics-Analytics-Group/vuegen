@@ -1,4 +1,5 @@
 from pathlib import Path
+from vuegen import plot_utils
 import altair as alt
 import json
 import requests
@@ -36,6 +37,9 @@ st.markdown(
 file_path = (section_dir / '../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/1_Plots/1_Interactive_plots/1_top_species_plot_by_biome_plotly.json').resolve().as_posix()
 with open(file_path, 'r') as plot_file:
     plot_json = json.load(plot_file)
+
+# Decode binary TypedArray fields produced by Plotly without pretty-print
+plot_json = plot_utils.decode_plotly_json(plot_json)
 
 # Keep only 'data' and 'layout' sections
 plot_json = {key: plot_json[key] for key in plot_json
@@ -78,6 +82,9 @@ file_path = (section_dir / '../../../../../docs/example_data/Basic_example_vuege
 with open(file_path, 'r') as plot_file:
     plot_json = json.load(plot_file)
 
+# Decode binary TypedArray fields produced by Plotly without pretty-print
+plot_json = plot_utils.decode_plotly_json(plot_json)
+
 # Keep only 'data' and 'layout' sections
 plot_json = {key: plot_json[key] for key in plot_json
                                  if key in ['data', 'layout']}
@@ -100,6 +107,9 @@ st.markdown(
 file_path = (section_dir / '../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/1_Plots/1_Interactive_plots/4_pie_plots_biomes_plotly.json').resolve().as_posix()
 with open(file_path, 'r') as plot_file:
     plot_json = json.load(plot_file)
+
+# Decode binary TypedArray fields produced by Plotly without pretty-print
+plot_json = plot_utils.decode_plotly_json(plot_json)
 
 # Keep only 'data' and 'layout' sections
 plot_json = {key: plot_json[key] for key in plot_json
@@ -141,6 +151,9 @@ st.markdown(
 file_path = (section_dir / '../../../../../docs/example_data/Basic_example_vuegen_demo_notebook/1_Plots/1_Interactive_plots/6_plotly_plot_R.json').resolve().as_posix()
 with open(file_path, 'r') as plot_file:
     plot_json = json.load(plot_file)
+
+# Decode binary TypedArray fields produced by Plotly without pretty-print
+plot_json = plot_utils.decode_plotly_json(plot_json)
 
 # Keep only 'data' and 'layout' sections
 plot_json = {key: plot_json[key] for key in plot_json
