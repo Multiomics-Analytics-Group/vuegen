@@ -563,13 +563,13 @@ def pyvishtml_to_networkx(html_file: str) -> nx.Graph:
 
 
 # CONFIG
-def load_yaml_config(file_path: str) -> dict:
+def load_yaml_config(file_path: str | Path) -> dict:
     """
     Load a YAML configuration file and return its contents as a dictionary.
 
     Parameters
     ----------
-    file_path : str
+    file_path : str or Path
         The path to the YAML configuration file.
 
     Returns
@@ -817,7 +817,10 @@ def init_log(
 
 
 def get_logger(
-    log_suffix, folder="logs", display=True, logger_id="vuegen"
+    log_suffix: str,
+    folder: str | Path = "logs",
+    display: bool = True,
+    logger_id: str = "vuegen",
 ) -> tuple[logging.Logger, str]:
     """
     Initialize the logger with a log file name that includes an optional suffix.
