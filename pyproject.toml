@@ -82,6 +82,7 @@ formats = "ipynb,py:percent"
 [tool.ruff]
 # Allow lines to be as long as:
 line-length = 88
+target-version = "py310"
 
 [tool.ruff.lint]
 # https://docs.astral.sh/ruff/tutorial/#rule-selection
