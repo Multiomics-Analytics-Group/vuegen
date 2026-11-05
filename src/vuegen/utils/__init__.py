@@ -8,14 +8,14 @@ streamlit report footer is also in this file.
 from __future__ import annotations
 
 import argparse
-from enum import StrEnum
 import json
 import logging
 import os
 import sys
 import textwrap
 from collections.abc import Iterable
-from datetime import datetime, timezone
+from datetime import UTC, datetime
+from enum import StrEnum
 from io import StringIO
 from pathlib import Path
 from urllib.parse import urlparse
@@ -699,7 +699,7 @@ def get_time(incl_time: bool = True, incl_timezone: bool = True) -> str:
 
     # MAIN FUNCTION
     # getting current time and timezone
-    the_time = datetime.now(tz=timezone.utc).astimezone()
+    the_time = datetime.now(tz=UTC).astimezone()
     timezone_name = the_time.tzname()
     # convert date parts to string
 

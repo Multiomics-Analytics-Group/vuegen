@@ -254,7 +254,7 @@ jobs:
         # https://pyinstaller.org/en/stable/usage.html#building-macos-app-bundles
         # 'Under macOS, PyInstaller always builds a UNIX executable in dist.'
         # --onefile --windowed for Windows?
-        # --collect-all yaml --collect-all strenum --collect-all jinja2 --collect-all fastjsonschema --collect-all jsonschema --collect-all jsonschema_specifications
+        # --collect-all yaml --collect-all jinja2 --collect-all fastjsonschema --collect-all jsonschema --collect-all jsonschema_specifications
         # replace by spec file once done...
       - name: Upload executable
         uses: actions/upload-artifact@v4
