@@ -35,7 +35,9 @@ jobs:
       - name: lint package code with ruff
         run: |
           python -m pip install --upgrade pip
-          pip install ruff
+          # Pinned: newer releases add lint rules that can fail unrelated PRs.
+          # Bump deliberately and fix findings in the same PR.
+          pip install ruff==0.16.0
           ruff check src
       - name: Install dependencies for testing
         run: |
