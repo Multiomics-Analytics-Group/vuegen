@@ -8,6 +8,7 @@ streamlit report footer is also in this file.
 from __future__ import annotations
 
 import argparse
+from enum import StrEnum
 import json
 import logging
 import os
@@ -24,10 +25,6 @@ import requests
 import yaml
 from bs4 import BeautifulSoup
 
-try:
-    from enum import StrEnum
-except ImportError:
-    from strenum import StrEnum
 import vuegen
 from vuegen.constants import GITHUB_ORG_URL, LOGO_URL, ORG, REPO_URL, TIMEOUT
 
