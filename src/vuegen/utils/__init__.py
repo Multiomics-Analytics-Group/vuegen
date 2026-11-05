@@ -14,7 +14,8 @@ import os
 import sys
 import textwrap
 from collections.abc import Iterable
-from datetime import datetime, timezone
+from datetime import UTC, datetime
+from enum import StrEnum
 from io import StringIO
 from pathlib import Path
 from urllib.parse import urlparse
@@ -24,10 +25,6 @@ import requests
 import yaml
 from bs4 import BeautifulSoup
 
-try:
-    from enum import StrEnum
-except ImportError:
-    from strenum import StrEnum
 import vuegen
 from vuegen.constants import GITHUB_ORG_URL, LOGO_URL, ORG, REPO_URL, TIMEOUT
 
@@ -702,7 +699,7 @@ def get_time(incl_time: bool = True, incl_timezone: bool = True) -> str:
 
     # MAIN FUNCTION
     # getting current time and timezone
-    the_time = datetime.now(tz=timezone.utc).astimezone()
+    the_time = datetime.now(tz=UTC).astimezone()
     timezone_name = the_time.tzname()
     # convert date parts to string
 

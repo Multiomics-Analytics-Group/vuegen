@@ -54,6 +54,8 @@ The VueGen documentation is available at [vuegen.readthedocs.io][vuegen-docs], w
 
 ## Installation
 
+VueGen requires Python 3.11 or newer.
+
 > [!TIP]
 > It is recommended to install VueGen inside a virtual environment to manage depenendencies and avoid conflicts with existing packages. You can use the virtual environment manager of your choice, such as `poetry`, `conda`, or `pipenv`.
 
