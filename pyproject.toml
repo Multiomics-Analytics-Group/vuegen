@@ -12,7 +12,7 @@ repository = "https://github.com/Multiomics-Analytics-Group/vuegen"
 version = "0.0.0"
 
 [tool.poetry.dependencies]
-python = ">=3.10,<4.0"
+python = ">=3.11,<4.0"
 streamlit = "^1.48.0"
 streamlit-aggrid = "*"
 quarto-cli = "*"
@@ -29,7 +29,6 @@ itables = "^2.2.2"
 kaleido = "^0.2.0"
 vl-convert-python = "^1.7.0"
 dataframe-image = "^0.2.6"
-strenum = { version = "^0.4.15", python = "<3.11" }
 pyyaml = "^6.0.2"
 
 # optional doc depencencies, follow approach as described here:
@@ -82,6 +81,7 @@ formats = "ipynb,py:percent"
 [tool.ruff]
 # Allow lines to be as long as:
 line-length = 88
+target-version = "py311"
 
 [tool.ruff.lint]
 # https://docs.astral.sh/ruff/tutorial/#rule-selection
