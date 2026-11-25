@@ -28,6 +28,10 @@ from bs4 import BeautifulSoup
 import vuegen
 from vuegen.constants import GITHUB_ORG_URL, LOGO_URL, ORG, REPO_URL, TIMEOUT
 
+# Only what the documentation imports is public API; the other helpers are
+# still importable by vuegen's own modules but are not part of the public API.
+__all__ = ["get_logger", "load_yaml_config"]
+
 
 # CHECKS
 def check_path(filepath: Path) -> bool:
