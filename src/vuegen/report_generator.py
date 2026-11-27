@@ -11,6 +11,8 @@ from .report import ReportType
 from .streamlit_reportview import StreamlitReportView
 from .utils import assert_enum_value, get_logger, load_yaml_config, write_yaml_config
 
+__all__ = ["get_report"]
+
 
 def get_report(
     report_type: str,
